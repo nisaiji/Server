@@ -1,7 +1,13 @@
 import mongoose from "mongoose";
-import addressSchema from "./Schemas/address.schema";
+// import addressSchema from "./Schemas/address.schema";
 
 const schoolSchema = mongoose.Schema({
+    // admin: a unique username which represents a school, used for authentication and other stuff
+    adminName:{
+        type:String,
+        unique:true,
+        required:true,
+    },
     name:{
         type:String,
         required:true
@@ -11,8 +17,22 @@ const schoolSchema = mongoose.Schema({
         required:true,
         unique:true
     },
+    phone:{
+        type:String,
+        required:true,
+    },
+    email:{
+        type:String,
+        required:true,
+        lowercase:true,
+        unique:true,
+    },
+    password:{
+        type:String,
+        required:true,
+    },
     address:{
-        type:addressSchema,
+        type:String,
     },
     sections:[
         {

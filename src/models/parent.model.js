@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import addressSchema from "./Schemas/address.schema";
+// import addressSchema from "./Schemas/address.schema";
 
 const parentSchema = mongoose.Schema({
     username:{
@@ -17,7 +17,7 @@ const parentSchema = mongoose.Schema({
         unique:true,
         required:true,
     },
-    phoe:{
+    phone:{
         type:String,
         required:true,
     },
@@ -40,7 +40,7 @@ const parentSchema = mongoose.Schema({
         }
     ],
     address:{
-        type:addressSchema,
+        type:String,
     }
         
     

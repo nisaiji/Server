@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import addressSchema from "./Schemas/address.schema";
 
 
 const studentSchema = mongoose.Schema({
@@ -32,21 +31,16 @@ const studentSchema = mongoose.Schema({
         unique:true,
 
     },
-    fathername:{
-        type:String,
-        required:true,
-    },
-    fatherPhone :{
-        type:String,
-        required:true,
-    },
+   parent:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'parent',
+   },
     class:{
         type:String,
         required:true,
     },
     address:{
-        type:addressSchema,
-        // required:true,
+        type:String,
     },
     section:{
         type:mongoose.Schema.Types.ObjectId,
