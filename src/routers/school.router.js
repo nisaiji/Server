@@ -5,7 +5,7 @@ import {
 } from "../controllers/school.controller.js";
 
 const schoolRouter = express.Router();
-// name,affiliationNo,address,email,phone,adminName,password
+
 /**
  * @swagger
  * /school/register:

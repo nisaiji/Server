@@ -2,6 +2,7 @@ import schoolModel from "../models/school.model.js";
 import generateAccessToken from "../services/generateAccessToken.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from 'bcrypt';
+import { checkSchoolExist, createSchool, findSchoolByAdminName } from "../services/school.services.js";
 
 export async function registerController(req,res){
     try {
@@ -11,7 +12,9 @@ export async function registerController(req,res){
             return res.send(error(400,"all fields are required!"));
         }
 
-        const existingSchool = await schoolModel.findOne({$or :[{adminName},{email}]});
+        // const existingSchool = await schoolModel.findOne({$or :[{adminName},{email}]});
+        const existingSchool = await checkSchoolExist(adminName,email);
+
 
         if(existingSchool&& existingSchool?.adminName===adminName){
             return res.send(error(400,"admin name already exist"));
@@ -24,7 +27,8 @@ export async function registerController(req,res){
         
         // todo: verify affiliation
         
-        const school = await schoolModel.create({name,affiliationNo,address,email,phone,adminName,"password":hashedPassword});
+        // const school = await schoolModel.create({name,affiliationNo,address,email,phone,adminName,"password":hashedPassword});
+        const school = await createSchool(name,affiliationNo,address,email,phone,adminName,hashedPassword);
         // console.log(school);
         return res.send(success(201,"School registered successfully!"));
         
@@ -42,7 +46,8 @@ export async function loginController(req,res){
             return res.send(error(400,"all fields are required!"));
         }
 
-        const school = await schoolModel.findOne({adminName});
+        // const school = await schoolModel.findOne({adminName});
+        const school = await findSchoolByAdminName(adminName);
         if(!school){
             return res.send(error(404,"admin name is not registered!"));
         }
