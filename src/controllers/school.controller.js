@@ -3,10 +3,16 @@ import generateAccessToken from "../services/generateAccessToken.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from 'bcrypt';
 import { checkSchoolExist, createSchool, findSchoolByAdminName } from "../services/school.services.js";
+import {registerSchoolSchema,loginSchoolSchema} from "../validators/schoolSchema.validator.js";
 
 export async function registerController(req,res){
     try {
+
         const{name,affiliationNo,address,email,phone,adminName,password} = req.body;
+        const {error:schemaError} = registerSchoolSchema.validate({name,affiliationNo,address,email,phone,adminName,password});
+        if(schemaError){
+            return res.send(error(400,schemaError.details[0].message));
+        }
 
         if(!name || !affiliationNo || !address || !email ||!phone || !adminName || !password){
             return res.send(error(400,"all fields are required!"));
@@ -42,6 +48,10 @@ export async function loginController(req,res){
     try {
         console.log("login called")
         const {adminName , password} = req.body;
+        const {error:schemaError} = loginSchoolSchema.validate({adminName,password});
+        if(schemaError){
+            return res.send(error(400,schemaError.details[0].message));
+        }
         if(!adminName || !password){
             return res.send(error(400,"all fields are required!"));
         }
