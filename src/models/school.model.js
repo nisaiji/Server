@@ -33,6 +33,7 @@ const schoolSchema = mongoose.Schema({
     },
     address:{
         type:String,
+        required:true
     },
     sections:[
         {

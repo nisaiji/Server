@@ -7,7 +7,6 @@ import {registerSchoolSchema,loginSchoolSchema} from "../validators/schoolSchema
 
 export async function registerController(req,res){
     try {
-
         const{name,affiliationNo,address,email,phone,adminName,password} = req.body;
         const {error:schemaError} = registerSchoolSchema.validate({name,affiliationNo,address,email,phone,adminName,password});
         if(schemaError){
@@ -71,7 +70,6 @@ export async function loginController(req,res){
         
     } catch (err) {
         // console.log(err)
-        return res.send(error(500,err.message));
-        
+        return res.send(error(500,err.message));  
     }
 }

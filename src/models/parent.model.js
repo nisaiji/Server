@@ -41,6 +41,7 @@ const parentSchema = mongoose.Schema({
     ],
     address:{
         type:String,
+        required:true
     }
         
     
