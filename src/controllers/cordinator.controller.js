@@ -3,7 +3,8 @@ import {
   createCordinator,
   findCordinatorByUsername
 } from "../services/cordinator.services.js";
-import generateAccessToken from "../services/generateAccessToken.js";
+import generateAccessToken from "../services/accessToken.service.js";
+import { checkPasswordMatch, hashPassword } from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function cordinatorRegister(req, res) {
@@ -19,15 +20,15 @@ export async function cordinatorRegister(req, res) {
     if (existingCordinator && existingCordinator?.email === email) {
       return res.send(error(400, "email already exist"));
     }
-    const hashedPassword = await bcrypt.hash(password, 11);
-
+    const hashedPassword = await hashPassword(password);
+    console.log({hashedPassword});
     const cordinator = await createCordinator(
       username,
       firstname,
       lastname,
       email,
-      password,
-      phone
+      hashedPassword ,
+      phone,
     );
     return res.send(success(201, "cordinator registered successfully!"));
   } catch (err) {
@@ -46,11 +47,12 @@ export async function loginController(req, res) {
     if (!cordinator) {
       return res.send(error(404, "cordinator is not registered"));
     }
-    const matchPassword = await bcrypt.compare(password, cordinator.password);
+    const matchPassword = await checkPasswordMatch(password, cordinator.password);
+    console.log(matchPassword);
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
-    const accessToken = generateAccessToken({ ...cordinator });
+    const accessToken = generateAccessToken({ sub: cordinator["_id"] });
     return res.send(success(200, { accessToken }));
   } catch (err) {
     return res.send(error(500, err.message));
