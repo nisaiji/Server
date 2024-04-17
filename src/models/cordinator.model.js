@@ -4,7 +4,7 @@ const cordinatorSchema = mongoose.Schema({
     username:{
         type:String,
         unique:true,
-        required:true
+        required:true,
     },
     firstname:{
         type:String,

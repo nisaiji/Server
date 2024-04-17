@@ -2,7 +2,7 @@ import Joi from "joi";
 
 const registerSchoolSchema = Joi.object({
   adminName: Joi.string()
-    .min(3)
+    .min(5)
     .max(15)
     .required(),
   name: Joi.string().min(8).max(500).required(),
