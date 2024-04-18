@@ -1,7 +1,7 @@
 import generateAccessToken from "../services/accessToken.service.js";
 import { checkParentExist, createParent, findParentByUsername } from "../services/parent.services.js";
 import { checkPasswordMatch, hashPassword } from "../services/password.service.js";
-import { error } from "../utills/responseWrapper.js";
+import { error, success } from "../utills/responseWrapper.js";
 import { parentLoginSchema, parentRegisterSchema } from "../validators/parent.validator.js";
 
 export async function registerParentController(req,res){

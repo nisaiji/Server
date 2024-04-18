@@ -37,7 +37,7 @@ const schoolRouter = express.Router();
  *                 type: string
  *     responses:
  *       200:
- *         description: "User registered successfully"
+ *         description: "school registered successfully"
  *       400:
  *         description: "Unauthorized!"
  *       500:
@@ -67,7 +67,7 @@ schoolRouter.post("/register", registerController);
  *                 type: string
  *     responses:
  *       200:
- *         description: "User login successfully"
+ *         description: "school admin logged in successfully"
  *       400:
  *         description: "Unauthorized!"
  *       500:

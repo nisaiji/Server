@@ -41,6 +41,7 @@ const cordinatorRouter = express.Router();
  *       500:
  *         description: Server error
  */
+
 cordinatorRouter.post("/register", cordinatorRegister);
 /**
  * @swagger
@@ -63,7 +64,7 @@ cordinatorRouter.post("/register", cordinatorRegister);
  *                 type: string
  *     responses:
  *       200:
- *         description: Coordinator registered successfully
+ *         description: Coordinator logged in successfully
  *       400:
  *         description: Unauthorized request
  *       500:
