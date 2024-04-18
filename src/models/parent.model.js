@@ -31,20 +31,17 @@ const parentSchema = mongoose.Schema({
         type:String,
         required:true,
     },
-
+    address:{
+        type:String,
+        required:true
+    },
     // one parent can have multiple childs 
     child:[
         {
             type:mongoose.Schema.Types.ObjectId,
             ref:"student"
         }
-    ],
-    address:{
-        type:String,
-        required:true
-    }
-        
-    
+    ],    
 })
 
 const parentModel = mongoose.model('parent',parentSchema);
