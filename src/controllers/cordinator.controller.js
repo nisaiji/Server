@@ -4,12 +4,31 @@ import {
   findCordinatorByUsername
 } from "../services/cordinator.services.js";
 import generateAccessToken from "../services/accessToken.service.js";
-import { checkPasswordMatch, hashPassword } from "../services/password.service.js";
+import {
+  checkPasswordMatch,
+  hashPassword
+} from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
+import {
+  loginCordinatorSchema,
+  registerCordinatorSchema
+} from "../validators/cordinator.validator.js";
 
 export async function cordinatorRegister(req, res) {
   try {
     const { username, firstname, lastname, email, password, phone } = req.body;
+    const { error: schemaError } = registerCordinatorSchema.validate({
+      username,
+      firstname,
+      lastname,
+      email,
+      phone,
+      password
+    });
+
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
     if (!username || !firstname || !lastname || !email || !password || !phone) {
       return res.send(error(400, "all fields are required!"));
     }
@@ -21,14 +40,14 @@ export async function cordinatorRegister(req, res) {
       return res.send(error(400, "email already exist"));
     }
     const hashedPassword = await hashPassword(password);
-    console.log({hashedPassword});
+    // console.log({ hashedPassword });
     const cordinator = await createCordinator(
       username,
       firstname,
       lastname,
       email,
-      hashedPassword ,
-      phone,
+      hashedPassword,
+      phone
     );
     return res.send(success(201, "cordinator registered successfully!"));
   } catch (err) {
@@ -39,6 +58,13 @@ export async function cordinatorRegister(req, res) {
 export async function loginController(req, res) {
   try {
     const { username, password } = req.body;
+    const { error: schemaError } = loginCordinatorSchema.validate({
+      username,
+      password
+    });
+    if(schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
     if (!username || !password) {
       return res.send(error(400, "all fields are required!"));
     }
@@ -47,7 +73,10 @@ export async function loginController(req, res) {
     if (!cordinator) {
       return res.send(error(404, "cordinator is not registered"));
     }
-    const matchPassword = await checkPasswordMatch(password, cordinator.password);
+    const matchPassword = await checkPasswordMatch(
+      password,
+      cordinator.password
+    );
     console.log(matchPassword);
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));

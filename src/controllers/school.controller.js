@@ -1,4 +1,3 @@
-import schoolModel from "../models/school.model.js";
 import generateAccessToken from "../services/accessToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";

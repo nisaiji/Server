@@ -10,8 +10,10 @@ const schoolRouter = express.Router();
  * @swagger
  * /school/register:
  *   post:
- *     summary: "This is register API"
- *     description: "This is used to register school"
+ *     summary: To register school
+ *     description: This API will register school.one adminName will represent to school.
+ *     tags:
+ *       - School
  *     requestBody:
  *       required: true
  *       content:
@@ -48,8 +50,10 @@ schoolRouter.post("/register", registerController);
  * @swagger
  * /school/login:
  *   post:
- *     summary: "This is login API"
+ *     summary: To login school
  *     description: "This is used for login school"
+ *     tags:
+ *       - School
  *     requestBody:
  *       required: true
  *       content:
