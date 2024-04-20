@@ -3,6 +3,7 @@ import {
   loginParentController,
   registerParentController
 } from "../controllers/parent.controller.js";
+import { parentLoginValidation, parentRegisterValidation } from "../middlewares/parent.validation.middleware.js";
 
 const parentRouter = express.Router();
 
@@ -44,7 +45,7 @@ const parentRouter = express.Router();
  *       500:
  *         description: Server error
  */
-parentRouter.post("/register", registerParentController);
+parentRouter.post("/register",parentRegisterValidation, registerParentController);
 /**
  * @swagger
  * /parent/login:
@@ -72,5 +73,5 @@ parentRouter.post("/register", registerParentController);
  *       500:
  *         description: Server error
  */
-parentRouter.post("/login", loginParentController);
+parentRouter.post("/login",parentLoginValidation, loginParentController);
 export default parentRouter;

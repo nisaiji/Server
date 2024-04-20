@@ -1,5 +1,6 @@
 import Joi from "joi";
 
+// register the school
 const registerSchoolSchema = Joi.object({
   adminName: Joi.string()
     .min(5)
@@ -21,6 +22,7 @@ const registerSchoolSchema = Joi.object({
   address: Joi.string().required()
 });
 
+// login school
 const loginSchoolSchema = Joi.object({
     adminName: Joi.string()
     .min(3)
@@ -31,4 +33,7 @@ const loginSchoolSchema = Joi.object({
     .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/)),
 
 })
+
+
+
 export {registerSchoolSchema,loginSchoolSchema};

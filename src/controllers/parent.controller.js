@@ -2,16 +2,10 @@ import generateAccessToken from "../services/accessToken.service.js";
 import { checkParentExist, createParent, findParentByUsername } from "../services/parent.services.js";
 import { checkPasswordMatch, hashPassword } from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
-import { parentLoginSchema, parentRegisterSchema } from "../validators/parent.validator.js";
 
 export async function registerParentController(req,res){
     try {
-        const{username, firstname, lastname,phone,email,password,address} = req.body;
-        const{error:schemaError} = parentRegisterSchema.validate({username, firstname, lastname,phone,email,password,address});
-        if(schemaError){
-            return res.send(error(400, schemaError.details[0].message));
-        }
-        
+        const{username, firstname, lastname,phone,email,password,address} = req.body;        
         const existingParent = await checkParentExist(username , email);
         if(existingParent && existingParent.username===username){
             return res.send(error(400 , "username already exists"));
@@ -31,10 +25,6 @@ export async function registerParentController(req,res){
 export async function loginParentController(req,res){
     try {
         const {username , password} = req.body;
-        const {error:schemaError} = parentLoginSchema.validate({username,password});
-        if(schemaError){
-            return res.send(error(400,schemaError.details[0].message));
-        }
         const parent = await findParentByUsername(username);
         if(!parent){
             return res.send(error(404 , "parent is not registered"));
@@ -43,7 +33,7 @@ export async function loginParentController(req,res){
         if(!matchPassword){
             return res.send(error(404,"incorrect password"));
         }
-        const accessToken = generateAccessToken({sub:parent["_id"]});
+        const accessToken = generateAccessToken({parentId:parent["_id"]});
         return res.send(success(200, {accessToken}));
     } catch (err) {
         return res.send(error(500, err.message));    

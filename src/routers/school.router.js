@@ -1,8 +1,7 @@
 import express from "express";
-import {
-  loginController,
-  registerController
-} from "../controllers/school.controller.js";
+import {loginController, registerController, registerCordinatorController} from "../controllers/school.controller.js";
+import { schoolAuthentication } from "../middlewares/school.authentication.middleware.js";
+import { cordinatorRegisterValidation, schoolLoginValidation, schoolRegisterValidation } from "../middlewares/school.validation.middleware.js";
 
 const schoolRouter = express.Router();
 
@@ -44,7 +43,7 @@ const schoolRouter = express.Router();
  *         description: "Server side error"
  */
 
-schoolRouter.post("/register", registerController);
+schoolRouter.post("/register",schoolRegisterValidation, registerController);
 
 /**
  * @swagger
@@ -73,6 +72,44 @@ schoolRouter.post("/register", registerController);
  *       500:
  *         description: "Server side error"
  */
-schoolRouter.post("/login", loginController);
+schoolRouter.post("/login",schoolLoginValidation, loginController);
+
+/**
+ * @swagger
+ * /school/register-cordinator:
+ *   post:
+ *     summary: To register a cordinator
+ *     description: This API will register cordinator. Cordinator will manage the one section of students.
+ *     tags:
+ *       - Cordinator
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Coordinator registered successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+
+schoolRouter.post("/register-cordinator",schoolAuthentication, cordinatorRegisterValidation,registerCordinatorController);
 
 export default schoolRouter;

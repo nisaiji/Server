@@ -1,9 +1,7 @@
 import mongoose from "mongoose";
-import dotenv from 'dotenv';
-import { error } from "../utills/responseWrapper.js";
-dotenv.config();
+import { config } from "./config.js";
 
-const MONGO_URL = process.env.MONGO_URL;
+const MONGO_URL = config.dbURL;
 
 export default async function connectDB(){
     try {

@@ -1,15 +1,13 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import morgan from 'morgan';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import connectDB from './src/config/db.config.js';
 import router from './src/routers/index.router.js';
-// import swaggerDocs from './src/config/swagger.config.js';
-dotenv.config();
+import { config } from './src/config/config.js';
 
-const PORT = process.env.PORT || 4000;
+const PORT = config.port || 4000;
 
 const app = express();
 app.use(express.json());

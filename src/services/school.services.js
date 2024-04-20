@@ -45,3 +45,12 @@ export async function findSchoolByAdminName(adminName){
         return err;
     }
 }
+
+export async function findSchoolByID(_id){
+  try {
+    const school = await schoolModel.findById({_id});  
+    return school; 
+  } catch (err){
+    return err;    
+  }
+}

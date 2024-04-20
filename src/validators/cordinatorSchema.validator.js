@@ -1,5 +1,11 @@
 import Joi from "joi";
 
+const loginCordinatorSchema = Joi.object({
+  username: Joi.string().min(5).max(15).required(),
+  password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
+});
+
+// school instance will register cordinator
 const registerCordinatorSchema = Joi.object({
   username: Joi.string().min(5).max(15).required(),
   firstname: Joi.string().min(3).max(100).required(),
@@ -16,10 +22,5 @@ const registerCordinatorSchema = Joi.object({
     .required(),
   password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
 });
-
-const loginCordinatorSchema = Joi.object({
-  username: Joi.string().min(5).max(15).required(),
-  password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
-});
-
-export { registerCordinatorSchema, loginCordinatorSchema };
+export {loginCordinatorSchema,registerCordinatorSchema};
+      

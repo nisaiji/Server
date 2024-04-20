@@ -1,8 +1,8 @@
 import Jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
-dotenv.config();
+import { config } from "../config/config.js";
 
-const secretKey = process.env.ACCESS_SECRET_KEY || "ThisIsASecretKeyForJWTToken";
+
+const secretKey = config.jwtSecret || "ThisIsASecretKeyForJWTToken";
 
 export default function generateAccessToken(data){
     try {

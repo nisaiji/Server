@@ -1,8 +1,8 @@
 import express from "express";
+import { loginController } from "../controllers/cordinator.controller.js";
 import {
-  cordinatorRegister,
-  loginController
-} from "../controllers/cordinator.controller.js";
+  cordinatorLoginValidation,
+} from "../middlewares/cordinator.validation.middleware.js";
 
 const cordinatorRouter = express.Router();
 
@@ -42,7 +42,7 @@ const cordinatorRouter = express.Router();
  *         description: Server error
  */
 
-cordinatorRouter.post("/register", cordinatorRegister);
+// co=ardinatorRouter.post("/register",cordinatorRegisterValidation,cordinatorRegister);
 /**
  * @swagger
  * /cordinator/login:
@@ -70,6 +70,6 @@ cordinatorRouter.post("/register", cordinatorRegister);
  *       500:
  *         description: Server error
  */
-cordinatorRouter.post("/login", loginController);
+cordinatorRouter.post("/login", cordinatorLoginValidation, loginController);
 
 export default cordinatorRouter;
