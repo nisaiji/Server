@@ -3,7 +3,8 @@ import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";
 import {checkSchoolExist,createSchool,findSchoolByAdminName, findSchoolByID} from "../services/school.services.js";
 import { hashPassword } from "../services/password.service.js";
-import { checkCordinatorExist, createCordinator } from "../services/cordinator.services.js";
+import { checkCordinatorExist, createCordinator, findCordinatorById } from "../services/cordinator.services.js";
+import { checkSectionExist, createSection } from "../services/section.services.js";
 
 export async function registerController(req, res) {
   try {
@@ -61,7 +62,6 @@ export async function loginController(req, res) {
   }
 }
 
-
 export async function registerCordinatorController(req,res){
   try {
     const schoolId = req.schoolId;
@@ -93,5 +93,28 @@ export async function registerCordinatorController(req,res){
    return res.send(success(201,"cordinator created successfully"));
   } catch (err) {
     return res.send(error(500,err.message));    
+  }
+}
+
+
+export async function registerSectionController(req,res){
+  try {
+    const {name , cordinatorId} = req.body;
+    const existingSection = await checkSectionExist(name);
+    if(existingSection){
+      return res.send(error(400,"section name already exist"));
+    }
+    const section = await createSection(name, cordinatorId) ;
+    const cordinator = await findCordinatorById(cordinatorId);
+    if(!cordinator){
+      return res.send(error(400,"cordinator doesn't exist"));
+    }
+    console.log(cordinator);
+    cordinator?.section?.push(section["_id"]);
+    await cordinator.save();
+    return res.send(success(201,"section created successfully!"));
+
+  } catch (err) {
+    return res.send(error(500,err.message))    
   }
 }

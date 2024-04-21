@@ -1,7 +1,7 @@
 import express from "express";
-import {loginController, registerController, registerCordinatorController} from "../controllers/school.controller.js";
+import {loginController, registerController, registerCordinatorController, registerSectionController} from "../controllers/school.controller.js";
 import { schoolAuthentication } from "../middlewares/school.authentication.middleware.js";
-import { cordinatorRegisterValidation, schoolLoginValidation, schoolRegisterValidation } from "../middlewares/school.validation.middleware.js";
+import { cordinatorRegisterValidation, schoolLoginValidation, schoolRegisterValidation, sectionRegisterValidation } from "../middlewares/school.validation.middleware.js";
 
 const schoolRouter = express.Router();
 
@@ -42,7 +42,6 @@ const schoolRouter = express.Router();
  *       500:
  *         description: "Server side error"
  */
-
 schoolRouter.post("/register",schoolRegisterValidation, registerController);
 
 /**
@@ -111,8 +110,37 @@ schoolRouter.post("/login",schoolLoginValidation, loginController);
  *       500:
  *         description: Server error
  */
-
  schoolRouter.post("/register-cordinator",schoolAuthentication, cordinatorRegisterValidation,registerCordinatorController);
- schoolRouter.post("/register-class-section",schoolAuthentication, cordinatorRegisterValidation,registerCordinatorController);
+
+ /**
+ * @swagger
+ * /school/register-class-section:
+ *   post:
+ *     security:
+ *       - Authorization: []
+ *     summary: To register a class-section
+ *     description: This API will register a class-section. The coordinator will manage one section of students.
+ *     tags:
+ *       - School
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               cordinatorId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Coordinator registered successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+ schoolRouter.post("/register-class-section",schoolAuthentication, sectionRegisterValidation,registerSectionController);
 
 export default schoolRouter;

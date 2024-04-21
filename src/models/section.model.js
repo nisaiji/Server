@@ -6,9 +6,10 @@ const sectionSchema = mongoose.Schema({
         required:true,
         unique:true
     },
-    cordinatorName:{
+    cordinator:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'cordinator',
+        required:true
     },
     students:[
         {

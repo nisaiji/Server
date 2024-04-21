@@ -44,3 +44,12 @@ export async function findCordinatorByUsername(username) {
   }
 }
 
+
+export async function findCordinatorById(id){
+  try {
+    const cordinator = await cordinatorModel.findOne({cordinator:id});
+    return cordinator;
+  } catch (error) {
+    return error;
+  }
+}
