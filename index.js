@@ -24,6 +24,16 @@ const swaggerOptions = {
         title: "School-App",
         description: "This is a server for school-app",
         version: "1.0.0"
+      },
+      components:{
+        securitySchemes: {
+          Authorization: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+              value: "Bearer <JWT token here>"
+          }
+      }
       }
     },
     servers: [{ url: "http://localhost:4000/" }],

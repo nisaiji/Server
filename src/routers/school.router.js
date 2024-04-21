@@ -78,10 +78,12 @@ schoolRouter.post("/login",schoolLoginValidation, loginController);
  * @swagger
  * /school/register-cordinator:
  *   post:
- *     summary: To register a cordinator
- *     description: This API will register cordinator. Cordinator will manage the one section of students.
+ *     security:
+ *       - Authorization: []
+ *     summary: To register a coordinator
+ *     description: This API will register a coordinator. The coordinator will manage one section of students.
  *     tags:
- *       - Cordinator
+ *       - School
  *     requestBody:
  *       required: true
  *       content:
@@ -110,6 +112,7 @@ schoolRouter.post("/login",schoolLoginValidation, loginController);
  *         description: Server error
  */
 
-schoolRouter.post("/register-cordinator",schoolAuthentication, cordinatorRegisterValidation,registerCordinatorController);
+ schoolRouter.post("/register-cordinator",schoolAuthentication, cordinatorRegisterValidation,registerCordinatorController);
+ schoolRouter.post("/register-class-section",schoolAuthentication, cordinatorRegisterValidation,registerCordinatorController);
 
 export default schoolRouter;

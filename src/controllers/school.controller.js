@@ -52,7 +52,7 @@ export async function loginController(req, res) {
     const matchPassword = await bcrypt.compare(password, school.password);
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
-    } n
+    } 
     const accessToken = generateAccessToken({ schoolId:school["_id"] });
     return res.send(success(200, { accessToken }));
   } catch (err) {
@@ -71,7 +71,7 @@ export async function registerCordinatorController(req,res){
     const existingCordinator = await checkCordinatorExist(username, email);
 
     if (existingCordinator && existingCordinator?.username === username) {
-            return res.send(error(400, "user name already exist"));
+            return res.send(error(400, "username name already exist"));
           }
     if (existingCordinator && existingCordinator?.email === email) {
             return res.send(error(400, "email already exist"));
