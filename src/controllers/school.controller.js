@@ -1,14 +1,28 @@
 import generateAccessToken from "../services/accessToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";
-import {checkSchoolExist,createSchool,findSchoolByAdminName, findSchoolByID} from "../services/school.services.js";
+import {
+  checkSchoolExist,
+  createSchool,
+  findSchoolByAdminName,
+  findSchoolByID
+} from "../services/school.services.js";
 import { hashPassword } from "../services/password.service.js";
-import { checkCordinatorExist, createCordinator, findCordinatorById } from "../services/cordinator.services.js";
-import { checkSectionExist, createSection } from "../services/section.services.js";
+import {
+  checkCordinatorExist,
+  createCordinator,
+  findCordinatorById
+} from "../services/cordinator.services.js";
+import {
+  checkSectionExist,
+  createSection
+} from "../services/section.services.js";
+import { checkStudentExist, registerStudent } from "../services/student.service.js";
 
 export async function registerController(req, res) {
   try {
-    const { name, affiliationNo, address, email, phone, adminName, password } =  req.body;
+    const { name, affiliationNo, address, email, phone, adminName, password } =
+      req.body;
 
     // const existingSchool = await schoolModel.findOne({$or :[{adminName},{email}]});
     const existingSchool = await checkSchoolExist(adminName, email);
@@ -53,8 +67,8 @@ export async function loginController(req, res) {
     const matchPassword = await bcrypt.compare(password, school.password);
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
-    } 
-    const accessToken = generateAccessToken({ schoolId:school["_id"] });
+    }
+    const accessToken = generateAccessToken({ schoolId: school["_id"] });
     return res.send(success(200, { accessToken }));
   } catch (err) {
     // console.log(err)
@@ -62,20 +76,20 @@ export async function loginController(req, res) {
   }
 }
 
-export async function registerCordinatorController(req,res){
+export async function registerCordinatorController(req, res) {
   try {
     const schoolId = req.schoolId;
     // console.log("register cordinator controller");
-    console.log({schoolId});
+    console.log({ schoolId });
     const { username, firstname, lastname, email, password, phone } = req.body;
     const existingCordinator = await checkCordinatorExist(username, email);
 
     if (existingCordinator && existingCordinator?.username === username) {
-            return res.send(error(400, "username name already exist"));
-          }
+      return res.send(error(400, "username name already exist"));
+    }
     if (existingCordinator && existingCordinator?.email === email) {
-            return res.send(error(400, "email already exist"));
-          }
+      return res.send(error(400, "email already exist"));
+    }
     const hashedPassword = await hashPassword(password);
     const cordinator = await createCordinator(
       username,
@@ -84,37 +98,71 @@ export async function registerCordinatorController(req,res){
       email,
       hashedPassword,
       phone
-    ); 
-   const school = await findSchoolByID(schoolId);
-   school.cordinators.push(cordinator["_id"]);
-   await school.save();
-   cordinator.school = school["_id"];
-   await cordinator.save();
-   return res.send(success(201,"cordinator created successfully"));
+    );
+    const school = await findSchoolByID(schoolId);
+    school.cordinators.push(cordinator["_id"]);
+    await school.save();
+    cordinator.school = school["_id"];
+    await cordinator.save();
+    return res.send(success(201, "cordinator created successfully"));
   } catch (err) {
-    return res.send(error(500,err.message));    
+    return res.send(error(500, err.message));
   }
 }
 
-
-export async function registerSectionController(req,res){
+export async function registerSectionController(req, res) {
   try {
-    const {name , cordinatorId} = req.body;
+    const { name, cordinatorId } = req.body;
     const existingSection = await checkSectionExist(name);
-    if(existingSection){
-      return res.send(error(400,"section name already exist"));
+    if (existingSection) {
+      return res.send(error(400, "section name already exist"));
     }
-    const section = await createSection(name, cordinatorId) ;
+    const section = await createSection(name, cordinatorId);
     const cordinator = await findCordinatorById(cordinatorId);
-    if(!cordinator){
-      return res.send(error(400,"cordinator doesn't exist"));
+    if (!cordinator) {
+      return res.send(error(400, "cordinator doesn't exist"));
     }
     console.log(cordinator);
     cordinator?.section?.push(section["_id"]);
     await cordinator.save();
-    return res.send(success(201,"section created successfully!"));
-
+    return res.send(success(201, "section created successfully!"));
   } catch (err) {
-    return res.send(error(500,err.message))    
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function registerStudentController(req, res) {
+  try {
+    const {
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      email,
+      phone,
+      classStd,
+      address
+    } = req.body;
+    const schoolId = req.schoolId;
+    const existingStudent = await checkStudentExist(rollNumber, schoolId);
+    if (existingStudent) {
+      return res.send(error(400, "roll number already exist"));
+    }
+    const student = await registerStudent(
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      phone,
+      email,
+      classStd,
+      address,
+      schoolId
+    );
+    return res.send(success(201, "student created successfully!"));
+  } catch (err) {
+    return res.send(error(500, err.message));
   }
 }

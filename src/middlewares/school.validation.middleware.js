@@ -2,6 +2,7 @@ import { error } from "../utills/responseWrapper.js";
 import { registerCordinatorSchema } from "../validators/cordinatorSchema.validator.js";
 import { loginSchoolSchema, registerSchoolSchema } from "../validators/schoolSchema.validator.js";
 import { registerSectionSchema } from "../validators/sectionSchema.validator.js";
+import { registerStudentSchema } from "../validators/studentSchema.validator.js";
 
 export async function schoolRegisterValidation(req,res,next){
     try {
@@ -76,4 +77,29 @@ export async function sectionRegisterValidation(req,res,next){
 } catch (err) {
     return res.send(error(500,err.message));      
 }
+}
+
+export async function studentRegisterValidation(req,res,next){
+  try {
+    const{rollNumber , firstname , lastname, gender , age , phone, email,classStd,address} = req.body;
+    const {error:schemaError} = registerStudentSchema.validate({
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      email,
+      phone,
+      classStd,
+      address,
+    });
+
+    if(schemaError){
+      return res.send(error(400,schemaError.details[0].message));
+    }
+    next();    
+
+  } catch (err) {
+    return res.send(error(500,err.message));
+  }
 }

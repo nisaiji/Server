@@ -33,7 +33,7 @@ const cordinatorSchema = mongoose.Schema({
             ref:"section"
         }
     ],
-    school:{
+   school:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"school",
     }
