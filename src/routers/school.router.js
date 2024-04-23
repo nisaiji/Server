@@ -1,7 +1,7 @@
 import express from "express";
-import {loginController, registerController, registerCordinatorController, registerSectionController, registerStudentController} from "../controllers/school.controller.js";
+import {loginController, registerController, registerCordinatorController, registerSectionController, registerStudentController, studentAddToSectionController} from "../controllers/school.controller.js";
 import { schoolAuthentication } from "../middlewares/school.authentication.middleware.js";
-import { cordinatorRegisterValidation, schoolLoginValidation, schoolRegisterValidation, sectionRegisterValidation, studentRegisterValidation } from "../middlewares/school.validation.middleware.js";
+import { cordinatorRegisterValidation, schoolLoginValidation, schoolRegisterValidation, sectionRegisterValidation, studentAddToSectionValidation, studentRegisterValidation } from "../middlewares/school.validation.middleware.js";
 
 const schoolRouter = express.Router();
 
@@ -190,4 +190,59 @@ schoolRouter.post("/login",schoolLoginValidation, loginController);
  *         description: Server error
  */
  schoolRouter.post("/register-student",schoolAuthentication,studentRegisterValidation,registerStudentController);
+
+ /**
+ * @swagger
+ * /school/add-student-to-section/{studentId}:
+ *   post:
+ *     security:
+ *       - Authorization: []
+ *     summary: Register a student
+ *     description: Register a student with their details.
+ *     tags:
+ *       - School
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         description: ID of the student
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rollNumber:
+ *                 type: string
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               gender:
+ *                 type: string
+ *                 enum: ["Male", "Female", "Non-binary", "Other"]
+ *               age:
+ *                 type: number
+ *                 minimum: 3
+ *                 maximum: 100
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               classStd:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Student registered successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+ schoolRouter.post("/add-student-to-section/:studentId",schoolAuthentication,studentAddToSectionValidation, studentAddToSectionController)
 export default schoolRouter;

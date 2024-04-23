@@ -17,3 +17,17 @@ export async function createSection(name, cordinator){
         return error;
     }
 }
+
+export async function findSectionById(_id){
+    try {
+        const section = await sectionModel.findById({_id});
+        return section;
+    } catch (error){
+        return error;       
+    }
+}
+
+
+export function checkStudentExistInSection(students , student){
+    return students.includes(student);
+}

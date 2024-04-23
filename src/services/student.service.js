@@ -19,3 +19,13 @@ export async function registerStudent(rollNumber, firstname,lastname, gender , a
         return error;        
     }
 }
+
+
+export async function findStudentById(_id){
+    try {
+        const student = await studentModel.findById({_id});     
+        return student;
+    } catch (error) {
+        return  error;       
+    }
+}

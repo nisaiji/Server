@@ -15,9 +15,16 @@ import {
 } from "../services/cordinator.services.js";
 import {
   checkSectionExist,
-  createSection
+  checkStudentExistInSection,
+  createSection,
+  findSectionById
 } from "../services/section.services.js";
-import { checkStudentExist, registerStudent } from "../services/student.service.js";
+import {
+  checkStudentExist,
+  findStudentById,
+  registerStudent
+} from "../services/student.service.js";
+import studentModel from "../models/student.model.js";
 
 export async function registerController(req, res) {
   try {
@@ -162,6 +169,38 @@ export async function registerStudentController(req, res) {
       schoolId
     );
     return res.send(success(201, "student created successfully!"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function studentAddToSectionController(req, res) {
+  try {
+    const studentId = req.params.studentId;
+    const { sectionId } = req.body;
+    const student = await findStudentById(studentId);
+    if (!student) {
+      return res.send(error(400, "student doesn't exists"));
+    }
+    const section = await findSectionById(sectionId);
+    if (!section) {
+      return res.send(error(400, "section doesn't exists"));
+    }
+    const isStudentExistInSection = checkStudentExistInSection(
+      section.students,
+      studentId
+    );
+    if (isStudentExistInSection){
+      return res.send(error(400, "student already exist in section"));
+    }
+    section?.students?.push(studentId);
+    student.section = sectionId;
+    await section.save();
+    await student.save();
+
+    return res.send(
+      success(201, `${student.firstname} added to ${section.name} successfully`)
+    );
   } catch (err) {
     return res.send(error(500, err.message));
   }

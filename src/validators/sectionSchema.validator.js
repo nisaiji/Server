@@ -5,4 +5,11 @@ const registerSectionSchema = Joi.object({
     cordinatorId:Joi.string().required(),
 });
 
-export {registerSectionSchema};
+
+const studentAddToSectionSchema = Joi.object({
+   studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+   sectionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required() 
+})
+
+
+export {registerSectionSchema,studentAddToSectionSchema};

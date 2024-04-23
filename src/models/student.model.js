@@ -14,7 +14,7 @@ const studentSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  gender: {
+  gender: { 
     type: String,
     enum: ["Male", "Female", "Non-binary", "Other"]
   },
@@ -44,11 +44,11 @@ const studentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "parent"
   },
-  section: {
+  section:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "section"
   },
-  school: {
+  school:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "school"
   }
