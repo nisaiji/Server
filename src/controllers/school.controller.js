@@ -25,6 +25,7 @@ import {
   registerStudent
 } from "../services/student.service.js";
 import studentModel from "../models/student.model.js";
+import { checkChildExist, checkParentExist, createParent, findParentById } from "../services/parent.services.js";
 
 export async function registerController(req, res) {
   try {
@@ -116,7 +117,7 @@ export async function registerCordinatorController(req, res) {
     return res.send(error(500, err.message));
   }
 }
-
+ 
 export async function registerSectionController(req, res) {
   try {
     const { name, cordinatorId } = req.body;
@@ -190,7 +191,7 @@ export async function studentAddToSectionController(req, res) {
       section.students,
       studentId
     );
-    if (isStudentExistInSection){
+    if (isStudentExistInSection) {
       return res.send(error(400, "student already exist in section"));
     }
     section?.students?.push(studentId);
@@ -203,5 +204,61 @@ export async function studentAddToSectionController(req, res) {
     );
   } catch (err) {
     return res.send(error(500, err.message));
+  }
+}
+
+export async function registerParentController(req, res) {
+  try {
+    const studentId = req.params.studentId;
+    const {username, firstname, lastname, phone, email, password, address } =  req.body;
+    const existingParent = await checkParentExist(username, email);
+    const student = await findStudentById(studentId);
+    if(!student){
+      return res.send(error(400,"student doesn't exists"));
+    }
+    if (existingParent && existingParent.username === username) {
+      return res.send(error(400, "username already exists"));
+    }
+    if (existingParent && existingParent.email === email) {
+      return res.send(error(400, "email already exists"));
+    }
+    const hashedPassword = await hashPassword(password);
+    const parent = await createParent(
+      username,
+      firstname,
+      lastname,
+      phone,
+      email,
+      hashedPassword,
+      address,
+    );
+    const isChildExist = checkChildExist(parent.child, studentId);
+    if(isChildExist){
+      return res.send(error(400 , "child already linked with parent"));
+    }
+    student.parent = parent["_id"];
+    parent.child.push(student["_id"]);
+    await student.save();
+    await parent.save();
+
+    return res.send(success(201, "parent registered successfully!"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function registerExistingParentController(req,res){
+  try {
+    const studentId = req.params.studentId;
+    const{parentId} = req.body;
+    const parent = await findParentById(parentId); 
+    if(!parent){
+      return res.send(error(400,"parent doesn't exists"));
+    }
+    
+
+    
+  } catch (err) {
+    return res.send(error(500,err.message));
   }
 }

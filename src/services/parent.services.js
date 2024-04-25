@@ -2,7 +2,7 @@ import parentModel from "../models/parent.model.js";
 
 export async function checkParentExist(username, email) {
   try {
-    const existingParent = await parentModel.find({
+    const existingParent = await parentModel.findOne({
       $or: [{ username }, { email }]
     });
     return existingParent;
@@ -43,4 +43,17 @@ export async function findParentByUsername(username) {
   } catch (error) {
     return error;
   }
+}
+
+export async function findParentById(_id){
+  try {
+    const parent = await parentModel.findById({_id});
+    return parent;
+  } catch (error) {
+    return error;    
+  }
+}
+
+export  function checkChildExist(children , childId){
+  return children.includes(childId); 
 }

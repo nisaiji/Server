@@ -6,16 +6,18 @@ import {
 
 export async function parentRegisterValidation(req, res, next) {
   try {
+    const studentId = req.params.studentId;
     const { username, firstname, lastname, phone, email, password, address } =
       req.body;
     const { error: schemaError } = parentRegisterSchema.validate({
-      username,
+      username, 
       firstname,
       lastname,
       phone,
       email,
       password,
-      address
+      address,
+      studentId
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -25,7 +27,22 @@ export async function parentRegisterValidation(req, res, next) {
     return res.send(error(500, err.message));
   }
 }
-
+export async function existingParentRegisterValidation(req,res,next){
+  try {
+    const studentId = req.params.studentId;
+    const {parentId } =  req.body;
+    const { error: schemaError } = parentRegisterSchema.validate({
+      parentId,
+      studentId
+    });
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next();
+  } catch (err) {
+    return res.send(error(500,err.me))
+  }
+}
 export async function parentLoginValidation(req, res, next) {
   try {
     const { username, password } = req.body;

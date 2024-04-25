@@ -1,7 +1,9 @@
 import express from "express";
-import {loginController, registerController, registerCordinatorController, registerSectionController, registerStudentController, studentAddToSectionController} from "../controllers/school.controller.js";
+import {loginController, registerController, registerCordinatorController, registerExistingParentController, registerParentController, registerSectionController, registerStudentController, studentAddToSectionController} from "../controllers/school.controller.js";
+import { existingParentRegisterValidation, parentRegisterValidation } from "../middlewares/parent.validation.middleware.js";
 import { schoolAuthentication } from "../middlewares/school.authentication.middleware.js";
 import { cordinatorRegisterValidation, schoolLoginValidation, schoolRegisterValidation, sectionRegisterValidation, studentAddToSectionValidation, studentRegisterValidation } from "../middlewares/school.validation.middleware.js";
+import { existingParentRegisterSchema } from "../validators/parentSchema.validator.js";
 
 const schoolRouter = express.Router();
 
@@ -245,4 +247,54 @@ schoolRouter.post("/login",schoolLoginValidation, loginController);
  *         description: Server error
  */
  schoolRouter.post("/add-student-to-section/:studentId",schoolAuthentication,studentAddToSectionValidation, studentAddToSectionController)
+
+/**
+ * @swagger
+ * /school/register-student-parent/{studentId}:
+ *   post:
+ *     security:
+ *       - Authorization: []
+ *     summary: Register a student's parent
+ *     description: Register a student's parent with their details.
+ *     tags:
+ *       - School
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         description: ID of the student
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Student parent registered successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+ schoolRouter.post("/register-student-parent/:studentId",schoolAuthentication,parentRegisterValidation,registerParentController);
+ 
+//  schoolRouter.post("/add-student-existing-parent/:studentId",schoolAuthentication,existingParentRegisterValidation,registerExistingParentController);
 export default schoolRouter;

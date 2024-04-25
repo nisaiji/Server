@@ -1,5 +1,5 @@
 import Joi from "joi";
-const parentRegisterSchema = Joi.object({
+const parentRegisterSchema = Joi.object({ 
   username: Joi.string().min(5).max(15).required(),
   firstname: Joi.string().min(3).max(100).required(),
   lastname: Joi.string().min(3).max(100).required(),
@@ -13,13 +13,20 @@ const parentRegisterSchema = Joi.object({
       tlds: { allow: ["com", "net", "org", "io", "co"] }
     })
     .required(),
-  password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/)),
-  address: Joi.string().required()
+  password:Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/)),
+  address: Joi.string().required(),
+  studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
 });
+
+
+const existingParentRegisterSchema = Joi.object({
+  studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+  parentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+})
 
 const parentLoginSchema = Joi.object({
   username: Joi.string().min(5).max(15).required(),
   password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
 });
 
-export { parentRegisterSchema, parentLoginSchema };
+export { parentRegisterSchema, parentLoginSchema,existingParentRegisterSchema};
