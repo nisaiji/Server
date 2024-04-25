@@ -5,6 +5,7 @@ import { findSchoolByID } from "../services/school.services.js";
 
 export async function schoolAuthentication(req, res, next) {
   try {
+    // console.log("authentication called")
     const token = req.header("Authorization");
     if (!token) {
       return res.send(error(404, "Authorization token is required!"));

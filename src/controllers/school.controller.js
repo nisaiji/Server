@@ -255,9 +255,21 @@ export async function registerExistingParentController(req,res){
     if(!parent){
       return res.send(error(400,"parent doesn't exists"));
     }
-    
+    const student = await findStudentById(studentId);
+    if(!student){
+      return res.send(error(400,"student doesn't exists"));
+    }
+    const isChildExist = checkChildExist(parent.child, studentId);
+    if(isChildExist){
+      return res.send(error(400 , "child already linked with parent"));
+    }
+    parent.child.push(studentId);
+    student.parent = parentId;
+    await parent.save();
+    await student.save();
+    return res.send(success(200,"student linked with existing parent successfully"));
 
-    
+    return res.send()
   } catch (err) {
     return res.send(error(500,err.message));
   }

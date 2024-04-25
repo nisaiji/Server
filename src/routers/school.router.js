@@ -295,6 +295,39 @@ schoolRouter.post("/login",schoolLoginValidation, loginController);
  *         description: Server error
  */
  schoolRouter.post("/register-student-parent/:studentId",schoolAuthentication,parentRegisterValidation,registerParentController);
- 
-//  schoolRouter.post("/add-student-existing-parent/:studentId",schoolAuthentication,existingParentRegisterValidation,registerExistingParentController);
+ /**
+ * @swagger
+ * /school/add-student-existing-parent/{studentId}:
+ *   post:
+ *     security:
+ *       - Authorization: []
+ *     summary: Register a student's parent
+ *     description: Register a student's parent with their details.
+ *     tags:
+ *       - School
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         description: ID of the student
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               parentId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Student parent registered successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+ schoolRouter.post("/add-student-existing-parent/:studentId",schoolAuthentication,existingParentRegisterValidation,registerExistingParentController);
 export default schoolRouter;

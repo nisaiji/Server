@@ -1,5 +1,6 @@
 import { error } from "../utills/responseWrapper.js";
 import {
+  existingParentRegisterSchema,
   parentLoginSchema,
   parentRegisterSchema
 } from "../validators/parentSchema.validator.js";
@@ -28,10 +29,10 @@ export async function parentRegisterValidation(req, res, next) {
   }
 }
 export async function existingParentRegisterValidation(req,res,next){
-  try {
+  try{
     const studentId = req.params.studentId;
     const {parentId } =  req.body;
-    const { error: schemaError } = parentRegisterSchema.validate({
+    const { error: schemaError } = existingParentRegisterSchema.validate({
       parentId,
       studentId
     });
