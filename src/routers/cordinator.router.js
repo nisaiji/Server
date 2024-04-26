@@ -1,8 +1,6 @@
 import express from "express";
 import { loginController } from "../controllers/cordinator.controller.js";
-import {
-  cordinatorLoginValidation,
-} from "../middlewares/cordinator.validation.middleware.js";
+import {  cordinatorLoginValidation} from "../middlewares/cordinator.validation.middleware.js";
 
 const cordinatorRouter = express.Router();
 

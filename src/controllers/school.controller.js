@@ -11,6 +11,7 @@ import { hashPassword } from "../services/password.service.js";
 import {
   checkCordinatorExist,
   createCordinator,
+  deleteCordinator,
   findCordinatorById
 } from "../services/cordinator.services.js";
 import {
@@ -25,7 +26,12 @@ import {
   registerStudent
 } from "../services/student.service.js";
 import studentModel from "../models/student.model.js";
-import { checkChildExist, checkParentExist, createParent, findParentById } from "../services/parent.services.js";
+import {
+  checkChildExist,
+  checkParentExist,
+  createParent,
+  findParentById
+} from "../services/parent.services.js";
 
 export async function registerController(req, res) {
   try {
@@ -117,7 +123,7 @@ export async function registerCordinatorController(req, res) {
     return res.send(error(500, err.message));
   }
 }
- 
+
 export async function registerSectionController(req, res) {
   try {
     const { name, cordinatorId } = req.body;
@@ -210,11 +216,12 @@ export async function studentAddToSectionController(req, res) {
 export async function registerParentController(req, res) {
   try {
     const studentId = req.params.studentId;
-    const {username, firstname, lastname, phone, email, password, address } =  req.body;
+    const { username, firstname, lastname, phone, email, password, address } =
+      req.body;
     const existingParent = await checkParentExist(username, email);
     const student = await findStudentById(studentId);
-    if(!student){
-      return res.send(error(400,"student doesn't exists"));
+    if (!student) {
+      return res.send(error(400, "student doesn't exists"));
     }
     if (existingParent && existingParent.username === username) {
       return res.send(error(400, "username already exists"));
@@ -230,11 +237,11 @@ export async function registerParentController(req, res) {
       phone,
       email,
       hashedPassword,
-      address,
+      address
     );
     const isChildExist = checkChildExist(parent.child, studentId);
-    if(isChildExist){
-      return res.send(error(400 , "child already linked with parent"));
+    if (isChildExist) {
+      return res.send(error(400, "child already linked with parent"));
     }
     student.parent = parent["_id"];
     parent.child.push(student["_id"]);
@@ -247,30 +254,60 @@ export async function registerParentController(req, res) {
   }
 }
 
-export async function registerExistingParentController(req,res){
+export async function registerExistingParentController(req, res) {
   try {
     const studentId = req.params.studentId;
-    const{parentId} = req.body;
-    const parent = await findParentById(parentId); 
-    if(!parent){
-      return res.send(error(400,"parent doesn't exists"));
+    const { parentId } = req.body;
+    const parent = await findParentById(parentId);
+    if (!parent) {
+      return res.send(error(400, "parent doesn't exists"));
     }
     const student = await findStudentById(studentId);
-    if(!student){
-      return res.send(error(400,"student doesn't exists"));
+    if (!student) {
+      return res.send(error(400, "student doesn't exists"));
     }
     const isChildExist = checkChildExist(parent.child, studentId);
-    if(isChildExist){
-      return res.send(error(400 , "child already linked with parent"));
+    if (isChildExist) {
+      return res.send(error(400, "child already linked with parent"));
     }
     parent.child.push(studentId);
     student.parent = parentId;
     await parent.save();
     await student.save();
-    return res.send(success(200,"student linked with existing parent successfully"));
+    return res.send(
+      success(200, "student linked with existing parent successfully")
+    );
 
-    return res.send()
+    return res.send();
   } catch (err) {
-    return res.send(error(500,err.message));
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function markTeacherAsCordinatorController(req, res) {
+  try {
+    const teacherId = req.params.teacherId;
+    const teacher = await findCordinatorById(teacherId);
+    if (!teacher) {
+      return res.send(error(400, "teacher doesn't exists"));
+    }
+    teacher["isCordinator"] = true;
+    await teacher.save();
+    return res.send(success(200,"teacher marked as cordinator successfully"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function deleteCordinatorController(req, res) {
+  try {
+    const cordinatorId = req.params.cordinatorId;
+    const cordinator = await deleteCordinator(cordinatorId);
+    if (!cordinator) {
+      return res.send(error(400, "can not find cordinator"));
+    }
+    return res.send(success(200, "cordinator deleted successfully"));
+  } catch (err) {
+    return res.send(error(500, err.message));
   }
 }

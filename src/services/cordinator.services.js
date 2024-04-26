@@ -1,5 +1,6 @@
 
 import cordinatorModel from "../models/cordinator.model.js";
+import sectionModel from "../models/section.model.js";
 
 export async function checkCordinatorExist(username, email) {
   try {
@@ -47,9 +48,23 @@ export async function findCordinatorByUsername(username) {
 
 export async function findCordinatorById(id){
   try {
-    const cordinator = await cordinatorModel.findOne({cordinator:id});
+    const cordinator = await cordinatorModel.findById(id);
+    console.log({id,cordinator})
     return cordinator;
   } catch (error) {
     return error;
+  }
+}
+
+export async function deleteCordinator(id){
+  try {
+    const cordinator = await cordinatorModel.findByIdAndDelete(id);
+    await sectionModel.updateMany(
+      {cordinator:id},
+      {$unset:{cordinator:1}}
+    );
+    return cordinator;
+  } catch (error) {
+    return error;    
   }
 }

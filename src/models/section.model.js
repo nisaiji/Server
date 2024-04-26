@@ -9,7 +9,7 @@ const sectionSchema = mongoose.Schema({
     cordinator:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'cordinator',
-        required:true
+        // required:true
     },
     students:[
         {
@@ -21,3 +21,5 @@ const sectionSchema = mongoose.Schema({
 
 const sectionModel = mongoose.model('section',sectionSchema);
 export default sectionModel;
+
+

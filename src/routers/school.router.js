@@ -1,9 +1,9 @@
 import express from "express";
-import {loginController, registerController, registerCordinatorController, registerExistingParentController, registerParentController, registerSectionController, registerStudentController, studentAddToSectionController} from "../controllers/school.controller.js";
+import {deleteCordinatorController, loginController, markTeacherAsCordinatorController, registerController, registerCordinatorController, registerExistingParentController, registerParentController, registerSectionController, registerStudentController, studentAddToSectionController} from "../controllers/school.controller.js";
 import { existingParentRegisterValidation, parentRegisterValidation } from "../middlewares/parent.validation.middleware.js";
 import { schoolAuthentication } from "../middlewares/school.authentication.middleware.js";
 import { cordinatorRegisterValidation, schoolLoginValidation, schoolRegisterValidation, sectionRegisterValidation, studentAddToSectionValidation, studentRegisterValidation } from "../middlewares/school.validation.middleware.js";
-import { existingParentRegisterSchema } from "../validators/parentSchema.validator.js";
+import { cordinatorDeleteValidation, teacherValidation } from "../middlewares/cordinator.validation.middleware.js";
 
 const schoolRouter = express.Router();
 
@@ -295,6 +295,7 @@ schoolRouter.post("/login",schoolLoginValidation, loginController);
  *         description: Server error
  */
  schoolRouter.post("/register-student-parent/:studentId",schoolAuthentication,parentRegisterValidation,registerParentController);
+
  /**
  * @swagger
  * /school/add-student-existing-parent/{studentId}:
@@ -330,4 +331,73 @@ schoolRouter.post("/login",schoolLoginValidation, loginController);
  *         description: Server error
  */
  schoolRouter.post("/add-student-existing-parent/:studentId",schoolAuthentication,existingParentRegisterValidation,registerExistingParentController);
-export default schoolRouter;
+
+/**
+ * @swagger
+ * /school/mark-teacher-as-coordinator/{teacherId}:
+ *   patch:
+ *     security:
+ *       - Authorization: []
+ *     summary: Mark teacher as coordinator
+ *     description: Mark a teacher as coordinator.
+ *     tags:
+ *       - School
+ *     parameters:
+ *       - in: path
+ *         name: teacherId
+ *         required: true
+ *         description: ID of the teacher
+ *         schema:
+ *           type: string
+ *       - in: body
+ *         name: body
+ *         required: true
+ *         description: Parent ID
+ *         schema:
+ *           type: object
+ *           properties:
+ *     responses:
+ *       200:
+ *         description: Teacher marked as coordinator successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+ schoolRouter.patch("/mark-teacher-as-cordinator/:teacherId",schoolAuthentication,teacherValidation,markTeacherAsCordinatorController);
+
+ /**
+ * @swagger
+ * /school/delete-cordinator/{teacherId}:
+ *   delete:
+ *     security:
+ *       - Authorization: []
+ *     summary: Mark teacher as coordinator
+ *     description: Mark a teacher as coordinator.
+ *     tags:
+ *       - School
+ *     parameters:
+ *       - in: path
+ *         name: teacherId
+ *         required: true
+ *         description: ID of the teacher
+ *         schema:
+ *           type: string
+ *       - in: body
+ *         name: body
+ *         required: true
+ *         description: Parent ID
+ *         schema:
+ *           type: object
+ *           properties:
+ *     responses:
+ *       200:
+ *         description: Teacher marked as coordinator successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+ schoolRouter.delete("/delete-cordinator/:cordinatorId",schoolAuthentication,cordinatorDeleteValidation,deleteCordinatorController);
+
+ export default schoolRouter;

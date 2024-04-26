@@ -19,6 +19,10 @@ const cordinatorSchema = mongoose.Schema({
         unique:true,
         required:true,
     },
+    isCordinator:{
+        type:Boolean,
+        default:false,
+    },
     password:{
         type:String,
         required:true,
@@ -37,8 +41,7 @@ const cordinatorSchema = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"school",
     }
-
-})
+});
 
 const cordinatorModel = mongoose.model('cordinator',cordinatorSchema);
 export  default cordinatorModel;

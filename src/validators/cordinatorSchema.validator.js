@@ -22,5 +22,13 @@ const registerCordinatorSchema = Joi.object({
     .required(),
   password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
 });
-export {loginCordinatorSchema,registerCordinatorSchema};
+
+const teacherSchema = Joi.object({
+  teacherId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+})
+
+const cordinatorDeleteSchema = Joi.object({
+  cordinatorId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+})
+export {loginCordinatorSchema,registerCordinatorSchema,teacherSchema,cordinatorDeleteSchema};
       
