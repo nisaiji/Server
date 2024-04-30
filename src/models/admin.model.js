@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 // import addressSchema from "./Schemas/address.schema";
 
-const schoolSchema = mongoose.Schema({
+const adminSchema = mongoose.Schema({
   // admin: a unique username which represents a school, used for authentication and other stuff
   adminName: {
     type: String,
     unique: true,
     required: true
   },
-  name: {
+  schoolName: {
     type: String,
     required: true
   },
@@ -27,9 +27,15 @@ const schoolSchema = mongoose.Schema({
     lowercase: true,
     unique: true
   },
+  role:{
+    type:String,
+    enum:["superAdmin","admin","principal"]
+
+  },
   password: {
     type: String,
     required: true
+    // select:false,
   },
   address: {
     type: String,
@@ -41,13 +47,13 @@ const schoolSchema = mongoose.Schema({
       ref: "section"
     }
   ],
-  cordinators: [
+  teachers: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "cordinator"
+      ref: "teacher"
     }
   ]
 });
 
-const schoolModel = mongoose.model("school", schoolSchema);
-export default schoolModel;
+const adminModel = mongoose.model("admin", adminSchema);
+export default adminModel;

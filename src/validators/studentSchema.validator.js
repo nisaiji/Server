@@ -15,5 +15,12 @@ const registerStudentSchema = Joi.object({
     address:Joi.string().required(),
 })
 
+const deleteStudentSchema = Joi.object({
+    studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(), 
+})
 
-export {registerStudentSchema};
+const studentAddToSectionSchema = Joi.object({
+    studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+    sectionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required() 
+ })
+export {registerStudentSchema,deleteStudentSchema,studentAddToSectionSchema};

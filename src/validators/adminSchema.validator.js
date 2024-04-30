@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 // register the school
-const registerSchoolSchema = Joi.object({
+const registerAdminSchema = Joi.object({
   adminName: Joi.string()
     .min(5)
     .max(15)
@@ -23,7 +23,7 @@ const registerSchoolSchema = Joi.object({
 });
 
 // login school
-const loginSchoolSchema = Joi.object({
+const loginAdminSchema = Joi.object({
     adminName: Joi.string()
     .min(3)
     .max(15)
@@ -36,4 +36,4 @@ const loginSchoolSchema = Joi.object({
 
 
 
-export {registerSchoolSchema,loginSchoolSchema};
+export {registerAdminSchema,loginAdminSchema};

@@ -50,7 +50,7 @@ const studentSchema = mongoose.Schema({
   },
   school:{
     type: mongoose.Schema.Types.ObjectId,
-    ref: "school"
+    ref: "admin"
   }
 });
 

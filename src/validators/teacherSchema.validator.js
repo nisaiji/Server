@@ -1,12 +1,12 @@
 import Joi from "joi";
 
-const loginCordinatorSchema = Joi.object({
+const teacherLoginSchema = Joi.object({
   username: Joi.string().min(5).max(15).required(),
   password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
 });
 
 // school instance will register cordinator
-const registerCordinatorSchema = Joi.object({
+const teacherRegisterSchema = Joi.object({
   username: Joi.string().min(5).max(15).required(),
   firstname: Joi.string().min(3).max(100).required(),
   lastname: Joi.string().min(3).max(100).required(),
@@ -23,12 +23,14 @@ const registerCordinatorSchema = Joi.object({
   password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
 });
 
-const teacherSchema = Joi.object({
+const markTeacherAsCordinatorSchema = Joi.object({
   teacherId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
 })
 
-const cordinatorDeleteSchema = Joi.object({
+const teacherDeleteSchema = Joi.object({
   cordinatorId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
 })
-export {loginCordinatorSchema,registerCordinatorSchema,teacherSchema,cordinatorDeleteSchema};
+
+
+export {teacherLoginSchema,teacherRegisterSchema,markTeacherAsCordinatorSchema,teacherDeleteSchema};
       

@@ -18,7 +18,6 @@ const parentRegisterSchema = Joi.object({
   studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
 });
 
-
 const existingParentRegisterSchema = Joi.object({
   studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
   parentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),

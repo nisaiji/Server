@@ -27,7 +27,15 @@ export async function findSectionById(_id){
     }
 }
 
-
 export function checkStudentExistInSection(students , student){
     return students.includes(student);
+}
+
+export async function getAllSection(){
+    try {
+        const sections = await sectionModel.find({}).populate('students').populate("cordinator");
+        return sections;
+    } catch (error) {
+        return error;        
+    }
 }

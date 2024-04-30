@@ -1,9 +1,9 @@
 import { error } from "../utills/responseWrapper.js";
 import Jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
-import { findSchoolByID } from "../services/school.services.js";
+import { findAdminByID } from "../services/admin.services.js";
 
-export async function schoolAuthentication(req, res, next) {
+export async function adminAuthentication(req, res, next) {
   try {
     // console.log("authentication called")
     const token = req.header("Authorization");
@@ -12,9 +12,9 @@ export async function schoolAuthentication(req, res, next) {
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.jwtSecret);
-    const school = await findSchoolByID(decoded.schoolId);
+    const school = await findAdminByID(decoded.adminId);
     if (!school) {
-      return res.send(error(404, "school doesn't exists"));
+      return res.send(error(404, "admin doesn't exists"));
     }
     req.schoolId = decoded.schoolId;
     next();
