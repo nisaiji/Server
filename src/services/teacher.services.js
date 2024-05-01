@@ -55,6 +55,7 @@ export async function findTeacherById(id) {
 
 export async function deleteTeacher(id) {
   try {
+    
     const teacher = await teacherModel.findByIdAndDelete(id);
     await sectionModel.updateMany(
       { coordinator: id },
@@ -76,7 +77,7 @@ export async function getAllTeachers() {
 }
 export async function getAllCordinators() {
   try {
-    const cordinatorlist = await teacherModel.find({ isCordinator: true });
+    const cordinatorlist = await teacherModel.find({ isCoordinator: true });
     return cordinatorlist;
   } catch (error) {
     return error;

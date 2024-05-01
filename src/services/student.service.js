@@ -29,3 +29,14 @@ export async function findStudentById(_id){
         return  error;       
     }
 }
+
+export async function deleteStudentById(id){
+    try {
+        const student = await studentModel.findByIdAndDelete(id);
+        console.log(student);
+        return student;       
+    } catch (error) {
+        return error;
+        
+    }
+}

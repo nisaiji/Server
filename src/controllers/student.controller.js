@@ -1,4 +1,5 @@
-import { checkStudentExist, findStudentById, registerStudent } from "../services/student.service.js";
+import { checkStudentExistInSection, findSectionById } from "../services/section.services.js";
+import { checkStudentExist, deleteStudentById, findStudentById, registerStudent } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
@@ -72,10 +73,12 @@ export async function addToSectionStudentController(req, res) {
 export async function deleteStudentController(req, res) {
     try {
       const studentId = req.params.studentId;
-      const student = await findStudentById(studentId);
+      const student = await deleteStudentById(studentId);
       if (!student) {
-        return res.send(error(111112));
+        return res.send(error(400, "student doesn't exists"));
       }
+      return res.send(success(200,'student deleted successfully'));
+
     } catch (err) {
       return res.send(error(500, err.message));
     }

@@ -6,10 +6,10 @@ const adminRouter = express.Router();
 
 /**
  * @swagger
- * /school/register:
+ * /admin/register:
  *   post:
- *     summary: To register school
- *     description: This API will register school.one adminName will represent to school.
+ *     summary: To register admin
+ *     description: This API will register admin.one adminName will represent to school.
  *     tags:
  *       - Admin
  *     requestBody:
@@ -19,7 +19,7 @@ const adminRouter = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               schoolName:
  *                 type: string
  *               affiliationNo:
  *                 type: string
@@ -45,10 +45,10 @@ adminRouter.post("/register", adminRegisterValidation, registerAdminController);
 
 /**
  * @swagger
- * /school/login:
+ * /admin/login:
  *   post:
- *     summary: To login school
- *     description: "This is used for login school"
+ *     summary: To login admin
+ *     description: "This is used for login admin"
  *     tags:
  *       - Admin
  *     requestBody:

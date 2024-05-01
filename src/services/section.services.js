@@ -9,9 +9,9 @@ export async function checkSectionExist(name){
     }
 }
 
-export async function createSection(name, cordinator){
+export async function createSection(name, coordinator){
     try {
-        const section = await sectionModel.create({name, cordinator});
+        const section = await sectionModel.create({name, coordinator});
         return section;
     } catch (error) {
         return error;
@@ -33,7 +33,9 @@ export function checkStudentExistInSection(students , student){
 
 export async function getAllSection(){
     try {
-        const sections = await sectionModel.find({}).populate('students').populate("cordinator");
+        // console.log("get section list called")
+        const sections = await sectionModel.find({}).populate('students').populate("coordinator");
+        console.log(sections);
         return sections;
     } catch (error) {
         return error;        

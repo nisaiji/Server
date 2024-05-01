@@ -1,21 +1,22 @@
-import { checkSectionExist, getAllSection } from "../services/section.services";
-import { error, success } from "../utills/responseWrapper";
+import { checkSectionExist, createSection, getAllSection } from "../services/section.services.js";
+import { findTeacherById } from "../services/teacher.services.js";
+import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerSectionController(req, res) {
     try{
-      const { name, cordinatorId } = req.body;
+      const { name, coordinatorId } = req.body;
       const existingSection = await checkSectionExist(name);
       if (existingSection) {
         return res.send(error(400, "section name already exist"));
       }
-      const section = await createSection(name, cordinatorId);
-      const cordinator = await findCordinatorById(cordinatorId);
-      if (!cordinator) {
+      const section = await createSection(name, coordinatorId);
+      const coordinator = await findTeacherById(coordinatorId);
+      if (!coordinator) {
         return res.send(error(400, "cordinator doesn't exist"));
       }
-      console.log(cordinator);
-      cordinator?.section?.push(section["_id"]);
-      await cordinator.save();
+      // console.log(coordinator);
+      coordinator?.section?.push(section["_id"]);
+      await coordinator.save();
       return res.send(success(201, "section created successfully!"));
     } catch (err) {
       return res.send(error(500, err.message));

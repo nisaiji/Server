@@ -7,10 +7,10 @@ import {
 
 export async function adminRegisterValidation(req, res, next) {
   try {
-    const { name, affiliationNo, address, email, phone, adminName, password } =
+    const { schoolName, affiliationNo, address, email, phone, adminName, password } =
       req.body;
     const { error: schemaError } = registerAdminSchema.validate({
-      name,
+      schoolName,
       affiliationNo,
       address,
       email,

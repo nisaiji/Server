@@ -55,12 +55,12 @@ parentRouter.post("/register/:studentId",adminAuthentication,registerParentValid
 
 /**
  * @swagger
- * /school/add-student-existing-parent/{studentId}:
+ * /parent/link-student-with-existing-parent/{studentId}:
  *   post:
  *     security:
  *       - Authorization: []
- *     summary: Register a student's parent
- *     description: Register a student's parent with their details.
+ *     summary: linked student with existing parent
+ *     description: linked a student with the already existing parent who registered by siblings.
  *     tags:
  *       - Parents
  *     parameters:
@@ -81,13 +81,13 @@ parentRouter.post("/register/:studentId",adminAuthentication,registerParentValid
  *                 type: string
  *     responses:
  *       200:
- *         description: Student parent registered successfully
+ *         description: student linked with existing parent successfully
  *       400:
  *         description: Unauthorized request
  *       500:
  *         description: Server error
  */
- parentRouter.post("/add-student-existing-parent/:studentId",adminAuthentication,registerExistingParentValidation, registerExistingParentController);
+ parentRouter.post("/link-student-with-existing-parent/:studentId",adminAuthentication,registerExistingParentValidation, registerExistingParentController);
   
 /**
  * @swagger

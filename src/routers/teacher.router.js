@@ -5,15 +5,14 @@ import { registerTeacherValidation, loginTeacherValidation,markTeacherAsCordinat
 
 const teacherRouter = express.Router();
 
-
 /**
  * @swagger
  * /teacher/register:
  *   post:
  *     security:
  *       - Authorization: []
- *     summary: To register a coordinator
- *     description: This API will register a coordinator. The coordinator will manage one section of students.
+ *     summary: To register a teacher
+ *     description: This API will register a teacher. The teacher will manage one section of students.
  *     tags:
  *       - Teacher
  *     requestBody:
@@ -49,8 +48,8 @@ teacherRouter.post("/register",adminAuthentication, registerTeacherValidation,  
  * @swagger
  * /teacher/login:
  *   post:
- *     summary: To login a cordinator
- *     description: This API will allow to login registered cordinator.
+ *     summary: To login a teacher
+ *     description: This API will allow a teacher to login.
  *     tags:
  *       - Teacher
  *     requestBody:
@@ -106,18 +105,18 @@ teacherRouter.post("/login", loginTeacherValidation, loginTeacherController);
  *       500:
  *         description: Server error
  */
-teacherRouter.patch("/mark-teacher-as-cordinator/:teacherId",adminAuthentication,markTeacherAsCordinatorValidation,markTeacherAsCordinatorController);
+teacherRouter.patch("/mark-teacher-as-coordinator/:teacherId",adminAuthentication,markTeacherAsCordinatorValidation,markTeacherAsCordinatorController);
   
   /**
  * @swagger
- * /school/delete-cordinator/{teacherId}:
+ * /teacher/{teacherId}:
  *   delete:
  *     security:
  *       - Authorization: []
- *     summary: Mark teacher as coordinator
- *     description: Mark a teacher as coordinator.
+ *     summary: Delete teacher
+ *     description: Delete teacher.
  *     tags:
- *       - School
+ *       - Teacher
  *     parameters:
  *       - in: path
  *         name: teacherId
@@ -140,21 +139,21 @@ teacherRouter.patch("/mark-teacher-as-cordinator/:teacherId",adminAuthentication
  *       500:
  *         description: Server error
  */
-teacherRouter.delete("/:cordinatorId",adminAuthentication, deleteTeacherValidation,deleteTeacherController );
+teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,deleteTeacherController );
 
   /**
  * @swagger
- * /school/all-cordinators:
+ * /teacher/all-cordinators:
  *   get:
  *     security:
  *       - Authorization: []
  *     summary: get list of all cordinators.
  *     description: get list of all cordinators.
  *     tags:
- *       - School
+ *       - Teacher
  *     responses:
  *       200:
- *         description: Teacher marked as coordinator successfully
+ *         description: featched a list of cordinators successfully
  *       400:
  *         description: Unauthorized request
  *       500:
@@ -164,17 +163,17 @@ teacherRouter.get("/all-cordinators",adminAuthentication, getAllCordinatorsContr
 
   /**
  * @swagger
- * /school/all-teachers:
+ * /teacher/all-teachers:
  *   get:
  *     security:
  *       - Authorization: []
  *     summary: get list of all teachers.
  *     description: get list of all teachers.
  *     tags:
- *       - School
+ *       - Teacher
  *     responses:
  *       200:
- *         description: Teacher marked as coordinator successfully
+ *         description: featched a list of teachers successfully
  *       400:
  *         description: Unauthorized request
  *       500:

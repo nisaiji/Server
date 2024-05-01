@@ -12,7 +12,7 @@ export async function checkAdminExist(adminName, email) {
 }
 
 export async function createAdmin(
-  name,
+  schoolName,
   affiliationNo,
   address,
   email,
@@ -22,7 +22,7 @@ export async function createAdmin(
 ) {
   try {
     const admin = await adminModel.create({
-      name,
+      schoolName,
       affiliationNo,
       address,
       email,
@@ -45,9 +45,10 @@ export async function findAdminByAdminName(adminName) {
   }
 }
 
-export async function findAdminByID(_id) {
+export async function findAdminByID(id) {
   try {
-    const admin = await adminModel.findById({ _id });
+    const admin = await adminModel.findById(id);
+    // console.log(admin);
     return admin;
   } catch (err) {
     return err;

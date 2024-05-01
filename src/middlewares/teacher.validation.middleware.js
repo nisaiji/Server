@@ -46,8 +46,7 @@ export async function loginTeacherValidation(req, res, next) {
 
 export async function markTeacherAsCordinatorValidation(req, res, next) {
   try {
-    const teacherId = req.param.teacherId;
-    console.log({ teacherId });
+    const teacherId = req.params.teacherId;
     const { error: schemaError } = markTeacherAsCordinatorSchema.validate({ teacherId });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -60,12 +59,10 @@ export async function markTeacherAsCordinatorValidation(req, res, next) {
 
 export async function deleteTeacherValidation(req, res, next) {
   try {
-    const cordinatorId = req.params.cordinatorId;
-    console.log({ cordinatorId });
+    const teacherId = req.params.teacherId;
     const { error: schemaError } = teacherDeleteSchema.validate({
-      cordinatorId
+      teacherId
     });
-    console.log({ schemaError });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }

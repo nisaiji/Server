@@ -59,8 +59,8 @@ studentRouter.post("/register",adminAuthentication,registerStudentValidation, re
  *   post:
  *     security:
  *       - Authorization: []
- *     summary: Register a student
- *     description: Register a student with their details.
+ *     summary: Add student to a section.
+ *     description: add student to a section.
  *     tags:
  *       - Student
  *     parameters:
@@ -77,26 +77,7 @@ studentRouter.post("/register",adminAuthentication,registerStudentValidation, re
  *           schema:
  *             type: object
  *             properties:
- *               rollNumber:
- *                 type: string
- *               firstname:
- *                 type: string
- *               lastname:
- *                 type: string
- *               gender:
- *                 type: string
- *                 enum: ["Male", "Female", "Non-binary", "Other"]
- *               age:
- *                 type: number
- *                 minimum: 3
- *                 maximum: 100
- *               phone:
- *                 type: string
- *               email:
- *                 type: string
- *               classStd:
- *                 type: string
- *               address:
+ *               sectionId:
  *                 type: string
  *     responses:
  *       200:
@@ -106,7 +87,7 @@ studentRouter.post("/register",adminAuthentication,registerStudentValidation, re
  *       500:
  *         description: Server error
  */
-studentRouter.post("/add-to-section",adminAuthentication,addToSectionStudentValidation,addToSectionStudentController);
+studentRouter.post("/add-to-section/:studentId",adminAuthentication,addToSectionStudentValidation,addToSectionStudentController);
 
 /**
  * @swagger
@@ -114,27 +95,20 @@ studentRouter.post("/add-to-section",adminAuthentication,addToSectionStudentVali
  *   delete:
  *     security:
  *       - Authorization: []
- *     summary: Mark teacher as coordinator
- *     description: Mark a teacher as coordinator.
+ *     summary: delete student
+ *     description: This api will delete student.
  *     tags:
  *       - Student
  *     parameters:
  *       - in: path
- *         name: teacherId
+ *         name: studentId
  *         required: true
- *         description: ID of the teacher
+ *         description: ID of the student
  *         schema:
  *           type: string
- *       - in: body
- *         name: body
- *         required: true
- *         description: Parent ID
- *         schema:
- *           type: object
- *           properties:
  *     responses:
  *       200:
- *         description: Teacher marked as coordinator successfully
+ *         description: student deleted successfully
  *       400:
  *         description: Unauthorized request
  *       500:

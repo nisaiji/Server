@@ -6,7 +6,7 @@ const registerAdminSchema = Joi.object({
     .min(5)
     .max(15)
     .required(),
-  name: Joi.string().min(8).max(500).required(),
+  schoolName: Joi.string().min(8).max(500).required(),
   affiliationNo: Joi.string().min(5).max(50).required(),
   phone: Joi.string()
     .pattern(/^\+91[6-9][0-9]{9}$/)

@@ -28,7 +28,7 @@ const markTeacherAsCordinatorSchema = Joi.object({
 })
 
 const teacherDeleteSchema = Joi.object({
-  cordinatorId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+  teacherId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
 })
 
 

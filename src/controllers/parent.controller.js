@@ -1,6 +1,7 @@
 import generateAccessToken from "../services/accessToken.service.js";
-import { checkParentExist, createParent, findParentByUsername } from "../services/parent.services.js";
+import { checkChildExist, checkParentExist, createParent, findParentById, findParentByUsername } from "../services/parent.services.js";
 import { checkPasswordMatch, hashPassword } from "../services/password.service.js";
+import { findStudentById } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerParentController(req, res) {
@@ -86,7 +87,6 @@ export async function registerExistingParentController(req, res) {
         success(200, "student linked with existing parent successfully")
       );
   
-      return res.send();
     } catch (err) {
       return res.send(error(500, err.message));
     }
