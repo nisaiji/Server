@@ -1,7 +1,7 @@
 import express from "express";
-import {  loginParentController, registerExistingParentController, registerParentController} from "../controllers/parent.controller.js";
-import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
-import { loginParentValidation, registerExistingParentValidation, registerParentValidation } from "../middlewares/validation/parent.validation.middleware.js";
+import {  loginParentController, registerExistingParentController, registerParentController, updateParentController} from "../controllers/parent.controller.js";
+import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
+import { loginParentValidation, registerExistingParentValidation, registerParentValidation, updateParentValidation } from "../middlewares/validation/parent.validation.middleware.js";
 
 const parentRouter = express.Router();
 
@@ -22,27 +22,6 @@ const parentRouter = express.Router();
  *         description: ID of the student
  *         schema:
  *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               firstname:
- *                 type: string
- *               lastname:
- *                 type: string
- *               phone:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               address:
- *                 type: string
  *     responses:
  *       200:
  *         description: Student parent registered successfully
@@ -51,7 +30,7 @@ const parentRouter = express.Router();
  *       500:
  *         description: Server error
  */
-parentRouter.post("/register/:studentId",adminAuthentication,registerParentValidation,registerParentController)
+parentRouter.post("/register/:studentId",classTeacherAuthentication,registerParentValidation,registerParentController)
 
 /**
  * @swagger
@@ -87,7 +66,7 @@ parentRouter.post("/register/:studentId",adminAuthentication,registerParentValid
  *       500:
  *         description: Server error
  */
- parentRouter.post("/link-student-with-existing-parent/:studentId",adminAuthentication,registerExistingParentValidation, registerExistingParentController);
+ parentRouter.post("/link-student-with-existing-parent/:studentId",classTeacherAuthentication,registerExistingParentValidation, registerExistingParentController);
   
 /**
  * @swagger
@@ -117,4 +96,7 @@ parentRouter.post("/register/:studentId",adminAuthentication,registerParentValid
  *         description: Server error
  */
 parentRouter.post("/login",loginParentValidation, loginParentController);
+
+
+parentRouter.put("/:parentId",updateParentValidation, updateParentController);
 export default parentRouter;

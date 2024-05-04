@@ -11,30 +11,38 @@ export async function checkParentExist(username, email) {
   }
 }
 
-export async function createParent(
-  username,
-  firstname,
-  lastname,
-  phone,
-  email,
-  password,
-  address
-) {
+export async function createParent() {
   try {
-    const parent = await parentModel.create({
-      username,
-      firstname,
-      lastname,
-      phone,
-      email,
-      password,
-      address
-    });
+    const parent = await parentModel.create({});
     return parent;
   } catch (error) {
     return error;
   }
 }
+// export async function createParent(
+//   username,
+//   firstname,
+//   lastname,
+//   phone,
+//   email,
+//   password,
+//   address
+// ) {
+//   try {
+//     const parent = await parentModel.create({
+//       username,
+//       firstname,
+//       lastname,
+//       phone,
+//       email,
+//       password,
+//       address
+//     });
+//     return parent;
+//   } catch (error) {
+//     return error;
+//   }
+// }
 
 export async function findParentByUsername(username) {
   try {
@@ -54,6 +62,15 @@ export async function findParentById(_id){
   }
 }
 
-export  function checkChildExist(children , childId){
+export function checkChildExist(children , childId){
   return children.includes(childId); 
+}
+
+export async function checkStudentAlreadyLinkedToParent(studentId){
+  try{
+    const parent = parentModel.findOne({ child: { $in: studentId } });
+    return parent;
+  } catch (error) {
+    return error;    
+  }
 }

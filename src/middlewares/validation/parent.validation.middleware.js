@@ -2,24 +2,16 @@ import { error } from "../../utills/responseWrapper.js";
 import {
   existingParentRegisterSchema,
   parentLoginSchema,
-  parentRegisterSchema
+  parentRegisterSchema,
+  parentUpdateSchema
 } from "../../validators/parentSchema.validator.js";
 
 export async function registerParentValidation(req, res, next) {
   try {
     const studentId = req.params.studentId;
-    const { username, firstname, lastname, phone, email, password, address } =
-      req.body;
-    const { error: schemaError } = parentRegisterSchema.validate({
-      username,
-      firstname,
-      lastname,
-      phone,
-      email,
-      password,
-      address,
-      studentId
-    });
+    // const { username, firstname, lastname, phone, email, password, address } =
+    //   req.body;
+    const { error: schemaError } = parentRegisterSchema.validate({studentId});
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }
@@ -28,6 +20,29 @@ export async function registerParentValidation(req, res, next) {
     return res.send(error(500, err.message));
   }
 }
+// export async function registerParentValidation(req, res, next) {
+//   try {
+//     const studentId = req.params.studentId;
+//     const { username, firstname, lastname, phone, email, password, address } =
+//       req.body;
+//     const { error: schemaError } = parentRegisterSchema.validate({
+//       username,
+//       firstname,
+//       lastname,
+//       phone,
+//       email,
+//       password,
+//       address,
+//       studentId
+//     });
+//     if (schemaError) {
+//       return res.send(error(400, schemaError.details[0].message));
+//     }
+//     next();
+//   } catch (err) {
+//     return res.send(error(500, err.message));
+//   }
+// }
 export async function registerExistingParentValidation(req, res, next) {
   try {
     const studentId = req.params.studentId;
@@ -57,5 +72,18 @@ export async function loginParentValidation(req, res, next) {
     next();
   } catch (err) {
     return res.send(error(500, err.message));
+  }
+}
+
+export async function updateParentValidation(req,res,next){
+  try {
+    const parentId = req.params.parentId;
+    const {error:schemaError} = parentUpdateSchema.validate({parentId});
+    if(schemaError){
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next();
+  } catch (err){
+    return res.send(error(500,err.message));    
   }
 }

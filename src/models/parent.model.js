@@ -4,37 +4,30 @@ import mongoose from "mongoose";
 const parentSchema = mongoose.Schema({
   username: {
     type: String,
-    unique: true,
-    required: true
+    default: "abc@123"
   },
   firstname: {
     type: String,
-    unique: true,
-    required: true
+    default: "John"
   },
   lastname: {
     type: String,
-    unique: true,
-    required: true
+    default: "Doe"
   },
   phone: {
     type: String,
-    required: true
+    default: "+910000000000"
   },
   email: {
     type: String,
-    required: true,
-    unique: true,
     lowercase: true
   },
   password: {
-    type: String,
-    required: true,
-    // select: false
+    type: String
   },
   address: {
     type: String,
-    required: true
+    default: "abc xyz india"
   },
   // one parent can have multiple childs
   child: [

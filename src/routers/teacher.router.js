@@ -106,7 +106,7 @@ teacherRouter.post("/login", loginClassTeacherValidation, loginClassTeacherContr
  *         description: Server error
  */
 teacherRouter.patch("/mark-teacher-as-class-teacher/:teacherId",adminAuthentication,markTeacherAsClassTeacherValidation,markTeacherAsClassTeacherController);
-  
+
   /**
  * @swagger
  * /teacher/{teacherId}:
@@ -180,6 +180,7 @@ teacherRouter.get("/all-class-teachers",adminAuthentication, getAllClassTeachers
  *         description: Server error
  */
 teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController);
+
 
 
 export default teacherRouter;
