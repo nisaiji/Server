@@ -2,9 +2,9 @@ import {
   checkTeacherExist,
   createTeacher,
   deleteTeacher,
+  findClassTeacherByUsername,
   findTeacherById,
-  findTeacherByUsername,
-  getAllCordinators,
+  getAllClassTeachers,
   getAllTeachers
 } from "../services/teacher.services.js";
 import generateAccessToken from "../services/accessToken.service.js";
@@ -34,7 +34,8 @@ export async function registerTeacherController(req, res) {
       lastname,
       email,
       hashedPassword,
-      phone
+      phone,
+      adminId
     );
     const admin = await findAdminByID(adminId);
     // console.log({ admin });
@@ -48,22 +49,23 @@ export async function registerTeacherController(req, res) {
   }
 }
 
-export async function loginTeacherController(req, res) {
+export async function loginClassTeacherController(req, res) {
   try {
     const { username, password } = req.body;
 
-    const teacher = await findTeacherByUsername(username);
-    if (!teacher) {
-      return res.send(error(404, "teacher is not registered"));
+    const classTeacher = await findClassTeacherByUsername(username);
+    // console.log(classTeacher);
+    if (!classTeacher) {
+      return res.send(error(404, "class teacher doesn't exist"));
     }
-    const matchPassword = await checkPasswordMatch(password, teacher.password);
+    const matchPassword = await checkPasswordMatch(password, classTeacher.password);
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
     const accessToken = generateAccessToken({
-      teacherId: teacher["_id"],
-      schoolId: teacher["school"],
-      phone: teacher["phone"]
+      classTeacherId: classTeacher["_id"],
+      schoolId: classTeacher["school"],
+      phone: classTeacher["phone"]
     });
     return res.send(success(200, { accessToken }));
   } catch (err) {
@@ -71,16 +73,16 @@ export async function loginTeacherController(req, res) {
   }
 }
 
-export async function markTeacherAsCordinatorController(req, res) {
+export async function markTeacherAsClassTeacherController(req, res) {
   try {
     const teacherId = req.params.teacherId;
     const teacher = await findTeacherById(teacherId);
     if (!teacher) {
       return res.send(error(400, "teacher doesn't exists"));
     }
-    teacher["isCoordinator"] = true;
+    teacher["isClassTeacher"] = true;
     await teacher.save();
-    return res.send(success(200, "teacher marked as cordinator successfully"));
+    return res.send(success(200, "teacher marked as class Teacher successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -89,7 +91,7 @@ export async function markTeacherAsCordinatorController(req, res) {
 export async function deleteTeacherController(req, res) {
   try {
     const teacherId = req.params.teacherId;
-    console.log({teacherId})
+    // console.log({teacherId})
     const teacher = await deleteTeacher(teacherId);
     if (!teacher) {
       return res.send(error(400, "can not find teacher"));
@@ -109,10 +111,10 @@ export async function getAllTeachersController(req, res) {
   }
 }
 
-export async function getAllCordinatorsController(req, res) {
+export async function getAllClassTeachersController(req, res) {
   try {
-    const cordinatorlist = await getAllCordinators();
-    return res.send(success(2001, cordinatorlist));
+    const classTeacherList = await getAllClassTeachers();
+    return res.send(success(2001, classTeacherList));
   } catch (err) {
     return res.send(error(500, err.message));
   }

@@ -1,6 +1,12 @@
 import express from "express";
-import {loginAdminController,registerAdminController} from "../controllers/admin.controller.js";
-import { adminRegisterValidation,adminLoginValidation } from "../middlewares/admin.validation.middleware.js";
+import {
+  loginAdminController,
+  registerAdminController
+} from "../controllers/admin.controller.js";
+import {
+  adminLoginValidation,
+  adminRegisterValidation
+} from "../middlewares/validation/admin.validation.middleware.js";
 
 const adminRouter = express.Router();
 
@@ -71,6 +77,5 @@ adminRouter.post("/register", adminRegisterValidation, registerAdminController);
  *         description: "Server side error"
  */
 adminRouter.post("/login", adminLoginValidation, loginAdminController);
-
 
 export default adminRouter;

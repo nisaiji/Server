@@ -1,9 +1,9 @@
-import { error } from "../utills/responseWrapper.js";
+import { error } from "../../utills/responseWrapper.js";
 import {
   existingParentRegisterSchema,
   parentLoginSchema,
   parentRegisterSchema
-} from "../validators/parentSchema.validator.js";
+} from "../../validators/parentSchema.validator.js";
 
 export async function registerParentValidation(req, res, next) {
   try {

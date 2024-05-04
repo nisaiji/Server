@@ -3,8 +3,10 @@ import {
   getAllSectionsController,
   registerSectionController
 } from "../controllers/section.controller.js";
-import { adminAuthentication } from "../middlewares/admin.authentication.middleware.js";
-import { registerSectionValidation } from "../middlewares/section.validation.middleware.js";
+import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { registerSectionValidation } from "../middlewares/validation/section.validation.middleware.js";
+// import { adminAuthentication } from "../middlewares/admin.authentication.middleware.js";
+// import { registerSectionValidation } from "../middlewares/section.validation.middleware.js";
 
 const sectionRouter = express.Router();
 /**
@@ -26,7 +28,7 @@ const sectionRouter = express.Router();
  *             properties:
  *               name:
  *                 type: string
- *               cordinatorId:
+ *               classTeacherId:
  *                 type: string
  *     responses:
  *       200:
@@ -36,12 +38,7 @@ const sectionRouter = express.Router();
  *       500:
  *         description: Server error
  */
-sectionRouter.post(
-  "/register",
-  adminAuthentication,
-  registerSectionValidation,
-  registerSectionController
-);
+sectionRouter.post("/register",adminAuthentication, registerSectionValidation, registerSectionController);
 
 /**
  * @swagger

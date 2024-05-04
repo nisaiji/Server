@@ -1,12 +1,12 @@
-import { error } from "../utills/responseWrapper.js";
-import { registerSectionSchema } from "../validators/sectionSchema.validator.js";
+import { error } from "../../utills/responseWrapper.js";
+import { registerSectionSchema } from "../../validators/sectionSchema.validator.js";
 
 export async function registerSectionValidation(req, res, next) {
   try {
-    const { name, coordinatorId } = req.body;
+    const { name, classTeacherId } = req.body;
     const { error: schemaError } = registerSectionSchema.validate({
       name,
-      coordinatorId
+      classTeacherId
     });
 
     if (schemaError) {

@@ -1,5 +1,6 @@
-import { checkStudentExistInSection, findSectionById } from "../services/section.services.js";
+import { checkStudentExistInSection, findSectionByClassTeacherId, findSectionById } from "../services/section.services.js";
 import { checkStudentExist, deleteStudentById, findStudentById, registerStudent } from "../services/student.service.js";
+import { findTeacherById } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
@@ -12,11 +13,20 @@ export async function registerStudentController(req, res) {
         age,
         email,
         phone,
-        classStd,
         address
       } = req.body;
-      const schoolId = req.schoolId;
-      const existingStudent = await checkStudentExist(rollNumber, schoolId);
+      const classTeacherId = req.classTeacherId;
+      const classTeacher = await findTeacherById(classTeacherId);
+      if(!classTeacher){
+        return res.send(error(400,"class teacher doesn't exists"));
+      }
+      const section = await findSectionByClassTeacherId(classTeacherId);
+      if(!section){
+        return res.send(error(400,"section doesn't exists"));
+      }
+      const adminId = classTeacher?.admin;
+      // console.log({classTeacher})
+      const existingStudent = await checkStudentExist(rollNumber, adminId);
       if (existingStudent) {
         return res.send(error(400, "roll number already exist"));
       }
@@ -28,11 +38,15 @@ export async function registerStudentController(req, res) {
         age,
         phone,
         email,
-        classStd,
         address,
-        schoolId
+        adminId,
       );
+      section?.students?.push(student["_id"]);
+      student.section = section["_id"];
+      await section.save();
+      await student.save();
       return res.send(success(201, "student created successfully!"));
+
     } catch (err) {
       return res.send(error(500, err.message));
     }

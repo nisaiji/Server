@@ -24,7 +24,7 @@ const teacherSchema = mongoose.Schema({
     enum:["teacher","classTeacher","coordinator"],
     default:"teacher"
   },
-  isCoordinator: {
+  isClassTeacher: {
     type: Boolean,
     default: false
   },
@@ -43,9 +43,9 @@ const teacherSchema = mongoose.Schema({
       ref: "section"
     }
   ],
-  school: {
+  admin: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "school"
+    ref: "admin"
   }
 });
 

@@ -1,9 +1,9 @@
-import { error } from "../utills/responseWrapper.js";
+import { error } from "../../utills/responseWrapper.js";
 import {
   loginAdminSchema,
   registerAdminSchema,
   
-} from "../validators/adminSchema.validator.js";
+} from "../../validators/adminSchema.validator.js";
 
 export async function adminRegisterValidation(req, res, next) {
   try {

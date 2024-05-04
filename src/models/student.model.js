@@ -33,11 +33,7 @@ const studentSchema = mongoose.Schema({
     required: true,
     unique: true
   },
-  classStd: {
-    type: String,
-    required: true
-  },
-  address: {
+  address:{
     type: String
   },
   parent: {
@@ -48,10 +44,10 @@ const studentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "section"
   },
-  school:{
+  admin:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"
-  }
+  },
 });
 
 const studentModel = mongoose.model("student", studentSchema);

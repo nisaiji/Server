@@ -1,7 +1,7 @@
 import express from "express";
 import {  loginParentController, registerExistingParentController, registerParentController} from "../controllers/parent.controller.js";
-import { adminAuthentication } from "../middlewares/admin.authentication.middleware.js";
-import { loginParentValidation,registerExistingParentValidation, registerParentValidation } from "../middlewares/parent.validation.middleware.js";
+import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { loginParentValidation, registerExistingParentValidation, registerParentValidation } from "../middlewares/validation/parent.validation.middleware.js";
 
 const parentRouter = express.Router();
 

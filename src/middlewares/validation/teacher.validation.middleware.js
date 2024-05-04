@@ -1,11 +1,11 @@
-import { error } from "../utills/responseWrapper.js";
+import { error } from "../../utills/responseWrapper.js";
 import {
   teacherDeleteSchema,
-  markTeacherAsCordinatorSchema,
-  teacherLoginSchema,
+  markTeacherAsClassTeacherSchema,
+  classTeacherLoginSchema,
   teacherRegisterSchema,
   
-} from "../validators/teacherSchema.validator.js";
+} from "../../validators/teacherSchema.validator.js";
 
 export async function registerTeacherValidation(req, res, next) {
   try {
@@ -28,14 +28,14 @@ export async function registerTeacherValidation(req, res, next) {
   }
 }
 
-export async function loginTeacherValidation(req, res, next) {
+export async function loginClassTeacherValidation(req, res, next) {
   try {
     const { username, password } = req.body;
-    const { error: schemaError } = teacherLoginSchema.validate({
+    const { error: schemaError } = classTeacherLoginSchema.validate({
       username,
       password
     });
-    if (schemaError) {
+    if (schemaError){
       return res.send(error(400, schemaError.details[0].message));
     }
     next();
@@ -44,10 +44,10 @@ export async function loginTeacherValidation(req, res, next) {
   }
 }
 
-export async function markTeacherAsCordinatorValidation(req, res, next) {
+export async function markTeacherAsClassTeacherValidation(req, res, next) {
   try {
     const teacherId = req.params.teacherId;
-    const { error: schemaError } = markTeacherAsCordinatorSchema.validate({ teacherId });
+    const { error: schemaError } = markTeacherAsClassTeacherSchema.validate({ teacherId });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }

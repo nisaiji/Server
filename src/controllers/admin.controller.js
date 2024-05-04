@@ -47,7 +47,7 @@ export async function registerAdminController(req, res) {
     if (admin instanceof Error) {
       return res.send(error(400, "admin couldn't be registered"));
     }
-    console.log({ admin });
+    // console.log({ admin });
     return res.send(success(201, "admin registered successfully!"));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -65,7 +65,7 @@ export async function loginAdminController(req, res) {
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
-    const accessToken = generateAccessToken({ adminId: admin["_id"] });
+    const accessToken = generateAccessToken({ adminId: admin["_id"],phone:admin["phone"] });
     return res.send(success(200, { accessToken }));
   } catch (err) {
     return res.send(error(500, err.message));

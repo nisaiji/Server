@@ -18,7 +18,8 @@ export async function createTeacher(
   lastname,
   email,
   password,
-  phone
+  phone,
+  admin
 ) {
   try {
     const teacher = await teacherModel.create({
@@ -27,7 +28,8 @@ export async function createTeacher(
       lastname,
       email,
       password,
-      phone
+      phone,
+      admin
     });
     return teacher;
   } catch (err) {
@@ -35,10 +37,12 @@ export async function createTeacher(
   }
 }
 
-export async function findTeacherByUsername(username) {
+export async function findClassTeacherByUsername(username) {
   try {
-    const teacher = await teacherModel.findOne({ username });
-    return teacher;
+    const classTeacher = await teacherModel.findOne({
+      $and: [{ username }, { isClassTeacher: true }]
+    });
+    return classTeacher;
   } catch (err) {
     return err;
   }
@@ -53,16 +57,26 @@ export async function findTeacherById(id) {
   }
 }
 
+export async function findClassTeacherById(id) {
+  try {
+    const classTeacher = await teacherModel.findOne({
+      $and: [{ _id: id }, { isClassTeacher: true }]
+    });
+    return classTeacher;
+  } catch (error) {
+    return error;
+  }
+}
+
 export async function deleteTeacher(id) {
   try {
-    
     const teacher = await teacherModel.findByIdAndDelete(id);
     await sectionModel.updateMany(
       { coordinator: id },
       { $unset: { coordinator: 1 } }
     );
     return teacher;
-  } catch (error){
+  } catch (error) {
     return error;
   }
 }
@@ -75,9 +89,10 @@ export async function getAllTeachers() {
     return error;
   }
 }
-export async function getAllCordinators() {
+
+export async function getAllClassTeachers() {
   try {
-    const cordinatorlist = await teacherModel.find({ isCoordinator: true });
+    const cordinatorlist = await teacherModel.find({ isClassTeacher: true });
     return cordinatorlist;
   } catch (error) {
     return error;

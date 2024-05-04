@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-const teacherLoginSchema = Joi.object({
+const classTeacherLoginSchema = Joi.object({
   username: Joi.string().min(5).max(15).required(),
   password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
 });
@@ -23,7 +23,7 @@ const teacherRegisterSchema = Joi.object({
   password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
 });
 
-const markTeacherAsCordinatorSchema = Joi.object({
+const markTeacherAsClassTeacherSchema = Joi.object({
   teacherId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
 })
 
@@ -32,5 +32,5 @@ const teacherDeleteSchema = Joi.object({
 })
 
 
-export {teacherLoginSchema,teacherRegisterSchema,markTeacherAsCordinatorSchema,teacherDeleteSchema};
+export {classTeacherLoginSchema,teacherRegisterSchema,markTeacherAsClassTeacherSchema,teacherDeleteSchema};
       

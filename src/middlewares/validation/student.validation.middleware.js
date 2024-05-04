@@ -1,5 +1,5 @@
-import { error } from "../utills/responseWrapper.js";
-import { deleteStudentSchema, registerStudentSchema, studentAddToSectionSchema } from "../validators/studentSchema.validator.js";
+import { error } from "../../utills/responseWrapper.js";
+import { deleteStudentSchema, registerStudentSchema, studentAddToSectionSchema } from "../../validators/studentSchema.validator.js";
 
 export async function registerStudentValidation(req, res, next) {
     try {
@@ -11,7 +11,6 @@ export async function registerStudentValidation(req, res, next) {
         age,
         phone,
         email,
-        classStd,
         address
       } = req.body;
       const { error: schemaError } = registerStudentSchema.validate({
@@ -22,7 +21,6 @@ export async function registerStudentValidation(req, res, next) {
         age,
         email,
         phone,
-        classStd,
         address
       });
   
@@ -35,7 +33,7 @@ export async function registerStudentValidation(req, res, next) {
     }
   }
 
-  export async function addToSectionStudentValidation(req, res, next) {
+export async function addToSectionStudentValidation(req, res, next) {
     try {
       const studentId = req.params.studentId;
       const { sectionId } = req.body;

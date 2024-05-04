@@ -6,7 +6,7 @@ const sectionSchema = mongoose.Schema({
     required: true,
     unique: true
   },
-  coordinator: {
+  classTeacher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "teacher"
   },
@@ -15,7 +15,11 @@ const sectionSchema = mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "student"
     }
-  ]
+  ],
+  admin:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"admin"
+  }
 });
 
 const sectionModel = mongoose.model("section", sectionSchema);

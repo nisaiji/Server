@@ -11,7 +11,7 @@ const registerStudentSchema = Joi.object({
         tlds: { allow: ["com", "net", "org", "io", "co"] },
     }).required(),
     phone:Joi.string().pattern(/^\+91[6-9][0-9]{9}$/).length(13).required(),
-    classStd:Joi.string().length(4),
+    // classStd:Joi.string().length(4),
     address:Joi.string().required(),
 })
 

@@ -1,7 +1,8 @@
 import express from "express";
 import { addToSectionStudentController, deleteStudentController, registerStudentController } from "../controllers/student.controller.js";
-import { adminAuthentication } from "../middlewares/admin.authentication.middleware.js";
-import { addToSectionStudentValidation, deleteStudentValidation, registerStudentValidation } from "../middlewares/student.validation.middleware.js";
+import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
+import { addToSectionStudentValidation, deleteStudentValidation, registerStudentValidation } from "../middlewares/validation/student.validation.middleware.js";
 
 const studentRouter = express.Router();
 
@@ -39,8 +40,6 @@ const studentRouter = express.Router();
  *                 type: string
  *               email:
  *                 type: string
- *               classStd:
- *                 type: string
  *               address:
  *                 type: string
  *     responses:
@@ -51,43 +50,43 @@ const studentRouter = express.Router();
  *       500:
  *         description: Server error
  */
-studentRouter.post("/register",adminAuthentication,registerStudentValidation, registerStudentController);
+studentRouter.post("/register",classTeacherAuthentication,registerStudentValidation, registerStudentController);
 
-/**
- * @swagger
- * /student/add-to-section/{studentId}:
- *   post:
- *     security:
- *       - Authorization: []
- *     summary: Add student to a section.
- *     description: add student to a section.
- *     tags:
- *       - Student
- *     parameters:
- *       - in: path
- *         name: studentId
- *         required: true
- *         description: ID of the student
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               sectionId:
- *                 type: string
- *     responses:
- *       200:
- *         description: student added to section successfully
- *       400:
- *         description: Unauthorized request
- *       500:
- *         description: Server error
- */
-studentRouter.post("/add-to-section/:studentId",adminAuthentication,addToSectionStudentValidation,addToSectionStudentController);
+// /**
+//  * @swagger
+//  * /student/add-to-section/{studentId}:
+//  *   post:
+//  *     security:
+//  *       - Authorization: []
+//  *     summary: Add student to a section.
+//  *     description: add student to a section.
+//  *     tags:
+//  *       - Student
+//  *     parameters:
+//  *       - in: path
+//  *         name: studentId
+//  *         required: true
+//  *         description: ID of the student
+//  *         schema:
+//  *           type: string
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               sectionId:
+//  *                 type: string
+//  *     responses:
+//  *       200:
+//  *         description: student added to section successfully
+//  *       400:
+//  *         description: Unauthorized request
+//  *       500:
+//  *         description: Server error
+//  */
+// studentRouter.post("/add-to-section/:studentId",adminAuthentication,addToSectionStudentValidation,addToSectionStudentController);
 
 /**
  * @swagger
