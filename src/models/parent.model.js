@@ -13,6 +13,7 @@ const parentSchema = mongoose.Schema({
   lastname: {
     type: String,
     default: "Doe"
+    // required:true,
   },
   phone: {
     type: String,

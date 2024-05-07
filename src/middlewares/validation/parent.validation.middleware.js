@@ -78,7 +78,8 @@ export async function loginParentValidation(req, res, next) {
 export async function updateParentValidation(req,res,next){
   try {
     const parentId = req.params.parentId;
-    const {error:schemaError} = parentUpdateSchema.validate({parentId});
+    const { username, firstname, lastname, phone, email, password, address } = req.body;
+    const {error:schemaError} = parentUpdateSchema.validate({parentId,username, firstname, lastname, phone, email, password, address});
     if(schemaError){
       return res.send(error(400, schemaError.details[0].message));
     }

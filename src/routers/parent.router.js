@@ -1,6 +1,7 @@
 import express from "express";
 import {  loginParentController, registerExistingParentController, registerParentController, updateParentController} from "../controllers/parent.controller.js";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
+import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 import { loginParentValidation, registerExistingParentValidation, registerParentValidation, updateParentValidation } from "../middlewares/validation/parent.validation.middleware.js";
 
 const parentRouter = express.Router();
@@ -66,7 +67,7 @@ parentRouter.post("/register/:studentId",classTeacherAuthentication,registerPare
  *       500:
  *         description: Server error
  */
- parentRouter.post("/link-student-with-existing-parent/:studentId",classTeacherAuthentication,registerExistingParentValidation, registerExistingParentController);
+parentRouter.post("/link-student-with-existing-parent/:studentId",classTeacherAuthentication,registerExistingParentValidation, registerExistingParentController);
   
 /**
  * @swagger
@@ -97,6 +98,44 @@ parentRouter.post("/register/:studentId",classTeacherAuthentication,registerPare
  */
 parentRouter.post("/login",loginParentValidation, loginParentController);
 
-
-parentRouter.put("/:parentId",updateParentValidation, updateParentController);
+/**
+ * @swagger
+ * /parent:
+ *   put:
+ *     security:
+ *       - Authorization: []
+ *     summary: Update parent details
+ *     description: Update a student's parent credentials.
+ *     tags:
+ *       - Parents
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Parent updated successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+parentRouter.put("/", parentAuthentication, updateParentValidation, updateParentController);
 export default parentRouter;

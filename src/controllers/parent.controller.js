@@ -1,6 +1,6 @@
 import generateAccessToken from "../services/accessToken.service.js";
 import { checkChildExist, checkStudentAlreadyLinkedToParent, createParent, findParentById, findParentByUsername } from "../services/parent.services.js";
-import { checkPasswordMatch } from "../services/password.service.js";
+import { checkPasswordMatch, hashPassword } from "../services/password.service.js";
 import { findStudentById } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -20,9 +20,12 @@ export async function registerParentController(req, res) {
       
       student.parent = parent["_id"];
       parent.child.push(student["_id"]);
+      const hashedPassword = await hashPassword("password@123");
+      parent["password"] = hashedPassword;
+      parent["username"] = parent["_id"];
       await student.save();
       await parent.save();
-      console.log({parent,student});
+      // console.log({parent,student});
       
       return res.send(success(201, "parent registered successfully!"));
     } catch (err){
@@ -88,7 +91,7 @@ export async function loginParentController(req,res){
     }
 }
 
-export async function registerExistingParentController(req, res) {
+export async function registerExistingParentController(req, res){
     try {
       const studentId = req.params.studentId;
       const { parentId } = req.body;
@@ -124,11 +127,39 @@ export async function registerExistingParentController(req, res) {
 
 export async function updateParentController(req,res){
   try {
-    const parentId = req.params.parentId;
+    const parentId = req.parentId;
+    const {username,firstname,lastname,phone,email,password,address} = req.body;
     const  parent = await findParentById(parentId);
     if(!parent){
       return res.send(error(400,"parent doesn't exist"));
     }
+    // Update parent details with new values
+    if (username) {
+      parent.username = username;
+    }
+    if (firstname) {
+      parent.firstname = firstname;
+    }
+    if (lastname) {
+      parent.lastname = lastname;
+    }
+    if (phone) {
+      parent.phone = phone;
+    }
+    if (email) {
+      parent.email = email;
+    }
+    if (password){
+     const hashedPassword = await hashPassword(password);
+     parent["password"] = hashedPassword;
+    }
+    if (address) {
+      parent.address = address;
+    }
+
+    // Save the updated parent
+    await parent.save();
+    return res.send(success(200,"parent details updated successfully"));
     
   } catch (err) {
     return res.send(error(500,err.message)) ;   

@@ -1,7 +1,5 @@
 import bcrypt from "bcrypt";
 
-
-
 export async function hashPassword(password) {
   try {
     const hashedPassword = await bcrypt.hash(password, 13);
