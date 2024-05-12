@@ -64,8 +64,9 @@ export async function loginClassTeacherController(req, res) {
     }
     const accessToken = generateAccessToken({
       classTeacherId: classTeacher["_id"],
-      schoolId: classTeacher["school"],
-      phone: classTeacher["phone"]
+      adminId: classTeacher["admin"],
+      section:classTeacher["section"],
+      phone: classTeacher["phone"],
     });
     return res.send(success(200, { accessToken }));
   } catch (err) {

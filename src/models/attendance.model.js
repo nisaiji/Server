@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const attendanceSchema = new mongoose.Schema({
     date:{
-        type:Date,
+        type:String,
         required:true
     },
     day:{
@@ -17,11 +17,22 @@ const attendanceSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:"student"
     },
+    section:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"section"
+    },
+    classTeacher:{ 
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"teacher"
+    },
     admin:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"admin"
     }
 },
 {
-    timestamps:true
+   timestamps:true
 });
+
+const attendanceModel = mongoose.model("attendance",attendanceSchema);
+export default attendanceModel;
