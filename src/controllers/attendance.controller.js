@@ -30,10 +30,3 @@ export async function markAttendanceController(req,res){
     }
 }
 
-export async function updateAttendaceController(req,res){
-    try {
-        
-    } catch (err) {
-        return res.send(error(500,err.message));        
-    }
-}

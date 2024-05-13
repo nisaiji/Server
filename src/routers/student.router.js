@@ -13,7 +13,7 @@ const studentRouter = express.Router();
  *     security:
  *       - Authorization: []
  *     summary: Register a student
- *     description: Register a student with their details.
+ *     description: This API will register a student with their details.it requires classTeacher login token.
  *     tags:
  *       - Student
  *     requestBody:
@@ -52,41 +52,6 @@ const studentRouter = express.Router();
  */
 studentRouter.post("/register",classTeacherAuthentication,registerStudentValidation, registerStudentController);
 
-// /**
-//  * @swagger
-//  * /student/add-to-section/{studentId}:
-//  *   post:
-//  *     security:
-//  *       - Authorization: []
-//  *     summary: Add student to a section.
-//  *     description: add student to a section.
-//  *     tags:
-//  *       - Student
-//  *     parameters:
-//  *       - in: path
-//  *         name: studentId
-//  *         required: true
-//  *         description: ID of the student
-//  *         schema:
-//  *           type: string
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             properties:
-//  *               sectionId:
-//  *                 type: string
-//  *     responses:
-//  *       200:
-//  *         description: student added to section successfully
-//  *       400:
-//  *         description: Unauthorized request
-//  *       500:
-//  *         description: Server error
-//  */
-// studentRouter.post("/add-to-section/:studentId",adminAuthentication,addToSectionStudentValidation,addToSectionStudentController);
 
 /**
  * @swagger
@@ -95,7 +60,7 @@ studentRouter.post("/register",classTeacherAuthentication,registerStudentValidat
  *     security:
  *       - Authorization: []
  *     summary: delete student
- *     description: This api will delete student.
+ *     description: This api will delete student from database.it requires admin login token.
  *     tags:
  *       - Student
  *     parameters:

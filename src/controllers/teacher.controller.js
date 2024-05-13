@@ -63,13 +63,14 @@ export async function loginClassTeacherController(req, res) {
       return res.send(error(404, "incorrect password"));
     }
     const accessToken = generateAccessToken({
+      role:"classTeacher",
       classTeacherId: classTeacher["_id"],
       adminId: classTeacher["admin"],
       section:classTeacher["section"],
       phone: classTeacher["phone"],
     });
     return res.send(success(200, { accessToken }));
-  } catch (err) {
+  } catch (err){
     return res.send(error(500, err.message));
   }
 }

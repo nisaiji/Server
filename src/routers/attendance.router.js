@@ -13,7 +13,7 @@ const attendanceRouter = express.Router();
  *     security:
  *       - Authorization: []
  *     summary: to mark the attendance of student
- *     description: This API will mark the attendance of a student,if already marked then it will update, but before it ensure class teacher is authentic and authorized.
+ *     description: This API will mark the attendance of a student,if already marked then it will update, but before it ensure class teacher is authentic and authorized.it requires classTeacher login token.
  *     tags:
  *       - Attendance
  *     requestBody:

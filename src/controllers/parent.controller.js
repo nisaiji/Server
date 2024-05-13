@@ -84,7 +84,7 @@ export async function loginParentController(req,res){
         if(!matchPassword){
             return res.send(error(404,"incorrect password"));
         }
-        const accessToken = generateAccessToken({parentId:parent["_id"]});
+        const accessToken = generateAccessToken({role:"parent",parentId:parent["_id"],children:parent["child"]});
         return res.send(success(200, {accessToken}));
     } catch (err) {
         return res.send(error(500, err.message));    

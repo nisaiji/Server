@@ -65,7 +65,7 @@ export async function loginAdminController(req, res) {
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
-    const accessToken = generateAccessToken({ adminId: admin["_id"],phone:admin["phone"] });
+    const accessToken = generateAccessToken({role:"admin", adminId: admin["_id"],phone:admin["phone"] });
     return res.send(success(200, { accessToken }));
   } catch (err) {
     return res.send(error(500, err.message));

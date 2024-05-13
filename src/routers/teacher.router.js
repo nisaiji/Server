@@ -12,7 +12,7 @@ const teacherRouter = express.Router();
  *     security:
  *       - Authorization: []
  *     summary: To register a teacher
- *     description: This API will register a teacher. The teacher will manage one section of students.
+ *     description: This API will register a teacher. It requires admin login token.
  *     tags:
  *       - Teacher
  *     requestBody:
@@ -80,7 +80,7 @@ teacherRouter.post("/login", loginClassTeacherValidation, loginClassTeacherContr
  *     security:
  *       - Authorization: []
  *     summary: Mark teacher as class-teacher
- *     description: Mark a teacher as class-teacher.
+ *     description: This API will Mark a teacher as class-teacher. it requires admin login token.
  *     tags:
  *       - Teacher
  *     parameters:
@@ -113,8 +113,8 @@ teacherRouter.patch("/mark-teacher-as-class-teacher/:teacherId",adminAuthenticat
  *   delete:
  *     security:
  *       - Authorization: []
- *     summary: Delete teacher
- *     description: Delete teacher.
+ *     summary: To delete teacher
+ *     description: This API will delete teacher. It requires admin login token.
  *     tags:
  *       - Teacher
  *     parameters:
@@ -148,12 +148,12 @@ teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,
  *     security:
  *       - Authorization: []
  *     summary: get list of all cordinators.
- *     description: get list of all cordinators.
+ *     description: This API will get you a list of all class-teachers.
  *     tags:
  *       - Teacher
  *     responses:
  *       200:
- *         description: featched a list of cordinators successfully
+ *         description: featched a list of class-teachers successfully.
  *       400:
  *         description: Unauthorized request
  *       500:

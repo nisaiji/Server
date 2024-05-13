@@ -16,7 +16,7 @@ const sectionRouter = express.Router();
  *     security:
  *       - Authorization: []
  *     summary: To register a class-section
- *     description: This API will register a class-section. The coordinator will manage one section of students.
+ *     description: This API will register a class-section.it requires admin login token.
  *     tags:
  *       - Section
  *     requestBody:
@@ -38,7 +38,12 @@ const sectionRouter = express.Router();
  *       500:
  *         description: Server error
  */
-sectionRouter.post("/register",adminAuthentication, registerSectionValidation, registerSectionController);
+sectionRouter.post(
+  "/register",
+  adminAuthentication,
+  registerSectionValidation,
+  registerSectionController
+);
 
 /**
  * @swagger
@@ -47,7 +52,7 @@ sectionRouter.post("/register",adminAuthentication, registerSectionValidation, r
  *     security:
  *       - Authorization: []
  *     summary: get list of all sections.
- *     description: get list of all sections along with students list and cordinator.
+ *     description: This API will get you a list of all sections along with students list and cordinator.It requires admin login token.
  *     tags:
  *       - Section
  *     responses:

@@ -13,7 +13,7 @@ const parentRouter = express.Router();
  *     security:
  *       - Authorization: []
  *     summary: Register a student's parent
- *     description: Register a student's parent with their details.
+ *     description: This API will register a student's parent. it requires classTeacher login token.
  *     tags:
  *       - Parents
  *     parameters:
@@ -40,7 +40,7 @@ parentRouter.post("/register/:studentId",classTeacherAuthentication,registerPare
  *     security:
  *       - Authorization: []
  *     summary: linked student with existing parent
- *     description: linked a student with the already existing parent who registered by siblings.
+ *     description: This API will link a student with the already existing parent who registered by siblings. it requires classTeacher login token.
  *     tags:
  *       - Parents
  *     parameters:
@@ -105,7 +105,7 @@ parentRouter.post("/login",loginParentValidation, loginParentController);
  *     security:
  *       - Authorization: []
  *     summary: Update parent details
- *     description: Update a student's parent credentials.
+ *     description: This API will update a student's parent credentials. it requires parent login token.
  *     tags:
  *       - Parents
  *     requestBody:
