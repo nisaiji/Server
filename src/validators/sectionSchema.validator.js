@@ -1,13 +1,25 @@
 import Joi from "joi";
 
 const registerSectionSchema = Joi.object({
-  name: Joi.string().min(1).max(5).required().messages({
-    "string.min": "name length should be at least 3 char long",
-    "string.max": "name length should be smaller than 5 chars",
-    "any.required": "name is required"
-  }),
-  classTeacherId: Joi.string().required(),
-  classId: Joi.string().required()
+  name: Joi.string()
+    .min(1)
+    .max(5)
+    .required()
+    .messages({
+      "string.min": "Name must be at least 1 char long.",
+      "string.max": "Name must be max 5 chars long.",
+      "any.required": "Name is required."
+    }),
+  classTeacherId: Joi.string()
+    .required()
+    .messages({
+      "any.required": "Class teacher ID is required."
+    }),
+  classId: Joi.string()
+    .required()
+    .messages({
+      "any.required": "Class ID is required."
+    })
 });
 
 export { registerSectionSchema };
