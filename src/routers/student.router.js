@@ -52,7 +52,6 @@ const studentRouter = express.Router();
  */
 studentRouter.post("/register",classTeacherAuthentication,registerStudentValidation, registerStudentController);
 
-
 /**
  * @swagger
  * /student/{studentId}:
