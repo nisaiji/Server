@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerClassController } from '../controllers/class.controller.js';
+import { getClassListController, registerClassController } from '../controllers/class.controller.js';
 import { adminAuthentication } from '../middlewares/authentication/admin.authentication.middleware.js';
 
 const classRouter = express.Router();
@@ -60,5 +60,24 @@ classRouter.post("/register",adminAuthentication, registerClassController);
  */
 classRouter.delete("/:classId",adminAuthentication, registerClassController);
 
+/**
+ * @swagger
+ * /class/class-list:
+ *   get:
+ *     security:
+ *       - Authorization: []
+ *     summary: To get a list of class
+ *     description: This API will fetch a list of  classes and its all sections.it requires admin login token.
+ *     tags:
+ *       - Class
+ *     responses:
+ *       200:
+ *         description: class-list fetched successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+classRouter.get("/class-list",adminAuthentication,getClassListController);
 
 export default classRouter;

@@ -1,5 +1,5 @@
 import { checkStudentExistInSection, findSectionByClassTeacherId, findSectionById } from "../services/section.services.js";
-import { checkStudentExist, deleteStudentById, findStudentById, registerStudent } from "../services/student.service.js";
+import { checkStudentExist, deleteStudentById, findStudentById, getStudentList, registerStudent } from "../services/student.service.js";
 import { findTeacherById } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -97,3 +97,20 @@ export async function deleteStudentController(req, res) {
       return res.send(error(500, err.message));
     }
   }
+
+export async function getStudentListOfSection(req,res){
+  try {
+    const sectionId = req.params.sectionId;
+    const classTeacherId = req.classTeacherId;
+    const pageNo = req.params.pageNo;
+    const limit = 5;
+    const section = await findSectionById(sectionId);
+    if(section["classTeacher"]!==classTeacherId){
+      return res.send(error(400,"this class teacher doesn't has access to this section."));
+    }
+    const studentList = await getStudentList({limit,page:pageNo,sectionId});
+    return studentList;
+  } catch (err) {
+    return res.send(error(500,err.message));    
+  }
+}

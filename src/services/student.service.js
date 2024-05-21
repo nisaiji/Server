@@ -58,3 +58,12 @@ export async function deleteStudentById(id) {
     return error;
   }
 }
+
+export async function getStudentList({limit , page,sectionId}){
+  try {
+    const students = await studentModel.find({section:sectionId}).limit(limit*1).skip((page-1)*limit).exec();
+    return students;
+  } catch (error) {
+    return error;    
+  }
+}

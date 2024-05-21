@@ -31,6 +31,8 @@ const sectionRouter = express.Router();
  *                 type: string
  *               classTeacherId:
  *                 type: string
+ *               classId:
+ *                 type: string
  *     responses:
  *       200:
  *         description: section registered successfully

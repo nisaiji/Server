@@ -116,7 +116,7 @@ export async function getAllTeachersController(req, res) {
     const teacherList = await getAllTeachers();
     return res.send(success(200, teacherList));
   } catch (err) {
-    return res.send(error(500, err.message));
+     return res.send(error(500, err.message));
   }
 }
 

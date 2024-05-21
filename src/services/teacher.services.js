@@ -102,7 +102,7 @@ export async function getAllClassTeachers() {
 
 export async function getTeacherList({limit , page}){
   try {
-    const teachers = await teacherModel.find().limit(limit*1).skip((page-1)*limit).exec();
+    const teachers = await teacherModel.find().select("-password").limit(limit*1).skip((page-1)*limit).exec();
     return teachers;
   } catch (error) {
     return error;    

@@ -1,5 +1,5 @@
 import express from "express";
-import { addToSectionStudentController, deleteStudentController, registerStudentController } from "../controllers/student.controller.js";
+import { addToSectionStudentController, deleteStudentController, getStudentListOfSection, registerStudentController } from "../controllers/student.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { addToSectionStudentValidation, deleteStudentValidation, registerStudentValidation } from "../middlewares/validation/student.validation.middleware.js";
@@ -80,4 +80,30 @@ studentRouter.post("/register",classTeacherAuthentication,registerStudentValidat
  */
 studentRouter.delete("/:studentId",adminAuthentication, deleteStudentValidation, deleteStudentController);
 
+/**
+ * @swagger
+ * /student/student-list/{sectionId}/{pageNo}:
+ *   get:
+ *     security:
+ *       - Authorization: []
+ *     summary: get a list of student of that section.
+ *     description: This api will fetch list of students of that section. it requires class-teacher login token.
+ *     tags:
+ *       - Student
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         description: ID of the student
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: student deleted successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+studentRouter.get("/student-list/:sectionId/:pageNo",classTeacherAuthentication,getStudentListOfSection);
 export default studentRouter;

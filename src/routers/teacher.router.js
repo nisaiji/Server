@@ -182,7 +182,7 @@ teacherRouter.get("/all-class-teachers",adminAuthentication, getAllClassTeachers
 teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController);
 
 
-teacherRouter.get("/teacher-list/:pageNo",getTeacherListController);
+teacherRouter.get("/teacher-list/:pageNo",adminAuthentication,getTeacherListController);
 
 
 export default teacherRouter;

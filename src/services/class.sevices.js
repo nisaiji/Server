@@ -3,7 +3,7 @@ import sectionModel from "../models/section.model.js";
 
 export async function checkClassExists({name,adminId}){
     try {
-        const existClass = await classModel.find({$and:[{name},{admin:adminId}]}); 
+        const existClass = await classModel.findOne({$and:[{name},{admin:adminId}]}); 
         return existClass;       
     } catch (error) {
         return error;        
@@ -26,4 +26,14 @@ export async function deleteClass(classId){
     } catch (error) {
         return error;        
     } 
+}
+
+
+export async function getClassList(adminId){
+    try {
+        const classes = await classModel.find().populate({path:"section",select:"_id name"});
+        return classes;
+        } catch (error) {
+        return error;        
+    }
 }

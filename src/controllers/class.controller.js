@@ -1,4 +1,4 @@
-import { checkClassExists, deleteClass, registerClass } from "../services/class.sevices.js";
+import { checkClassExists, deleteClass, getClassList, registerClass } from "../services/class.sevices.js";
 import { checkClassExistById } from "../services/section.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -22,7 +22,6 @@ export async function registerClassController(req,res){
     }
 }
 
-
 export async function deleteClassController(req,res){
     try {
         const classId = req.params.classId;
@@ -40,6 +39,19 @@ export async function deleteClassController(req,res){
         const deletedClass = await deleteClass(classId);
 
         return res.send(success(200,"class "))
+    } catch (err) {
+        return res.send(error(500,err.message));        
+    }
+}
+
+export async function getClassListController(req,res){
+    try {
+        const adminId = req.adminId;
+        const classlist = await getClassList(adminId);
+        if(classlist instanceof Error){
+            return res.send(error(400,"can't get list of class"));
+        }
+        return res.send(success(200,classlist));
     } catch (err) {
         return res.send(error(500,err.message));        
     }
