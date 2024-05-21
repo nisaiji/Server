@@ -1,4 +1,7 @@
-import generateAccessToken from "../services/accessToken.service.js";
+import {
+  generateAccessToken,
+  generateRefreshToken
+} from "../services/JWTToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";
 import {
@@ -21,13 +24,16 @@ export async function registerAdminController(req, res) {
     } = req.body;
 
     // const existingSchool = await schoolModel.findOne({$or :[{adminName},{email}]});
-    const existingSchool = await checkAdminExist(adminName, email);
+    const existingSchool = await checkAdminExist(adminName, email,affiliationNo);
 
     if (existingSchool && existingSchool?.adminName === adminName) {
       return res.send(error(400, "admin name already exist"));
     }
     if (existingSchool && existingSchool?.email === email) {
       return res.send(error(400, "email already exist"));
+    }
+    if (existingSchool && existingSchool?.affiliationNo === affiliationNo) {
+      return res.send(error(400, "affiliationNo already exist"));
     }
 
     const hashedPassword = await hashPassword(password);
@@ -65,8 +71,19 @@ export async function loginAdminController(req, res) {
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
-    const accessToken = generateAccessToken({role:"admin", adminId: admin["_id"],phone:admin["phone"] });
-    return res.send(success(200, { accessToken }));
+    const accessToken = generateAccessToken({
+      role: "admin",
+      adminId: admin["_id"],
+      phone: admin["phone"]
+    });
+    const refreshToken = generateRefreshToken({
+      role: "admin",
+      adminId: admin["_id"],
+      phone: admin["phone"]
+    });
+    // console.log({refreshToken})
+    res.cookie("jwt", refreshToken);
+    return res.send(success(200, { accessToken,username:admin.adminName}));
   } catch (err) {
     return res.send(error(500, err.message));
   }

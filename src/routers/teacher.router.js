@@ -1,5 +1,5 @@
 import express from "express";
-import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController} from "../controllers/teacher.controller.js";
+import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController} from "../controllers/teacher.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { deleteTeacherValidation, loginClassTeacherValidation, markTeacherAsClassTeacherValidation, registerTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
 
@@ -181,6 +181,8 @@ teacherRouter.get("/all-class-teachers",adminAuthentication, getAllClassTeachers
  */
 teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController);
 
+
+teacherRouter.get("/teacher-list/:pageNo",getTeacherListController);
 
 
 export default teacherRouter;

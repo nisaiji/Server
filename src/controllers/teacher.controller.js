@@ -5,9 +5,10 @@ import {
   findClassTeacherByUsername,
   findTeacherById,
   getAllClassTeachers,
-  getAllTeachers
+  getAllTeachers,
+  getTeacherList
 } from "../services/teacher.services.js";
-import generateAccessToken from "../services/accessToken.service.js";
+import { generateAccessToken } from "../services/JWTToken.service.js";
 import {
   checkPasswordMatch,
   hashPassword
@@ -17,6 +18,7 @@ import { findAdminByID } from "../services/admin.services.js";
 
 export async function registerTeacherController(req, res) {
   try {
+    console.log("controller")
     const adminId = req.adminId;
     const { username, firstname, lastname, email, password, phone } = req.body;
     const existingTeacher = await checkTeacherExist(username, email);
@@ -58,19 +60,22 @@ export async function loginClassTeacherController(req, res) {
     if (!classTeacher) {
       return res.send(error(404, "class teacher doesn't exist"));
     }
-    const matchPassword = await checkPasswordMatch(password, classTeacher.password);
+    const matchPassword = await checkPasswordMatch(
+      password,
+      classTeacher.password
+    );
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
     const accessToken = generateAccessToken({
-      role:"classTeacher",
+      role: "classTeacher",
       classTeacherId: classTeacher["_id"],
       adminId: classTeacher["admin"],
-      section:classTeacher["section"],
-      phone: classTeacher["phone"],
+      section: classTeacher["section"],
+      phone: classTeacher["phone"]
     });
     return res.send(success(200, { accessToken }));
-  } catch (err){
+  } catch (err) {
     return res.send(error(500, err.message));
   }
 }
@@ -84,7 +89,9 @@ export async function markTeacherAsClassTeacherController(req, res) {
     }
     teacher["isClassTeacher"] = true;
     await teacher.save();
-    return res.send(success(200, "teacher marked as class Teacher successfully"));
+    return res.send(
+      success(200, "teacher marked as class Teacher successfully")
+    );
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -108,6 +115,17 @@ export async function getAllTeachersController(req, res) {
   try {
     const teacherList = await getAllTeachers();
     return res.send(success(200, teacherList));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function getTeacherListController(req, res) {
+  try {
+    const pageNo = req.params.pageNo;
+    const limit = 5;
+    const teacherList = await getTeacherList({limit,page:pageNo});
+    return res.send(success(200,{pageNo,limit,teacherList}));
   } catch (err) {
     return res.send(error(500, err.message));
   }

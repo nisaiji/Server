@@ -9,12 +9,14 @@ export async function classTeacherAuthentication(req, res, next) {
     if (!token) {
       return res.send(error(404, "Authorization token is required!"));
     }
+    console.log("errror")
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.jwtSecret);
     const teacher = await findClassTeacherById(decoded.classTeacherId);
     if (!teacher) {
       return res.send(error(404, "class teacher doesn't exists"));
     }
+
     req.classTeacherId = decoded.classTeacherId;
     req.adminId = decoded.adminId;
     next();

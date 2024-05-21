@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  deleteSectionController,
   getAllSectionsController,
   registerSectionController
 } from "../controllers/section.controller.js";
@@ -38,12 +39,7 @@ const sectionRouter = express.Router();
  *       500:
  *         description: Server error
  */
-sectionRouter.post(
-  "/register",
-  adminAuthentication,
-  registerSectionValidation,
-  registerSectionController
-);
+sectionRouter.post("/register",adminAuthentication,registerSectionValidation,registerSectionController);
 
 /**
  * @swagger
@@ -64,5 +60,33 @@ sectionRouter.post(
  *         description: Server error
  */
 sectionRouter.get("/all", adminAuthentication, getAllSectionsController);
+
+/**
+ * @swagger
+ * /section/{sectionId}:
+ *   delete:
+ *     security:
+ *       - Authorization: []
+ *     summary: To delete a section.
+ *     description: This API will delete a section,and unlink students,class teacher from that section.It requires admin login token.
+ *     tags:
+ *       - Section
+ *     parameters:
+ *       - in: path
+ *         name: sectionId
+ *         required: true
+ *         description: ID of the section
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: section deleted successfully.
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+sectionRouter.delete("/:sectionId", adminAuthentication,  deleteSectionController);
+
 
 export default sectionRouter;

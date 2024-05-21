@@ -1,9 +1,9 @@
 import adminModel from "../models/admin.model.js";
 
-export async function checkAdminExist(adminName, email) {
+export async function checkAdminExist(adminName, email,affiliationNo) {
   try {
     const admin = await adminModel.findOne({
-      $or: [{ adminName }, { email }]
+      $or: [{ adminName }, { email },{affiliationNo}]
     });
     return admin;
   } catch (err) {

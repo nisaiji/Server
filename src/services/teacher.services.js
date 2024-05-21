@@ -72,8 +72,8 @@ export async function deleteTeacher(id) {
   try {
     const teacher = await teacherModel.findByIdAndDelete(id);
     await sectionModel.updateMany(
-      { coordinator: id },
-      { $unset: { coordinator: 1 } }
+      { classTeacher: id },
+      { $unset: {classTeacher: 1}}
     );
     return teacher;
   } catch (error) {
@@ -96,5 +96,15 @@ export async function getAllClassTeachers() {
     return cordinatorlist;
   } catch (error) {
     return error;
+  }
+}
+
+
+export async function getTeacherList({limit , page}){
+  try {
+    const teachers = await teacherModel.find().limit(limit*1).skip((page-1)*limit).exec();
+    return teachers;
+  } catch (error) {
+    return error;    
   }
 }
