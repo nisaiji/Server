@@ -8,6 +8,7 @@ import {
   getAllTeachers,
   getTeacherCount,
   getTeacherList,
+  updateTeacherById,
 } from "../services/teacher.services.js";
 import { generateAccessToken } from "../services/JWTToken.service.js";
 import {
@@ -142,5 +143,24 @@ export async function getAllClassTeachersController(req, res) {
     return res.send(success(2001, classTeacherList));
   } catch (err) {
     return res.send(error(500, err.message));
+  }
+}
+
+export async function updateTeacherController(req,res){
+  try {
+    const teacherId = req.params.teacherId;
+    const { username, firstname, lastname, email, password, phone } = req.body;
+    const teacher = await findTeacherById(teacherId);
+    if (!teacher) {
+      return res.send(error(400, "can not find teacher"));
+      }
+    const updatedTeacher =  await updateTeacherById(teacherId, { username, firstname, lastname, email, password, phone });
+    if(updatedTeacher instanceof Error){
+      return res.send(error(500,"can't update teacher"));
+    }
+      return res.send(success(200, "teacher updated successfully"));
+      
+  } catch (err) {
+    return res.send(error(500,err.message));    
   }
 }

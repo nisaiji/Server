@@ -118,3 +118,21 @@ export async function getTeacherCount({adminId}){
     return error;    
   }
 }
+
+
+export async function updateTeacherById(teacherId , { username, firstname, lastname, email, phone }){
+  try {
+    const updatedTeacher = await teacherModel.findByIdAndUpdate(
+      teacherId,
+      {
+        username,
+        firstname,
+        lastname,
+        email,
+        phone
+      });
+      return updatedTeacher;
+  } catch (error) {
+    throw error;    
+  }
+}

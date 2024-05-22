@@ -1,7 +1,7 @@
 import express from "express";
-import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController} from "../controllers/teacher.controller.js";
+import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController, updateTeacherController} from "../controllers/teacher.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
-import { deleteTeacherValidation, loginClassTeacherValidation, markTeacherAsClassTeacherValidation, registerTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
+import { deleteTeacherValidation, loginClassTeacherValidation, markTeacherAsClassTeacherValidation, registerTeacherValidation, updateTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
 
 const teacherRouter = express.Router();
 
@@ -140,6 +140,53 @@ teacherRouter.patch("/mark-teacher-as-class-teacher/:teacherId",adminAuthenticat
  *         description: Server error
  */
 teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,deleteTeacherController );
+/**
+ * @swagger
+ * /teacher/{teacherId}:
+ *   put:
+ *     security:
+ *       - Authorization: []
+ *     summary: Update a teacher's details
+ *     description: This API updates a teacher's details. It requires an admin login token.
+ *     tags:
+ *       - Teacher
+ *     parameters:
+ *       - in: path
+ *         name: teacherId
+ *         required: true
+ *         description: ID of the teacher
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Teacher updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+teacherRouter.put("/:teacherId",adminAuthentication, updateTeacherValidation,updateTeacherController);
 
   /**
  * @swagger
@@ -205,6 +252,8 @@ teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController
  *         description: Server error
  */
 teacherRouter.get("/teacher-list/:pageNo",adminAuthentication,getTeacherListController);
+
+
 
 
 export default teacherRouter;
