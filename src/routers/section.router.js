@@ -2,7 +2,8 @@ import express from "express";
 import {
   deleteSectionController,
   getAllSectionsController,
-  registerSectionController
+  getSectionsController,
+  registerSectionController,
 } from "../controllers/section.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { registerSectionValidation } from "../middlewares/validation/section.validation.middleware.js";
@@ -41,7 +42,12 @@ const sectionRouter = express.Router();
  *       500:
  *         description: Server error
  */
-sectionRouter.post("/register",adminAuthentication,registerSectionValidation,registerSectionController);
+sectionRouter.post(
+  "/register",
+  adminAuthentication,
+  registerSectionValidation,
+  registerSectionController
+);
 
 /**
  * @swagger
@@ -62,6 +68,8 @@ sectionRouter.post("/register",adminAuthentication,registerSectionValidation,reg
  *         description: Server error
  */
 sectionRouter.get("/all", adminAuthentication, getAllSectionsController);
+
+sectionRouter.patch("/class", adminAuthentication, getSectionsController);
 
 /**
  * @swagger
@@ -88,7 +96,10 @@ sectionRouter.get("/all", adminAuthentication, getAllSectionsController);
  *       500:
  *         description: Server error
  */
-sectionRouter.delete("/:sectionId", adminAuthentication,  deleteSectionController);
-
+sectionRouter.delete(
+  "/:sectionId",
+  adminAuthentication,
+  deleteSectionController
+);
 
 export default sectionRouter;

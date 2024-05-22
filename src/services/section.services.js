@@ -6,7 +6,7 @@ import teacherModel from "../models/teacher.model.js";
 export async function checkSectionExist(name, classId, adminId) {
   try {
     const section = await sectionModel.findOne({
-      $and: [{ name }, { classId }, { admin: adminId }]
+      $and: [{ name }, { classId }, { admin: adminId }],
     });
     return section;
   } catch (error) {
@@ -20,7 +20,7 @@ export async function createSection(name, classTeacher, classId, admin) {
       name,
       classId,
       classTeacher,
-      admin
+      admin,
     });
     return section;
   } catch (error) {
@@ -49,6 +49,18 @@ export async function getAllSection() {
       .populate("students")
       .populate("coordinator");
     // console.log(sections);
+    return sections;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function getSection(classId) {
+  try {
+    // console.log("get section list called")
+    const sections = await sectionModel
+      .find({ classId: classId })
+      .populate("students");
     return sections;
   } catch (error) {
     return error;
@@ -93,15 +105,15 @@ export async function checkClassExistById(classId) {
 //   }
 // }
 
-export async function deleteSection(sectionId){
-    try {
-        const section = await sectionModel.findByIdAndDelete(sectionId);
-        await classModel.updateOne(
-            {_id:section.classId},
-            {$pull:{section:sectionId}}
-        );
-        return section;
-    } catch (error) {
-        return error;        
-    }
+export async function deleteSection(sectionId) {
+  try {
+    const section = await sectionModel.findByIdAndDelete(sectionId);
+    await classModel.updateOne(
+      { _id: section.classId },
+      { $pull: { section: sectionId } }
+    );
+    return section;
+  } catch (error) {
+    return error;
+  }
 }

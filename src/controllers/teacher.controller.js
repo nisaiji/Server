@@ -6,19 +6,19 @@ import {
   findTeacherById,
   getAllClassTeachers,
   getAllTeachers,
-  getTeacherList
+  getTeacherList,
 } from "../services/teacher.services.js";
 import { generateAccessToken } from "../services/JWTToken.service.js";
 import {
   checkPasswordMatch,
-  hashPassword
+  hashPassword,
 } from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { findAdminByID } from "../services/admin.services.js";
 
 export async function registerTeacherController(req, res) {
   try {
-    console.log("controller")
+    console.log("controller");
     const adminId = req.adminId;
     const { username, firstname, lastname, email, password, phone } = req.body;
     const existingTeacher = await checkTeacherExist(username, email);
@@ -72,7 +72,7 @@ export async function loginClassTeacherController(req, res) {
       classTeacherId: classTeacher["_id"],
       adminId: classTeacher["admin"],
       section: classTeacher["section"],
-      phone: classTeacher["phone"]
+      phone: classTeacher["phone"],
     });
     return res.send(success(200, { accessToken }));
   } catch (err) {
@@ -116,7 +116,7 @@ export async function getAllTeachersController(req, res) {
     const teacherList = await getAllTeachers();
     return res.send(success(200, teacherList));
   } catch (err) {
-     return res.send(error(500, err.message));
+    return res.send(error(500, err.message));
   }
 }
 
@@ -124,8 +124,8 @@ export async function getTeacherListController(req, res) {
   try {
     const pageNo = req.params.pageNo;
     const limit = 5;
-    const teacherList = await getTeacherList({limit,page:pageNo});
-    return res.send(success(200,{pageNo,limit,teacherList}));
+    const teacherList = await getTeacherList({ limit, page: pageNo });
+    return res.send(success(200, { pageNo, limit, teacherList }));
   } catch (err) {
     return res.send(error(500, err.message));
   }
