@@ -58,12 +58,10 @@ export async function getAllSection() {
   }
 }
 
-export async function getSection(classId) {
+export async function getClassSections(classId) {
   try {
-    // console.log("get section list called")
     const sections = await sectionModel
-      .find({ classId: classId })
-      .populate("students");
+      .find({ classId: classId });
     return sections;
   } catch (error) {
     return error;

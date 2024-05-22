@@ -5,7 +5,7 @@ import {
   deleteSection,
   findSectionById,
   getAllSection,
-  getSection,
+  getClassSections,
 } from "../services/section.services.js";
 import { findClassTeacherById } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
@@ -50,14 +50,14 @@ export async function getAllSectionsController(req, res) {
   }
 }
 
-export async function getSectionsController(req, res) {
+export async function getClassSectionsController(req, res) {
   try {
-    const { classId } = req.body;
+    const classId = req.params.classId;
     const existingClass = await checkClassExistById(classId);
     if (!existingClass) {
       return res.send(error(400, "class doesn't exists"));
     }
-    const sectionlist = await getSection(classId);
+    const sectionlist = await getClassSections(classId);
     return res.send(success(200, sectionlist));
   } catch (err) {
     return res.send(error(500, err.message));

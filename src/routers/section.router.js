@@ -2,7 +2,7 @@ import express from "express";
 import {
   deleteSectionController,
   getAllSectionsController,
-  getSectionsController,
+  getClassSectionsController,
   registerSectionController,
 } from "../controllers/section.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
@@ -69,7 +69,30 @@ sectionRouter.post(
  */
 sectionRouter.get("/all", adminAuthentication, getAllSectionsController);
 
-sectionRouter.patch("/class", adminAuthentication, getSectionsController);
+/**
+ * @swagger
+ * /section/{classId}:
+ *   get:
+ *     security:
+ *       - Authorization: []
+ *     summary: get list of all sections of particular class.
+ *     description: This API will get you a list of all sections along with students list and cordinator.It requires admin login token.
+ *     tags:
+ *       - Section
+ *     parameters:
+ *       - in: path
+ *         name: classId
+ *         required: true
+ *         description: ID of the class
+ *     responses:
+ *       200:
+ *         description: section list featched successfully.
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+sectionRouter.get("/:classId", adminAuthentication, getClassSectionsController);
 
 /**
  * @swagger
