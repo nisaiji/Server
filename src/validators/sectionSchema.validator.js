@@ -10,7 +10,7 @@ const registerSectionSchema = Joi.object({
       "string.max": "Name must be max 5 chars long.",
       "any.required": "Name is required."
     }),
-  classTeacherId: Joi.string()
+    teacherId: Joi.string()
     .required()
     .messages({
       "any.required": "Class teacher ID is required."

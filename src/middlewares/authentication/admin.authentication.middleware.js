@@ -6,6 +6,7 @@ import { findAdminByID } from "../../services/admin.services.js";
 export async function adminAuthentication(req, res, next) {
   try { 
     const token = req.header("Authorization");
+    // console.log(token)
     if (!token) {
       return res.send(error(404, "Authorization token is required!"));
     }

@@ -6,6 +6,7 @@ import {
   findTeacherById,
   getAllClassTeachers,
   getAllTeachers,
+  getTeacherCount,
   getTeacherList
 } from "../services/teacher.services.js";
 import { generateAccessToken } from "../services/JWTToken.service.js";
@@ -123,9 +124,11 @@ export async function getAllTeachersController(req, res) {
 export async function getTeacherListController(req, res) {
   try {
     const pageNo = req.params.pageNo;
+    const adminId = req.adminId;
     const limit = 5;
-    const teacherList = await getTeacherList({limit,page:pageNo});
-    return res.send(success(200,{pageNo,limit,teacherList}));
+    const teacherCount = await getTeacherCount({adminId});
+    const teacherList = await getTeacherList({adminId,limit,page:pageNo});
+    return res.send(success(200,{pageNo,limit,totalCount:teacherCount,teacherList}));
   } catch (err) {
     return res.send(error(500, err.message));
   }

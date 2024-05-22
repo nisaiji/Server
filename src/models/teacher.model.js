@@ -37,12 +37,6 @@ const teacherSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  section: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "section"
-    }
-  ],
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"

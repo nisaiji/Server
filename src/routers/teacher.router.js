@@ -107,7 +107,7 @@ teacherRouter.post("/login", loginClassTeacherValidation, loginClassTeacherContr
  */
 teacherRouter.patch("/mark-teacher-as-class-teacher/:teacherId",adminAuthentication,markTeacherAsClassTeacherValidation,markTeacherAsClassTeacherController);
 
-  /**
+/**
  * @swagger
  * /teacher/{teacherId}:
  *   delete:
@@ -181,7 +181,29 @@ teacherRouter.get("/all-class-teachers",adminAuthentication, getAllClassTeachers
  */
 teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController);
 
-
+/**
+ * @swagger
+ * /teacher/teacher-list/{pageNo}:
+ *   get:
+ *     security:
+ *       - Authorization: []
+ *     summary: To delete teacher
+ *     description: This API will delete teacher. It requires admin login token.
+ *     tags:
+ *       - Teacher
+ *     parameters:
+ *       - in: path
+ *         name: pageNo
+ *         required: true
+ *         description: page no of teacher list
+ *     responses:
+ *       200:
+ *         description: Teacher marked as coordinator successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
 teacherRouter.get("/teacher-list/:pageNo",adminAuthentication,getTeacherListController);
 
 

@@ -19,10 +19,7 @@ export async function adminRegisterValidation(req, res, next) {
       password
     });
     if (schemaError) {
-      const field = schemaError?.details[0]?.path[0];
-      const errorMsg= schemaError?.details[0].message;
-      console.log(schemaError?.details[0].path[0])
-      return res.send(error(400, {field,errorMsg}));
+      return res.send(error(400, schemaError.details[0].message));
     }
     next();
   } catch (err) {
@@ -38,10 +35,7 @@ export async function adminLoginValidation(req, res, next) {
       password
     });
     if (schemaError) {
-      const field = schemaError?.details[0]?.path[0];
-      const errorMsg= schemaError?.details[0].message;
-      console.log(schemaError?.details[0].path[0])
-      return res.send(error(400, {field,errorMsg}));
+      return res.send(error(400, schemaError.details[0].message));
     }
     next();
   } catch (err) {

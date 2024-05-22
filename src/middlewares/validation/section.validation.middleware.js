@@ -3,10 +3,10 @@ import { registerSectionSchema } from "../../validators/sectionSchema.validator.
 
 export async function registerSectionValidation(req, res, next) {
   try {
-    const { name, classTeacherId,classId } = req.body;
+    const { name, teacherId,classId } = req.body;
     const { error: schemaError } = registerSectionSchema.validate({
       name,
-      classTeacherId,
+      teacherId,
       classId,
     });
 
