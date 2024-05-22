@@ -26,9 +26,9 @@ export async function registerSectionController(req, res) {
     const section = await createSection(name, classTeacherId, classId, adminId);
 
     const classTeacher = await findClassTeacherById(classTeacherId);
-    // if (!classTeacher) {
-    //   return res.send(error(400, "cordinator doesn't exist"));
-    // }
+    if (!classTeacher) {
+      return res.send(error(400, "cordinator doesn't exist"));
+    }
     classTeacher?.section?.push(section["_id"]);
     await classTeacher.save();
 

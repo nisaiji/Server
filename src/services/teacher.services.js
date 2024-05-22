@@ -100,10 +100,20 @@ export async function getAllClassTeachers() {
 }
 
 
-export async function getTeacherList({limit , page}){
+export async function getTeacherList({adminId,limit , page}){
   try {
-    const teachers = await teacherModel.find().select("-password").limit(limit*1).skip((page-1)*limit).exec();
+    const teachers = await teacherModel.find({admin:adminId}).select("-password").limit(limit*1).skip((page-1)*limit).exec();
     return teachers;
+  } catch (error) {
+    return error;    
+  }
+}
+
+
+export async function getTeacherCount({adminId}){
+  try {
+    const teacherCount = await teacherModel.countDocuments({admin:adminId});
+    return teacherCount;
   } catch (error) {
     return error;    
   }

@@ -5,9 +5,11 @@ import teacherModel from "../models/teacher.model.js";
 
 export async function checkSectionExist(name, classId, adminId) {
   try {
+    console.log({ name, classId, adminId });
     const section = await sectionModel.findOne({
       $and: [{ name }, { classId }, { admin: adminId }],
     });
+    console.log(section);
     return section;
   } catch (error) {
     return error;
@@ -24,7 +26,8 @@ export async function createSection(name, classTeacher, classId, admin) {
     });
     return section;
   } catch (error) {
-    return error;
+    throw error;
+    // return error;
   }
 }
 

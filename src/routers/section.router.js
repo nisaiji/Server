@@ -30,7 +30,7 @@ const sectionRouter = express.Router();
  *             properties:
  *               name:
  *                 type: string
- *               classTeacherId:
+ *               teacherId:
  *                 type: string
  *               classId:
  *                 type: string
