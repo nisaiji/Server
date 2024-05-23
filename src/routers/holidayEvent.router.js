@@ -1,7 +1,7 @@
 import express from 'express';
 import { adminAuthentication } from '../middlewares/authentication/admin.authentication.middleware.js';
 import { createHolidayEventValidation } from '../middlewares/validation/holidayEvent.validation.middleware.js';
-import { createHolidayEventController } from '../controllers/holidayEvent.controller.js';
+import { createHolidayEventController, getHolidayEventController } from '../controllers/holidayEvent.controller.js';
 
 const holidayEventRouter = express.Router();
 
@@ -42,5 +42,25 @@ const holidayEventRouter = express.Router();
  *         description: Server side error
  */
 holidayEventRouter.post("/create-event",adminAuthentication,createHolidayEventValidation,createHolidayEventController);
+
+/**
+ * @swagger
+ * /holiday-event/:
+ *   get:
+ *     security:
+ *       - Authorization: []
+ *     summary: get a list of holiday events.
+ *     description: This API will fetch you holiday event list. it requires admin login token.
+ *     tags:
+ *       - Holiday Event
+ *     responses:
+ *       200:
+ *         description: Holiday event fetched successfully
+ *       400:
+ *         description: Unauthorized!
+ *       500:
+ *         description: Server side error
+ */
+holidayEventRouter.get("/",adminAuthentication,getHolidayEventController);
 
 export default holidayEventRouter;

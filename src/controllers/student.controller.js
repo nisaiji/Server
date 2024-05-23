@@ -98,7 +98,7 @@ export async function deleteStudentController(req, res) {
     }
   }
 
-export async function getStudentListOfSection(req,res){
+export async function getStudentListOfSectionController(req,res){
   try {
     const sectionId = req.params.sectionId;
     const classTeacherId = req.classTeacherId;
@@ -107,6 +107,26 @@ export async function getStudentListOfSection(req,res){
     const section = await findSectionById(sectionId);
     if(section["classTeacher"]!==classTeacherId){
       return res.send(error(400,"this class teacher doesn't has access to this section."));
+    }
+    const studentList = await getStudentList({limit,page:pageNo,sectionId});
+    return studentList;
+  } catch (err) {
+    return res.send(error(500,err.message));    
+  }
+}
+
+export async function getStudentListOfSectionForAdminController(req,res){
+  try {
+    const sectionId = req.params.sectionId;
+    const adminId = req.adminId;
+    const pageNo = req.params.pageNo;
+    const limit = 5;
+    const section = await findSectionById(sectionId);
+    if(!section){
+      return res.send(error(400,"section doesn't exist"));
+    }
+    if(section["admin"]!==adminId){
+      return res.send(error(400,"this Admin doesn't has access to this section."));
     }
     const studentList = await getStudentList({limit,page:pageNo,sectionId});
     return studentList;

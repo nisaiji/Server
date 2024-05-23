@@ -3,9 +3,10 @@ import { createHolidayEventSchema } from "../../validators/holidayEventSchema.va
 
 export async function createHolidayEventValidation(req,res,next){
     try {
-        const{date,name,description,teacherHoliday,studentHoliday}=req.body;
+        const{date,title,description,teacherHoliday,studentHoliday}=req.body;
         const adminId = req.adminId;
-        const{error:schemaError} = createHolidayEventSchema.validate({date,name,description,teacherHoliday,studentHoliday,adminId});
+        console.log({date,"type":typeof date});
+        const{error:schemaError} = createHolidayEventSchema.validate({date,title,description,teacherHoliday,studentHoliday,adminId});
         if(schemaError){
             return res.send(error(400, schemaError.details[0].message));
           }
