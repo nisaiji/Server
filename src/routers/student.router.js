@@ -1,17 +1,20 @@
 import express from "express";
 import {
   addToSectionStudentController,
+  adminRegisterStudentController,
   deleteStudentController,
   getStudentListOfSectionController,
   getStudentListOfSectionForAdminController,
   registerStudentController
 } from "../controllers/student.controller.js";
+
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import {
   addToSectionStudentValidation,
+  adminRegisterStudentValidation,
   deleteStudentValidation,
-  registerStudentValidation
+  registerStudentValidation,
 } from "../middlewares/validation/student.validation.middleware.js";
 
 const studentRouter = express.Router();
@@ -65,6 +68,61 @@ studentRouter.post(
   classTeacherAuthentication,
   registerStudentValidation,
   registerStudentController
+);
+
+/**
+ * @swagger
+ * /student/admin-register:
+ *   post:
+ *     security:
+ *       - Authorization: []
+ *     summary: Register a student
+ *     description: This API will register a student with their details.it requires admin login token.
+ *     tags:
+ *       - Student
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rollNumber:
+ *                 type: string
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               gender:
+ *                 type: string
+ *                 enum: ["Male", "Female", "Non-binary", "Other"]
+ *               age:
+ *                 type: number
+ *                 minimum: 3
+ *                 maximum: 100
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               sectionId:
+ *                 type: string
+ *               classId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Student registered successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+studentRouter.post(
+  "/admin-register",
+  adminAuthentication,
+  adminRegisterStudentValidation,
+  adminRegisterStudentController
 );
 
 /**
