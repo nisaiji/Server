@@ -7,14 +7,17 @@ import {
   getAllSection,
   getClassSections,
 } from "../services/section.services.js";
-import { findClassTeacherById } from "../services/teacher.services.js";
+import {
+  findClassTeacherById,
+  findTeacherById,
+} from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerSectionController(req, res) {
+  console.log(req.body);
   try {
-    const { name, classTeacherId, classId } = req.body;
+    const { name, teacherId, classId } = req.body;
     const adminId = req.adminId;
-
     const existingClass = await checkClassExistById(classId);
     if (!existingClass) {
       return res.send(error(400, "class doesn't exists"));
@@ -23,9 +26,10 @@ export async function registerSectionController(req, res) {
     if (existingSection) {
       return res.send(error(400, "section name already exist"));
     }
-    const section = await createSection(name, classTeacherId, classId, adminId);
+    const section = await createSection(name, teacherId, classId, adminId);
 
-    const classTeacher = await findClassTeacherById(classTeacherId);
+    const classTeacher = await findTeacherById(teacherId);
+    console.log(classTeacher);
     if (!classTeacher) {
       return res.send(error(400, "cordinator doesn't exist"));
     }

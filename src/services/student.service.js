@@ -3,7 +3,7 @@ import studentModel from "../models/student.model.js";
 export async function checkStudentExist(rollNumber, admin) {
   try {
     const student = await studentModel.findOne({
-      $and: [{ rollNumber }, { admin }]
+      $and: [{ rollNumber }, { admin }],
     });
     return student;
   } catch (error) {
@@ -32,7 +32,39 @@ export async function registerStudent(
       phone,
       email,
       address,
-      admin
+      admin,
+    });
+    return student;
+  } catch (error) {
+    return error;
+  }
+}
+export async function adminRegisterStudent({
+  rollNumber,
+  firstname,
+  lastname,
+  gender,
+  age,
+  phone,
+  email,
+  address,
+  sectionId,
+  classId,
+  adminId,
+}) {
+  try {
+    const student = await studentModel.create({
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      phone,
+      email,
+      address,
+      admin: adminId,
+      section: sectionId,
+      classId,
     });
     return student;
   } catch (error) {
@@ -59,11 +91,15 @@ export async function deleteStudentById(id) {
   }
 }
 
-export async function getStudentList({limit , page,sectionId}){
+export async function getStudentList({ limit, page, sectionId }) {
   try {
-    const students = await studentModel.find({section:sectionId}).limit(limit*1).skip((page-1)*limit).exec();
+    const students = await studentModel
+      .find({ section: sectionId })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
     return students;
   } catch (error) {
-    return error;    
+    return error;
   }
 }

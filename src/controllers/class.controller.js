@@ -56,6 +56,7 @@ export async function getClassListController(req, res) {
     if (classlist instanceof Error) {
       return res.send(error(400, "can't get list of class"));
     }
+    // console.log(classlist);
     return res.send(success(200, classlist));
   } catch (err) {
     return res.send(error(500, err.message));
