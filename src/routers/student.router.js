@@ -221,11 +221,6 @@ studentRouter.get(
   getStudentListOfSectionForAdminController
 );
 
-studentRouter.put(
-  "/admin-update-student/:studentId",
-  adminAuthentication,
-  adminUpdateStudent,
-  adminUpdateStudentController
-);
+studentRouter.put("/admin-update-student/:studentId", adminAuthentication);
 
 export default studentRouter;

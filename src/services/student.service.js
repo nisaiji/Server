@@ -115,29 +115,3 @@ export async function getStudentCount({ sectionId }) {
     return error;
   }
 }
-
-export async function adminUpdateStudent(
-  studentId,
-  { rollNumber, firstname, lastname, gender, age, phone, email, address }
-) {
-  console.log(studentId);
-  try {
-    const student = await studentModel.findByIdAndUpdate(
-      { _id: studentId },
-      {
-        rollNumber,
-        firstname,
-        lastname,
-        gender,
-        age,
-        phone,
-        email,
-        address,
-      }
-    );
-    // console.log(student);
-    return student;
-  } catch (error) {
-    return error;
-  }
-}
