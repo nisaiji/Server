@@ -48,3 +48,21 @@ export async function getEventList({ adminId }) {
     throw error;
   }
 }
+
+export async function getHolidayEventById({eventId}){
+  try {
+    const event = await holidayEventModel.findById(eventId);
+    return event;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+export async function deleteHolidayEventById({eventId}){
+  try {
+    const event = await holidayEventModel.findByIdAndDelete(eventId);
+    return event;
+  } catch (error) {
+    throw error;    
+  }
+}

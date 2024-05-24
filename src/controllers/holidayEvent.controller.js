@@ -1,5 +1,5 @@
 import { findAdminByID } from "../services/admin.services.js";
-import { checkHolidayEventExist, createHolidayEvent,getEventList } from "../services/holidayEvent.service.js";
+import { checkHolidayEventExist, createHolidayEvent,deleteHolidayEventById,getEventList, getHolidayEventById } from "../services/holidayEvent.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function createHolidayEventController(req,res){
@@ -36,6 +36,23 @@ export async function getHolidayEventController(req,res){
         }
         const eventList = await getEventList({adminId});
         return res.send(success(200,eventList));
+    } catch (err) {
+        return res.send(error(500,err.message));       
+    }
+}
+
+export async function deleteHolidayEventController(req,res){
+    try {
+        const eventId = req.params.eventId;
+        const event = await getHolidayEventById({eventId});
+        if(!event){
+            return res.send(error(400,"event doesn't exists"));
+        }
+        const deletedEvent = await deleteHolidayEventById({eventId});
+        if(deletedEvent instanceof Error){
+            return res.send(error(400,"can't delete the event."));
+        }
+        return res.send(success(200,"event deleted successfully"));
     } catch (err) {
         return res.send(error(500,err.message));       
     }
