@@ -1,6 +1,7 @@
 import { error } from "../../utills/responseWrapper.js";
 import {
   adminRegisterStudentSchema,
+  adminUpdateStudentSchema,
   deleteStudentSchema,
   registerStudentSchema,
   studentAddToSectionSchema,
@@ -53,6 +54,43 @@ export async function adminRegisterStudentValidation(req, res, next) {
       classId,
     } = req.body;
     const { error: schemaError } = adminRegisterStudentSchema.validate({
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      email,
+      phone,
+      address,
+      sectionId,
+      classId,
+    });
+
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next();
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+export async function adminUpdateStudentValidation(req, res, next) {
+  try {
+    const studentId = req.params.studentId;
+    const {
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      phone,
+      email,
+      address,
+      sectionId,
+      classId,
+    } = req.body;
+    const { error: schemaError } = adminUpdateStudentSchema.validate({
+      studentId,
       rollNumber,
       firstname,
       lastname,

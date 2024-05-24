@@ -3,7 +3,7 @@ import studentModel from "../models/student.model.js";
 export async function checkStudentExist(rollNumber, admin) {
   try {
     const student = await studentModel.findOne({
-      $and: [{ rollNumber }, { admin }],
+      $and: [{ rollNumber }, { admin }]
     });
     return student;
   } catch (error) {
@@ -32,7 +32,7 @@ export async function registerStudent(
       phone,
       email,
       address,
-      admin,
+      admin
     });
     return student;
   } catch (error) {
@@ -51,7 +51,7 @@ export async function adminRegisterStudent({
   address,
   sectionId,
   classId,
-  adminId,
+  adminId
 }) {
   try {
     const student = await studentModel.create({
@@ -65,7 +65,7 @@ export async function adminRegisterStudent({
       address,
       admin: adminId,
       section: sectionId,
-      classId,
+      classId
     });
     return student;
   } catch (error) {
@@ -108,7 +108,7 @@ export async function getStudentList({ limit, page, sectionId }) {
 export async function getStudentCount({ sectionId }) {
   try {
     const studentCount = await studentModel.countDocuments({
-      section: sectionId,
+      section: sectionId
     });
     return studentCount;
   } catch (error) {
@@ -116,25 +116,29 @@ export async function getStudentCount({ sectionId }) {
   }
 }
 
-export async function adminUpdateStudent(
+export async function adminUpdateStudent({
   studentId,
-  { rollNumber, firstname, lastname, gender, age, phone, email, address }
-) {
+  rollNumber,
+  firstname,
+  lastname,
+  gender,
+  age,
+  phone,
+  email,
+  address
+}) {
   console.log(studentId);
   try {
-    const student = await studentModel.findByIdAndUpdate(
-      { _id: studentId },
-      {
-        rollNumber,
-        firstname,
-        lastname,
-        gender,
-        age,
-        phone,
-        email,
-        address,
-      }
-    );
+    const student = await studentModel.findByIdAndUpdate(studentId, {
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      phone,
+      email,
+      address
+    });
     // console.log(student);
     return student;
   } catch (error) {

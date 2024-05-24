@@ -240,7 +240,8 @@ export async function adminUpdateStudentController(req, res) {
     if (!studentexist) {
       return res.send(error(400, "student doesn't exists"));
     }
-    const student = await adminUpdateStudent(studentId, {
+    const updatedStudent = await adminUpdateStudent( {
+      studentId,
       rollNumber,
       firstname,
       lastname,
@@ -250,6 +251,9 @@ export async function adminUpdateStudentController(req, res) {
       email,
       address,
     });
+    if(updatedStudent instanceof Error){
+      return res.send(error(400,"can't update student."));
+    }
     return res.send(success(201, "student updated successfully!"));
   } catch (err) {
     return res.send(error(500, err.message));
