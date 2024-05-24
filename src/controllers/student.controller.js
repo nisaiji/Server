@@ -217,3 +217,45 @@ export async function getStudentListOfSectionForAdminController(req, res) {
     return res.send(error(500, err.message));
   }
 }
+
+export async function adminUpdateStudentController(req, res) {
+  try {
+    const {
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      email,
+      phone,
+      address,
+    } = req.body;
+    const studentId = req.params.studentId;
+    const adminId = req.adminId;
+    const admin = await findAdminByID(adminId);
+    if (!admin) {
+      return res.send(error(400, "admin doesn't exists"));
+    }
+    const studentexist = await findStudentById(studentId);
+    if (!studentexist) {
+      return res.send(error(400, "student doesn't exists"));
+    }
+    const updatedStudent = await adminUpdateStudent({
+      studentId,
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      phone,
+      email,
+      address,
+    });
+    if (updatedStudent instanceof Error) {
+      return res.send(error(400, "can't update student."));
+    }
+    return res.send(success(201, "student updated successfully!"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}

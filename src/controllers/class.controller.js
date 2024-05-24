@@ -17,7 +17,7 @@ export async function registerClassController(req, res) {
     }
 
     const registeredClass = await registerClass({ name, adminId });
-    if (registerClass instanceof Error) {
+    if (registeredClass instanceof Error) {
       return res.send(error(400, "can't register class"));
     }
 

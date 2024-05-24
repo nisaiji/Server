@@ -221,6 +221,63 @@ studentRouter.get(
   getStudentListOfSectionForAdminController
 );
 
-studentRouter.put("/admin-update-student/:studentId", adminAuthentication);
+/**
+ * @swagger
+ * /student/admint-upate-student/{studentId}:
+ *   put:
+ *     security:
+ *       - Authorization: []
+ *     summary: Update a student's details
+ *     description: This API updates a student's details. It requires an admin login token.
+ *     tags:
+ *       - Student
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         description: ID of the student
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rollNumber:
+ *                 type: string
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               gender:
+ *                 type: string
+ *                 enum: ["Male", "Female", "Non-binary", "Other"]
+ *               age:
+ *                 type: number
+ *                 minimum: 3
+ *                 maximum: 100
+ *               phone:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Teacher updated successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+studentRouter.put(
+  "/admin-update-student/:studentId",
+  adminAuthentication,
+  adminUpdateStudentController
+);
 
 export default studentRouter;
