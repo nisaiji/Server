@@ -2,10 +2,11 @@ import express from "express";
 import {
   addToSectionStudentController,
   adminRegisterStudentController,
+  adminUpdateStudentController,
   deleteStudentController,
   getStudentListOfSectionController,
   getStudentListOfSectionForAdminController,
-  registerStudentController
+  registerStudentController,
 } from "../controllers/student.controller.js";
 
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
@@ -16,6 +17,7 @@ import {
   deleteStudentValidation,
   registerStudentValidation,
 } from "../middlewares/validation/student.validation.middleware.js";
+import { adminUpdateStudent } from "../services/student.service.js";
 
 const studentRouter = express.Router();
 
@@ -218,4 +220,12 @@ studentRouter.get(
   adminAuthentication,
   getStudentListOfSectionForAdminController
 );
+
+studentRouter.put(
+  "/admin-update-student/:studentId",
+  adminAuthentication,
+  adminUpdateStudent,
+  adminUpdateStudentController
+);
+
 export default studentRouter;

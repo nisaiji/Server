@@ -39,6 +39,7 @@ export async function registerStudent(
     return error;
   }
 }
+
 export async function adminRegisterStudent({
   rollNumber,
   firstname,
@@ -99,6 +100,43 @@ export async function getStudentList({ limit, page, sectionId }) {
       .skip((page - 1) * limit)
       .exec();
     return students;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function getStudentCount({ sectionId }) {
+  try {
+    const studentCount = await studentModel.countDocuments({
+      section: sectionId,
+    });
+    return studentCount;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function adminUpdateStudent(
+  studentId,
+  { rollNumber, firstname, lastname, gender, age, phone, email, address }
+) {
+  console.log(studentId);
+  try {
+    const student = await studentModel.findByIdAndUpdate(
+      { _id: studentId },
+      {
+        rollNumber,
+        firstname,
+        lastname,
+        gender,
+        age,
+        phone,
+        email,
+        address,
+      }
+    );
+    // console.log(student);
+    return student;
   } catch (error) {
     return error;
   }

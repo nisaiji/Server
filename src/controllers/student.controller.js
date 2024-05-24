@@ -3,15 +3,17 @@ import { findClassById } from "../services/class.sevices.js";
 import {
   checkStudentExistInSection,
   findSectionByClassTeacherId,
-  findSectionById
+  findSectionById,
 } from "../services/section.services.js";
 import {
   adminRegisterStudent,
+  adminUpdateStudent,
   checkStudentExist,
   deleteStudentById,
   findStudentById,
+  getStudentCount,
   getStudentList,
-  registerStudent
+  registerStudent,
 } from "../services/student.service.js";
 import { findTeacherById } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
@@ -26,7 +28,7 @@ export async function registerStudentController(req, res) {
       age,
       email,
       phone,
-      address
+      address,
     } = req.body;
     const classTeacherId = req.classTeacherId;
     const classTeacher = await findTeacherById(classTeacherId);
@@ -63,6 +65,7 @@ export async function registerStudentController(req, res) {
     return res.send(error(500, err.message));
   }
 }
+
 export async function adminRegisterStudentController(req, res) {
   try {
     const {
@@ -75,7 +78,7 @@ export async function adminRegisterStudentController(req, res) {
       phone,
       address,
       sectionId,
-      classId
+      classId,
     } = req.body;
     const adminId = req.adminId;
     const admin = await findAdminByID(adminId);
@@ -106,7 +109,7 @@ export async function adminRegisterStudentController(req, res) {
       address,
       sectionId,
       classId,
-      adminId
+      adminId,
     });
     section?.students?.push(student["_id"]);
     student.section = section["_id"];
@@ -178,7 +181,7 @@ export async function getStudentListOfSectionController(req, res) {
     const studentList = await getStudentList({
       limit,
       page: pageNo,
-      sectionId
+      sectionId,
     });
     return studentList;
   } catch (err) {
@@ -192,11 +195,12 @@ export async function getStudentListOfSectionForAdminController(req, res) {
     const adminId = req.adminId;
     const pageNo = req.params.pageNo;
     const limit = 5;
+    const studentCount = await getStudentCount({ sectionId });
     const section = await findSectionById(sectionId);
     if (!section) {
       return res.send(error(400, "section doesn't exist"));
     }
-    if (section["admin"] !== adminId) {
+    if (section["admin"].toString() !== adminId) {
       return res.send(
         error(400, "this Admin doesn't has access to this section.")
       );
@@ -204,9 +208,49 @@ export async function getStudentListOfSectionForAdminController(req, res) {
     const studentList = await getStudentList({
       limit,
       page: pageNo,
-      sectionId
+      sectionId,
     });
-    return studentList;
+    return res.send(
+      success(200, { pageNo, limit, totalCount: studentCount, studentList })
+    );
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function adminUpdateStudentController(req, res) {
+  try {
+    const {
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      email,
+      phone,
+      address,
+    } = req.body;
+    const studentId = req.params.studentId;
+    const adminId = req.adminId;
+    const admin = await findAdminByID(adminId);
+    if (!admin) {
+      return res.send(error(400, "admin doesn't exists"));
+    }
+    const studentexist = await findStudentById(studentId);
+    if (!studentexist) {
+      return res.send(error(400, "student doesn't exists"));
+    }
+    const student = await adminUpdateStudent(studentId, {
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      phone,
+      email,
+      address,
+    });
+    return res.send(success(201, "student updated successfully!"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
