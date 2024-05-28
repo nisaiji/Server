@@ -12,6 +12,7 @@ export  function generateAccessToken(data){
         return error;
     }
 }
+
 export function generateRefreshToken(data){
     try {
         const token = Jwt.sign(data, secretKey,{expiresIn:"1y"});

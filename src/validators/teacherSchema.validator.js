@@ -78,6 +78,7 @@ const teacherRegisterSchema = Joi.object({
       "any.required": "Password is required."
     }),
 });
+
 const teacherUpdationSchema = Joi.object({
   teacherId: Joi.string()
   .regex(/^[0-9a-fA-F]{24}$/)

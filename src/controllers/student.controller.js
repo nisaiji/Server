@@ -30,7 +30,7 @@ export async function registerStudentController(req, res) {
       phone,
       address,
     } = req.body;
-    const classTeacherId = req.classTeacherId;
+    const classTeacherId = req.teacherId;
     const classTeacher = await findTeacherById(classTeacherId);
     if (!classTeacher) {
       return res.send(error(400, "class teacher doesn't exists"));
@@ -40,7 +40,6 @@ export async function registerStudentController(req, res) {
       return res.send(error(400, "section doesn't exists"));
     }
     const adminId = classTeacher?.admin;
-    // console.log({classTeacher})
     const existingStudent = await checkStudentExist(rollNumber, adminId);
     if (existingStudent) {
       return res.send(error(400, "roll number already exist"));
@@ -60,7 +59,7 @@ export async function registerStudentController(req, res) {
     student.section = section["_id"];
     await section.save();
     await student.save();
-    return res.send(success(201, "student created successfully!"));
+    return res.send(success(201, "student created successfully! by teacher"));
   } catch (err) {
     return res.send(error(500, err.message));
   }

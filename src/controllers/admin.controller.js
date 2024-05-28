@@ -76,6 +76,7 @@ export async function loginAdminController(req, res) {
       adminId: admin["_id"],
       phone: admin["phone"]
     });
+    // console.log('a',accessToken);
     const refreshToken = generateRefreshToken({
       role: "admin",
       adminId: admin["_id"],
