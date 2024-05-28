@@ -61,7 +61,8 @@ export async function getAllSection() {
 export async function getClassSections(classId) {
   try {
     const sections = await sectionModel
-      .find({ classId: classId });
+      .find({ classId: classId }).populate('classTeacher');
+      console.log(sections);
     return sections;
   } catch (error) {
     return error;
