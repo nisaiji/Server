@@ -145,3 +145,31 @@ export async function adminUpdateStudent({
     return error;
   }
 }
+
+export async function updateStudent({
+  studentId,
+  rollNumber,
+  firstname,
+  lastname,
+  gender,
+  age,
+  phone,
+  email,
+  address,
+}) {
+  try {
+    const student = await studentModel.findByIdAndUpdate(studentId, {
+      rollNumber,
+      firstname,
+      lastname,
+      gender,
+      age,
+      phone,
+      email,
+      address,
+    });
+    return student;
+  } catch (error) {
+    return error;
+  }
+}
