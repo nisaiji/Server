@@ -6,7 +6,6 @@ const _config = {
     dbURL:process.env.MONGO_URL,
     accessTokenSecretKey:process.env.ACCESS_TOKEN_SECRET_KEY,
     refreshTokenSecretKey:process.env.REFRESH_TOKEN_SECRET_KEY
-
 }
 
 export const config =   Object.freeze(_config);    

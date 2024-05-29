@@ -21,7 +21,6 @@ const teacherSchema = mongoose.Schema({
   },
   role:{
     type:String,
-    enum:["teacher","classTeacher","coordinator"],
     default:"teacher"
   },
   isClassTeacher: {

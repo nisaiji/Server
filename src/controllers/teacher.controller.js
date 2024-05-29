@@ -10,13 +10,14 @@ import {
   getTeacherList,
   updateTeacherById,
 } from "../services/teacher.services.js";
-import { generateAccessToken } from "../services/JWTToken.service.js";
 import {
   checkPasswordMatch,
   hashPassword,
 } from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { findAdminByID } from "../services/admin.services.js";
+import { generateAccessToken } from "../services/JWTToken.service.js";
+import { findSectionByClassTeacherId } from "../services/section.services.js";
 
 export async function registerTeacherController(req, res) {
   try {
@@ -42,7 +43,6 @@ export async function registerTeacherController(req, res) {
       adminId
     );
     const admin = await findAdminByID(adminId);
-    // console.log({ admin });
     admin.teachers.push(teacher["_id"]);
     await admin.save();
     teacher.school = admin["_id"];
@@ -56,9 +56,7 @@ export async function registerTeacherController(req, res) {
 export async function loginClassTeacherController(req, res) {
   try {
     const { username, password } = req.body;
-
     const classTeacher = await findClassTeacherByUsername(username);
-    // console.log(classTeacher);
     if (!classTeacher) {
       return res.send(error(404, "class teacher doesn't exist"));
     }
@@ -70,14 +68,21 @@ export async function loginClassTeacherController(req, res) {
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
+    const section = await findSectionByClassTeacherId(classTeacher["_id"]);
     const accessToken = generateAccessToken({
-      role: "classTeacher",
-      classTeacherId: classTeacher["_id"],
+      role: "teacher",
+      teacherId: classTeacher["_id"],
       adminId: classTeacher["admin"],
-      section: classTeacher["section"],
       phone: classTeacher["phone"],
+      sectionId: section["_id"],
+        classId: section["classId"],
     });
-    return res.send(success(200, { accessToken }));
+    return res.send(
+      success(200, {
+        accessToken,
+        username: classTeacher.username,
+      })
+    );
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -147,21 +152,27 @@ export async function getAllClassTeachersController(req, res) {
   }
 }
 
-export async function updateTeacherController(req,res){
+export async function updateTeacherController(req, res) {
   try {
     const teacherId = req.params.teacherId;
     const { username, firstname, lastname, email, password, phone } = req.body;
     const teacher = await findTeacherById(teacherId);
     if (!teacher) {
       return res.send(error(400, "can not find teacher"));
-      }
-    const updatedTeacher =  await updateTeacherById(teacherId, { username, firstname, lastname, email, password, phone });
-    if(updatedTeacher instanceof Error){
-      return res.send(error(500,"can't update teacher"));
     }
-      return res.send(success(200, "teacher updated successfully"));
-      
+    const updatedTeacher = await updateTeacherById(teacherId, {
+      username,
+      firstname,
+      lastname,
+      email,
+      password,
+      phone,
+    });
+    if (updatedTeacher instanceof Error) {
+      return res.send(error(500, "can't update teacher"));
+    }
+    return res.send(success(200, "teacher updated successfully"));
   } catch (err) {
-    return res.send(error(500,err.message));    
+    return res.send(error(500, err.message));
   }
 }

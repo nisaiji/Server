@@ -14,7 +14,6 @@ import {
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerSectionController(req, res) {
-  console.log(req.body);
   try {
     const { name, teacherId, classId } = req.body;
     const adminId = req.adminId;
@@ -27,18 +26,15 @@ export async function registerSectionController(req, res) {
       return res.send(error(400, "section name already exist"));
     }
     const section = await createSection(name, teacherId, classId, adminId);
-
     const classTeacher = await findTeacherById(teacherId);
-    console.log(classTeacher);
     if (!classTeacher) {
       return res.send(error(400, "cordinator doesn't exist"));
     }
     classTeacher?.section?.push(section["_id"]);
+    classTeacher.isClassTeacher = true;
     await classTeacher.save();
-
     existingClass["section"]?.push(section["_id"]);
     await existingClass.save();
-
     return res.send(success(201, "section created successfully!"));
   } catch (err) {
     return res.send(error(500, err.message));

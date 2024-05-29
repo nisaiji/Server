@@ -9,8 +9,8 @@ const swaggerOptions = {
     info: {
       title: "School-App",
       description: "This is a server for school-app",
-      version: "1.0.0"
-    }
+      version: "1.0.0",
+    },
   },
   servers: [{ url: "http://localhost:4000/" }],
   apis: ["../../index.js"],
