@@ -19,6 +19,7 @@ const registerAdminSchema = Joi.object({
   }),
   phone: Joi.string()
     .pattern(/^\+91[6-9][0-9]{9}$/)
+    .message("Phone no. should have +91 prefix")
     .length(13)
     .required().messages({
       "string.pattern": "Phone no. should have +91 prefix",
