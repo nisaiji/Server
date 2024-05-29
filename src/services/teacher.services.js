@@ -4,7 +4,7 @@ import teacherModel from "../models/teacher.model.js";
 export async function checkTeacherExist(username, email) {
   try {
     const teacher = await teacherModel.findOne({
-      $or: [{ username }, { email }],
+      $or: [{ username }, { email }]
     });
     return teacher;
   } catch (err) {
@@ -29,7 +29,7 @@ export async function createTeacher(
       email,
       password,
       phone,
-      admin,
+      admin
     });
     return teacher;
   } catch (err) {
@@ -39,9 +39,7 @@ export async function createTeacher(
 
 export async function findClassTeacherByUsername(username) {
   try {
-    const classTeacher = await teacherModel.findOne({
-      $and: [{ username }, { isClassTeacher: true }],
-    });
+    const classTeacher = await teacherModel.findOne({ username });
     return classTeacher;
   } catch (err) {
     return err;
@@ -60,7 +58,7 @@ export async function findTeacherById(id) {
 export async function findClassTeacherById(id) {
   try {
     const classTeacher = await teacherModel.findOne({
-      $and: [{ _id: id }, { isClassTeacher: true }],
+      $and: [{ _id: id }, { isClassTeacher: true }]
     });
     return classTeacher;
   } catch (error) {
@@ -132,7 +130,7 @@ export async function updateTeacherById(
       firstname,
       lastname,
       email,
-      phone,
+      phone
     });
     return updatedTeacher;
   } catch (error) {

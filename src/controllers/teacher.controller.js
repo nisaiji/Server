@@ -66,6 +66,7 @@ export async function loginClassTeacherController(req, res) {
       password,
       classTeacher.password
     );
+    // console.log(matchPassword)
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
