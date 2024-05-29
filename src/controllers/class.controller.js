@@ -2,13 +2,14 @@ import {
   checkClassExists,
   deleteClass,
   getClassList,
-  registerClass,
+  registerClass
 } from "../services/class.sevices.js";
 import { checkClassExistById } from "../services/section.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerClassController(req, res) {
   try {
+    console.log("register class controller called");
     const { name } = req.body;
     const adminId = req.adminId;
     const existClass = await checkClassExists({ name, adminId });
@@ -17,10 +18,11 @@ export async function registerClassController(req, res) {
     }
 
     const registeredClass = await registerClass({ name, adminId });
-    if (registeredClass instanceof Error) {
+  
+    if (registerClass instanceof Error) {
       return res.send(error(400, "can't register class"));
     }
-
+     
     return res.send(success(200, "class registered successfully!"));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -53,6 +55,7 @@ export async function getClassListController(req, res) {
   try {
     const adminId = req.adminId;
     const classlist = await getClassList(adminId);
+    console.log(classlist);
     if (classlist instanceof Error) {
       return res.send(error(400, "can't get list of class"));
     }
