@@ -1,5 +1,5 @@
 import express from 'express';
-import { getClassListController, registerClassController } from '../controllers/class.controller.js';
+import { deleteClassController, getClassListController, registerClassController } from '../controllers/class.controller.js';
 import { adminAuthentication } from '../middlewares/authentication/admin.authentication.middleware.js';
 import { classRegisterValidation } from '../middlewares/validation/class.validation.middleware.js';
 
@@ -59,7 +59,7 @@ classRouter.post("/register",adminAuthentication,classRegisterValidation, regist
  *       500:
  *         description: Server error
  */
-classRouter.delete("/:classId",adminAuthentication, registerClassController);
+classRouter.delete("/:classId",adminAuthentication, deleteClassController);
 
 /**
  * @swagger
