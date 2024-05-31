@@ -4,6 +4,7 @@ import {
   adminRegisterParentController,
   loginParentController,
   registerExistingParentController,
+  registerParentController,
   updateParentController,
 } from "../controllers/parent.controller.js";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
@@ -47,7 +48,7 @@ parentRouter.post(
   "/register/:studentId",
   classTeacherAuthentication,
   registerParentValidation,
-  // registerParentController
+  registerParentController
 );
 
 /**

@@ -14,6 +14,32 @@ import {
 import { findStudentById } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
+export async function registerParentController(req, res) {
+  try {
+    const studentId = req.params.studentId;
+    const student = await findStudentById(studentId);
+    if (!student) {
+      return res.send(error(400, "student doesn't exists"));
+    }
+    const existingParent = await findParentByPhoneNo(req.body.phone);
+    if(!existingParent){
+      const parent = await createParent(req.body);
+      const hashedPassword = await hashPassword("password@123");
+      parent["password"] = hashedPassword;
+      parent["username"] = parent._id;
+      student.parent = parent._id;
+      await student.save();
+      await parent.save();
+    }else{
+      student.parent = existingParent._id;
+      await student.save();
+    }
+    return res.send(success(201, {message:"parent registered successfully!",classId:student.classId,sectionId:student.section}));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
 export async function adminRegisterParentController(req, res) {
   try {
     const studentId = req.params.studentId;
@@ -39,46 +65,6 @@ export async function adminRegisterParentController(req, res) {
     return res.send(error(500, err.message));
   }
 }
-// export async function registerParentController(req, res) {
-//     try {
-//       const studentId = req.params.studentId;
-//       const { username, firstname, lastname, phone, email, password, address } =
-//         req.body;
-//       const existingParent = await checkParentExist(username, email);
-//       const student = await findStudentById(studentId);
-//       if (!student) {
-//         return res.send(error(400, "student doesn't exists"));
-//       }
-//       if (existingParent && existingParent.username === username) {
-//         return res.send(error(400, "username already exists"));
-//       }
-//       if (existingParent && existingParent.email === email) {
-//         return res.send(error(400, "email already exists"));
-//       }
-//       const hashedPassword = await hashPassword(password);
-//       const parent = await createParent(
-//         username,
-//         firstname,
-//         lastname,
-//         phone,
-//         email,
-//         hashedPassword,
-//         address
-//       );
-//       const isChildExist = checkChildExist(parent.child, studentId);
-//       if (isChildExist) {
-//         return res.send(error(400, "child already linked with parent"));
-//       }
-//       student.parent = parent["_id"];
-//       parent.child.push(student["_id"]);
-//       await student.save();
-//       await parent.save();
-
-//       return res.send(success(201, "parent registered successfully!"));
-//     } catch (err) {
-//       return res.send(error(500, err.message));
-//     }
-//   }
 
 export async function loginParentController(req, res) {
   try {
