@@ -69,7 +69,7 @@ export async function adminRegisterStudent({
     });
     return student;
   } catch (error) {
-    return error;
+   throw error;
   }
 }
 

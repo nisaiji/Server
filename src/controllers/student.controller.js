@@ -92,7 +92,7 @@ export async function adminRegisterStudentController(req, res) {
     if (!section) {
       return res.send(error(400, "section doesn't exists"));
     }
-    const Class = await findClassById(classId);
+    const Class = await findClassB+yId(classId);
     if (!Class) {
       return res.send(error(400, "Class doesn't exists"));
     }
@@ -114,6 +114,10 @@ export async function adminRegisterStudentController(req, res) {
       classId,
       adminId,
     });
+    console.log(student);
+    if(student instanceof error){
+      return res.send(error(400,"can't create student"));
+    }
     section?.students?.push(student["_id"]);
     student.section = section["_id"];
     await section.save();
