@@ -11,9 +11,17 @@ export async function checkParentExist(username, email) {
   }
 }
 
-export async function createParent() {
+export async function createParent(data) {
   try {
-    const parent = await parentModel.create({});
+    const parent = await parentModel.create({
+      username:data.username,
+      firstname:data.firstname,
+      lastname:data.lastname,
+      email:data.email,
+      phone:data.phone,
+      address:data.address,
+      password:data.password,
+  });
     return parent;
   } catch (error) {
     return error;
@@ -47,6 +55,15 @@ export async function createParent() {
 export async function findParentByUsername(username) {
   try {
     const parent = await parentModel.findOne({ username });
+    return parent;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function findParentByPhoneNo(phoneNo) {
+  try {
+    const parent = await parentModel.findOne({ phone:phoneNo });
     return parent;
   } catch (error) {
     return error;

@@ -13,11 +13,11 @@ const parentSchema = mongoose.Schema({
   lastname: {
     type: String,
     default: "Doe"
-    // required:true,
   },
   phone: {
     type: String,
-    default: "+910000000000"
+    unique:true,
+    required: true
   },
   email: {
     type: String,
@@ -30,13 +30,6 @@ const parentSchema = mongoose.Schema({
     type: String,
     default: "abc xyz india"
   },
-  // one parent can have multiple childs
-  child: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "student"
-    }
-  ]
 });
 
 const parentModel = mongoose.model("parent", parentSchema);

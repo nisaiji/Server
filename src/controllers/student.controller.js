@@ -63,7 +63,12 @@ export async function registerStudentController(req, res) {
     student.section = section["_id"];
     await section.save();
     await student.save();
-    return res.send(success(201, "student created successfully! by teacher"));
+    return res.send(
+      success(201, {
+        message: "student created successfully!",
+        studentId: student["_id"].toString(),
+      })
+    );
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -121,8 +126,12 @@ export async function adminRegisterStudentController(req, res) {
     section?.students?.push(student["_id"]);
     student.section = section["_id"];
     await section.save();
-    await student.save();
-    return res.send(success(201, "student created successfully!"));
+    return res.send(
+      success(201, {
+        message: "student created successfully!",
+        studentId: student["_id"].toString(),
+      })
+    );
   } catch (err) {
     return res.send(error(500, err.message));
   }
