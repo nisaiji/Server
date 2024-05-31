@@ -1,8 +1,20 @@
 import express from "express";
-import {  loginParentController, registerExistingParentController, registerParentController, updateParentController} from "../controllers/parent.controller.js";
+import {
+  adminGetParentController,
+  adminRegisterParentController,
+  loginParentController,
+  registerExistingParentController,
+  updateParentController,
+} from "../controllers/parent.controller.js";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
-import { loginParentValidation, registerExistingParentValidation, registerParentValidation, updateParentValidation } from "../middlewares/validation/parent.validation.middleware.js";
+import {
+  loginParentValidation,
+  registerExistingParentValidation,
+  registerParentValidation,
+  updateParentValidation,
+} from "../middlewares/validation/parent.validation.middleware.js";
+import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 
 const parentRouter = express.Router();
 
@@ -31,7 +43,76 @@ const parentRouter = express.Router();
  *       500:
  *         description: Server error
  */
-parentRouter.post("/register/:studentId",classTeacherAuthentication,registerParentValidation,registerParentController)
+parentRouter.post(
+  "/register/:studentId",
+  classTeacherAuthentication,
+  registerParentValidation,
+  // registerParentController
+);
+
+/**
+ * @swagger
+ * /parent/admin-register/{studentId}:
+ *   post:
+ *     security:
+ *       - Authorization: []
+ *     summary: Register a student's parent
+ *     description: This API will register a student's parent. it requires admin login token.
+ *     tags:
+ *       - Parents
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         description: ID of the student
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Student parent registered successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+parentRouter.post(
+  "/admin-register/:studentId",
+  adminAuthentication,
+  registerParentValidation,
+  adminRegisterParentController
+);
+
+/**
+ * @swagger
+ * /parent/admin-get-parent/{phone}:
+ *   post:
+ *     security:
+ *       - Authorization: []
+ *     summary: get student's parent
+ *     description: This API will get student's parent. it requires admin login token.
+ *     tags:
+ *       - Parents
+ *     parameters:
+ *       - in: path
+ *         phone: phone
+ *         required: true
+ *         description: phone number of the parent
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description:  Parent get successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+parentRouter.get(
+  "/admin-get-parent/:phone",
+  adminAuthentication,
+  adminGetParentController
+);
+
 
 /**
  * @swagger
@@ -67,8 +148,13 @@ parentRouter.post("/register/:studentId",classTeacherAuthentication,registerPare
  *       500:
  *         description: Server error
  */
-parentRouter.post("/link-student-with-existing-parent/:studentId",classTeacherAuthentication,registerExistingParentValidation, registerExistingParentController);
-  
+parentRouter.post(
+  "/link-student-with-existing-parent/:studentId",
+  classTeacherAuthentication,
+  registerExistingParentValidation,
+  registerExistingParentController
+);
+
 /**
  * @swagger
  * /parent/login:
@@ -96,7 +182,7 @@ parentRouter.post("/link-student-with-existing-parent/:studentId",classTeacherAu
  *       500:
  *         description: Server error
  */
-parentRouter.post("/login",loginParentValidation, loginParentController);
+parentRouter.post("/login", loginParentValidation, loginParentController);
 
 /**
  * @swagger
@@ -137,5 +223,12 @@ parentRouter.post("/login",loginParentValidation, loginParentController);
  *       500:
  *         description: Server error
  */
-parentRouter.put("/", parentAuthentication, updateParentValidation, updateParentController);
+parentRouter.put(
+  "/",
+  parentAuthentication,
+  updateParentValidation,
+  updateParentController
+);
+
+
 export default parentRouter;

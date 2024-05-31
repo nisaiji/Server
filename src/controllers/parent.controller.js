@@ -1,47 +1,40 @@
-import {generateAccessToken} from "../services/JWTToken.service.js";
+import { generateAccessToken } from "../services/JWTToken.service.js";
 import {
   checkChildExist,
   checkStudentAlreadyLinkedToParent,
   createParent,
   findParentById,
-  findParentByUsername
+  findParentByPhoneNo,
+  findParentByUsername,
 } from "../services/parent.services.js";
 import {
   checkPasswordMatch,
-  hashPassword
+  hashPassword,
 } from "../services/password.service.js";
 import { findStudentById } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
-export async function registerParentController(req, res) {
+export async function adminRegisterParentController(req, res) {
   try {
     const studentId = req.params.studentId;
     const student = await findStudentById(studentId);
     if (!student) {
       return res.send(error(400, "student doesn't exists"));
     }
-    const existingParent = await checkStudentAlreadyLinkedToParent(studentId);
-    if (existingParent) {
-      return res.send(
-        error(
-          400,
-          "student is already linked with parent, Cann't create parent again!"
-        )
-      );
+    const existingParent = await findParentByPhoneNo(req.body.phone);
+    if(!existingParent){
+      const parent = await createParent(req.body);
+      const hashedPassword = await hashPassword("password@123");
+      parent["password"] = hashedPassword;
+      parent["username"] = parent._id;
+      student.parent = parent._id;
+      await student.save();
+      await parent.save();
+    }else{
+      student.parent = existingParent._id;
+      await student.save();
     }
-    const parent = await createParent();
-    console.log(parent);
-
-    student.parent = parent["_id"];
-    parent.child.push(student["_id"]);
-    const hashedPassword = await hashPassword("password@123");
-    parent["password"] = hashedPassword;
-    parent["username"] = parent["_id"];
-    await student.save();
-    await parent.save();
-    // console.log({parent,student});
-
-    return res.send(success(201, "parent registered successfully!"));
+    return res.send(success(201, {message:"parent registered successfully!",classId:student.classId,sectionId:student.section}));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -101,7 +94,7 @@ export async function loginParentController(req, res) {
     const accessToken = generateAccessToken({
       role: "parent",
       parentId: parent["_id"],
-      children: parent["child"]
+      children: parent["child"],
     });
     return res.send(success(200, { accessToken }));
   } catch (err) {
@@ -183,5 +176,19 @@ export async function updateParentController(req, res) {
     return res.send(success(200, "parent details updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
+  }
+}
+
+export async function adminGetParentController(req,res){
+  try {
+    const phone=req.params.phone
+    const parentExist=await findParentByPhoneNo(phone)
+    if(!parentExist){
+      res.send(error(404,'parent not found'))
+    }
+    
+    res.send(success(200,parentExist))
+  } catch (error) {
+    res.send(error(500,error.message))
   }
 }

@@ -130,7 +130,7 @@ studentRouter.post(
 
 /**
  * @swagger
- * /student/{studentId}:
+ * /student/admin-delete-student/{studentId}:
  *   delete:
  *     security:
  *       - Authorization: []
@@ -162,7 +162,7 @@ studentRouter.delete(
 
 /**
  * @swagger
- * /student/{studentId}:
+ * /student/delete-student/{studentId}:
  *   delete:
  *     security:
  *       - Authorization: []
