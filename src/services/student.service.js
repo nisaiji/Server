@@ -1,10 +1,9 @@
 import studentModel from "../models/student.model.js";
 
-export async function checkStudentExist(rollNumber, admin) {
+export async function checkStudentExist(rollNumber,email, admin) {
   try {
-    const student = await studentModel.findOne({
-      $and: [{ rollNumber }, { admin }],
-    });
+    const student = await studentModel.findOne({$or:[{$and: [{ rollNumber }, { admin }],},{email}]});
+    // const student = await studentModel.findOne({$and: [{ rollNumber }, { admin }],});
     return student;
   } catch (error) {
     return student;

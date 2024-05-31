@@ -167,14 +167,14 @@ export async function updateParentController(req, res) {
 
 export async function adminGetParentController(req,res){
   try {
-    const phone=req.params.phone
+    const phone=req.params.phone;
     const parentExist=await findParentByPhoneNo(phone)
     if(!parentExist){
-      res.send(error(404,'parent not found'))
+      return res.send(error(404,'parent not found'))
     }
     
-    res.send(success(200,parentExist))
-  } catch (error) {
-    res.send(error(500,error.message))
+   return res.send(success(200,parentExist))
+  } catch (err) {
+    res.send(error(500,err.message))
   }
 }
