@@ -42,6 +42,7 @@ export async function registerParentController(req, res) {
 
 export async function adminRegisterParentController(req, res) {
   try {
+    // const {username,firstname,lastname,email,password,phone,address} = req.body;
     const studentId = req.params.studentId;
     const student = await findStudentById(studentId);
     if (!student) {
@@ -51,8 +52,8 @@ export async function adminRegisterParentController(req, res) {
     if(!existingParent){
       const parent = await createParent(req.body);
       const hashedPassword = await hashPassword("password@123");
-      parent["password"] = hashedPassword;
-      parent["username"] = parent._id;
+      // parent["password"] = hashedPassword;
+      // parent["username"] = parent._id;
       student.parent = parent._id;
       await student.save();
       await parent.save();
