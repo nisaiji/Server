@@ -33,7 +33,7 @@ export async function deleteClass(classId) {
 export async function getClassList(adminId) {
   try {
     const classes = await classModel
-      .find()
+      .find({admin:adminId})
       .populate({ path: "section", select: "_id name" })
       .select("_id name");
     return classes;
