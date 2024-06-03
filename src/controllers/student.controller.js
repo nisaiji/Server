@@ -44,9 +44,12 @@ export async function registerStudentController(req, res) {
       return res.send(error(400, "section doesn't exists"));
     }
     const adminId = classTeacher?.admin;
-    const existingStudent = await checkStudentExist(rollNumber, adminId);
-    if (existingStudent) {
+    const existingStudent = await checkStudentExist(rollNumber,email, adminId);
+    if (existingStudent && existingStudent["rollNumber"]===rollNumber) {
       return res.send(error(400, "roll number already exist"));
+    }
+    if (existingStudent && existingStudent["email"]===email) {
+      return res.send(error(400, "email already exist"));
     }
     const student = await registerStudent(
       rollNumber,
@@ -102,9 +105,14 @@ export async function adminRegisterStudentController(req, res) {
       return res.send(error(400, "Class doesn't exists"));
     }
 
-    const existingStudent = await checkStudentExist(rollNumber, adminId);
-    if (existingStudent) {
+    const existingStudent = await checkStudentExist(rollNumber,email, adminId);
+    // console.log(existingStudent);
+    if(existingStudent && existingStudent["rollNumber"]===rollNumber) {
       return res.send(error(400, "roll number already exist"));
+    }
+    
+    if(existingStudent && existingStudent["email"]===email) {
+      return res.send(error(400, "email already exist"));
     }
     const student = await adminRegisterStudent({
       rollNumber,
@@ -119,6 +127,10 @@ export async function adminRegisterStudentController(req, res) {
       classId,
       adminId,
     });
+    console.log(student);
+    if(student instanceof Error){
+      return res.send(error(400,"can't create student"));
+    }
     section?.students?.push(student["_id"]);
     student.section = section["_id"];
     await section.save();

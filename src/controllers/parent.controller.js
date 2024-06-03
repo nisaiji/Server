@@ -48,6 +48,7 @@ export async function registerParentController(req, res) {
 
 export async function adminRegisterParentController(req, res) {
   try {
+    // const {username,firstname,lastname,email,password,phone,address} = req.body;
     const studentId = req.params.studentId;
     const student = await findStudentById(studentId);
     if (!student) {
@@ -57,8 +58,8 @@ export async function adminRegisterParentController(req, res) {
     if (!existingParent) {
       const parent = await createParent(req.body);
       const hashedPassword = await hashPassword("password@123");
-      parent["password"] = hashedPassword;
-      parent["username"] = parent._id;
+      // parent["password"] = hashedPassword;
+      // parent["username"] = parent._id;
       student.parent = parent._id;
       await student.save();
       await parent.save();
@@ -179,13 +180,14 @@ export async function updateParentController(req, res) {
 
 export async function adminGetParentController(req, res) {
   try {
-    const phone = req.params.phone;
-    const parentExist = await findParentByPhoneNo(phone);
-    if (!parentExist) {
-      return res.send(error(404, "parent not found"));
+    const phone=req.params.phone;
+    const parentExist=await findParentByPhoneNo(phone)
+    if(!parentExist){
+      return res.send(error(404,'parent not found'))
     }
-    res.send(success(200, parentExist));
-  } catch (e) {
-    res.send(error(500, e.message));
+    
+   return res.send(success(200,parentExist))
+  } catch (err) {
+    res.send(error(500,err.message))
   }
 }

@@ -71,11 +71,11 @@ export async function deleteSectionController(req, res) {
     if (!section) {
       return res.send(error(400, "section doesn't exists"));
     }
-    if (section["students"].length > 0) {
-      return res.send(
-        error(400, "can't delete section, there are students in section.")
-      );
-    }
+    // if (section["students"].length > 0) {
+    //   return res.send(
+    //     error(400, "can't delete section, there are students in section.")
+    //   );
+    // }
     if (section["classTeacher"]) {
       return res.send(
         error(
