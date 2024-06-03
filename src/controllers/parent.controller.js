@@ -22,7 +22,7 @@ export async function registerParentController(req, res) {
       return res.send(error(400, "student doesn't exists"));
     }
     const existingParent = await findParentByPhoneNo(req.body.phone);
-    if(!existingParent){
+    if (!existingParent) {
       const parent = await createParent(req.body);
       const hashedPassword = await hashPassword("password@123");
       parent["password"] = hashedPassword;
@@ -30,11 +30,17 @@ export async function registerParentController(req, res) {
       student.parent = parent._id;
       await student.save();
       await parent.save();
-    }else{
+    } else {
       student.parent = existingParent._id;
       await student.save();
     }
-    return res.send(success(201, {message:"parent registered successfully!",classId:student.classId,sectionId:student.section}));
+    return res.send(
+      success(201, {
+        message: "parent registered successfully!",
+        classId: student.classId,
+        sectionId: student.section,
+      })
+    );
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -48,7 +54,7 @@ export async function adminRegisterParentController(req, res) {
       return res.send(error(400, "student doesn't exists"));
     }
     const existingParent = await findParentByPhoneNo(req.body.phone);
-    if(!existingParent){
+    if (!existingParent) {
       const parent = await createParent(req.body);
       const hashedPassword = await hashPassword("password@123");
       parent["password"] = hashedPassword;
@@ -56,11 +62,17 @@ export async function adminRegisterParentController(req, res) {
       student.parent = parent._id;
       await student.save();
       await parent.save();
-    }else{
+    } else {
       student.parent = existingParent._id;
       await student.save();
     }
-    return res.send(success(201, {message:"parent registered successfully!",classId:student.classId,sectionId:student.section}));
+    return res.send(
+      success(201, {
+        message: "parent registered successfully!",
+        classId: student.classId,
+        sectionId: student.section,
+      })
+    );
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -165,16 +177,15 @@ export async function updateParentController(req, res) {
   }
 }
 
-export async function adminGetParentController(req,res){
+export async function adminGetParentController(req, res) {
   try {
-    const phone=req.params.phone
-    const parentExist=await findParentByPhoneNo(phone)
-    if(!parentExist){
-      res.send(error(404,'parent not found'))
+    const phone = req.params.phone;
+    const parentExist = await findParentByPhoneNo(phone);
+    if (!parentExist) {
+      return res.send(error(404, "parent not found"));
     }
-    
-    res.send(success(200,parentExist))
-  } catch (error) {
-    res.send(error(500,error.message))
+    res.send(success(200, parentExist));
+  } catch (e) {
+    res.send(error(500, e.message));
   }
 }
