@@ -1,11 +1,7 @@
 import express from "express";
-import {
-  deleteSectionController,
-  getAllSectionsController,
-  getClassSectionsController,
-  registerSectionController,
-} from "../controllers/section.controller.js";
+import {deleteSectionController,getAllSectionsController,getClassSectionsController,registerSectionController,} from "../controllers/section.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { deleteSectionAuthorization } from "../middlewares/authorization/deleteSection.authorization.middleware.js";
 import { registerSectionValidation } from "../middlewares/validation/section.validation.middleware.js";
 // import { adminAuthentication } from "../middlewares/admin.authentication.middleware.js";
 // import { registerSectionValidation } from "../middlewares/section.validation.middleware.js";
@@ -42,12 +38,7 @@ const sectionRouter = express.Router();
  *       500:
  *         description: Server error
  */
-sectionRouter.post(
-  "/register",
-  adminAuthentication,
-  registerSectionValidation,
-  registerSectionController
-);
+sectionRouter.post("/register",adminAuthentication,registerSectionValidation,registerSectionController);
 
 /**
  * @swagger
@@ -119,10 +110,6 @@ sectionRouter.get("/:classId", adminAuthentication, getClassSectionsController);
  *       500:
  *         description: Server error
  */
-sectionRouter.delete(
-  "/:sectionId",
-  adminAuthentication,
-  deleteSectionController
-);
+sectionRouter.delete("/:sectionId",adminAuthentication,deleteSectionAuthorization,deleteSectionController);
 
 export default sectionRouter;

@@ -60,7 +60,7 @@ const teacherRegisterSchema = Joi.object({
       "any.required": "Email is required."
     }),
   phone: Joi.string()
-    .pattern(/^\+91[6-9][0-9]{9}$/)
+    .pattern(/^\+91[0-5][0-9]{9}$/)
     .length(13)
     .required()
     .messages({
@@ -125,7 +125,7 @@ const teacherUpdationSchema = Joi.object({
       "any.required": "Email is required."
     }),
   phone: Joi.string()
-    .pattern(/^\+91[6-9][0-9]{9}$/)
+    .pattern(/^\+91[0-5][0-9]{9}$/)
     .length(13)
     .required()
     .messages({

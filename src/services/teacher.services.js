@@ -79,20 +79,20 @@ export async function deleteTeacher(id) {
   }
 }
 
-export async function getAllTeachers() {
+export async function getAllTeachers({adminId}) {
   try {
-    const teacherlist = await teacherModel.find({});
+    const teacherlist = await teacherModel.find({admin:adminId});
     return teacherlist;
   } catch (error) {
     return error;
   }
 }
 
-export async function getAllClassTeachers() {
+export async function getAllClassTeachers(adminId) {
   try {
-    const cordinatorlist = await teacherModel.find({ isClassTeacher: true });
+    const cordinatorlist = await teacherModel.find({ admin:adminId });
     return cordinatorlist;
-  } catch (error) {
+  } catch (error){
     return error;
   }
 }

@@ -107,7 +107,7 @@ export async function checkClassExistById(classId) {
 //   }
 // }
 
-export async function deleteSection(sectionId) {
+export async function deleteSection({sectionId}) {
   try {
     const section = await sectionModel.findByIdAndDelete(sectionId);
     await classModel.updateOne(
@@ -118,4 +118,9 @@ export async function deleteSection(sectionId) {
   } catch (error) {
     return error;
   }
+}
+
+export async function getSectionStudents({sectionId,adminId}){
+  const students = await studentModel.find({section:sectionId,admin:adminId});
+  return students;
 }
