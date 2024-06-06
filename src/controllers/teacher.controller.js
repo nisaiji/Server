@@ -121,8 +121,7 @@ export async function deleteTeacherController(req, res) {
 
 export async function getAllTeachersController(req, res) {
   try {
-    const adminId = req.adminId;
-    const teacherList = await getAllTeachers({adminId});
+    const teacherList = await getAllTeachers();
     return res.send(success(200, teacherList));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -144,10 +143,9 @@ export async function getTeacherListController(req, res) {
   }
 }
 
-export async function getAllClassTeachersController(req, res){
+export async function getAllClassTeachersController(req, res) {
   try {
-    const adminId = req.adminId;
-    const classTeacherList = await getAllClassTeachers(adminId);
+    const classTeacherList = await getAllClassTeachers();
     return res.send(success(2001, classTeacherList));
   } catch (err) {
     return res.send(error(500, err.message));
