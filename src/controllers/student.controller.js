@@ -127,7 +127,7 @@ export async function adminRegisterStudentController(req, res) {
       classId,
       adminId,
     });
-    console.log(student);
+    // console.log(student);
     if(student instanceof Error){
       return res.send(error(400,"can't create student"));
     }
