@@ -122,7 +122,6 @@ export async function deleteTeacherController(req, res) {
 export async function getAllTeachersController(req, res) {
   try {
     const adminId=req.adminId
-    console.log(req.adminId);
     const teacherList = await getAllTeachers(adminId);
     return res.send(success(200, teacherList));
   } catch (err) {
