@@ -60,12 +60,12 @@ const teacherRegisterSchema = Joi.object({
       "any.required": "Email is required."
     }),
   phone: Joi.string()
-    .pattern(/^\+91[6-9][0-9]{9}$/)
-    .length(13)
+    .pattern(/^[1-5][0-9]{9}$/)
+    .length(10)
     .required()
     .messages({
       "string.pattern.base": "Invalid phone number format.",
-      "string.length": "Phone number must be 13 characters.",
+      "string.length": "Phone number must be 10 characters.",
       "any.required": "Phone number is required."
     }),
   password: Joi.string()
