@@ -79,7 +79,7 @@ export async function deleteTeacher(id) {
   }
 }
 
-export async function getAllTeachers({adminId}) {
+export async function getAllTeachers(adminId) {
   try {
     const teacherlist = await teacherModel.find({admin:adminId});
     return teacherlist;

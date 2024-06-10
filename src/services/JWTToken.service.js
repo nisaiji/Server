@@ -6,7 +6,7 @@ const secretKey = config.accessTokenSecretKey || "ThisIsASecretKeyForJWTToken";
 
 export  function generateAccessToken(data){
     try {
-        const token = Jwt.sign(data, secretKey,{expiresIn:"1d"});
+        const token = Jwt.sign(data, secretKey,{expiresIn:'1d'});
         return token;
     } catch (error) {
         return error;

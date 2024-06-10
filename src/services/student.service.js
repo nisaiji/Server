@@ -104,11 +104,33 @@ export async function getStudentList({ limit, page, sectionId }) {
   }
 }
 
+export async function getAllStudentList({ limit, page}) {
+  try {
+    const students = await studentModel
+      .find()
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+    return students;
+  } catch (error) {
+    return error;
+  }
+}
+
 export async function getStudentCount({ sectionId }) {
   try {
     const studentCount = await studentModel.countDocuments({
       section: sectionId,
     });
+    return studentCount;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function getAllStudentCount() {
+  try {
+    const studentCount = await studentModel.countDocuments();
     return studentCount;
   } catch (error) {
     return error;

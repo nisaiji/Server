@@ -99,7 +99,7 @@ const adminRegisterStudentSchema = Joi.object({
     .required()
     .messages({
       "string.pattern.base": "Invalid phone number.",
-      "string.length": "Phone number must be 13 chars.",
+      "string.length": "Phone number must be 10 chars.",
       "any.required": "Phone number is required.",
     }),
   address: Joi.string().required().messages({
