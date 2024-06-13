@@ -4,28 +4,28 @@ const teacherSchema = mongoose.Schema({
   username: {
     type: String,
     unique: true,
-    required: true
-  }, 
+    required: true,
+  },
   firstname: {
     type: String,
-    required: true
+    required: true,
   },
   lastname: {
     type: String,
-    required: true
+    required: true,
   },
   email: {
     type: String,
     unique: true,
-    required: true
+    required: true,
   },
-  role:{
-    type:String,
-    default:"teacher"
+  role: {
+    type: String,
+    default: "teacher",
   },
   isClassTeacher: {
     type: Boolean,
-    default: false
+    default: false,
   },
   password: {
     type: String,
@@ -34,12 +34,27 @@ const teacherSchema = mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true
+    required: true,
   },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "admin"
-  }
+    ref: "admin",
+  },
+  university: {
+    type: "string",
+  },
+  degree: {
+    type: "string",
+  },
+  bloodGroup: {
+    type: "string",
+  },
+  gender: {
+    type: "string",
+  },
+  dob: {
+    type: "string",
+  },
 });
 
 const teacherModel = mongoose.model("teacher", teacherSchema);

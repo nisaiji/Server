@@ -16,7 +16,7 @@ export async function registerTeacherValidation(req, res, next) {
       lastname,
       email,
       phone,
-      password
+      password,
     });
 
     if (schemaError) {
@@ -33,9 +33,9 @@ export async function loginClassTeacherValidation(req, res, next) {
     const { username, password } = req.body;
     const { error: schemaError } = classTeacherLoginSchema.validate({
       username,
-      password
+      password,
     });
-    if (schemaError){
+    if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }
     next();
@@ -47,7 +47,9 @@ export async function loginClassTeacherValidation(req, res, next) {
 export async function markTeacherAsClassTeacherValidation(req, res, next) {
   try {
     const teacherId = req.params.teacherId;
-    const { error: schemaError } = markTeacherAsClassTeacherSchema.validate({ teacherId });
+    const { error: schemaError } = markTeacherAsClassTeacherSchema.validate({
+      teacherId,
+    });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }
@@ -61,7 +63,7 @@ export async function deleteTeacherValidation(req, res, next) {
   try {
     const teacherId = req.params.teacherId;
     const { error: schemaError } = teacherDeleteSchema.validate({
-      teacherId
+      teacherId,
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -73,7 +75,17 @@ export async function deleteTeacherValidation(req, res, next) {
 }
 export async function updateTeacherValidation(req, res, next) {
   try {
-    const { username, firstname, lastname, email,  phone } = req.body;
+    const {
+      username,
+      firstname,
+      lastname,
+      email,
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+    } = req.body;
     const teacherId = req.params.teacherId;
     const { error: schemaError } = teacherUpdationSchema.validate({
       teacherId,
@@ -81,9 +93,15 @@ export async function updateTeacherValidation(req, res, next) {
       firstname,
       lastname,
       email,
-      phone
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+      dob,
     });
     if (schemaError) {
+      console.log(schemaError);
       return res.send(error(400, schemaError.details[0].message));
     }
     next();

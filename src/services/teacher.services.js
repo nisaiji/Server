@@ -4,7 +4,7 @@ import teacherModel from "../models/teacher.model.js";
 export async function checkTeacherExist(username, email) {
   try {
     const teacher = await teacherModel.findOne({
-      $or: [{ username }, { email }]
+      $or: [{ username }, { email }],
     });
     return teacher;
   } catch (err) {
@@ -29,7 +29,7 @@ export async function createTeacher(
       email,
       password,
       phone,
-      admin
+      admin,
     });
     return teacher;
   } catch (err) {
@@ -58,7 +58,7 @@ export async function findTeacherById(id) {
 export async function findClassTeacherById(id) {
   try {
     const classTeacher = await teacherModel.findOne({
-      $and: [{ _id: id }, { isClassTeacher: true }]
+      $and: [{ _id: id }, { isClassTeacher: true }],
     });
     return classTeacher;
   } catch (error) {
@@ -81,7 +81,7 @@ export async function deleteTeacher(id) {
 
 export async function getAllTeachers(adminId) {
   try {
-    const teacherlist = await teacherModel.find({admin:adminId});
+    const teacherlist = await teacherModel.find({ admin: adminId });
     return teacherlist;
   } catch (error) {
     return error;
@@ -90,9 +90,9 @@ export async function getAllTeachers(adminId) {
 
 export async function getAllClassTeachers(adminId) {
   try {
-    const cordinatorlist = await teacherModel.find({ admin:adminId });
+    const cordinatorlist = await teacherModel.find({ admin: adminId });
     return cordinatorlist;
-  } catch (error){
+  } catch (error) {
     return error;
   }
 }
@@ -122,7 +122,18 @@ export async function getTeacherCount({ adminId }) {
 
 export async function updateTeacherById(
   teacherId,
-  { username, firstname, lastname, email, phone }
+  {
+    username,
+    firstname,
+    lastname,
+    email,
+    phone,
+    bloodGroup,
+    gender,
+    university,
+    degree,
+    dob,
+  }
 ) {
   try {
     const updatedTeacher = await teacherModel.findByIdAndUpdate(teacherId, {
@@ -130,7 +141,12 @@ export async function updateTeacherById(
       firstname,
       lastname,
       email,
-      phone
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+      dob,
     });
     return updatedTeacher;
   } catch (error) {

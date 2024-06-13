@@ -1,5 +1,5 @@
 import express from "express";
-import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController, updateTeacherController} from "../controllers/teacher.controller.js";
+import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController, updateTeacherController, getTeachersController} from "../controllers/teacher.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { deleteTeacherValidation, loginClassTeacherValidation, markTeacherAsClassTeacherValidation, registerTeacherValidation, updateTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
 
@@ -186,7 +186,7 @@ teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,
  *       500:
  *         description: Internal server error
  */
-teacherRouter.put("/:teacherId",adminAuthentication, updateTeacherValidation,updateTeacherController);
+teacherRouter.put("/:teacherId",adminAuthentication, updateTeacherController);
 
   /**
  * @swagger
@@ -253,6 +253,7 @@ teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController
  */
 teacherRouter.get("/teacher-list/:pageNo",adminAuthentication,getTeacherListController);
 
+teacherRouter.get('/:teacherId',adminAuthentication,getTeachersController)
 
 
 
