@@ -11,11 +11,11 @@ import {
   getTeacherCount,
   getTeacherList,
   updateClassTeacherById,
-  updateTeacherById,
+  updateTeacherById
 } from "../services/teacher.services.js";
 import {
   checkPasswordMatch,
-  hashPassword,
+  hashPassword
 } from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { findAdminByID } from "../services/admin.services.js";
@@ -78,7 +78,7 @@ export async function loginClassTeacherController(req, res) {
       role: "teacher",
       teacherId: classTeacher["_id"],
       adminId: classTeacher["admin"],
-      phone: classTeacher["phone"],
+      phone: classTeacher["phone"]
     });
     return res.send(success(200, { accessToken }));
   } catch (err) {
@@ -98,13 +98,13 @@ export async function updateClassTeacherController(req, res) {
       university,
       degree
     } = req.body;
-    const { email, password } = req.body; 
+    const { email, password } = req.body;
     const classTeacher = await findClassTeacherById(teacherId);
-    if(!classTeacher){
-      return res.send(error(400,"class teacher doesn't exists"));
+    if (!classTeacher) {
+      return res.send(error(400, "class teacher doesn't exists"));
     }
-    const updatedTeacher = await updateClassTeacherById({      
-      id:teacherId,
+    const updatedTeacher = await updateClassTeacherById({
+      id: teacherId,
       firstname,
       lastname,
       dob,
@@ -154,7 +154,7 @@ export async function deleteTeacherController(req, res) {
 export async function getAllTeachersController(req, res) {
   try {
     const adminId = req.adminId;
-    const teacherList = await getAllTeachers({adminId});
+    const teacherList = await getAllTeachers({ adminId });
     return res.send(success(200, teacherList));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -176,7 +176,7 @@ export async function getTeacherListController(req, res) {
   }
 }
 
-export async function getAllClassTeachersController(req, res){
+export async function getAllClassTeachersController(req, res) {
   try {
     const adminId = req.adminId;
     const classTeacherList = await getAllClassTeachers(adminId);
@@ -200,7 +200,7 @@ export async function updateTeacherController(req, res) {
       lastname,
       email,
       password,
-      phone,
+      phone
     });
     if (updatedTeacher instanceof Error) {
       return res.send(error(500, "can't update teacher"));
