@@ -2,12 +2,15 @@ import {
   checkTeacherExist,
   createTeacher,
   deleteTeacher,
+  findClassTeacherByEmail,
+  findClassTeacherById,
   findClassTeacherByUsername,
   findTeacherById,
   getAllClassTeachers,
   getAllTeachers,
   getTeacherCount,
   getTeacherList,
+  updateClassTeacherById,
   updateTeacherById,
 } from "../services/teacher.services.js";
 import { generateAccessToken } from "../services/JWTToken.service.js";
@@ -55,9 +58,9 @@ export async function registerTeacherController(req, res) {
 
 export async function loginClassTeacherController(req, res) {
   try {
-    const { username, password } = req.body;
-
-    const classTeacher = await findClassTeacherByUsername(username);
+    const { email, password } = req.body;
+    // const classTeacher = await findClassTeacherByUsername(username);
+    const classTeacher = await findClassTeacherByEmail(email);
     // console.log(classTeacher);
     if (!classTeacher) {
       return res.send(error(404, "class teacher doesn't exist"));
@@ -77,6 +80,40 @@ export async function loginClassTeacherController(req, res) {
       phone: classTeacher["phone"],
     });
     return res.send(success(200, { accessToken }));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+export async function updateClassTeacherController(req, res) {
+  try {
+    const teacherId = req.params.teacherId;
+    const {
+      firstname,
+      lastname,
+      dob,
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree
+    } = req.body;
+    const { email, password } = req.body; 
+    const classTeacher = await findClassTeacherById(teacherId);
+    if(!classTeacher){
+      return res.send(error(400,"class teacher doesn't exists"));
+    }
+    const updatedTeacher = await updateClassTeacherById({      
+      id:teacherId,
+      firstname,
+      lastname,
+      dob,
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree
+    });
+    return res.send(success(200, "class teacher updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }

@@ -1,7 +1,7 @@
 import express from "express";
-import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController, updateTeacherController} from "../controllers/teacher.controller.js";
+import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController, updateTeacherController, updateClassTeacherController} from "../controllers/teacher.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
-import { deleteTeacherValidation, loginClassTeacherValidation, markTeacherAsClassTeacherValidation, registerTeacherValidation, updateTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
+import { deleteTeacherValidation, loginClassTeacherValidation, markTeacherAsClassTeacherValidation, registerTeacherValidation, updateClassTeacherValidation, updateTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
 
 const teacherRouter = express.Router();
 
@@ -59,7 +59,7 @@ teacherRouter.post("/register",adminAuthentication, registerTeacherValidation,  
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               email:
  *                 type: string
  *               password:
  *                 type: string
@@ -72,6 +72,54 @@ teacherRouter.post("/register",adminAuthentication, registerTeacherValidation,  
  *         description: Server error
  */
 teacherRouter.post("/login", loginClassTeacherValidation, loginClassTeacherController);
+
+/**
+ * @swagger
+ * /teacher/update-profile/{teacherId}:
+ *   put:
+ *     summary: To update a teacher
+ *     description: This API will allow a teacher to update profile.
+ *     tags:
+ *       - Teacher
+ *     parameters:
+ *       - in: path
+ *         name: teacherId
+ *         required: true
+ *         description: ID of the teacher
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstname:
+ *                 type: string
+ *               lastname:
+ *                 type: string
+ *               dob:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               bloodGroup:
+ *                 type: string
+ *               gender:
+ *                 type: string
+ *               university:
+ *                 type: string
+ *               degree:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: teacher logged in successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+teacherRouter.put("/update-profile/:teacherId", updateClassTeacherValidation, updateClassTeacherController);
 
 /**
  * @swagger
@@ -252,8 +300,5 @@ teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController
  *         description: Server error
  */
 teacherRouter.get("/teacher-list/:pageNo",adminAuthentication,getTeacherListController);
-
-
-
 
 export default teacherRouter;

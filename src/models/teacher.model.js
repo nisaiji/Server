@@ -14,10 +14,25 @@ const teacherSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  dob:{
+    type:String,
+  },
+  bloodGroup:{
+    type:String,
+  },
   email: {
     type: String,
     unique: true,
     required: true
+  },
+  gender:{
+    type:String,
+  },
+  university:{
+    type:String,
+  },
+  degree:{
+    type:String
   },
   role:{
     type:String,
