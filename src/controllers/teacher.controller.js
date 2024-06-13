@@ -2,6 +2,7 @@ import {
   checkTeacherExist,
   createTeacher,
   deleteTeacher,
+  findClassTeacherByEmail,
   findClassTeacherById,
   findClassTeacherByUsername,
   findTeacherById,
@@ -9,6 +10,7 @@ import {
   getAllTeachers,
   getTeacherCount,
   getTeacherList,
+  updateClassTeacherById,
   updateTeacherById,
 } from "../services/teacher.services.js";
 import {
@@ -57,8 +59,10 @@ export async function registerTeacherController(req, res) {
 
 export async function loginClassTeacherController(req, res) {
   try {
-    const { username, password } = req.body;
-    const classTeacher = await findClassTeacherByUsername(username);
+    const { email, password } = req.body;
+    // const classTeacher = await findClassTeacherByUsername(username);
+    const classTeacher = await findClassTeacherByEmail(email);
+    // console.log(classTeacher);
     if (!classTeacher) {
       return res.send(error(404, "class teacher doesn't exist"));
     }
@@ -78,16 +82,50 @@ export async function loginClassTeacherController(req, res) {
       adminId: classTeacher["admin"],
       phone: classTeacher["phone"],
       sectionId: section["_id"],
-      classId: section["classId"],
+      classId: Class["_id"],
       sectionName: section["name"],
       className: Class["name"],
     });
     return res.send(
-      success(200, {
-        accessToken,
-        username: classTeacher.username,
-      })
+      success(200, { accessToken, username: classTeacher["username"] })
     );
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function updateClassTeacherController(req, res) {
+  try {
+    const teacherId = req.params.teacherId;
+    const {
+      firstname,
+      lastname,
+      dob,
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+    } = req.body;
+    // const { email, password } = req.body;
+    const classTeacher = await findClassTeacherById(teacherId);
+    if (!classTeacher) {
+      return res.send(error(400, "class teacher doesn't exists"));
+    }
+    console.log("ct", classTeacher);
+    const updatedTeacher = await updateClassTeacherById({
+      id: teacherId,
+      firstname,
+      lastname,
+      dob,
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+    });
+    console.log("up", updatedTeacher);
+    return res.send(success(200, "class teacher updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -126,7 +164,8 @@ export async function deleteTeacherController(req, res) {
 
 export async function getAllTeachersController(req, res) {
   try {
-    const teacherList = await getAllTeachers(req.adminId);
+    const adminId = req.adminId;
+    const teacherList = await getAllTeachers({ adminId });
     return res.send(success(200, teacherList));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -194,11 +233,6 @@ export async function updateTeacherController(req, res) {
       email,
       password,
       phone,
-      bloodGroup,
-      gender,
-      university,
-      degree,
-      dob,
     });
     if (updatedTeacher instanceof Error) {
       return res.send(error(500, "can't update teacher"));

@@ -12,16 +12,31 @@ const teacherSchema = mongoose.Schema({
   },
   lastname: {
     type: String,
-    required: true,
+    required: true
+  },
+  dob:{
+    type:String,
+  },
+  bloodGroup:{
+    type:String,
   },
   email: {
     type: String,
     unique: true,
     required: true,
   },
-  role: {
-    type: String,
-    default: "teacher",
+  gender:{
+    type:String,
+  },
+  university:{
+    type:String,
+  },
+  degree:{
+    type:String
+  },
+  role:{
+    type:String,
+    default:"teacher"
   },
   isClassTeacher: {
     type: Boolean,

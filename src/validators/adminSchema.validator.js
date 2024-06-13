@@ -18,11 +18,12 @@ const registerAdminSchema = Joi.object({
     "any.required": "Affiliation no. is required!"
   }),
   phone: Joi.string()
-    .pattern(/^[6-9][0-9]{9}$/)
+    .pattern(/^[1-5][0-9]{9}$/)
+    .message("invalid phone number")
     .length(10)
     .required().messages({
-      "string.pattern": "Phone no. should have +91 prefix",
-      "string.length": "Phone no. length should have 13 digits",
+      "string.pattern": "invalid phone numberrr",
+      "string.length": "Phone no. length should have 10 digits",
       "any.required": "Phone no is required!"
     }),
   email: Joi.string()
