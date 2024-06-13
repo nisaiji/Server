@@ -40,11 +40,11 @@ const parentUpdateSchema = Joi.object({
       "string.max": "Last name must be smaller than 100 characters long."
     }),
   phone: Joi.string()
-    .pattern(/^\+91[6-9][0-9]{9}$/)
-    .length(13)
+    .pattern(/^[1-5][0-9]{9}$/)
+    .length(10)
     .messages({
-      "string.pattern.base": "Phone number must start with +91 and be followed by a 10-digit number starting with 6-9.",
-      "string.length": "Phone number must be exactly 13 characters long."
+      "string.pattern.base": "Phone number must have 10-digit number starting with 1-5.",
+      "string.length": "Phone number must be exactly 10 characters long."
     }),
   email: Joi.string()
     .email({

@@ -40,12 +40,12 @@ const registerStudentSchema = Joi.object({
       "any.required": "Email is required.",
     }),
   phone: Joi.string()
-    .pattern(/^\+91[6-9][0-9]{9}$/)
-    .length(13)
+    .pattern(/^[1-5][0-9]{9}$/)
+    .length(10)
     .required()
     .messages({
       "string.pattern.base": "Invalid phone number.",
-      "string.length": "Phone number must be 13 chars.",
+      "string.length": "Phone number must be 10 chars.",
       "any.required": "Phone number is required.",
     }),
   address: Joi.string().required().messages({
@@ -94,12 +94,12 @@ const adminRegisterStudentSchema = Joi.object({
       "any.required": "Email is required.",
     }),
   phone: Joi.string()
-    .pattern(/^\+91[6-9][0-9]{9}$/)
-    .length(13)
+    .pattern(/^[1-5][0-9]{9}$/)
+    .length(10)
     .required()
     .messages({
       "string.pattern.base": "Invalid phone number.",
-      "string.length": "Phone number must be 13 chars.",
+      "string.length": "Phone number must be 10 chars.",
       "any.required": "Phone number is required.",
     }),
   address: Joi.string().required().messages({
@@ -168,12 +168,12 @@ const adminUpdateStudentSchema = Joi.object({
       "any.required": "Email is required.",
     }),
   phone: Joi.string()
-    .pattern(/^\+91[6-9][0-9]{9}$/)
-    .length(13)
+    .pattern(/^[1-5][0-9]{9}$/)
+    .length(10)
     .required()
     .messages({
       "string.pattern.base": "Invalid phone number.",
-      "string.length": "Phone number must be 13 chars.",
+      "string.length": "Phone number must be 10 chars.",
       "any.required": "Phone number is required.",
     }),
   address: Joi.string().required().messages({
