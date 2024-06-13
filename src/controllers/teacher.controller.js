@@ -24,7 +24,7 @@ import { findSectionByClassTeacherId } from "../services/section.services.js";
 
 export async function registerTeacherController(req, res) {
   try {
-    console.log("controller");
+    // console.log("controller");
     const adminId = req.adminId;
     const { username, firstname, lastname, email, password, phone } = req.body;
     const existingTeacher = await checkTeacherExist(username, email);
@@ -178,8 +178,7 @@ export async function getTeacherListController(req, res) {
 
 export async function getAllClassTeachersController(req, res) {
   try {
-    const adminId = req.adminId;
-    const classTeacherList = await getAllClassTeachers(adminId);
+    const classTeacherList = await getAllClassTeachers();
     return res.send(success(2001, classTeacherList));
   } catch (err) {
     return res.send(error(500, err.message));

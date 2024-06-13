@@ -41,9 +41,9 @@ export async function deleteClassController(req, res) {
     if (existingClass["section"].length > 0) {
       return res.send(error(400, "can't delete class, there are sections."));
     }
-    console.log(existingClass);
+    // console.log(existingClass);
     const deletedClass = await deleteClass(classId);
-    console.log(existingClass);
+    // console.log(existingClass);
     return res.send(success(200, "class deleted successfully"));
   } catch (err) {
     return res.send(error(500, err.message));

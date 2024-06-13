@@ -11,6 +11,8 @@ import {
   checkStudentExist,
   deleteStudentById,
   findStudentById,
+  getAllStudentCount,
+  getAllStudentList,
   getStudentCount,
   getStudentList,
   registerStudent,
@@ -44,11 +46,11 @@ export async function registerStudentController(req, res) {
       return res.send(error(400, "section doesn't exists"));
     }
     const adminId = classTeacher?.admin;
-    const existingStudent = await checkStudentExist(rollNumber,email, adminId);
-    if (existingStudent && existingStudent["rollNumber"]===rollNumber) {
+    const existingStudent = await checkStudentExist(rollNumber, email, adminId);
+    if (existingStudent && existingStudent["rollNumber"] === rollNumber) {
       return res.send(error(400, "roll number already exist"));
     }
-    if (existingStudent && existingStudent["email"]===email) {
+    if (existingStudent && existingStudent["email"] === email) {
       return res.send(error(400, "email already exist"));
     }
     const student = await registerStudent(
@@ -105,13 +107,13 @@ export async function adminRegisterStudentController(req, res) {
       return res.send(error(400, "Class doesn't exists"));
     }
 
-    const existingStudent = await checkStudentExist(rollNumber,email, adminId);
+    const existingStudent = await checkStudentExist(rollNumber, email, adminId);
     // console.log(existingStudent);
-    if(existingStudent && existingStudent["rollNumber"]===rollNumber) {
+    if (existingStudent && existingStudent["rollNumber"] === rollNumber) {
       return res.send(error(400, "roll number already exist"));
     }
-    
-    if(existingStudent && existingStudent["email"]===email) {
+
+    if (existingStudent && existingStudent["email"] === email) {
       return res.send(error(400, "email already exist"));
     }
     const student = await adminRegisterStudent({
@@ -127,9 +129,9 @@ export async function adminRegisterStudentController(req, res) {
       classId,
       adminId,
     });
-    console.log(student);
-    if(student instanceof Error){
-      return res.send(error(400,"can't create student"));
+    // console.log(student);
+    if (student instanceof Error) {
+      return res.send(error(400, "can't create student"));
     }
     section?.students?.push(student["_id"]);
     student.section = section["_id"];
@@ -236,6 +238,24 @@ export async function getStudentListOfSectionForAdminController(req, res) {
       limit,
       page: pageNo,
       sectionId,
+    });
+    return res.send(
+      success(200, { pageNo, limit, totalCount: studentCount, studentList })
+    );
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function getAllStudentListForAdminController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const pageNo = req.params.pageNo;
+    const limit = 5;
+    const studentCount = await getAllStudentCount();
+    const studentList = await getAllStudentList({
+      limit,
+      page: pageNo,
     });
     return res.send(
       success(200, { pageNo, limit, totalCount: studentCount, studentList })
