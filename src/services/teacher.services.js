@@ -67,11 +67,11 @@ export async function findClassTeacherById(id) {
   try {
     const classTeacher = await teacherModel.findById(id);
     return classTeacher;
-  }catch(error){
+  } catch (error) {
     return error;
   }
 }
-export async function updateClassTeacherById({ 
+export async function updateClassTeacherById({
   id,
   firstname,
   lastname,
@@ -80,23 +80,24 @@ export async function updateClassTeacherById({
   bloodGroup,
   gender,
   university,
-  degree}){
-    try {
-      const teacher = await teacherModel.findByIdAndUpdate(id,{ 
-        firstname,
-        lastname,
-        dob,
-        phone,
-        bloodGroup,
-        gender,
-        university,
-        degree});
-        return teacher;
-              
-    } catch (error) {
-      throw error;
-    }
+  degree,
+}) {
+  try {
+    const teacher = await teacherModel.findByIdAndUpdate(id, {
+      firstname,
+      lastname,
+      dob,
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+    });
+    return teacher;
+  } catch (error) {
+    throw error;
   }
+}
 
 export async function deleteTeacher(id) {
   try {

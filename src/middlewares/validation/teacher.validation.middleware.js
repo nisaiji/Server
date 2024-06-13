@@ -5,7 +5,7 @@ import {
   classTeacherLoginSchema,
   teacherRegisterSchema,
   teacherUpdationSchema,
-  teacherUpdateSchema
+  teacherUpdateSchema,
 } from "../../validators/teacherSchema.validator.js";
 
 export async function registerTeacherValidation(req, res, next) {
@@ -34,7 +34,7 @@ export async function loginClassTeacherValidation(req, res, next) {
     const { email, password } = req.body;
     const { error: schemaError } = classTeacherLoginSchema.validate({
       email,
-      password
+      password,
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -55,7 +55,7 @@ export async function updateClassTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
     } = req.body;
     const { error: schemaError } = teacherUpdateSchema.validate({
       teacherId,
@@ -66,11 +66,11 @@ export async function updateClassTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
-    }
+      }
     next();
   } catch (err) {
     return res.send(error(500, err.message));
@@ -81,7 +81,7 @@ export async function markTeacherAsClassTeacherValidation(req, res, next) {
   try {
     const teacherId = req.params.teacherId;
     const { error: schemaError } = markTeacherAsClassTeacherSchema.validate({
-      teacherId
+      teacherId,
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));

@@ -107,12 +107,10 @@ export async function updateClassTeacherController(req, res) {
       university,
       degree,
     } = req.body;
-    // const { email, password } = req.body;
     const classTeacher = await findClassTeacherById(teacherId);
     if (!classTeacher) {
       return res.send(error(400, "class teacher doesn't exists"));
     }
-    console.log("ct", classTeacher);
     const updatedTeacher = await updateClassTeacherById({
       id: teacherId,
       firstname,
@@ -124,7 +122,6 @@ export async function updateClassTeacherController(req, res) {
       university,
       degree,
     });
-    console.log("up", updatedTeacher);
     return res.send(success(200, "class teacher updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));

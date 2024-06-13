@@ -119,7 +119,7 @@ teacherRouter.post("/login", loginClassTeacherValidation, loginClassTeacherContr
  *       500:
  *         description: Server error
  */
-teacherRouter.put("/update-profile/:teacherId", updateClassTeacherValidation, updateClassTeacherController);
+teacherRouter.put("/update-profile/:teacherId",adminAuthentication, updateClassTeacherValidation, updateClassTeacherController);
 
 /**
  * @swagger
