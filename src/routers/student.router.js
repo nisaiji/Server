@@ -5,6 +5,7 @@ import {
   adminUpdateStudentController,
   deleteStudentController,
   getAllStudentListForAdminController,
+  getAllStudentOfSectionController,
   getStudentListOfSectionController,
   getStudentListOfSectionForAdminController,
   registerStudentController,
@@ -222,6 +223,37 @@ studentRouter.get(
   "/student-list/:sectionId/:pageNo",
   classTeacherAuthentication,
   getStudentListOfSectionController
+);
+
+/**
+ * @swagger
+ * /student/student-list/{sectionId}/{pageNo}:
+ *   get:
+ *     security:
+ *       - Authorization: []
+ *     summary: get a list of student of that section.
+ *     description: This api will fetch list of students of that section. it requires class-teacher login token.
+ *     tags:
+ *       - Student
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         description: ID of the student
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: student deleted successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+studentRouter.get(
+  "/student-list/:sectionId",
+  classTeacherAuthentication,
+  getAllStudentOfSectionController
 );
 
 /**

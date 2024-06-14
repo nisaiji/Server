@@ -15,6 +15,7 @@ import {
   getAllStudentList,
   getStudentCount,
   getStudentList,
+  getStudentListBySectionId,
   registerStudent,
   updateStudent,
 } from "../services/student.service.js";
@@ -212,6 +213,28 @@ export async function getStudentListOfSectionController(req, res) {
     });
     return res.send(
       success(200, { pageNo, limit, totalCount: studentCount, studentList })
+    );
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function getAllStudentOfSectionController(req, res) {
+  try {
+    const sectionId = req.params.sectionId;
+    const classTeacherId = req.teacherId;
+    const studentCount = await getStudentCount({ sectionId });
+    const section = await findSectionById(sectionId);
+    if (section["classTeacher"].toString() !== classTeacherId) {
+      return res.send(
+        error(400, "this class teacher doesn't has access to this section.")
+      );
+    }
+    const studentList = await getStudentListBySectionId({
+      sectionId,
+    });
+    return res.send(
+      success(200, { totalCount: studentCount, studentList })
     );
   } catch (err) {
     return res.send(error(500, err.message));

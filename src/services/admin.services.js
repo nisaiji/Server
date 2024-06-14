@@ -45,6 +45,15 @@ export async function findAdminByAdminName(adminName) {
   }
 }
 
+export async function findAdminByEmail(email) {
+  try {
+    const admin = await adminModel.findOne({ email:email });
+    return admin;
+  } catch (err) {
+    return err;
+  }
+}
+
 export async function findAdminByID(id) {
   try {
     const admin = await adminModel.findById(id);

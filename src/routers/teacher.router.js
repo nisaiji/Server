@@ -188,6 +188,7 @@ teacherRouter.patch("/mark-teacher-as-class-teacher/:teacherId",adminAuthenticat
  *         description: Server error
  */
 teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,deleteTeacherController );
+
 /**
  * @swagger
  * /teacher/{teacherId}:

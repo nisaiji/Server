@@ -29,9 +29,9 @@ export async function adminRegisterValidation(req, res, next) {
 
 export async function adminLoginValidation(req, res, next) {
   try {
-    const { adminName, password } = req.body;
+    const { email, password } = req.body;
     const { error: schemaError } = loginAdminSchema.validate({
-      adminName,
+      email,
       password
     });
     if (schemaError) {
