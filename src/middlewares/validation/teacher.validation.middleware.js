@@ -46,18 +46,7 @@ export async function loginClassTeacherValidation(req, res, next) {
 }
 export async function updateClassTeacherValidation(req, res, next) {
   try {
-    const teacherId = req.params.teacherId;
-    const {
-      firstname,
-      lastname,
-      dob,
-      phone,
-      bloodGroup,
-      gender,
-      university,
-      degree
-    } = req.body;
-    const { error: schemaError } = teacherUpdateSchema.validate({
+    const {error: schemaError} = teacherUpdateSchema.validate({
       teacherId,
       firstname,
       lastname,
