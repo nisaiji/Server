@@ -1,5 +1,5 @@
 import express from "express";
-import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController, updateTeacherController, updateClassTeacherController} from "../controllers/teacher.controller.js";
+import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController, updateTeacherController, updateClassTeacherController, getTeachersController} from "../controllers/teacher.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { deleteTeacherValidation, loginClassTeacherValidation, markTeacherAsClassTeacherValidation, registerTeacherValidation, updateClassTeacherValidation, updateTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
 
@@ -119,7 +119,7 @@ teacherRouter.post("/login", loginClassTeacherValidation, loginClassTeacherContr
  *       500:
  *         description: Server error
  */
-teacherRouter.put("/update-profile/:teacherId", updateClassTeacherValidation, updateClassTeacherController);
+teacherRouter.put("/update-profile/:teacherId",adminAuthentication, updateClassTeacherValidation, updateClassTeacherController);
 
 /**
  * @swagger
@@ -188,6 +188,7 @@ teacherRouter.patch("/mark-teacher-as-class-teacher/:teacherId",adminAuthenticat
  *         description: Server error
  */
 teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,deleteTeacherController );
+
 /**
  * @swagger
  * /teacher/{teacherId}:
@@ -234,7 +235,9 @@ teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,
  *       500:
  *         description: Internal server error
  */
-teacherRouter.put("/:teacherId",adminAuthentication, updateTeacherValidation,updateTeacherController);
+teacherRouter.put("/:teacherId",adminAuthentication, updateTeacherController);
+
+teacherRouter.get("/:teacherId",adminAuthentication, getTeachersController);
 
   /**
  * @swagger

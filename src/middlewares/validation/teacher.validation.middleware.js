@@ -5,7 +5,7 @@ import {
   classTeacherLoginSchema,
   teacherRegisterSchema,
   teacherUpdationSchema,
-  teacherUpdateSchema
+  teacherUpdateSchema,
 } from "../../validators/teacherSchema.validator.js";
 
 export async function registerTeacherValidation(req, res, next) {
@@ -17,7 +17,7 @@ export async function registerTeacherValidation(req, res, next) {
       lastname,
       email,
       phone,
-      password
+      password,
     });
 
     if (schemaError) {
@@ -34,7 +34,7 @@ export async function loginClassTeacherValidation(req, res, next) {
     const { email, password } = req.body;
     const { error: schemaError } = classTeacherLoginSchema.validate({
       email,
-      password
+      password,
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -46,7 +46,18 @@ export async function loginClassTeacherValidation(req, res, next) {
 }
 export async function updateClassTeacherValidation(req, res, next) {
   try {
-    const {error: schemaError} = teacherUpdateSchema.validate({
+    const teacherId = req.params.teacherId;
+    const {
+      firstname,
+      lastname,
+      dob,
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+    } = req.body;
+    const { error: schemaError } = teacherUpdateSchema.validate({
       teacherId,
       firstname,
       lastname,
@@ -55,11 +66,11 @@ export async function updateClassTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
-    }
+      }
     next();
   } catch (err) {
     return res.send(error(500, err.message));
@@ -70,7 +81,7 @@ export async function markTeacherAsClassTeacherValidation(req, res, next) {
   try {
     const teacherId = req.params.teacherId;
     const { error: schemaError } = markTeacherAsClassTeacherSchema.validate({
-      teacherId
+      teacherId,
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -85,7 +96,7 @@ export async function deleteTeacherValidation(req, res, next) {
   try {
     const teacherId = req.params.teacherId;
     const { error: schemaError } = teacherDeleteSchema.validate({
-      teacherId
+      teacherId,
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -105,9 +116,15 @@ export async function updateTeacherValidation(req, res, next) {
       firstname,
       lastname,
       email,
-      phone
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+      dob,
     });
     if (schemaError) {
+      console.log(schemaError);
       return res.send(error(400, schemaError.details[0].message));
     }
     next();

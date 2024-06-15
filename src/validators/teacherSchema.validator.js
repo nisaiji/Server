@@ -8,7 +8,7 @@ const classTeacherLoginSchema = Joi.object({
   password: Joi.string()
     .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
     .messages({
-      "string.pattern.base": "Invalid password format."
+      "string.pattern.base": "Invalid password format.",
     })
     .required()
     .messages({
@@ -40,7 +40,7 @@ const teacherRegisterSchema = Joi.object({
     .required()
     .messages({
       "string.email": "Invalid email format.",
-      "any.required": "Email is required."
+      "any.required": "Email is required.",
     }),
   phone: Joi.string()
     .pattern(/^[1-5][0-9]{9}$/)
@@ -54,7 +54,7 @@ const teacherRegisterSchema = Joi.object({
   password: Joi.string()
     .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
     .messages({
-      "string.pattern.base": "Invalid password format."
+      "string.pattern.base": "Invalid password format.",
     })
     .required()
     .messages({
@@ -134,15 +134,15 @@ const teacherUpdationSchema = Joi.object({
       minDomainSegments: 2,
       tlds: { allow: ["com", "net", "org", "io", "co"] }
     })
-    .required()
+    .optional()
     .messages({
       "string.email": "Invalid email format.",
-      "any.required": "Email is required."
+      "any.required": "Email is required.",
     }),
   phone: Joi.string()
     .pattern(/^\+91[0-5][0-9]{9}$/)
     .length(13)
-    .required()
+    .optional()
     .messages({
       "string.pattern.base": "Invalid phone number format.",
       "string.length": "Phone number must be 13 characters.",

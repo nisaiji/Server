@@ -104,6 +104,16 @@ export async function getStudentList({ limit, page, sectionId }) {
   }
 }
 
+export async function getStudentListBySectionId({ sectionId }) {
+  try {
+    const students = await studentModel
+      .find({ section: sectionId })
+    return students;
+  } catch (error) {
+    return error;
+  }
+}
+
 export async function getAllStudentList({ limit, page}) {
   try {
     const students = await studentModel

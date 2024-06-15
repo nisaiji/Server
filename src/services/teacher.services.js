@@ -4,7 +4,7 @@ import teacherModel from "../models/teacher.model.js";
 export async function checkTeacherExist(username, email) {
   try {
     const teacher = await teacherModel.findOne({
-      $or: [{ username }, { email }]
+      $or: [{ username }, { email }],
     });
     return teacher;
   } catch (err) {
@@ -29,7 +29,7 @@ export async function createTeacher(
       email,
       password,
       phone,
-      admin
+      admin,
     });
     return teacher;
   } catch (err) {
@@ -67,11 +67,11 @@ export async function findClassTeacherById(id) {
   try {
     const classTeacher = await teacherModel.findById(id);
     return classTeacher;
-  }catch(error){
+  } catch (error) {
     return error;
   }
 }
-export async function updateClassTeacherById({ 
+export async function updateClassTeacherById({
   id,
   firstname,
   lastname,
@@ -80,23 +80,24 @@ export async function updateClassTeacherById({
   bloodGroup,
   gender,
   university,
-  degree}){
-    try {
-      const teacher = await teacherModel.findByIdAndUpdate(id,{ 
-        firstname,
-        lastname,
-        dob,
-        phone,
-        bloodGroup,
-        gender,
-        university,
-        degree});
-        return teacher;
-              
-    } catch (error) {
-      throw error;
-    }
+  degree,
+}) {
+  try {
+    const teacher = await teacherModel.findByIdAndUpdate(id, {
+      firstname,
+      lastname,
+      dob,
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+    });
+    return teacher;
+  } catch (error) {
+    throw error;
   }
+}
 
 export async function deleteTeacher(id) {
   try {
@@ -113,7 +114,7 @@ export async function deleteTeacher(id) {
 
 export async function getAllTeachers(adminId) {
   try {
-    const teacherlist = await teacherModel.find({admin:adminId});
+    const teacherlist = await teacherModel.find({ admin: adminId });
     return teacherlist;
   } catch (error) {
     return error;
@@ -122,9 +123,9 @@ export async function getAllTeachers(adminId) {
 
 export async function getAllClassTeachers(adminId) {
   try {
-    const cordinatorlist = await teacherModel.find({ admin:adminId });
+    const cordinatorlist = await teacherModel.find({ admin: adminId });
     return cordinatorlist;
-  } catch (error){
+  } catch (error) {
     return error;
   }
 }
@@ -154,7 +155,18 @@ export async function getTeacherCount({ adminId }) {
 
 export async function updateTeacherById(
   teacherId,
-  { username, firstname, lastname, email, phone }
+  {
+    username,
+    firstname,
+    lastname,
+    email,
+    phone,
+    bloodGroup,
+    gender,
+    university,
+    degree,
+    dob,
+  }
 ) {
   try {
     const updatedTeacher = await teacherModel.findByIdAndUpdate(teacherId, {
@@ -162,7 +174,12 @@ export async function updateTeacherById(
       firstname,
       lastname,
       email,
-      phone
+      phone,
+      bloodGroup,
+      gender,
+      university,
+      degree,
+      dob,
     });
     return updatedTeacher;
   } catch (error) {

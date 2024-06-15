@@ -6,7 +6,7 @@ export async function matchClassTeacherAndSection(classTeacherId, sectionId) {
   try {
     const matchedSection = await sectionModel.findOne({
       _id: sectionId,
-      classTeacher: classTeacherId
+      classTeacher: classTeacherId,
     });
     return matchedSection;
   } catch (error) {
@@ -28,17 +28,19 @@ export async function createAttendance(data) {
       studentId,
       sectionId,
       classTeacherId,
-      adminId
+      adminId,
     } = data;
+    // console.log('d',data);
     const createdAttendance = await attendanceModel.create({
       date: currDate,
       day,
-      isPresent,
+      isPresent:isPresent,
       student: studentId,
       section: sectionId,
       classTeacher: classTeacherId,
-      admin: adminId
+      admin: adminId,
     });
+    // console.log("ca", createdAttendance);
     return createdAttendance;
   } catch (error) {
     return error;
@@ -49,8 +51,8 @@ export async function checkAttendanceAlreadyMarked(data) {
   try {
     const { studentId, currDate } = data;
     const attendance = await attendanceModel.findOne({
-        date:currDate,
-        student:studentId, 
+      date: currDate,
+      student: studentId,
     });
     return attendance;
   } catch (error) {
@@ -58,14 +60,17 @@ export async function checkAttendanceAlreadyMarked(data) {
   }
 }
 
-export async function checkHolidayEvent(data){
-    try {
-      const {currDate , adminId} = data;
-      console.log({currDate,adminId});
-      const holiday = await holidayEventModel.findOne({date:currDate,admin:adminId});
-      console.log(holiday);
-      return holiday;  
-    } catch (error) {
-        return error;        
-    }
+export async function checkHolidayEvent(data) {
+  try {
+    const { currDate, adminId } = data;
+    // console.log({currDate,adminId});
+    const holiday = await holidayEventModel.findOne({
+      date: currDate,
+      admin: adminId,
+    });
+    // console.log(holiday);
+    return holiday;
+  } catch (error) {
+    return error;
+  }
 }

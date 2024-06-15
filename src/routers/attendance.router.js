@@ -37,6 +37,9 @@ const attendanceRouter = express.Router();
  *       500:
  *         description: "Server side error"
  */
-attendanceRouter.post("/mark-attendance", classTeacherAuthentication,markPresentValidation,classTeacherAuthorization,markAttendanceController);
+// attendanceRouter.post("/mark-attendance", classTeacherAuthentication,markPresentValidation,classTeacherAuthorization,markAttendanceController);
+
+attendanceRouter.post("/mark-attendance/:sectionId", classTeacherAuthentication,markAttendanceController);
+
 
 export default attendanceRouter;

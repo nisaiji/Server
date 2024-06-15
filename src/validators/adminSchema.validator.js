@@ -45,10 +45,9 @@ const registerAdminSchema = Joi.object({
 
 // login school
 const loginAdminSchema = Joi.object({
-  adminName: Joi.string().min(3).max(15).required().messages({
-    "string.min":"Admin name length must be atleast 3 chars",
-    "string.max":"Admin name length must be smaller than 15 chars",
-    "any.required":"Admin name is reqired!"
+  email: Joi.string().email({ minDomainSegments: 2 }).required().messages({
+    "string.email": "Invalid email format",
+    "any.required": "Email is required."
   }),
   password: Joi.string().required().messages({
     "any.required":"Password is required!",

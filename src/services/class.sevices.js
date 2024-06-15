@@ -50,3 +50,4 @@ export async function findClassById(id) {
     throw error;
   }
 }
+

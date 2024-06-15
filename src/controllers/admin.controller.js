@@ -7,7 +7,8 @@ import bcrypt from "bcrypt";
 import {
   checkAdminExist,
   createAdmin,
-  findAdminByAdminName
+  findAdminByAdminName,
+  findAdminByEmail
 } from "../services/admin.services.js";
 import { hashPassword } from "../services/password.service.js";
 
@@ -62,8 +63,8 @@ export async function registerAdminController(req, res) {
 
 export async function loginAdminController(req, res) {
   try {
-    const { adminName, password } = req.body;
-    const admin = await findAdminByAdminName(adminName);
+    const { email, password } = req.body;
+    const admin = await findAdminByEmail(email);
     if (!admin) {
       return res.send(error(404, "admin name is not registered!"));
     }
