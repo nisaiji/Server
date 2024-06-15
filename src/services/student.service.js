@@ -1,8 +1,11 @@
+import attendanceModel from "../models/attendance.model.js";
 import studentModel from "../models/student.model.js";
 
-export async function checkStudentExist(rollNumber,email, admin) {
+export async function checkStudentExist(rollNumber, email, admin) {
   try {
-    const student = await studentModel.findOne({$or:[{$and: [{ rollNumber }, { admin }],},{email}]});
+    const student = await studentModel.findOne({
+      $or: [{ $and: [{ rollNumber }, { admin }] }, { email }]
+    });
     // const student = await studentModel.findOne({$and: [{ rollNumber }, { admin }],});
     return student;
   } catch (error) {
@@ -31,7 +34,7 @@ export async function registerStudent(
       phone,
       email,
       address,
-      admin,
+      admin
     });
     return student;
   } catch (error) {
@@ -50,7 +53,7 @@ export async function adminRegisterStudent({
   address,
   sectionId,
   classId,
-  adminId,
+  adminId
 }) {
   try {
     const student = await studentModel.create({
@@ -64,11 +67,11 @@ export async function adminRegisterStudent({
       address,
       admin: adminId,
       section: sectionId,
-      classId,
+      classId
     });
     return student;
   } catch (error) {
-   throw error;
+    throw error;
   }
 }
 
@@ -106,15 +109,14 @@ export async function getStudentList({ limit, page, sectionId }) {
 
 export async function getStudentListBySectionId({ sectionId }) {
   try {
-    const students = await studentModel
-      .find({ section: sectionId })
+    const students = await studentModel.find({ section: sectionId });
     return students;
   } catch (error) {
     return error;
   }
 }
 
-export async function getAllStudentList({ limit, page}) {
+export async function getAllStudentList({ limit, page }) {
   try {
     const students = await studentModel
       .find()
@@ -130,11 +132,29 @@ export async function getAllStudentList({ limit, page}) {
 export async function getStudentCount({ sectionId }) {
   try {
     const studentCount = await studentModel.countDocuments({
-      section: sectionId,
+      section: sectionId
     });
+    console.log({ studentCount });
     return studentCount;
   } catch (error) {
     return error;
+  }
+}
+
+export async function getPresentStudentCount({ sectionId,currDate}) {
+  try {
+    console.log({sectionId,currDate})
+    const presentCount = await attendanceModel.countDocuments({
+      $and:[
+        {section:sectionId},
+        {date:currDate},
+        {isPresent:true}
+      ]
+    })
+    console.log(presentCount)
+    return presentCount;
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -156,7 +176,7 @@ export async function adminUpdateStudent({
   age,
   phone,
   email,
-  address,
+  address
 }) {
   console.log(studentId);
   try {
@@ -168,7 +188,7 @@ export async function adminUpdateStudent({
       age,
       phone,
       email,
-      address,
+      address
     });
     // console.log(student);
     return student;
@@ -186,7 +206,7 @@ export async function updateStudent({
   age,
   phone,
   email,
-  address,
+  address
 }) {
   try {
     const student = await studentModel.findByIdAndUpdate(studentId, {
@@ -197,10 +217,29 @@ export async function updateStudent({
       age,
       phone,
       email,
-      address,
+      address
     });
     return student;
   } catch (error) {
     return error;
   }
 }
+
+// export async function getStudentCount({sectionId}){
+//   try {
+//     const count = await studentModel.aggregate([{
+//       $match: {
+//         section:ObjectId(sectionId)  // Replace "A" with your actual section ID
+//       }
+//     },
+//     {
+//       $group: {
+//         _id: "$section",
+//         count: { $sum: 1 }
+//       }
+//     }]);
+//     return count;
+//   } catch (error) {
+//     throw error;
+//   }
+// }

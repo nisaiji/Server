@@ -3,6 +3,7 @@ import {
   checkHolidayEvent,
   createAttendance,
 } from "../services/attendance.service.js";
+import { getPresentStudentCount, getStudentCount } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function markAttendanceController(req, res) {
@@ -108,5 +109,21 @@ export async function checkAttendaceMarkedController(req,res){
     return res.send(success(200,"attendance haven't marked today"));
   } catch (err) {
     return res.send(error(500,err.message));    
+  }
+}
+
+
+export async function attendanceDailyStatusController(req,res){
+  try {
+    const sectionId = req.params.sectionId;
+    const date = new Date();
+    const currDate =   date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    // const holidayEvent = await checkHolidayEvent({ currDate, adminId });
+    console.log({sectionId})
+    const totalStudentCount = await getStudentCount({sectionId});
+    const presentStudentCount = await getPresentStudentCount({sectionId,currDate});
+    return res.send(success(200,{totalStudentCount,presentStudentCount}));
+  } catch (err) {
+    return res.send(error(500,err.message));   
   }
 }
