@@ -30,7 +30,6 @@ export async function createAttendance(data) {
       classTeacherId,
       adminId,
     } = data;
-    // console.log('d',data);
     const createdAttendance = await attendanceModel.create({
       date: currDate,
       day,
@@ -40,7 +39,7 @@ export async function createAttendance(data) {
       classTeacher: classTeacherId,
       admin: adminId,
     });
-    // console.log("ca", createdAttendance);
+    console.log("ca", createdAttendance);
     return createdAttendance;
   } catch (error) {
     return error;
