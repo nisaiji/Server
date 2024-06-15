@@ -33,15 +33,7 @@ export async function markAttendanceController(req, res) {
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
-    console.log(present, absent);
     present.map(async (student) => {
-        const attendance = await checkAttendanceAlreadyMarked({
-          studentId: student._id,
-          currDate,
-        });
-        console.log('attendance',attendance);
-      //   attendance.isPresent = true;
-      //   await attendance.save();
       const createdAttendance = await createAttendance({
         currDate,
         day,
@@ -51,19 +43,8 @@ export async function markAttendanceController(req, res) {
         classTeacherId,
         adminId,
       });
-      //   console.log(createdAttendance);
-      //   await createAttendance.save()
-      //   console.log(attendance);
-      // console.log(student);
     });
     absent.map(async (student) => {
-        const attendance = await checkAttendanceAlreadyMarked({
-          studentId: student._id,
-          currDate,
-        });
-        console.log('attendance',attendance);
-      //   attendance.isPresent = true;
-      //   await attendance.save();
       const createdAttendance = await createAttendance({
         currDate,
         day,
@@ -73,9 +54,6 @@ export async function markAttendanceController(req, res) {
         classTeacherId,
         adminId,
       });
-      // await createAttendance.save()
-      //   console.log(attendance);
-      // console.log(student);
     });
     return res.send(success(200, "attendance marked sucessfully"));
   } catch (err) {
