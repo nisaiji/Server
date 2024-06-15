@@ -46,18 +46,18 @@ export async function createAttendance(data) {
   }
 }
 
-export async function checkAttendanceAlreadyMarked(data) {
-  try {
-    const { studentId, currDate } = data;
-    const attendance = await attendanceModel.findOne({
-      date: currDate,
-      student: studentId,
-    });
-    return attendance;
-  } catch (error) {
-    return error;
-  }
-}
+// export async function checkAttendanceAlreadyMarked(data) {
+//   try {
+//     const { studentId, currDate } = data;
+//     const attendance = await attendanceModel.findOne({
+//       date: currDate,
+//       student: studentId,
+//     });
+//     return attendance;
+//   } catch (error) {
+//     return error;
+//   }
+// }
 
 export async function checkHolidayEvent(data) {
   try {
@@ -71,5 +71,14 @@ export async function checkHolidayEvent(data) {
     return holiday;
   } catch (error) {
     return error;
+  }
+}
+
+export async function checkAttendanceAlreadyMarked({sectionId, currDate}){
+  try {
+    const attendanceMarked = await attendanceModel.findOne({$and:[{section:sectionId},{date:currDate}]});
+    return attendanceMarked;
+  } catch (error) {
+    throw error;    
   }
 }

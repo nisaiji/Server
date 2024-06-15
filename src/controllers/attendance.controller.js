@@ -89,3 +89,24 @@ export async function markAttendanceController(req, res) {
 //         return res.send(error(500,err.message));
 //     }
 // }
+
+
+export async function checkAttendaceMarkedController(req,res){
+  try {
+    const adminId = req.adminId;
+    const sectionId = req.params.sectionId;
+    const date = new Date();
+    const currDate =   date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    const holidayEvent = await checkHolidayEvent({ currDate, adminId });
+    if (holidayEvent) {
+      return res.send(error(400, "today is scheduled as holiday!"));
+    }
+    const checkAttendanceMarked = await checkAttendanceAlreadyMarked({sectionId,currDate});
+    if(checkAttendanceMarked){
+      return res.send(error(400,"attendance already marked"));
+    }
+    return res.send(success(200,"attendance haven't marked today"));
+  } catch (err) {
+    return res.send(error(500,err.message));    
+  }
+}
