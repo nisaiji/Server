@@ -149,3 +149,94 @@ export async function attendanceDailyStatusController(req,res){
     return res.send(error(500,err.message));   
   }
 }
+
+
+export async function attendanceWeeklyStatusController(req, res) {
+  try {
+    const sectionId = req.params.sectionId;
+    const date = new Date();
+    const { monday, sunday } = date.getWeekDates();
+    // console.log(sectionId,adminId,monday,sunday);
+    const weekDates = [];
+    let currentDate = new Date(monday);
+    while (currentDate <= sunday) {
+      weekDates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    let weeklyAttendance = await Promise.all(
+      weekDates.map(async (date) => {
+        const currDate =
+          date.getDate() +
+          "-" +
+          (date.getMonth() + 1) +
+          "-" +
+          date.getFullYear();
+        const presentStudentCount = await getPresentStudentCount({
+          sectionId,
+          currDate,
+        });
+        return presentStudentCount;
+      })
+    );
+
+    const totalStudentCount = await getStudentCount({ sectionId });
+    // console.log(weeklyAttendance);
+    return res.send(success(200, { weeklyAttendance, totalStudentCount }));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function attendanceMonthlyStatusController(req, res) {
+  try {
+    const sectionId = req.params.sectionId;
+    const date = new Date();
+    // const { firstDay, lastDay } = date.getMonthDates();
+    var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    const monthDates = [];
+    let currentDate = new Date(firstDay);
+    while (currentDate <= lastDay) {
+      monthDates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    let monthlyAttendance = await Promise.all(
+      monthDates.map(async (date) => {
+        const currDate =
+          date.getDate() +
+          "-" +
+          (date.getMonth() + 1) +
+          "-" +
+          date.getFullYear();
+        const presentStudentCount = await getPresentStudentCount({
+          sectionId,
+          currDate,
+        });
+        return presentStudentCount;
+      })
+    );
+    const totalStudentCount = await getStudentCount({ sectionId });
+    console.log(monthlyAttendance);
+    return res.send(success(200, { monthlyAttendance, totalStudentCount }));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+
+Date.prototype.getWeekDates = function () {
+  var date = new Date(this.getTime());
+  date.setHours(0, 0, 0, 0);
+
+  var day = date.getDay();
+  var diffToMonday = day === 0 ? -6 : 1 - day;
+  var diffToSunday = day === 0 ? 0 : 7 - day;
+
+  var monday = new Date(date);
+  monday.setDate(date.getDate() + diffToMonday);
+
+  var sunday = new Date(date);
+  sunday.setDate(date.getDate() + diffToSunday);
+
+  return { monday, sunday };
+};
