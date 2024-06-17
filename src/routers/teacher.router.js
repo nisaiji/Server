@@ -1,7 +1,25 @@
 import express from "express";
-import { registerTeacherController,markTeacherAsClassTeacherController,deleteTeacherController,getAllTeachersController, loginClassTeacherController, getAllClassTeachersController, getTeacherListController, updateTeacherController, updateClassTeacherController, getTeachersController} from "../controllers/teacher.controller.js";
+import {
+  registerTeacherController,
+  markTeacherAsClassTeacherController,
+  deleteTeacherController,
+  loginClassTeacherController,
+  getAllClassTeachersController,
+  getTeacherListController,
+  updateTeacherController,
+  updateClassTeacherController,
+  getTeachersController,
+  getUnassignedTeacherController
+} from "../controllers/teacher.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
-import { deleteTeacherValidation, loginClassTeacherValidation, markTeacherAsClassTeacherValidation, registerTeacherValidation, updateClassTeacherValidation, updateTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
+import {
+  deleteTeacherValidation,
+  loginClassTeacherValidation,
+  markTeacherAsClassTeacherValidation,
+  registerTeacherValidation,
+  updateClassTeacherValidation,
+  updateTeacherValidation
+} from "../middlewares/validation/teacher.validation.middleware.js";
 
 const teacherRouter = express.Router();
 
@@ -42,7 +60,12 @@ const teacherRouter = express.Router();
  *       500:
  *         description: Server error
  */
-teacherRouter.post("/register",adminAuthentication, registerTeacherValidation,  registerTeacherController);
+teacherRouter.post(
+  "/register",
+  adminAuthentication,
+  registerTeacherValidation,
+  registerTeacherController
+);
 
 /**
  * @swagger
@@ -71,7 +94,11 @@ teacherRouter.post("/register",adminAuthentication, registerTeacherValidation,  
  *       500:
  *         description: Server error
  */
-teacherRouter.post("/login", loginClassTeacherValidation, loginClassTeacherController);
+teacherRouter.post(
+  "/login",
+  loginClassTeacherValidation,
+  loginClassTeacherController
+);
 
 /**
  * @swagger
@@ -119,7 +146,61 @@ teacherRouter.post("/login", loginClassTeacherValidation, loginClassTeacherContr
  *       500:
  *         description: Server error
  */
-teacherRouter.put("/update-profile/:teacherId",adminAuthentication, updateClassTeacherValidation, updateClassTeacherController);
+teacherRouter.put(
+  "/update-profile/:teacherId",
+  adminAuthentication,
+  updateClassTeacherValidation,
+  updateClassTeacherController
+);
+
+/**
+ * @swagger
+ * /teacher/all-teachers:
+ *   get:
+ *     security:
+ *       - Authorization: []
+ *     summary: get list of all teachers.
+ *     description: get list of all teachers.
+ *     tags:
+ *       - Teacher
+ *     responses:
+ *       200:
+ *         description: featched a list of teachers successfully
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+ teacherRouter.get(
+  "/unassigned-teachers",
+   adminAuthentication,
+  getUnassignedTeacherController
+);
+
+
+/**
+ * @swagger
+ * /teacher/all-class-teachers:
+ *   get:
+ *     security:
+ *       - Authorization: []
+ *     summary: get list of all cordinators.
+ *     description: This API will get you a list of all class-teachers.
+ *     tags:
+ *       - Teacher
+ *     responses:
+ *       200:
+ *         description: featched a list of class-teachers successfully.
+ *       400:
+ *         description: Unauthorized request
+ *       500:
+ *         description: Server error
+ */
+ teacherRouter.get(
+  "/all-class-teachers",
+  adminAuthentication,
+  getAllClassTeachersController
+);
 
 /**
  * @swagger
@@ -153,7 +234,12 @@ teacherRouter.put("/update-profile/:teacherId",adminAuthentication, updateClassT
  *       500:
  *         description: Server error
  */
-teacherRouter.patch("/mark-teacher-as-class-teacher/:teacherId",adminAuthentication,markTeacherAsClassTeacherValidation,markTeacherAsClassTeacherController);
+teacherRouter.patch(
+  "/mark-teacher-as-class-teacher/:teacherId",
+  adminAuthentication,
+  markTeacherAsClassTeacherValidation,
+  markTeacherAsClassTeacherController
+);
 
 /**
  * @swagger
@@ -187,7 +273,12 @@ teacherRouter.patch("/mark-teacher-as-class-teacher/:teacherId",adminAuthenticat
  *       500:
  *         description: Server error
  */
-teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,deleteTeacherController );
+teacherRouter.delete(
+  "/:teacherId",
+  adminAuthentication,
+  deleteTeacherValidation,
+  deleteTeacherController
+);
 
 /**
  * @swagger
@@ -235,49 +326,12 @@ teacherRouter.delete("/:teacherId",adminAuthentication, deleteTeacherValidation,
  *       500:
  *         description: Internal server error
  */
-teacherRouter.put("/:teacherId",adminAuthentication, updateTeacherController);
+teacherRouter.put("/:teacherId", adminAuthentication, updateTeacherController);
 
-teacherRouter.get("/:teacherId",adminAuthentication, getTeachersController);
+teacherRouter.get("/:teacherId", adminAuthentication, getTeachersController);
 
-  /**
- * @swagger
- * /teacher/all-class-teachers:
- *   get:
- *     security:
- *       - Authorization: []
- *     summary: get list of all cordinators.
- *     description: This API will get you a list of all class-teachers.
- *     tags:
- *       - Teacher
- *     responses:
- *       200:
- *         description: featched a list of class-teachers successfully.
- *       400:
- *         description: Unauthorized request
- *       500:
- *         description: Server error
- */
-teacherRouter.get("/all-class-teachers",adminAuthentication, getAllClassTeachersController );
 
-  /**
- * @swagger
- * /teacher/all-teachers:
- *   get:
- *     security:
- *       - Authorization: []
- *     summary: get list of all teachers.
- *     description: get list of all teachers.
- *     tags:
- *       - Teacher
- *     responses:
- *       200:
- *         description: featched a list of teachers successfully
- *       400:
- *         description: Unauthorized request
- *       500:
- *         description: Server error
- */
-teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController);
+
 
 /**
  * @swagger
@@ -302,6 +356,10 @@ teacherRouter.get("/all-teachers", adminAuthentication, getAllTeachersController
  *       500:
  *         description: Server error
  */
-teacherRouter.get("/teacher-list/:pageNo",adminAuthentication,getTeacherListController);
+teacherRouter.get(
+  "/teacher-list/:pageNo",
+  adminAuthentication,
+  getTeacherListController
+);
 
 export default teacherRouter;

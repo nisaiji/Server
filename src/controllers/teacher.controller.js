@@ -8,6 +8,7 @@ import {
   findTeacherById,
   getAllClassTeachers,
   getAllTeachers,
+  getNonClassTeachers,
   getTeacherCount,
   getTeacherList,
   updateClassTeacherById,
@@ -159,13 +160,24 @@ export async function deleteTeacherController(req, res) {
   }
 }
 
-export async function getAllTeachersController(req, res) {
+// export async function getAllTeachersController(req, res) {
+//   try {
+//     console.log("get all teachers");
+//     const adminId = req.adminId;
+//     const teacherList = await getAllTeachers({ adminId });
+//     return res.send(success(200, {teacherList}));
+//   } catch (err) {
+//     return res.send(error(500, err.message));
+//   }
+// }
+
+export async function getUnassignedTeacherController(req,res){
   try {
     const adminId = req.adminId;
-    const teacherList = await getAllTeachers({ adminId });
-    return res.send(success(200, teacherList));
+    const teacherList = await getNonClassTeachers(adminId);
+    return res.send(success(200,teacherList));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.send(error(500,err.message)); 
   }
 }
 
@@ -181,6 +193,7 @@ export async function getTeachersController(req, res) {
 
 export async function getTeacherListController(req, res) {
   try {
+    console.log("teacher list");
     const pageNo = req.params.pageNo;
     const adminId = req.adminId;
     const limit = 5;
@@ -196,8 +209,10 @@ export async function getTeacherListController(req, res) {
 
 export async function getAllClassTeachersController(req, res) {
   try {
-    const classTeacherList = await getAllClassTeachers();
-    return res.send(success(2001, classTeacherList));
+    console.log("teacher api called")
+    const adminId = req.adminId;
+    const classTeacherList = await getAllClassTeachers(adminId);
+    return res.send(success(200, classTeacherList));
   } catch (err) {
     return res.send(error(500, err.message));
   }

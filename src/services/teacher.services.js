@@ -115,15 +115,48 @@ export async function deleteTeacher(id) {
 export async function getAllTeachers(adminId) {
   try {
     const teacherlist = await teacherModel.find({ admin: adminId });
+    console.log(teacherlist);
     return teacherlist;
   } catch (error) {
     return error;
   }
 }
 
+
+export async function getNonClassTeachers(adminId){
+  try {
+    const teachers = await teacherModel.aggregate([
+      {
+        $lookup: {
+          from: 'sections', 
+          localField: '_id', 
+          foreignField: 'classTeacher', 
+          as: 'sections'
+        }
+      },
+      {
+        $match: {
+          sections: { $size: 0 } 
+        }
+      },
+      {
+        $project: {
+          sections: 0 
+        }
+      }
+    ]);
+    // console.log(teachers);
+    return teachers;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function getAllClassTeachers(adminId) {
   try {
+    console.log({adminId});
     const cordinatorlist = await teacherModel.find({ admin: adminId });
+    console.log(cordinatorlist);
     return cordinatorlist;
   } catch (error) {
     return error;
