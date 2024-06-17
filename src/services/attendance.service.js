@@ -39,7 +39,6 @@ export async function createAttendance(data) {
       classTeacher: classTeacherId,
       admin: adminId,
     });
-    console.log("ca", createdAttendance);
     return createdAttendance;
   } catch (error) {
     return error;

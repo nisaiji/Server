@@ -134,7 +134,7 @@ export async function getStudentCount({ sectionId }) {
     const studentCount = await studentModel.countDocuments({
       section: sectionId
     });
-    console.log({ studentCount });
+    // console.log({ studentCount });
     return studentCount;
   } catch (error) {
     return error;
@@ -143,7 +143,7 @@ export async function getStudentCount({ sectionId }) {
 
 export async function getPresentStudentCount({ sectionId,currDate}) {
   try {
-    console.log({sectionId,currDate})
+    // console.log({sectionId,currDate})
     const presentCount = await attendanceModel.countDocuments({
       $and:[
         {section:sectionId},
@@ -151,8 +151,25 @@ export async function getPresentStudentCount({ sectionId,currDate}) {
         {isPresent:true}
       ]
     })
-    console.log(presentCount)
+    // console.log(presentCount)
     return presentCount;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getAbsentStudentCount({ sectionId,currDate}) {
+  try {
+    // console.log({sectionId,currDate})
+    const absentCount = await attendanceModel.countDocuments({
+      $and:[
+        {section:sectionId},
+        {date:currDate},
+        {isPresent:false}
+      ]
+    })
+    // console.log(absentCount)
+    return absentCount;
   } catch (error) {
     throw error;
   }
