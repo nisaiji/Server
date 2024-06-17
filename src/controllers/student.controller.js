@@ -275,8 +275,9 @@ export async function getAllStudentListForAdminController(req, res) {
     const adminId = req.adminId;
     const pageNo = req.params.pageNo;
     const limit = 5;
-    const studentCount = await getAllStudentCount();
+    const studentCount = await getAllStudentCount(adminId);
     const studentList = await getAllStudentList({
+      adminId,
       limit,
       page: pageNo,
     });

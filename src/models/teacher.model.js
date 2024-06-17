@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-// for one section of students one cordinator will be assigned.
 const teacherSchema = mongoose.Schema({
   username: {
     type: String,
@@ -34,18 +33,10 @@ const teacherSchema = mongoose.Schema({
   degree:{
     type:String
   },
-  role:{
-    type:String,
-    default:"teacher"
-  },
-  isClassTeacher: {
-    type: Boolean,
-    default: false,
-  },
+
   password: {
     type: String,
     required: true,
-    // select: false
   },
   phone: {
     type: String,
@@ -54,21 +45,6 @@ const teacherSchema = mongoose.Schema({
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin",
-  },
-  university: {
-    type: "string",
-  },
-  degree: {
-    type: "string",
-  },
-  bloodGroup: {
-    type: "string",
-  },
-  gender: {
-    type: "string",
-  },
-  dob: {
-    type: "string",
   },
 });
 

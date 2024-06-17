@@ -24,6 +24,7 @@ import { generateAccessToken } from "../services/JWTToken.service.js";
 import { findSectionByClassTeacherId } from "../services/section.services.js";
 import { findClassById } from "../services/class.sevices.js";
 
+
 export async function registerTeacherController(req, res) {
   try {
     // console.log("controller");

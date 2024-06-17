@@ -116,10 +116,10 @@ export async function getStudentListBySectionId({ sectionId }) {
   }
 }
 
-export async function getAllStudentList({ limit, page }) {
+export async function getAllStudentList({adminId, limit, page }) {
   try {
     const students = await studentModel
-      .find()
+      .find({admin:adminId})
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec();
@@ -175,9 +175,9 @@ export async function getAbsentStudentCount({ sectionId,currDate}) {
   }
 }
 
-export async function getAllStudentCount() {
+export async function getAllStudentCount(adminId) {
   try {
-    const studentCount = await studentModel.countDocuments();
+    const studentCount = await studentModel.countDocuments({admin:adminId});
     return studentCount;
   } catch (error) {
     return error;
