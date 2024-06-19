@@ -1,0 +1,76 @@
+paths:
+  /class/register: 
+    post:
+      security:
+        - Authorization: []
+      tags:
+      - "Class"
+      summary: "Register a class to system."
+      description: "This API will allow admin to register class."
+      produces:
+      - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 name:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /class/delete-student/{classId}: 
+    delete:
+      security:
+        - Authorization: []
+      tags:
+      - "Class"
+      summary: "delete class by admin."
+      description: "This API will allow admin to delete class."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: classId
+         required: true
+         description: ID of the class
+         schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /class/class-list: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+      - "Class"
+      summary: "delete class by admin."
+      description: "This API will allow admin to delete class."
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"

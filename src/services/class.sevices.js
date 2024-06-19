@@ -1,5 +1,10 @@
 import classModel from "../models/class.model.js";
 import sectionModel from "../models/section.model.js";
+import teacherModel from "../models/teacher.model.js";
+
+
+
+
 
 export async function checkClassExists({ name, adminId }) {
   try {

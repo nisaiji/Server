@@ -17,31 +17,13 @@ const classTeacherLoginSchema = Joi.object({
 });
 
 const teacherRegisterSchema = Joi.object({
-  username: Joi.string().min(5).max(15).required().messages({
-    "string.min": "Username must be at least 5 characters.",
-    "string.max": "Username must be at most 15 characters.",
-    "any.required": "Username is required."
-  }),
-  firstname: Joi.string().min(3).max(100).required().messages({
-    "string.min": "First name must be at least 3 characters.",
-    "string.max": "First name must be at most 100 characters.",
+
+  firstname: Joi.string().required().messages({
     "any.required": "First name is required."
   }),
-  lastname: Joi.string().min(3).max(100).required().messages({
-    "string.min": "Last name must be at least 3 characters.",
-    "string.max": "Last name must be at most 100 characters.",
+  lastname: Joi.string().required().messages({
     "any.required": "Last name is required."
   }),
-  email: Joi.string()
-    .email({
-      minDomainSegments: 2,
-      tlds: { allow: ["com", "net", "org", "io", "co"] }
-    })
-    .required()
-    .messages({
-      "string.email": "Invalid email format.",
-      "any.required": "Email is required.",
-    }),
   phone: Joi.string()
     .pattern(/^[1-5][0-9]{9}$/)
     .length(10)
@@ -51,15 +33,7 @@ const teacherRegisterSchema = Joi.object({
       "string.length": "Phone number must be 10 characters.",
       "any.required": "Phone number is required."
     }),
-  password: Joi.string()
-    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
-    .messages({
-      "string.pattern.base": "Invalid password format.",
-    })
-    .required()
-    .messages({
-      "any.required": "Password is required."
-    })
+
 });
 
 const teacherUpdateSchema = Joi.object({

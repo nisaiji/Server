@@ -1,0 +1,344 @@
+paths:
+  /student/register: 
+    post:
+      security:
+        - Authorization: []    
+      tags:
+      - "Student"
+      summary: "Register a student to system."
+      description: "This API will allow class-teacher to register student."
+      produces:
+      - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 rollNumber:
+                   type: string
+                 firstname:
+                   type: string
+                 lastname:
+                   type: string
+                 gender:
+                   type: string
+                 parentName:
+                   type: string
+                 phone:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/admin-register: 
+    post:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "Register a student to system."
+      description: "This API will allow admin to register student."
+      produces:
+      - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 rollNumber:
+                   type: string
+                 firstname:
+                   type: string
+                 lastname:
+                   type: string
+                 gender:
+                   type: string
+                 parentName:
+                   type: string
+                 phone:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/admin-delete/{studentId}: 
+    delete:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "admin student delete."
+      description: "This API will allow admin to delete student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of the student
+         schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/delete-student/{studentId}: 
+    delete:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "delete student by class-teacher."
+      description: "This API will allow class-teacher to delete student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of the student
+         schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/student-list/{studentId}/{pageNo}: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To get a paginated list of students"
+      description: "This API will allow class-teacher to get a list of students"
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: sectionId
+         required: true
+         description: ID of the section.
+         schema:
+            type: string
+       - in: path
+         name: pageNo
+         required: true
+         description: page number.
+         schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/student-list/{sectionId}: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To get a  student list of section."
+      description: "This API will allow class-teacher to get student list."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: sectionId
+         required: true
+         description: ID of the section
+         schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/admin-student-list/{studentId}/{pageNo}: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To get a paginated list of students"
+      description: "This API will allow class-teacher to get a list of students"
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: sectionId
+         required: true
+         description: ID of the section.
+         schema:
+            type: string
+       - in: path
+         name: pageNo
+         required: true
+         description: page number.
+         schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/admin-all-student-list/{pageNo}: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To get a paginated list of students"
+      description: "This API will allow admin to get a list of students"
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: pageNo
+         required: true
+         description: page number.
+         schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/admin-update-student/{studentId}: 
+    post:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To update student details"
+      description: "This API will allow admin to update student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of student.
+         schema:
+            type: string
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 rollNumber:
+                   type: string
+                 firstname:
+                   type: string
+                 lastname:
+                   type: string
+                 gender:
+                   type: string
+                 parentName:
+                   type: string
+                 phone:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/update-student/{studentId}: 
+    post:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To update student details"
+      description: "This API will allow class-teacher to update student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of student.
+         schema:
+            type: string
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 rollNumber:
+                   type: string
+                 firstname:
+                   type: string
+                 lastname:
+                   type: string
+                 gender:
+                   type: string
+                 parentName:
+                   type: string
+                 phone:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"

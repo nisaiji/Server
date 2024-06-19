@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 const studentSchema = mongoose.Schema({
   rollNumber: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   firstname: {
     type: String,
@@ -20,18 +19,11 @@ const studentSchema = mongoose.Schema({
   },
   age: {
     type: Number,
-    required: true,
-    min: 3,
-    max: 100
-  },
-  phone: {
-    type: String,
     required: true
   },
   email: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   address: {
     type: String

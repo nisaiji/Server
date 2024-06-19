@@ -3,25 +3,25 @@ import mongoose from "mongoose";
 const sectionSchema = mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: true
   },
-  classId:{
+  classId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "class",
+    ref: "class"
   },
   classTeacher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "teacher"
   },
-  students:[
+  students: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "student"
     }
   ],
-  admin:{
+  admin: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:"admin"
+    ref: "admin"
   }
 });
 

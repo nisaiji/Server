@@ -1,4 +1,5 @@
 import {
+  checkPhoneExists,
   checkTeacherExist,
   createTeacher,
   deleteTeacher,
@@ -27,31 +28,23 @@ import { findClassById } from "../services/class.sevices.js";
 
 export async function registerTeacherController(req, res) {
   try {
-    // console.log("controller");
     const adminId = req.adminId;
-    const { username, firstname, lastname, email, password, phone } = req.body;
-    const existingTeacher = await checkTeacherExist(username, email);
-
-    if (existingTeacher && existingTeacher?.username === username) {
-      return res.send(error(400, "username name already exist"));
+    const { firstname, lastname,phone } = req.body;
+    const existingTeacher = await checkPhoneExists({phone});
+    if(existingTeacher){
+      return res.send(error(400,"phone number already registered"));
     }
-    if (existingTeacher && existingTeacher?.email === email) {
-      return res.send(error(400, "email already exist"));
-    }
+    const password = firstname+phone;
     const hashedPassword = await hashPassword(password);
     const teacher = await createTeacher(
-      username,
+     {
       firstname,
       lastname,
-      email,
       hashedPassword,
       phone,
       adminId
-    );
-    const admin = await findAdminByID(adminId);
-    admin.teachers.push(teacher["_id"]);
-    await admin.save();
-    teacher.school = admin["_id"];
+     }
+    )
     await teacher.save();
     return res.send(success(201, "teacher created successfully"));
   } catch (err) {
@@ -194,14 +187,10 @@ export async function getTeachersController(req, res) {
 
 export async function getTeacherListController(req, res) {
   try {
-    console.log("teacher list");
-    const pageNo = req.params.pageNo;
     const adminId = req.adminId;
-    const limit = 5;
-    const teacherCount = await getTeacherCount({ adminId });
-    const teacherList = await getTeacherList({ adminId, limit, page: pageNo });
+    const teacherList = await getTeacherList({ adminId});
     return res.send(
-      success(200, { pageNo, limit, totalCount: teacherCount, teacherList })
+      success(200, { teacherList })
     );
   } catch (err) {
     return res.send(error(500, err.message));
@@ -223,28 +212,17 @@ export async function updateTeacherController(req, res) {
   try {
     const teacherId = req.params.teacherId;
     const {
-      username,
       firstname,
       lastname,
-      email,
-      password,
       phone,
-      bloodGroup,
-      gender,
-      university,
-      degree,
-      dob,
     } = req.body;
     const teacher = await findTeacherById(teacherId);
     if (!teacher) {
       return res.send(error(400, "can not find teacher"));
     }
     const updatedTeacher = await updateTeacherById(teacherId, {
-      username,
       firstname,
       lastname,
-      email,
-      password,
       phone,
     });
     if (updatedTeacher instanceof Error) {

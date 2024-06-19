@@ -1,10 +1,19 @@
 import sectionModel from "../models/section.model.js";
 import teacherModel from "../models/teacher.model.js";
+import { error } from "../utills/responseWrapper.js";
 
+export async function checkPhoneExists({ phone }) {
+  try {
+    const teacher = await teacherModel.findOne({ phone });
+    return teacher;
+  } catch (error) {
+    throw error;
+  }
+}
 export async function checkTeacherExist(username, email) {
   try {
     const teacher = await teacherModel.findOne({
-      $or: [{ username }, { email }],
+      $or: [{ username }, { email }]
     });
     return teacher;
   } catch (err) {
@@ -12,28 +21,24 @@ export async function checkTeacherExist(username, email) {
   }
 }
 
-export async function createTeacher(
-  username,
+export async function createTeacher({
   firstname,
   lastname,
-  email,
-  password,
+  hashedPassword,
   phone,
-  admin
-) {
+  adminId
+}) {
   try {
     const teacher = await teacherModel.create({
-      username,
       firstname,
       lastname,
-      email,
-      password,
+      password: hashedPassword,
       phone,
-      admin,
+      admin: adminId
     });
     return teacher;
-  } catch (err) {
-    return err;
+  } catch (error) {
+    throw error;
   }
 }
 
@@ -80,7 +85,7 @@ export async function updateClassTeacherById({
   bloodGroup,
   gender,
   university,
-  degree,
+  degree
 }) {
   try {
     const teacher = await teacherModel.findByIdAndUpdate(id, {
@@ -91,7 +96,7 @@ export async function updateClassTeacherById({
       bloodGroup,
       gender,
       university,
-      degree,
+      degree
     });
     return teacher;
   } catch (error) {
@@ -122,26 +127,25 @@ export async function getAllTeachers(adminId) {
   }
 }
 
-
-export async function getNonClassTeachers(adminId){
+export async function getNonClassTeachers(adminId) {
   try {
     const teachers = await teacherModel.aggregate([
       {
         $lookup: {
-          from: 'sections', 
-          localField: '_id', 
-          foreignField: 'classTeacher', 
-          as: 'sections'
+          from: "sections",
+          localField: "_id",
+          foreignField: "classTeacher",
+          as: "sections"
         }
       },
       {
         $match: {
-          sections: { $size: 0 } 
+          sections: { $size: 0 }
         }
       },
       {
         $project: {
-          sections: 0 
+          sections: 0
         }
       }
     ]);
@@ -154,7 +158,7 @@ export async function getNonClassTeachers(adminId){
 
 export async function getAllClassTeachers(adminId) {
   try {
-    console.log({adminId});
+    console.log({ adminId });
     const cordinatorlist = await teacherModel.find({ admin: adminId });
     console.log(cordinatorlist);
     return cordinatorlist;
@@ -163,14 +167,9 @@ export async function getAllClassTeachers(adminId) {
   }
 }
 
-export async function getTeacherList({ adminId, limit, page }) {
+export async function getTeacherList({ adminId }) {
   try {
-    const teachers = await teacherModel
-      .find({ admin: adminId })
-      .select("-password")
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .exec();
+    const teachers = await teacherModel.find({ admin: adminId });
     return teachers;
   } catch (error) {
     return error;
@@ -198,7 +197,7 @@ export async function updateTeacherById(
     gender,
     university,
     degree,
-    dob,
+    dob
   }
 ) {
   try {
@@ -212,7 +211,7 @@ export async function updateTeacherById(
       gender,
       university,
       degree,
-      dob,
+      dob
     });
     return updatedTeacher;
   } catch (error) {

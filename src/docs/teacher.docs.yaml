@@ -1,0 +1,222 @@
+paths:
+  /teacher/register:
+    post:
+      security:
+        - Authorization: []
+      summary: "To register a teacher"
+      description: "This API will register a teacher. It requires admin login token."
+      tags:
+      - "Teacher"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/login:
+    post:
+      summary: "To login a teacher"
+      description: "This API will login a teacher."
+      tags:
+      - "Teacher"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/admin-class-teacher/{teacherId}:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update a teacher"
+      description: "This API will allow admin to update a teacher. It requires admin login token."
+      tags:
+      - "Teacher"
+      parameters:
+       - in: path
+         name: teacherId
+         required: true
+         description: ID of the teacher
+         schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+  
+  /teacher/all:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get all teachers"
+      description: "This API will allow admin to get all teachers. It requires admin login token."
+      tags:
+      - "Teacher"
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/{teacherId}:
+    delete:
+      security:
+        - Authorization: []
+      summary: "To delete a teacher"
+      description: "This API will allow admin to delete a teacher. It requires admin login token."
+      tags:
+      - "Teacher"
+      parameters:
+       - in: path
+         name: teacherId
+         required: true
+         description: ID of the teacher
+         schema:
+            type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+  
+  /teacher/get/{teacherId}:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get a teacher"
+      description: "This API will allow admin to get a teacher. It requires admin login token."
+      tags:
+      - "Teacher"
+      parameters:
+       - in: path
+         name: teacherId
+         required: true
+         description: ID of the teacher
+         schema:
+            type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+  
+  /teacher/teacher-list:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get a teacher list"
+      description: "This API will allow admin to get a teacher list. It requires admin login token."
+      tags:
+      - "Teacher"
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+  
+  /teacher/unassigned-teachers:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get a unassigned teachers"
+      description: "This API will allow admin to get a list of unassigned teachers. It requires admin login token."
+      tags:
+      - "Teacher"
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/admin-teacher/{teacherId}:
+    put:
+      security:
+        - Authorization: []
+      summary: Update a teacher's details
+      description: This API updates a teacher's details. It requires an admin login token.
+      tags:
+        - Teacher
+      parameters:
+        - in: path
+          name: teacherId
+          required: true
+          description: ID of the teacher
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Teacher updated successfully
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error

@@ -1,0 +1,115 @@
+paths:
+  /section/register: 
+    post:
+      security:
+        - Authorization: []
+      tags:
+      - "Section"
+      summary: "Register a section to system."
+      description: "This API will allow admin to register section."
+      produces:
+      - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 name:
+                   type: string
+                 teacherId:
+                   type: string
+                 classId:
+                   type:string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /section/all: 
+    post:
+      security:
+        - Authorization: []
+      tags:
+      - "Section"
+      summary: "get list of sections"
+      description: "This API will get you a list of all sections."
+      produces:
+      - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 name:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /section/{sectionId}: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+        - "Section"
+      summary: "To get a section by ID"
+      description: "This API will allow admin to get a section by its ID."
+      produces:
+        - "application/json"
+      parameters:
+        - in: path
+          name: sectionId
+          required: true
+          description: ID of the section
+          schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+          
+    delete:
+      security:
+        - Authorization: []
+      tags:
+        - "Section"
+      summary: "To delete a section"
+      description: "This API will allow admin to delete a section."
+      produces:
+        - "application/json"
+      parameters:
+        - in: path
+          name: sectionId
+          required: true
+          description: ID of the section
+          schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"

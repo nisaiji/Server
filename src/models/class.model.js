@@ -6,7 +6,7 @@ const classSchema = new mongoose.Schema({
     required: true
   },
   section: [
-    { 
+    {
       type: mongoose.Schema.Types.ObjectId,
       ref: "section"
     }
@@ -14,9 +14,9 @@ const classSchema = new mongoose.Schema({
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin",
-    required:true
+    required: true
   }
 });
- 
+
 const classModel = mongoose.model("class", classSchema);
 export default classModel;

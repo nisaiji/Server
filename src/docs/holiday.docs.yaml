@@ -1,0 +1,102 @@
+paths:
+  /Holiday-Event/create-event: 
+    post:
+      security:
+        - Authorization: []    
+      tags:
+      - "Holiday-Event"
+      summary: "To create a Holiday Event"
+      description: "This API will allow admin to create holiday event"
+      produces:
+      - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 date:
+                   type: string
+                 name:
+                   type: string
+                 teacherHoliday:
+                   type: string
+                 studentHoliday:
+                   type: string
+                 description:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /Holiday-Event/: 
+    get:
+      security:
+        - Authorization: []    
+      tags:
+      - "Holiday-Event"
+      summary: "To get a list Holiday Event"
+      description: "This API will allow admin to get a list of holiday event"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+  
+  /Holiday-Event/{eventId}: 
+    post:
+      security:
+        - Authorization: []    
+      tags:
+      - "Holiday-Event"
+      summary: "To delete a event"
+      description: "This API will allow admin to delete holiday event"
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of the student
+         schema:
+            type: string
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 date:
+                   type: string
+                 name:
+                   type: string
+                 teacherHoliday:
+                   type: string
+                 studentHoliday:
+                   type: string
+                 description:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+    

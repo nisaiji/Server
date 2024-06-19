@@ -10,14 +10,11 @@ import {
 
 export async function registerTeacherValidation(req, res, next) {
   try {
-    const { username, firstname, lastname, email, password, phone } = req.body;
+    const {firstname, lastname, phone} = req.body;
     const { error: schemaError } = teacherRegisterSchema.validate({
-      username,
       firstname,
       lastname,
-      email,
       phone,
-      password,
     });
 
     if (schemaError) {

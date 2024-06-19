@@ -1,51 +1,44 @@
 import mongoose from "mongoose";
 const teacherSchema = mongoose.Schema({
-  username: {
-    type: String,
-    unique: true,
-    required: true,
-  },
   firstname: {
     type: String,
-    required: true,
+    required: true
   },
   lastname: {
     type: String,
     required: true
   },
-  dob:{
-    type:String,
+  dob: {
+    type: String
   },
-  bloodGroup:{
-    type:String,
+  bloodGroup: {
+    type: String
   },
   email: {
     type: String,
     unique: true,
-    required: true,
   },
-  gender:{
-    type:String,
+  gender: {
+    type: String
   },
-  university:{
-    type:String,
+  university: {
+    type: String
   },
-  degree:{
-    type:String
+  degree: {
+    type: String
   },
-
   password: {
     type: String,
-    required: true,
+    required: true
   },
   phone: {
     type: String,
-    required: true,
+    required: true
   },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "admin",
-  },
+    ref: "admin"
+  }
 });
 
 const teacherModel = mongoose.model("teacher", teacherSchema);
