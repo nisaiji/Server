@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
 
 const studentSchema = mongoose.Schema({
-  rollNumber: {
-    type: String,
-    required: true
-  },
   firstname: {
     type: String,
     required: true
@@ -15,15 +11,13 @@ const studentSchema = mongoose.Schema({
   },
   gender: {
     type: String,
-    enum: ["Male", "Female", "Non-binary", "Other"]
+    required:true
   },
   age: {
     type: Number,
-    required: true
   },
   email: {
     type: String,
-    required: true
   },
   address: {
     type: String

@@ -2,17 +2,11 @@ import mongoose from "mongoose";
 // import addressSchema from "./Schemas/address.schema";
 
 const parentSchema = mongoose.Schema({
-  username: {
-    type: String,
-    default: "abc@123"
-  },
   firstname: {
     type: String,
-    default: "John"
   },
   lastname: {
     type: String,
-    default: "Doe"
   },
   phone: {
     type: String,

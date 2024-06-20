@@ -1,5 +1,6 @@
 import { findAdminByID } from "../services/admin.services.js";
 import { findClassById } from "../services/class.sevices.js";
+import { checkParentExist, registerParent } from "../services/parent.services.js";
 import {
   checkStudentExistInSection,
   findSectionByClassTeacherId,
@@ -82,21 +83,10 @@ export async function registerStudentController(req, res) {
 
 export async function adminRegisterStudentController(req, res) {
   try {
-    const {
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      age,
-      email,
-      phone,
-      address,
-      sectionId,
-      classId,
-    } = req.body;
+    const {firstname,lastname,gender,parentName,phone,sectionId,classId} = req.body;
     const adminId = req.adminId;
     const admin = await findAdminByID(adminId);
-    if (!admin) {
+    if(!admin){
       return res.send(error(400, "admin doesn't exists"));
     }
     const section = await findSectionById(sectionId);
@@ -108,41 +98,24 @@ export async function adminRegisterStudentController(req, res) {
       return res.send(error(400, "Class doesn't exists"));
     }
 
-    const existingStudent = await checkStudentExist(rollNumber, email, adminId);
-    // console.log(existingStudent);
-    if (existingStudent && existingStudent["rollNumber"] === rollNumber) {
-      return res.send(error(400, "roll number already exist"));
+    let parent = await checkParentExist({phone});
+    if(!parent){
+      parent = await registerParent({firstname:parentName,phone});
     }
-
-    if (existingStudent && existingStudent["email"] === email) {
-      return res.send(error(400, "email already exist"));
+    if(!parent){
+      return res.send(error(400,"can't register/find parent"));
     }
-    const student = await adminRegisterStudent({
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      age,
-      phone,
-      email,
-      address,
-      sectionId,
-      classId,
-      adminId,
-    });
-    // console.log(student);
+    
+    const existingStudent = await checkStudentExist({firstname,parentId:parent["_id"]});
+    console.log(existingStudent);
+    if(existingStudent){
+      return res.send(error(400,"student already exists"))
+    } 
+    const student = await registerStudent({firstname,lastname,gender,parentId:parent["_id"],sectionId,classId,adminId});
     if (student instanceof Error) {
-      return res.send(error(400, "can't create student"));
+      return res.send(error(400, "can't register student"));
     }
-    section?.students?.push(student["_id"]);
-    student.section = section["_id"];
-    await section.save();
-    return res.send(
-      success(201, {
-        message: "student created successfully!",
-        studentId: student["_id"].toString(),
-      })
-    );
+    return res.send(success(201, "student created successfully!"));
   } catch (err) {
     return res.send(error(500, err.message));
   }

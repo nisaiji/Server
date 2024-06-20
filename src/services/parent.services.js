@@ -1,6 +1,26 @@
 import parentModel from "../models/parent.model.js";
 
-export async function checkParentExist(username, email) {
+
+export async function checkParentExist({phone}){
+  try {
+    const parent = await parentModel.findOne({phone});
+    return parent;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+export async function registerParent({firstname,phone}){
+  try {
+    const parent = await parentModel.create({firstname, phone});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+export async function checkParentExist1(username, email) {
   try {
     const existingParent = await parentModel.findOne({
       $or: [{ username }, { email }],

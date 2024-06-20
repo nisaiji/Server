@@ -16,8 +16,6 @@ paths:
              schema:
                type: object
                properties:
-                 rollNumber:
-                   type: string
                  firstname:
                    type: string
                  lastname:
@@ -25,8 +23,6 @@ paths:
                  gender:
                    type: string
                  parentName:
-                   type: string
-                 phone:
                    type: string
       responses:
         200:
@@ -55,8 +51,6 @@ paths:
              schema:
                type: object
                properties:
-                 rollNumber:
-                   type: string
                  firstname:
                    type: string
                  lastname:
