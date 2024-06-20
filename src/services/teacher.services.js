@@ -10,6 +10,14 @@ export async function checkPhoneExists({ phone }) {
     throw error;
   }
 }
+export async function findTeacherByPhone({ phone }) {
+  try {
+    const teacher = await teacherModel.findOne({ phone });
+    return teacher;
+  } catch (error) {
+    throw error;
+  }
+}
 export async function checkTeacherExist(username, email) {
   try {
     const teacher = await teacherModel.findOne({

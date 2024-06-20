@@ -7,6 +7,7 @@ import {
   findClassTeacherById,
   findClassTeacherByUsername,
   findTeacherById,
+  findTeacherByPhone,
   getAllClassTeachers,
   getAllTeachers,
   getNonClassTeachers,
@@ -54,9 +55,9 @@ export async function registerTeacherController(req, res) {
 
 export async function loginClassTeacherController(req, res) {
   try {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
     // const classTeacher = await findClassTeacherByUsername(username);
-    const classTeacher = await findClassTeacherByEmail(email);
+    const classTeacher = await findTeacherByPhone({phone});
     // console.log(classTeacher);
     if (!classTeacher) {
       return res.send(error(404, "class teacher doesn't exist"));
@@ -70,6 +71,9 @@ export async function loginClassTeacherController(req, res) {
       return res.send(error(404, "incorrect password"));
     }
     const section = await findSectionByClassTeacherId(classTeacher["_id"]);
+    if(!section){
+      return res.send(error(400,"teacher is not assigned to any section"))
+    }
     const Class = await findClassById(section["classId"]);
     const accessToken = generateAccessToken({
       role: "teacher",
@@ -82,7 +86,7 @@ export async function loginClassTeacherController(req, res) {
       className: Class["name"],
     });
     return res.send(
-      success(200, { accessToken, username: classTeacher["username"] })
+      success(200, { accessToken, firstname: classTeacher["firstname"] })
     );
   } catch (err) {
     return res.send(error(500, err.message));

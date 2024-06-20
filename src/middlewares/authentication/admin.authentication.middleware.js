@@ -4,7 +4,7 @@ import { config } from "../../config/config.js";
 import { findAdminByID } from "../../services/admin.services.js";
 
 export async function adminAuthentication(req, res, next) {
-  try { 
+  try {
     const token = req.header("Authorization");
     // console.log(token)
     if (!token) {
@@ -13,11 +13,11 @@ export async function adminAuthentication(req, res, next) {
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
     const admin = await findAdminByID(decoded.adminId);
-    if (!admin){
+    if (!admin) {
       return res.send(error(404, "admin doesn't exists"));
     }
     req.adminId = decoded.adminId;
-    console.log("authentication called")
+    console.log("authentication called");
     next();
   } catch (err) {
     res.send(error(500, err.message));

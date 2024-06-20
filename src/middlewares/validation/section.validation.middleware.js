@@ -7,7 +7,7 @@ export async function registerSectionValidation(req, res, next) {
     const { error: schemaError } = registerSectionSchema.validate({
       name,
       teacherId,
-      classId,
+      classId
     });
 
     if (schemaError) {

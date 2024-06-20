@@ -13,14 +13,6 @@ const holidayEventSchema =new mongoose.Schema({
         type:String,
         required:true
     },
-    teacherHoliday:{
-        type:Boolean,
-        required:true,
-    },
-    studentHoliday:{
-        type:Boolean,
-        required:true
-    },
     description:{
         type:String,
     },

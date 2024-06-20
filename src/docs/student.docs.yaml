@@ -61,6 +61,10 @@ paths:
                    type: string
                  phone:
                    type: string
+                 sectionId:
+                   type: string
+                 classId:
+                   type: string
       responses:
         200:
           description: "successful"

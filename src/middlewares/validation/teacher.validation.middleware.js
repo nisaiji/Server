@@ -8,7 +8,7 @@ import {
   teacherUpdateSchema,
 } from "../../validators/teacherSchema.validator.js";
 
-export async function registerTeacherValidation(req, res, next) {
+export async function registerTeacherValidation(req, res, next){
   try {
     const {firstname, lastname, phone} = req.body;
     const { error: schemaError } = teacherRegisterSchema.validate({
@@ -28,9 +28,9 @@ export async function registerTeacherValidation(req, res, next) {
 
 export async function loginClassTeacherValidation(req, res, next) {
   try {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
     const { error: schemaError } = classTeacherLoginSchema.validate({
-      email,
+      phone,
       password,
     });
     if (schemaError) {

@@ -1,17 +1,16 @@
 import Joi from "joi";
 
 const classTeacherLoginSchema = Joi.object({
-  email: Joi.string().email({ minDomainSegments: 2 }).required().messages({
-    "string.email": "Invalid email format",
-    "any.required": "Email is required."
+  phone: Joi.string()
+  .pattern(/^[1-5][0-9]{9}$/)
+  .length(10)
+  .required()
+  .messages({
+    "string.pattern.base": "Invalid phone number format.",
+    "string.length": "Phone number must be 10 characters.",
+    "any.required": "Phone number is required."
   }),
-  password: Joi.string()
-    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
-    .messages({
-      "string.pattern.base": "Invalid password format.",
-    })
-    .required()
-    .messages({
+  password: Joi.string().required().messages({
       "any.required": "Password is required."
     })
 });
