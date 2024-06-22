@@ -10,12 +10,12 @@ const studentRouter = express.Router();
 studentRouter.post("/register",classTeacherAuthentication,registerStudentValidation,registerStudentController);
 studentRouter.post("/admin-register",adminAuthentication,registerStudentValidation,adminRegisterStudentController);
 studentRouter.put("/update-student/:studentId",classTeacherAuthentication,updateStudentController);
+studentRouter.get("/all-students/:pageNo",adminAuthentication,getAllStudentListForAdminController);
 // studentRouter.put("/admin-update-student/:studentId", adminAuthentication,adminRegisterStudentValidation,adminUpdateStudentController);
 // studentRouter.delete("/admin-delete/:studentId",adminAuthentication, deleteStudentValidation, deleteStudentController);
 // studentRouter.delete("/delete-student/:studentId", classTeacherAuthentication, deleteStudentValidation, deleteStudentController);
 // studentRouter.get("/student-list/:sectionId/:pageNo", classTeacherAuthentication, getStudentListOfSectionController);
 // studentRouter.get("/student-list/:sectionId",classTeacherAuthentication,getAllStudentOfSectionController);
 // studentRouter.get("/admin-student-list/:sectionId/:pageNo",adminAuthentication,getStudentListOfSectionForAdminController);
-// studentRouter.get("/admin-all-student-list/:pageNo",adminAuthentication,getAllStudentListForAdminController);
 
 export default studentRouter;

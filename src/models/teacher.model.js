@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 const teacherSchema = mongoose.Schema({
+  username: {
+    type: String
+  },
   firstname: {
     type: String,
     required: true
@@ -15,8 +18,7 @@ const teacherSchema = mongoose.Schema({
     type: String
   },
   email: {
-    type: String,
-    unique: true,
+    type: String
   },
   gender: {
     type: String
@@ -42,4 +44,5 @@ const teacherSchema = mongoose.Schema({
 });
 
 const teacherModel = mongoose.model("teacher", teacherSchema);
+
 export default teacherModel;

@@ -21,25 +21,31 @@ const registerAdminSchema = Joi.object({
     .pattern(/^[1-5][0-9]{9}$/)
     .message("invalid phone number")
     .length(10)
-    .required().messages({
+    .required()
+    .messages({
       "string.pattern": "invalid phone numberrr",
       "string.length": "Phone no. length should have 10 digits",
       "any.required": "Phone no is required!"
     }),
   email: Joi.string()
     .email({
-      minDomainSegments: 2,
+      minDomainSegments: 2
     })
-    .required().messages({
+    .required()
+    .messages({
       "string.email": "Invalid Email Id",
       "any.required": "Email is required!"
     }),
-  password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/)).required().messages({
-    "string.pattern": "Password should contains alpha-numberic special symbols",
-    "any.required": "Password is required!"
-  }),
+  password: Joi.string()
+    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
+    .required()
+    .messages({
+      "string.pattern":
+        "Password should contains alpha-numberic special symbols",
+      "any.required": "Password is required!"
+    }),
   address: Joi.string().required().messages({
-    "string.required":"Address is required!"
+    "string.required": "Address is required!"
   })
 });
 
@@ -50,7 +56,7 @@ const loginAdminSchema = Joi.object({
     "any.required": "Email is required."
   }),
   password: Joi.string().required().messages({
-    "any.required":"Password is required!",
+    "any.required": "Password is required!"
   })
 });
 

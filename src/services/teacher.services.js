@@ -1,6 +1,5 @@
 import sectionModel from "../models/section.model.js";
 import teacherModel from "../models/teacher.model.js";
-import { error } from "../utills/responseWrapper.js";
 
 export async function checkPhoneExists({ phone }) {
   try {
@@ -10,9 +9,11 @@ export async function checkPhoneExists({ phone }) {
     throw error;
   }
 }
-export async function findTeacherByPhone({ phone }) {
+export async function findTeacher({ user }) {
   try {
-    const teacher = await teacherModel.findOne({ phone });
+    const teacher = await teacherModel.findOne({
+      $or: [{ username: user }, { phone: user }, { email: user }]
+    });
     return teacher;
   } catch (error) {
     throw error;
@@ -73,6 +74,25 @@ export async function findTeacherById(id) {
     return teacher;
   } catch (error) {
     return error;
+  }
+}
+
+export async function updateAuthTeacher({id,username,email,password}){
+  try {
+    const teacher = await teacherModel.findByIdAndUpdate(id , {username,email,password});
+    return teacher;
+  } catch (error) {
+    throw error;
+  }
+}
+
+//firstname, lastname,phone, dob,bloodGroup,gender,university,degree
+export async function updateProfileTeacher({id,firstname,lastname,phone,dob,bloodGroup,gender,university,degree}){
+  try {
+    const teacher = await teacherModel.findByIdAndUpdate(id , {firstname,lastname,phone,dob,bloodGroup,gender,university,degree});
+    return teacher;
+  } catch (error) {
+    throw error;
   }
 }
 

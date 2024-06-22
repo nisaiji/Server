@@ -67,23 +67,30 @@ paths:
         500:
           description: "Internal Server Error"
 
-  /section/{sectionId}: 
-    get:
+  /section/replace-teacher: 
+    post:
       security:
         - Authorization: []
       tags:
         - "Section"
-      summary: "To get a section by ID"
-      description: "This API will allow admin to get a section by its ID."
+      summary: "To change the teacher of section"
+      description: "This API will allow admin to change the teacher of section."
       produces:
         - "application/json"
-      parameters:
-        - in: path
-          name: sectionId
-          required: true
-          description: ID of the section
-          schema:
-            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sectionId:
+                  type: string
+                teacherId:
+                  type: string
+              required:
+                - sectionId
+                - teacherId
       responses:
         200:
           description: "successful"
@@ -93,7 +100,9 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
-          
+
+
+  /section/{sectionId}:    
     delete:
       security:
         - Authorization: []
@@ -119,3 +128,5 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
+
+

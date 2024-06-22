@@ -222,14 +222,14 @@ paths:
         500:
           description: "Internal Server Error"
 
-  /student/admin-all-student-list/{pageNo}: 
+  /student/all-students/{pageNo}: 
     get:
       security:
         - Authorization: []
       tags:
       - "Student"
-      summary: "To get a paginated list of students"
-      description: "This API will allow admin to get a list of students"
+      summary: "To get a list of students"
+      description: "This API will allow admin to get a list of students."
       produces:
       - "application/json"
       parameters:

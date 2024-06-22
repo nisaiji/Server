@@ -41,9 +41,77 @@ paths:
             schema:
               type: object
               properties:
-                phone:
+                user:
                   type: string
                 password:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/auth-update:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update auth-details of teacher"
+      description: "This API will udpate auth-details of a teacher. It requires class teacher login token."
+      tags:
+      - "Teacher"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/profile-update:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update profile-details of teacher"
+      description: "This API will udpate profile-details of a teacher. It requires class teacher login token."
+      tags:
+      - "Teacher"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+                dob:
+                  type: string
+                bloodGroup:
+                  type: string
+                gneder:
+                  type: string
+                university:
+                  type: string
+                degree:
                   type: string
       responses:
         200:

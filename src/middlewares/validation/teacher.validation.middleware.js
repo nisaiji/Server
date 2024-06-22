@@ -6,15 +6,17 @@ import {
   teacherRegisterSchema,
   teacherUpdationSchema,
   teacherUpdateSchema,
+  teacherAuthUpdateSchema,
+  teacherProfileUpdateSchema
 } from "../../validators/teacherSchema.validator.js";
 
-export async function registerTeacherValidation(req, res, next){
+export async function registerTeacherValidation(req, res, next) {
   try {
-    const {firstname, lastname, phone} = req.body;
+    const { firstname, lastname, phone } = req.body;
     const { error: schemaError } = teacherRegisterSchema.validate({
       firstname,
       lastname,
-      phone,
+      phone
     });
 
     if (schemaError) {
@@ -26,12 +28,52 @@ export async function registerTeacherValidation(req, res, next){
   }
 }
 
+export async function authUpdateTeacherValidation(req, res, next) {
+  try {
+    const { username, email, password } = req.body;
+    const { error: schemaError } = teacherAuthUpdateSchema.validate({
+      username,
+      email,
+      password
+    });
+
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next()
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function profileUpdateTeacherValidation(req, res, next) {
+  try {
+    const { firstname, lastname,phone, dob,bloodGroup,gender,university,degree} = req.body;
+    const { error: schemaError } = teacherProfileUpdateSchema.validate({
+      firstname,
+      lastname,
+      phone,
+      dob,
+      bloodGroup,
+      gender,
+      university,
+      degree 
+    });
+
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next()
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
 export async function loginClassTeacherValidation(req, res, next) {
   try {
-    const { phone, password } = req.body;
+    const { user, password } = req.body;
     const { error: schemaError } = classTeacherLoginSchema.validate({
-      phone,
-      password,
+      user,
+      password
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -52,7 +94,7 @@ export async function updateClassTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree,
+      degree
     } = req.body;
     const { error: schemaError } = teacherUpdateSchema.validate({
       teacherId,
@@ -63,11 +105,11 @@ export async function updateClassTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree,
+      degree
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
-      }
+    }
     next();
   } catch (err) {
     return res.send(error(500, err.message));
@@ -78,7 +120,7 @@ export async function markTeacherAsClassTeacherValidation(req, res, next) {
   try {
     const teacherId = req.params.teacherId;
     const { error: schemaError } = markTeacherAsClassTeacherSchema.validate({
-      teacherId,
+      teacherId
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -93,7 +135,7 @@ export async function deleteTeacherValidation(req, res, next) {
   try {
     const teacherId = req.params.teacherId;
     const { error: schemaError } = teacherDeleteSchema.validate({
-      teacherId,
+      teacherId
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
@@ -118,7 +160,7 @@ export async function updateTeacherValidation(req, res, next) {
       gender,
       university,
       degree,
-      dob,
+      dob
     });
     if (schemaError) {
       console.log(schemaError);
