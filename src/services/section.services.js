@@ -36,7 +36,7 @@ export async function findSectionById(_id) {
     const section = await sectionModel.findById({ _id });
     return section;
   } catch (error) {
-    return error;
+    throw error;
   }
 }
 

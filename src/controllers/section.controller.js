@@ -55,6 +55,7 @@ export async function replaceTeacherController(req, res) {
     const adminId = req.adminId;
     const { sectionId, teacherId } = req.body;
     const section = await findSectionById(sectionId);
+    console.log(section);
     if (!section) {
       return res.send(error(400, "section doesn't exists"));
     }
@@ -98,7 +99,7 @@ export async function deleteSectionController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const adminId = req.adminId;
-    const section = await findSectionById(sectionId);
+    // const section = await findSectionById(sectionId);
 
     const deletedSection = await deleteSection({ sectionId });
     if (deletedSection instanceof Error) {

@@ -20,6 +20,16 @@ export async function registerParent({firstname,phone}){
 }
 
 
+export async function deleteParentById(parentId){
+  try {
+    const parent = await parentModel.findByIdAndDelete(parentId);
+    return parent;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+
 export async function checkParentExist1(username, email) {
   try {
     const existingParent = await parentModel.findOne({

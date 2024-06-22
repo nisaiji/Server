@@ -12,16 +12,24 @@ export async function checkStudentExist({ firstname, parentId }) {
   }
 }
 
-export async function registerStudent({ firstname, lastname, gender, adminId,parentId,sectionId,classId }) {
+export async function registerStudent({
+  firstname,
+  lastname,
+  gender,
+  adminId,
+  parentId,
+  sectionId,
+  classId
+}) {
   try {
-    console.log({classId});
+    console.log({ classId });
     const student = await studentModel.create({
       firstname,
       lastname,
       gender,
-      admin:adminId,
-      parent:parentId,
-      section:sectionId,
+      admin: adminId,
+      parent: parentId,
+      section: sectionId,
       classId
     });
     console.log(student);
@@ -70,6 +78,15 @@ export async function findStudentById(_id) {
     return student;
   } catch (error) {
     return error;
+  }
+}
+
+export async function findStudentSiblings(parentId) {
+  try {
+    const siblings = await studentModel.find({ parent: parentId });
+    return siblings;
+  } catch (error) {
+    throw error;
   }
 }
 

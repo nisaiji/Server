@@ -9,8 +9,8 @@ export async function deleteSectionAuthorization(req,res,next){
         if(!section){
             return res.send(error(400,"section doesn't exists"));
         }
-        console.log(section["admin"]!=adminId);
-        if(section["admin"]!=adminId){
+        console.log((section["admin"]?.toString())!=adminId);
+        if((section["admin"]?.toString())!=adminId){
             return res.send(error(400,"section doesn't belong to this admin"));
         }
         const sectionStudentList = await getSectionStudents({sectionId,adminId});
