@@ -1,6 +1,7 @@
 import { findAdminByID } from "../services/admin.services.js";
 import { findClassById } from "../services/class.sevices.js";
 import { checkParentExist, deleteParentById, findParentById, registerParent } from "../services/parent.services.js";
+import { hashPassword } from "../services/password.service.js";
 import {checkStudentExistInSection,findSectionByClassTeacherId, findSectionById,} from "../services/section.services.js";
 import {
   adminRegisterStudent,
@@ -40,17 +41,19 @@ export async function registerStudentController(req, res) {
     if (!Class) {
       return res.send(error(400, "Class doesn't exists"));
     }
-
+    
+    const password = parentName+phone;
+    const hashedPassword = await hashPassword(password);
     let parent = await checkParentExist({phone});
     if(!parent){
-      parent = await registerParent({firstname:parentName,phone});
+      console.log({hashedPassword});
+      parent = await registerParent({firstname:parentName,phone,password:hashedPassword});
     }
     if(!parent){
       return res.send(error(400,"can't register/find parent"));
     }
     
     const existingStudent = await checkStudentExist({firstname,parentId:parent["_id"]});
-    console.log(existingStudent);
     if(existingStudent){
       return res.send(error(400,"student already exists"))
     } 
@@ -81,9 +84,12 @@ export async function adminRegisterStudentController(req, res) {
       return res.send(error(400, "Class doesn't exists"));
     }
 
+    const password = parentName+phone;
+    const hashedPassword = await hashPassword(password);
     let parent = await checkParentExist({phone});
+
     if(!parent){
-      parent = await registerParent({firstname:parentName,phone});
+      parent = await registerParent({firstname:parentName,phone,password:hashedPassword});
     }
     if(!parent){
       return res.send(error(400,"can't register/find parent"));

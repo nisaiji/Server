@@ -63,7 +63,7 @@ export async function loginClassTeacherController(req, res) {
       password,
       classTeacher.password
     );
-  
+
     if (!matchPassword) {
       return res.send(error(404, "incorrect password"));
     }
@@ -80,52 +80,76 @@ export async function loginClassTeacherController(req, res) {
       sectionId: section["_id"],
       classId: Class["_id"],
       sectionName: section["name"],
-      className: Class["name"],
+      className: Class["name"]
     });
     return res.send(
-      success(200,{ accessToken, firstname: classTeacher["firstname"] })
+      success(200, { accessToken, firstname: classTeacher["firstname"] })
     );
   } catch (err) {
     return res.send(error(500, err.message));
   }
 }
 
-export async function authUpdateTeacherController(req,res){
+export async function authUpdateTeacherController(req, res) {
   try {
-    const {username,email,password} = req.body;
+    const { username, email, password } = req.body;
     const teacherId = req.teacherId;
     const teacher = await findTeacherById(teacherId);
-    if(!teacher){
-      return res.send(error(400,"teacher doesn't exists"));
+    if (!teacher) {
+      return res.send(error(400, "teacher doesn't exists"));
     }
     const hashedPassword = await hashPassword(password);
-    const updatedTeacher = await updateAuthTeacher({id:teacherId,username,email,password:hashedPassword});
-    if(updateAuthTeacher instanceof Error){
-      return res.send(error(400,"details cann't be updated"));
+    const updatedTeacher = await updateAuthTeacher({
+      id: teacherId,
+      username,
+      email,
+      password: hashedPassword
+    });
+    if (updatedTeacher instanceof Error) {
+      return res.send(error(400, "details cann't be updated"));
     }
-    return res.send(success(200,"teacher updated successfully"));    
+    return res.send(success(200, "teacher updated successfully"));
   } catch (err) {
-    return re.send(error(500,err.message));   
+    return re.send(error(500, err.message));
   }
 }
 
 // firstname, lastname,phone, dob,bloodGroup,gender,university,degree
-export async function profileUpdateTeacherController(req,res){
+export async function profileUpdateTeacherController(req, res) {
   try {
-    const {firstname,lastname,phone,dob,bloodGroup,gender,university,degree} = req.body;
+    const {
+      firstname,
+      lastname,
+      phone,
+      dob,
+      bloodGroup,
+      gender,
+      university,
+      degree
+    } = req.body;
     const teacherId = req.teacherId;
     const teacher = await findTeacherById(teacherId);
-    if(!teacher){
-      return res.send(error(400,"teacher doesn't exists"));
+    if (!teacher) {
+      return res.send(error(400, "teacher doesn't exists"));
     }
     // const hashedPassword = await hashPassword(password);
-    const updatedTeacher = await updateProfileTeacher({id:teacherId,firstname,lastname,phone,dob,bloodGroup,gender,university,degree});
-    if(updateAuthTeacher instanceof Error){
-      return res.send(error(400,"details cann't be updated"));
+    const updatedTeacher = await updateProfileTeacher({
+      id: teacherId,
+      firstname,
+      lastname,
+      phone,
+      dob,
+      bloodGroup,
+      gender,
+      university,
+      degree
+    });
+    if (updateAuthTeacher instanceof Error) {
+      return res.send(error(400, "details cann't be updated"));
     }
-    return res.send(success(200,"teacher updated successfully"));    
+    return res.send(success(200, "teacher updated successfully"));
   } catch (err) {
-    return re.send(error(500,err.message));   
+    return re.send(error(500, err.message));
   }
 }
 

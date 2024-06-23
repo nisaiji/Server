@@ -10,9 +10,10 @@ export async function checkParentExist({phone}){
   }
 }
 
-export async function registerParent({firstname,phone}){
+export async function registerParent({firstname,phone,password}){
   try {
-    const parent = await parentModel.create({firstname, phone});
+    console.log({password});
+    const parent = await parentModel.create({firstname, phone,password});
     return parent;
   } catch (error) {
     throw error;
@@ -106,6 +107,33 @@ export async function findParentById(_id) {
     return parent;
   } catch (error) {
     return error;
+  }
+}
+
+
+export async function updateAuthParent({id,username,email,password}){
+  try {
+    const parent = await parentModel.findByIdAndUpdate(id , {username,email,password});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function updateProfileParent({id,firstname,lastname,phone}){
+  try {
+    const parent = await parentModel.findByIdAndUpdate(id , {firstname,lastname,phone});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function findParent(user){
+  try {
+    const parent = await parentModel.findOne({$or:[{username:user},{email:user},{phone:user}]})    
+    return parent;
+  } catch (error) {
+    throw error;
   }
 }
 

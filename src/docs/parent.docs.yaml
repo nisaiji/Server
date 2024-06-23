@@ -1,0 +1,123 @@
+paths:
+  /parent/login:
+    post:
+      summary: "To login a parent"
+      description: "This API allow parent to login."
+      tags:
+      - "Parent"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+
+  /parent/auth-update:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update auth-details of parent"
+      description: "This API will udpate auth-details of a parent. It requires parent login token."
+      tags:
+      - "Parent"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+
+  /parent/profile-update:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update profile-details of parent"
+      description: "This API will udpate profile-details of a parent. It requires parent login token."
+      tags:
+      - "Parent"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+
+  # /teacher/admin-class-teacher/{teacherId}:
+  #   put:
+  #     security:
+  #       - Authorization: []
+  #     summary: "To update a teacher"
+  #     description: "This API will allow admin to update a teacher. It requires admin login token."
+  #     tags:
+  #     - "Teacher"
+  #     parameters:
+  #      - in: path
+  #        name: teacherId
+  #        required: true
+  #        description: ID of the teacher
+  #        schema:
+  #           type: string
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               firstname:
+  #                 type: string
+  #               lastname:
+  #                 type: string
+  #               phone:
+  #                 type: string
+  #     responses:
+  #       200:
+  #         description: "teacher registered successfully"
+  #       400:
+  #         description: "Unauthorized request"
+  #       500:
+  #         description: "Server error"
+

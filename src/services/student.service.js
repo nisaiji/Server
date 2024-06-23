@@ -32,7 +32,7 @@ export async function registerStudent({
       section: sectionId,
       classId
     });
-    console.log(student);
+    // console.log(student);
     return student;
   } catch (error) {
     throw error;
