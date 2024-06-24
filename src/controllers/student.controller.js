@@ -71,7 +71,8 @@ export async function registerStudentController(req, res) {
       parent = await registerParent({
         fullname: parentName,
         phone,
-        password: hashedPassword
+        password: hashedPassword,
+        admin:adminId
       });
     }
     if (!parent) {
@@ -136,7 +137,8 @@ export async function adminRegisterStudentController(req, res) {
       parent = await registerParent({
         fullname: parentName,
         phone,
-        password: hashedPassword
+        password: hashedPassword,
+        admin:adminId
       });
     }
     if (!parent) {

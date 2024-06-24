@@ -2,11 +2,12 @@ import express from "express";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { classTeacherAuthorization } from "../middlewares/authorization/classTeacher.authorization.middleware.js";
 import { markPresentValidation } from "../middlewares/validation/attendance.validation.middleware.js";
-import { markAttendanceController,checkAttendaceMarkedController,attendanceDailyStatusController, attendanceWeeklyStatusController, attendanceMonthlyStatusController } from "../controllers/attendance.controller.js";
+import { markAttendanceController,checkAttendaceMarkedController,attendanceDailyStatusController, attendanceWeeklyStatusController, attendanceMonthlyStatusController, parentMarkAttendanceController } from "../controllers/attendance.controller.js";
+import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 
 const attendanceRouter = express.Router();
 
-/**
+/** 
  * @swagger
  * /attendance/mark-attendance:
  *   post:
@@ -40,6 +41,9 @@ const attendanceRouter = express.Router();
 // attendanceRouter.post("/mark-attendance", classTeacherAuthentication,markPresentValidation,classTeacherAuthorization,markAttendanceController);
 
 attendanceRouter.post("/mark-attendance/:sectionId", classTeacherAuthentication,markAttendanceController);
+attendanceRouter.post("/parent-mark-attendance/",parentAuthentication,parentMarkAttendanceController);
+
+
 
 attendanceRouter.get("/check-attendance-marked/:sectionId",classTeacherAuthentication,checkAttendaceMarkedController);
 

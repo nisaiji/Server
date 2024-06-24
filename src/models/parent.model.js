@@ -19,6 +19,10 @@ const parentSchema = mongoose.Schema({
   },
   password: {
     type: String
+  },
+  admin: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "admin"
   }
 });
 

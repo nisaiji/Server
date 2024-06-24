@@ -16,6 +16,7 @@ export async function parentAuthentication(req, res, next) {
       return res.send(error(404, "parent doesn't exists"));
     }
     req.parentId = decoded.parentId;
+    req.adminId = decoded.adminId;
     next();
   } catch (err) {
     return res.send(error(500, err.message));

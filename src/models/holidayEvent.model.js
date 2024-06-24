@@ -16,6 +16,12 @@ const holidayEventSchema =new mongoose.Schema({
     description:{
         type:String,
     },
+    holiday:{
+        type:Boolean,
+    },
+    event:{
+        type:Boolean,
+    },
     admin:{
         type: mongoose.Schema.Types.ObjectId,
         ref:'admin'

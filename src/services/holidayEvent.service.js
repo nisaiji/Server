@@ -6,8 +6,8 @@ export async function createHolidayEvent(data) {
       formattedDate,
       day,
       title,
-      teacherHoliday,
-      studentHoliday,
+      holiday,
+      event,
       description,
       adminId
     } = data;
@@ -15,8 +15,8 @@ export async function createHolidayEvent(data) {
       date: formattedDate,
       day,
       title,
-      teacherHoliday,
-      studentHoliday,
+      holiday,
+      event,
       description,
       admin: adminId
     });

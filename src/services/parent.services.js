@@ -1,4 +1,6 @@
+import holidayEventModel from "../models/holidayEvent.model.js";
 import parentModel from "../models/parent.model.js";
+import studentModel from "../models/student.model.js";
 
 
 export async function checkParentExist({phone}){
@@ -10,10 +12,10 @@ export async function checkParentExist({phone}){
   }
 }
 
-export async function registerParent({fullname,phone,password}){
+export async function registerParent({fullname,phone,password,admin}){
   try {
     console.log({password});
-    const parent = await parentModel.create({fullname, phone,password});
+    const parent = await parentModel.create({fullname, phone,password,admin});
     return parent;
   } catch (error) {
     throw error;
@@ -165,5 +167,26 @@ export async function checkStudentAlreadyLinkedToParent(studentId) {
     return parent;
   } catch (error) {
     return error;
+  }
+}
+
+
+
+export async function getChildrenOfParent(parentId){
+  try {
+    const children = await studentModel.find({parent:parentId});
+    return children;
+  } catch (error) {
+    throw error;
+    
+  }
+}
+
+export async function getAllEventHolidays(adminId){
+  try {
+    const holidayEvents = await holidayEventModel.find({admin:adminId});
+    return holidayEvents;
+  } catch (error) {
+    throw error;    
   }
 }

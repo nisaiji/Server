@@ -1,6 +1,6 @@
 /attendance/mark-attendance/{sectionId}: 
     get:
-      security:
+      security: 
         - Authorization: []
       tags:
         - "Attendance"

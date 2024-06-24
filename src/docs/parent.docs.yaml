@@ -81,6 +81,39 @@ paths:
           description: "Server error"
 
 
+  /parent/children:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get children"
+      description: "This API will get children of parent. It requires parent login token."
+      tags:
+      - "Parent"
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /parent/holiday-events:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get event-holidays"
+      description: "This API will get holiday-events to parent. It requires parent login token."
+      tags:
+      - "Parent"
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+          
   # /teacher/admin-class-teacher/{teacherId}:
   #   put:
   #     security:
