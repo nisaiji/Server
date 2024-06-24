@@ -70,10 +70,6 @@ paths:
             schema:
               type: object
               properties:
-                firstname:
-                  type: string
-                lastname:
-                  type: string
                 phone:
                   type: string
       responses:

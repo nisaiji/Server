@@ -1,8 +1,19 @@
 import { findAdminByID } from "../services/admin.services.js";
 import { findClassById } from "../services/class.sevices.js";
-import { checkParentExist, deleteParentById, findParentById, registerParent } from "../services/parent.services.js";
+import {
+  checkParentExist,
+  deleteParentById,
+  findParentById,
+  registerParent,
+  updateInfoParent,
+  updateParent
+} from "../services/parent.services.js";
 import { hashPassword } from "../services/password.service.js";
-import {checkStudentExistInSection,findSectionByClassTeacherId, findSectionById,} from "../services/section.services.js";
+import {
+  checkStudentExistInSection,
+  findSectionByClassTeacherId,
+  findSectionById
+} from "../services/section.services.js";
 import {
   adminRegisterStudent,
   adminUpdateStudent,
@@ -16,21 +27,31 @@ import {
   getStudentList,
   getStudentListBySectionId,
   registerStudent,
+  searchStudentByName,
   updateStudent,
+  updateStudentByParent
 } from "../services/student.service.js";
 import {
   findClassTeacherById,
-  findTeacherById,
+  findTeacherById
 } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
   try {
-    const {firstname,lastname,gender,parentName,phone,sectionId,classId} = req.body;
+    const {
+      firstname,
+      lastname,
+      gender,
+      parentName,
+      phone,
+      sectionId,
+      classId
+    } = req.body;
     const teacherId = req.teacherId;
     const adminId = req.adminId;
     const teacher = await findTeacherById(teacherId);
-    if(!teacher){
+    if (!teacher) {
       return res.send(error(400, "teacher doesn't exists"));
     }
     const section = await findSectionById(sectionId);
@@ -41,23 +62,38 @@ export async function registerStudentController(req, res) {
     if (!Class) {
       return res.send(error(400, "Class doesn't exists"));
     }
-    
-    const password = parentName+phone;
+
+    const password = parentName + phone;
     const hashedPassword = await hashPassword(password);
-    let parent = await checkParentExist({phone});
-    if(!parent){
-      console.log({hashedPassword});
-      parent = await registerParent({firstname:parentName,phone,password:hashedPassword});
+    let parent = await checkParentExist({ phone });
+    if (!parent) {
+      console.log({ hashedPassword });
+      parent = await registerParent({
+        fullname: parentName,
+        phone,
+        password: hashedPassword
+      });
     }
-    if(!parent){
-      return res.send(error(400,"can't register/find parent"));
+    if (!parent) {
+      return res.send(error(400, "can't register/find parent"));
     }
-    
-    const existingStudent = await checkStudentExist({firstname,parentId:parent["_id"]});
-    if(existingStudent){
-      return res.send(error(400,"student already exists"))
-    } 
-    const student = await registerStudent({firstname,lastname,gender,parentId:parent["_id"],sectionId,classId,adminId});
+
+    const existingStudent = await checkStudentExist({
+      firstname,
+      parentId: parent["_id"]
+    });
+    if (existingStudent) {
+      return res.send(error(400, "student already exists"));
+    }
+    const student = await registerStudent({
+      firstname,
+      lastname,
+      gender,
+      parentId: parent["_id"],
+      sectionId,
+      classId,
+      adminId
+    });
     if (student instanceof Error) {
       return res.send(error(400, "can't register student"));
     }
@@ -69,10 +105,18 @@ export async function registerStudentController(req, res) {
 
 export async function adminRegisterStudentController(req, res) {
   try {
-    const {firstname,lastname,gender,parentName,phone,sectionId,classId} = req.body;
+    const {
+      firstname,
+      lastname,
+      gender,
+      parentName,
+      phone,
+      sectionId,
+      classId
+    } = req.body;
     const adminId = req.adminId;
     const admin = await findAdminByID(adminId);
-    if(!admin){
+    if (!admin) {
       return res.send(error(400, "admin doesn't exists"));
     }
     const section = await findSectionById(sectionId);
@@ -84,23 +128,38 @@ export async function adminRegisterStudentController(req, res) {
       return res.send(error(400, "Class doesn't exists"));
     }
 
-    const password = parentName+phone;
+    const password = parentName + phone;
     const hashedPassword = await hashPassword(password);
-    let parent = await checkParentExist({phone});
+    let parent = await checkParentExist({ phone });
 
-    if(!parent){
-      parent = await registerParent({firstname:parentName,phone,password:hashedPassword});
+    if (!parent) {
+      parent = await registerParent({
+        fullname: parentName,
+        phone,
+        password: hashedPassword
+      });
     }
-    if(!parent){
-      return res.send(error(400,"can't register/find parent"));
+    if (!parent) {
+      return res.send(error(400, "can't register/find parent"));
     }
-    
-    const existingStudent = await checkStudentExist({firstname,parentId:parent["_id"]});
+
+    const existingStudent = await checkStudentExist({
+      firstname,
+      parentId: parent["_id"]
+    });
     console.log(existingStudent);
-    if(existingStudent){
-      return res.send(error(400,"student already exists"))
-    } 
-    const student = await registerStudent({firstname,lastname,gender,parentId:parent["_id"],sectionId,classId,adminId});
+    if (existingStudent) {
+      return res.send(error(400, "student already exists"));
+    }
+    const student = await registerStudent({
+      firstname,
+      lastname,
+      gender,
+      parentId: parent["_id"],
+      sectionId,
+      classId,
+      adminId
+    });
     if (student instanceof Error) {
       return res.send(error(400, "can't register student"));
     }
@@ -151,14 +210,14 @@ export async function deleteStudentController(req, res) {
     }
     const parentId = student["parent"];
     const parent = await findParentById(parentId);
-    if(!parent){
-      return res.send(error(400,"parent doesn't exists"));
+    if (!parent) {
+      return res.send(error(400, "parent doesn't exists"));
     }
     const deletedStudent = await deleteStudentById(studentId);
-    
+
     const siblings = await findStudentSiblings(parentId);
-    console.log({siblings});
-    if(siblings.length===0){
+    console.log({ siblings });
+    if (siblings.length === 0) {
       const deletedParent = await deleteParentById(parentId);
     }
     return res.send(success(200, "student deleted successfully"));
@@ -183,7 +242,7 @@ export async function getStudentListOfSectionController(req, res) {
     const studentList = await getStudentList({
       limit,
       page: pageNo,
-      sectionId,
+      sectionId
     });
     return res.send(
       success(200, { pageNo, limit, totalCount: studentCount, studentList })
@@ -205,17 +264,15 @@ export async function getAllStudentOfSectionController(req, res) {
       );
     }
     const studentList = await getStudentListBySectionId({
-      sectionId,
+      sectionId
     });
-    return res.send(
-      success(200, { totalCount: studentCount, studentList })
-    );
+    return res.send(success(200, { totalCount: studentCount, studentList }));
   } catch (err) {
     return res.send(error(500, err.message));
   }
 }
 
-export async function getAllStudentOfSectionForAdminController(req, res){
+export async function getAllStudentOfSectionForAdminController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const adminId = req.adminId;
@@ -227,16 +284,13 @@ export async function getAllStudentOfSectionForAdminController(req, res){
       );
     }
     const studentList = await getStudentListBySectionId({
-      sectionId,
+      sectionId
     });
-    return res.send(
-      success(200, { totalCount: studentCount, studentList })
-    );
+    return res.send(success(200, { totalCount: studentCount, studentList }));
   } catch (err) {
     return res.send(error(500, err.message));
   }
 }
-
 
 // export async function getStudentListOfSectionForAdminController(req, res) {
 //   try {
@@ -276,7 +330,7 @@ export async function getAllStudentListForAdminController(req, res) {
     const studentList = await getAllStudentList({
       adminId,
       limit,
-      page: pageNo,
+      page: pageNo
     });
     return res.send(
       success(200, { pageNo, limit, totalCount: studentCount, studentList })
@@ -295,7 +349,7 @@ export async function adminUpdateStudentController(req, res) {
       parentName,
       phone,
       sectionId,
-      classId      
+      classId
     } = req.body;
     const studentId = req.params.studentId;
     const adminId = req.adminId;
@@ -308,8 +362,8 @@ export async function adminUpdateStudentController(req, res) {
       return res.send(error(400, "student doesn't exists"));
     }
     const parent = await findParentById(student["parentId"]);
-    if(!parent){
-      return res.send(error(400,"parent doesn't exists"));
+    if (!parent) {
+      return res.send(error(400, "parent doesn't exists"));
     }
     const updatedStudent = await adminUpdateStudent({
       studentId,
@@ -320,7 +374,7 @@ export async function adminUpdateStudentController(req, res) {
       age,
       phone,
       email,
-      address,
+      address
     });
     if (updatedStudent instanceof Error) {
       return res.send(error(400, "can't update student."));
@@ -333,41 +387,90 @@ export async function adminUpdateStudentController(req, res) {
 
 export async function updateStudentController(req, res) {
   try {
-    const {
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      age,
-      email,
-      phone,
-      address,
-    } = req.body;
+    const { firstname, lastname, gender, parentName, phone } = req.body;
     const studentId = req.params.studentId;
-    const classTeacherId = req.teacherId;
-    const teacher = await findClassTeacherById(classTeacherId);
-    if (!teacher) {
-      return res.send(error(400, "class teacher doesn't exists"));
-    }
-    const studentexist = await findStudentById(studentId);
-    if (!studentexist) {
+    const student = await findStudentById(studentId);
+    if (!student) {
       return res.send(error(400, "student doesn't exists"));
+    }
+    const parentId = student["parent"];
+    const parent = await findParentById(parentId);
+
+    if (!parent) {
+      return res.send(error(400, "parent doesn't exists"));
     }
     const updatedStudent = await updateStudent({
       studentId,
-      rollNumber,
       firstname,
       lastname,
-      gender,
-      age,
-      phone,
-      email,
-      address,
+      gender
     });
     if (updatedStudent instanceof Error) {
-      return res.send(error(400, "can't update student."));
+      return res.send(error(400, "can't update student Info."));
+    }
+    const updatedParent = await updateInfoParent({
+      parentId,
+      fullname: parentName,
+      phone
+    });
+    console.log(updatedParent);
+    if (updatedParent instanceof Error) {
+      return res.send(error(400, "can't update parent Info."));
     }
     return res.send(success(201, "student updated successfully!"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function parentUpdateStudentController(req, res) {
+  try {
+    const { bloodGroup, dob, address } = req.body;
+    const studentId = req.params.studentId;
+    const parentId = req.parentId;
+    const student = await findStudentById(studentId);
+    if (!student) {
+      return res.send(error(400, "student doesn't exists"));
+    }
+    if (student["parent"].toString() !== parentId) {
+      return res.send(error(400, "can't update,parent student mis-match"));
+    }
+
+    const updatedStudent = await updateStudentByParent({
+      studentId,
+      bloodGroup,
+      dob,
+      address
+    });
+    if (updatedStudent instanceof Error) {
+      return res.send(error(400, "student can't updated"));
+    }
+
+    return res.send(success(200, "student updated successfully"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function searchStudentOfSectionController(req, res) {
+  try {
+    const name = req.params.name;
+    const sectionId = req.sectionId;
+    if (!sectionId) {
+      return res.send(error(400, "section id is required"));
+    }
+    const section = await findSectionById(sectionId);
+    if (!section) {
+      return res.send(error(400, "section does not exists"));
+    }
+
+    const students = await searchStudentByName({ name, sectionId });
+    if (students instanceof Error) {
+      return res.send(error(400, "can't search students."));
+    }
+    return res.send(success(200, students));
+
+    res.json(users);
   } catch (err) {
     return res.send(error(500, err.message));
   }

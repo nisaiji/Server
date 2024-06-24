@@ -212,27 +212,12 @@ export async function adminUpdateStudent({
   }
 }
 
-export async function updateStudent({
-  studentId,
-  rollNumber,
-  firstname,
-  lastname,
-  gender,
-  age,
-  phone,
-  email,
-  address
-}) {
+export async function updateStudent({studentId,firstname,lastname,gender}){
   try {
     const student = await studentModel.findByIdAndUpdate(studentId, {
-      rollNumber,
       firstname,
       lastname,
       gender,
-      age,
-      phone,
-      email,
-      address
     });
     return student;
   } catch (error) {
@@ -240,6 +225,15 @@ export async function updateStudent({
   }
 }
 
+
+export async function updateStudentByParent({studentId,bloodGroup,dob,address}){
+  try {
+    const student = await studentModel.findByIdAndUpdate(studentId,{bloodGroup,dob,address});
+    return student;
+  } catch (error) {
+    throw error;
+  }
+}
 // export async function getStudentCount({sectionId}){
 //   try {
 //     const count = await studentModel.aggregate([{
@@ -258,3 +252,13 @@ export async function updateStudent({
 //     throw error;
 //   }
 // }
+
+export async function searchStudentByName({name,sectionId}){
+  try {
+    const regex = new RegExp(name, 'i'); 
+    const students = await studentModel.find({firstname: { $regex: regex },section:sectionId});    
+    return students;
+  } catch (error) {
+    throw error;    
+  }
+}

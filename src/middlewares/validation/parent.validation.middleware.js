@@ -113,10 +113,8 @@ export async function authUpdateParentValidation(req, res, next) {
 
 export async function profileUpdateParentValidation(req, res, next) {
   try {
-    const { firstname,lastname,phone } = req.body;
+    const {phone } = req.body;
     const { error: schemaError } = parentProfileUpdateSchema.validate({
-      firstname,
-      lastname,
       phone
     });
 

@@ -6,7 +6,6 @@ import { config } from "../../config/config.js";
 export async function parentAuthentication(req, res, next) {
   try {
     const token = req.header("Authorization");
-    console.log({ token });
     if (!token) {
       return res.send(error(404, "Authorization token is required"));
     }

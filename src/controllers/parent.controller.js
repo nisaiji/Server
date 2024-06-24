@@ -220,13 +220,13 @@ export async function authUpdateParentController(req,res){
 
 export async function profileUpdateParentController(req,res){
   try {
-    const{firstname,lastname,phone}  = req.body;
+    const{phone}  = req.body;
     const parentId = req.parentId;   
     const parent = await findParentById(parentId);
     if(!parent){
       return res.send(error(400,"parent doesn't exists"));
     }
-    const updatedParent  = await updateProfileParent({id:parentId,firstname,lastname,phone});
+    const updatedParent  = await updateProfileParent({id:parentId,phone});
     if(updatedParent instanceof Error){
       return res.send(error(400,"parent auth details can't be updated"));
     }

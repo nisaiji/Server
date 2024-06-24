@@ -64,25 +64,7 @@ const parentUpdateSchema = Joi.object({
     }),
 });
 const parentProfileUpdateSchema = Joi.object({
-  firstname: Joi.string()
-    .min(2)
-    .max(100)
-    .required()
-    .messages({
-      "string.min": "First name must be at least 3 characters long.",
-      "string.max": "First name must be smaller than 100 characters long.",
-      "any.required":"Firstname is required"
-    }),
-  lastname: Joi.string()
-    .min(2)
-    .max(100)
-    .required()
-    .messages({
-      "string.min": "Last name must be at least 3 characters long.",
-      "string.max": "Last name must be smaller than 100 characters long.",
-      "any.required":"Lastname is required"
-    }),
-  phone: Joi.string()
+     phone: Joi.string()
     .pattern(/^[1-5][0-9]{9}$/)
     .length(10)
     .messages({

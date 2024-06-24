@@ -216,6 +216,161 @@ paths:
         500:
           description: "Internal Server Error"
 
+  /student/search/{name}: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To search student based on firstname"
+      description: "This API will allow class-teacher to search student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: name
+         required: true
+         description: name of student.
+         schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/update/{studentId}: 
+    put:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To update student details"
+      description: "This API will allow class-teacher to update student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of student.
+         schema:
+            type: string
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 firstname:
+                   type: string
+                 lastname:
+                   type: string
+                 gender:
+                   type: string
+                 parentName:
+                   type: string
+                 phone:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/admin-update/{studentId}: 
+    put:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To update student details"
+      description: "This API will allow class-teacher to update student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of student.
+         schema:
+            type: string
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 firstname:
+                   type: string
+                 lastname:
+                   type: string
+                 gender:
+                   type: string
+                 parentName:
+                   type: string
+                 phone:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /student/parent-update/{studentId}: 
+    put:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To update student details"
+      description: "This API will allow parent to update student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of student.
+         schema:
+            type: string
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 bloodGroup:
+                   type: string
+                 dob:
+                   type: string
+                 address:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
   /student/student-list/{sectionId}/{pageNo}: 
     get:
       security:
@@ -309,9 +464,8 @@ paths:
         500:
           description: "Internal Server Error"
 
-
   /student/admin-update-student/{studentId}: 
-    post:
+    put:
       security:
         - Authorization: []
       tags:
@@ -356,48 +510,3 @@ paths:
         500:
           description: "Internal Server Error"
 
-  /student/update-student/{studentId}: 
-    post:
-      security:
-        - Authorization: []
-      tags:
-      - "Student"
-      summary: "To update student details"
-      description: "This API will allow class-teacher to update student."
-      produces:
-      - "application/json"
-      parameters:
-       - in: path
-         name: studentId
-         required: true
-         description: ID of student.
-         schema:
-            type: string
-      requestBody:
-         required: true
-         content:
-           application/json:
-             schema:
-               type: object
-               properties:
-                 rollNumber:
-                   type: string
-                 firstname:
-                   type: string
-                 lastname:
-                   type: string
-                 gender:
-                   type: string
-                 parentName:
-                   type: string
-                 phone:
-                   type: string
-      responses:
-        200:
-          description: "successful"
-        422:
-          description: "Unprocessable Entity"
-        403:
-          description: "Forbidden"
-        500:
-          description: "Internal Server Error"

@@ -16,6 +16,7 @@ export async function classTeacherAuthentication(req, res, next) {
       return res.send(error(404, "class teacher doesn't exists"));
     }
     req.teacherId = decoded.teacherId;
+    req.sectionId = decoded?.sectionId;
     req.adminId = decoded.adminId;
     next();
   } catch (err) {

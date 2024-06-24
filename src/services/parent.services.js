@@ -10,10 +10,19 @@ export async function checkParentExist({phone}){
   }
 }
 
-export async function registerParent({firstname,phone,password}){
+export async function registerParent({fullname,phone,password}){
   try {
     console.log({password});
-    const parent = await parentModel.create({firstname, phone,password});
+    const parent = await parentModel.create({fullname, phone,password});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function updateParent({fullname,phone}){
+  try {
+    console.log({password});
+    const parent = await parentModel.create({fullname, phone,password});
     return parent;
   } catch (error) {
     throw error;
@@ -111,6 +120,15 @@ export async function findParentById(_id) {
 }
 
 
+export async function updateInfoParent({parentId,fullname,phone}){
+  try {
+    const parent = await parentModel.findByIdAndUpdate(parentId,{fullname,phone});
+    return parent;
+  } catch (error) {
+    throw error;    
+  }
+}
+
 export async function updateAuthParent({id,username,email,password}){
   try {
     const parent = await parentModel.findByIdAndUpdate(id , {username,email,password});
@@ -119,9 +137,9 @@ export async function updateAuthParent({id,username,email,password}){
     throw error;
   }
 }
-export async function updateProfileParent({id,firstname,lastname,phone}){
+export async function updateProfileParent({id,phone}){
   try {
-    const parent = await parentModel.findByIdAndUpdate(id , {firstname,lastname,phone});
+    const parent = await parentModel.findByIdAndUpdate(id , {phone});
     return parent;
   } catch (error) {
     throw error;
