@@ -5,7 +5,7 @@ import { markPresentValidation } from "../middlewares/validation/attendance.vali
 import { markAttendanceController,checkAttendaceMarkedController,attendanceDailyStatusController, attendanceWeeklyStatusController, attendanceMonthlyStatusController, parentMarkAttendanceController } from "../controllers/attendance.controller.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 
-const attendanceRouter = express.Router();
+const attendanceRouter = express.Router(); 
 
 /** 
  * @swagger

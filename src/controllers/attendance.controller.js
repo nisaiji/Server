@@ -1,37 +1,15 @@
-import {
-  checkAttendanceAlreadyMarked,
-  checkAttendanceMarkedByParent,
-  checkAttendanceMarkedByTeacher,
-  checkHolidayEvent,
-  createAttendance,
-  markAttendanceByParent,
-  markAttendanceByTeacher,
-} from "../services/attendance.service.js";
-import {
-  getAbsentStudentCount,
-  getPresentStudentCount,
-  getStudentCount,
-} from "../services/student.service.js";
+import {checkAttendanceAlreadyMarked,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,markAttendanceByParent,markAttendanceByTeacher,} from "../services/attendance.service.js";
+import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount,} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function markAttendanceController(req, res) {
   try {
-    // console.log(req.body, req.teacherId, req.params.sectionId, req.adminId);
-    // const{studentId , sectionId,isPresent} = req.body;
     const { present, absent} = req.body;
     const sectionId = req.params.sectionId;
     const classTeacherId = req.teacherId;
     const adminId = req.adminId;
     const date = new Date();
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
+    const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
     if (day === "Sunday") {
       return res.send(error(400, "today is sunday"));
@@ -44,31 +22,20 @@ export async function markAttendanceController(req, res) {
     present.map(async (student) => {
       const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],currDate});
       if(parentMarkedAttendance){
-        const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance: student.isPresent,sectionId,classTeacherId,adminId,isTeacherMarked})
+        const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:true,sectionId,classTeacherId,adminId,isTeacherMarked:true})
       }
       else{
-        const createdAttendance = await createAttendance({
-          currDate,
-          day,
-          teacherAttendance: student.isPresent,
-          isTeacherMarked:true,
-          studentId: student._id, 
-          sectionId,
-          classTeacherId,
-          adminId,
-        });
+        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:true,isTeacherMarked:true,studentId: student._id,sectionId,classTeacherId,adminId,});
       }
     });
     absent.map(async (student) => {
-      const createdAttendance = await createAttendance({
-        currDate,
-        day,
-        isPresent: student.isPresent,
-        studentId: student._id,
-        sectionId,
-        classTeacherId,
-        adminId,
-      });
+      const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],currDate});
+      if(parentMarkedAttendance){
+        const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:false,sectionId,classTeacherId,adminId,isTeacherMarked:true})
+      }
+      else{
+        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:false,isTeacherMarked:true,studentId: student._id,sectionId,classTeacherId,adminId,});
+      }
     });
     return res.send(success(200, "attendance marked sucessfully"));
   } catch (err) {
@@ -78,16 +45,17 @@ export async function markAttendanceController(req, res) {
 export async function parentMarkAttendanceController(req, res) {
   try {
     const { studentId,attendance} = req.body;
+    const parentId = req.parentId;
+    const adminId = req.adminId;
+    if(!studentId || !attendance){
+      return res.send(error(400,"studentId and attendace is required"));
+    }
+    const student = await findStudentById(studentId);
+    if((student["parent"].toString())!==parentId){
+      return res.send(error(400,"parent is not authorized to mark attendance."));
+    }
     const date = new Date();
-    const daysOfWeek = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
+    const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
     if (day === "Sunday") {
       return res.send(error(400, "today is sunday"));

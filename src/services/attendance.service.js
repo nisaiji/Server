@@ -123,15 +123,14 @@ export async function markAttendanceByParent({
   attendance
 }) {
   try {
-    const attendance = await attendanceModel.create({
+    const markedAttendance = await attendanceModel.create({
       student: studentId,
-      date,
-      currDate,
+      date: currDate,
       day,
       parentAttendance: attendance,
       isParentMarked: true
     });
-    return attendance;
+    return markedAttendance;
   } catch (error) {
     throw error;
   }

@@ -5,7 +5,7 @@ import {
   createParent,
   findParent,
   findParentById,
-  findParentByPhoneNo,
+  findParentByPhoneNo, 
   findParentByUsername,
   getAllEventHolidays,
   getChildrenOfParent, 

@@ -1,39 +1,72 @@
-/attendance/mark-attendance/{sectionId}: 
-    get:
-      security: 
-        - Authorization: []
-      tags:
-        - "Attendance"
-      summary: "To mark attendance of student"
-      description: "This API will allow class-teacher to mark attendance of student."
-      produces:
-        - "application/json"
-      parameters:
-        - in: path
-          name: sectionId
+paths:
+  /attendance/mark-attendance/{sectionId}: 
+      post:
+        security: 
+          - Authorization: []
+        tags:
+          - "Attendance"
+        summary: "To mark attendance of student"
+        description: "This API will allow class-teacher to mark attendance of student."
+        produces:
+          - "application/json"
+        parameters:
+          - in: path
+            name: sectionId
+            required: true
+            description: ID of the section
+            schema:
+              type: string
+        requestBody:
           required: true
-          description: ID of the section
-          schema:
-            type: string
-      requestBody:
-         required: true
-         content:
-           application/json:
-             schema:
-               type: object
-               properties:
-                 present:
-                   type: string
-                 absent:
-                   type: string
-      responses:
-        200:
-          description: "successful"
-        422:
-          description: "Unprocessable Entity"
-        403:
-          description: "Forbidden"
-        500:
-          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  present:
+                    type: string
+                  absent:
+                    type: string
+        responses:
+          200:
+            description: "successful"
+          422:
+            description: "Unprocessable Entity"
+          403:
+            description: "Forbidden"
+          500:
+            description: "Internal Server Error"
+
+      
+  /attendance/parent-mark-attendance/: 
+      post:
+        security: 
+          - Authorization: []
+        tags:
+          - "Attendance"
+        summary: "To mark attendance of student"
+        description: "This API will allow class-teacher to mark attendance of student."
+        produces:
+          - "application/json"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  studentId:
+                    type: string
+                  attendance:
+                    type: string
+        responses:
+          200:
+            description: "successful"
+          422:
+            description: "Unprocessable Entity"
+          403:
+            description: "Forbidden"
+          500:
+            description: "Internal Server Error"
 
       
