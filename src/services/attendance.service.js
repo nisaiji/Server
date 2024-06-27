@@ -25,7 +25,6 @@ export async function createAttendance(data) {
       currDate,
       day,
       teacherAttendance,
-      isTeacherMarked,
       studentId,
       sectionId,
       classTeacherId,
@@ -35,7 +34,6 @@ export async function createAttendance(data) {
       date: currDate,
       day,
       teacherAttendance,
-      isTeacherMarked,
       student: studentId,
       section: sectionId,
       classTeacher: classTeacherId,
@@ -93,7 +91,7 @@ export async function checkAttendanceMarkedByTeacher({ studentId, currDate }) {
       $and: [
         { student: studentId },
         { date: currDate },
-        { isTeacherMarked: true }
+        { teacherAttendance: { $ne: "" } }
       ]
     });
     return attendance;
@@ -107,7 +105,7 @@ export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
       $and: [
         { student: studentId },
         { date: currDate },
-        { isParentMarked: true }
+        { parentAttendance: { $ne: "" } }
       ]
     });
     return attendance;
@@ -128,7 +126,6 @@ export async function markAttendanceByParent({
       date: currDate,
       day,
       parentAttendance: attendance,
-      isParentMarked: true
     });
     return markedAttendance;
   } catch (error) {
@@ -141,16 +138,52 @@ export async function markAttendanceByTeacher({
   teacherAttendance,
   sectionId,
   classTeacherId,
-  adminId,
-  isTeacherMarked
+  adminId
 }) {
   try {
     const attendance = await attendanceModel.findByIdAndUpdate(attendanceId, {
       teacherAttendance,
       section: sectionId,
       classTeacher: classTeacherId,
-      admin: adminId,
-      isTeacherMarked: true
+      admin: adminId
+    });
+    return attendance;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getMisMatchAttendance({ sectionId, date }) {
+  try {
+    const attendance = await attendanceModel
+      .find({
+        section: sectionId,
+        date: date,
+        parentAttendance: { $ne: "" },
+        $or: [
+          { teacherAttendance: "present", parentAttendance: "absent" },
+          { teacherAttendance: "absent", parentAttendance: "present" }
+        ]
+      })
+      .populate("student");
+    return attendance;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function findAttendanceById(attendanceId) {
+  try {
+    const attendance = await attendanceModel.findById(attendanceId);
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateAttendance({ attendanceId, attendance }) {
+  try {
+    const attendance = await attendanceModel.findByIdAndUpdate(attendanceId, {
+      teacherAttendance: attendance
     });
     return attendance;
   } catch (error) {

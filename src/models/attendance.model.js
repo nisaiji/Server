@@ -10,18 +10,12 @@ const attendanceSchema = new mongoose.Schema({
         required:true,
     },
     parentAttendance:{
-        type:Boolean,
+        type:String,
+        default:""
     },
     teacherAttendance:{
-        type:Boolean,
-    },
-    isTeacherMarked:{
-        type:Boolean,
-        default:false
-    },
-    isParentMarked:{
-        type:Boolean,
-        default:false
+        type:String,
+        default:""
     },
     student:{
         type: mongoose.Schema.Types.ObjectId,

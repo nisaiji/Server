@@ -135,10 +135,10 @@ export async function getAllStudentList({ adminId, limit, page }) {
   }
 }
 
-export async function getStudentCount({ sectionId }) {
+export async function getStudentCount({ sectionId}) {
   try {
     const studentCount = await studentModel.countDocuments({
-      section: sectionId
+      section: sectionId,
     });
     // console.log({ studentCount });
     return studentCount;
@@ -151,7 +151,7 @@ export async function getPresentStudentCount({ sectionId, currDate }) {
   try {
     // console.log({sectionId,currDate})
     const presentCount = await attendanceModel.countDocuments({
-      $and: [{ section: sectionId }, { date: currDate }, { isPresent: true }]
+      $and: [{ section: sectionId }, { date: currDate }, { teacherAttendance: "present" }]
     });
     // console.log(presentCount)
     return presentCount;
@@ -164,7 +164,7 @@ export async function getAbsentStudentCount({ sectionId, currDate }) {
   try {
     // console.log({sectionId,currDate})
     const absentCount = await attendanceModel.countDocuments({
-      $and: [{ section: sectionId }, { date: currDate }, { isPresent: false }]
+      $and: [{ section: sectionId }, { date: currDate }, { teacherAttendance: "absent" }]
     });
     // console.log(absentCount)
     return absentCount;

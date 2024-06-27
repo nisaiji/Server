@@ -1,4 +1,5 @@
-import {checkAttendanceAlreadyMarked,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,markAttendanceByParent,markAttendanceByTeacher,} from "../services/attendance.service.js";
+import attendanceModel from "../models/attendance.model.js";
+import {checkAttendanceAlreadyMarked,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,markAttendanceByParent,markAttendanceByTeacher, updateAttendance,} from "../services/attendance.service.js";
 import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount,} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -22,33 +23,38 @@ export async function markAttendanceController(req, res) {
     present.map(async (student) => {
       const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],currDate});
       if(parentMarkedAttendance){
-        const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:true,sectionId,classTeacherId,adminId,isTeacherMarked:true})
+        const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:"present",sectionId,classTeacherId,adminId})
       }
       else{
-        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:true,isTeacherMarked:true,studentId: student._id,sectionId,classTeacherId,adminId,});
+        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:"present",studentId: student._id,sectionId,classTeacherId,adminId,});
       }
     });
     absent.map(async (student) => {
       const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],currDate});
       if(parentMarkedAttendance){
-        const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:false,sectionId,classTeacherId,adminId,isTeacherMarked:true})
+        const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:"absent",sectionId,classTeacherId,adminId})
       }
       else{
-        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:false,isTeacherMarked:true,studentId: student._id,sectionId,classTeacherId,adminId,});
+        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:"absent",studentId: student._id,sectionId,classTeacherId,adminId,});
       }
     });
-    return res.send(success(200, "attendance marked sucessfully"));
+    const misMatchAttendance = await getMisMatchAttendance({sectionId,date:currDate});
+    return res.send(success(200, {misMatchAttendance}));
   } catch (err) {
     return res.send(error(500, err.message));
   }
 }
+
 export async function parentMarkAttendanceController(req, res) {
   try {
     const { studentId,attendance} = req.body;
     const parentId = req.parentId;
     const adminId = req.adminId;
-    if(!studentId || !attendance){
-      return res.send(error(400,"studentId and attendace is required"));
+    if(!(attendance==="present" || attendance==="absent")){
+      return res.send(error(400,"invalid attendance value"));
+    }
+    if(!studentId){
+      return res.send(error(400,"studentId is required"));
     }
     const student = await findStudentById(studentId);
     if((student["parent"].toString())!==parentId){
@@ -135,7 +141,6 @@ export async function checkAttendaceMarkedController(req, res) {
 export async function attendanceDailyStatusController(req, res) {
   try {
     const sectionId = req.params.sectionId;
-    // console.log(sectionId);
     const date = new Date();
     const currDate =
       date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
@@ -191,7 +196,7 @@ export async function attendanceWeeklyStatusController(req, res) {
       })
     );
 
-    const totalStudentCount = await getStudentCount({ sectionId });
+    const totalStudentCount = await getStudentCount({ sectionId});
     // console.log(weeklyAttendance);
     return res.send(success(200, { weeklyAttendance, totalStudentCount }));
   } catch (err) {
@@ -235,6 +240,44 @@ export async function attendanceMonthlyStatusController(req, res) {
   }
 }
 
+
+export async function getMisMatchAttendanceController(req,res){
+  try {
+    const sectionId = req.params.sectionId;
+    const date = new Date();
+    const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
+    const day = daysOfWeek[date.getDay()];
+    if (day === "Sunday") {
+      return res.send(error(400, "today is sunday"));
+    }
+    const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    const misMatchAttendance = await getMisMatchAttendance({sectionId,date:currDate});
+    return res.send(success(200,{misMatchAttendance}));    
+  } catch (err) {
+    return res.send(error(500,err.message));
+  }
+}
+
+export async function updateAttendanceController(req,res){
+  try {
+    const{attendanceId,attendance} = req.body;
+    const attendanceInstance = await findAttendanceById(attendanceId);
+    if(!(attendance==="present" || attendance==="absent")){
+      return res.send(error(400,"invalid attendance value"));
+    }
+    if(!attendanceInstance){
+      return res.send(error(400,"attendance is not registered"));
+    }
+    const updatedAttendance = await updateAttendance({attendanceId,attendance});
+    if(updatedAttendance instanceof Error){
+      return res.send(error(400,"can't update attendance"));
+    }
+    return res.send(success(200,"attendance updated successfully"))
+    
+  } catch (err) {
+    return res.send(error(500,err.message)) ;   
+  }
+}
 
 Date.prototype.getWeekDates = function () {
   var date = new Date(this.getTime());

@@ -37,8 +37,7 @@ paths:
           500:
             description: "Internal Server Error"
 
-      
-  /attendance/parent-mark-attendance/: 
+  /attendance/parent-mark-attendance: 
       post:
         security: 
           - Authorization: []
@@ -59,6 +58,145 @@ paths:
                     type: string
                   attendance:
                     type: string
+        responses:
+          200:
+            description: "successful"
+          422:
+            description: "Unprocessable Entity"
+          403:
+            description: "Forbidden"
+          500:
+            description: "Internal Server Error"
+  
+  /attendance/mismatch-attendance/{sectionId}: 
+      get:
+        security: 
+          - Authorization: []
+        tags:
+          - "Attendance"
+        summary: "To get mismatch attendance"
+        description: "This API will allow class-teacher to get mismatch attendance."
+        produces:
+          - "application/json"
+        parameters:
+          - in: path
+            name: sectionId
+            required: true
+            description: ID of the section
+            schema:
+              type: string
+        responses:
+          200:
+            description: "successful"
+          422:
+            description: "Unprocessable Entity"
+          403:
+            description: "Forbidden"
+          500:
+            description: "Internal Server Error"
+
+  /attendance/update-attendance: 
+      put:
+        security: 
+          - Authorization: []
+        tags:
+          - "Attendance"
+        summary: "To update marked attendance"
+        description: "This API will allow class-teacher to update attendance of student."
+        produces:
+          - "application/json"
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  attendanceId:
+                    type: string
+                  attendance:
+                    type: string
+        responses:
+          200:
+            description: "successful"
+          422:
+            description: "Unprocessable Entity"
+          403:
+            description: "Forbidden"
+          500:
+            description: "Internal Server Error"
+
+  /attendance/daily-status/{sectionId}: 
+      get:
+        security: 
+          - Authorization: []
+        tags:
+          - "Attendance"
+        summary: "To get daily attendance status"
+        description: "This API will allow class-teacher to get daily attendance status."
+        produces:
+          - "application/json"
+        parameters:
+          - in: path
+            name: sectionId
+            required: true
+            description: ID of the section
+            schema:
+              type: string
+        responses:
+          200:
+            description: "successful"
+          422:
+            description: "Unprocessable Entity"
+          403:
+            description: "Forbidden"
+          500:
+            description: "Internal Server Error"
+
+  /attendance/weekly-status/{sectionId}: 
+      get:
+        security: 
+          - Authorization: []
+        tags:
+          - "Attendance"
+        summary: "To get weekly attendance status"
+        description: "This API will allow class-teacher to get weekly attendance status."
+        produces:
+          - "application/json"
+        parameters:
+          - in: path
+            name: sectionId
+            required: true
+            description: ID of the section
+            schema:
+              type: string
+        responses:
+          200:
+            description: "successful"
+          422:
+            description: "Unprocessable Entity"
+          403:
+            description: "Forbidden"
+          500:
+            description: "Internal Server Error"
+
+  /attendance/monthly-status/{sectionId}: 
+      get:
+        security: 
+          - Authorization: []
+        tags:
+          - "Attendance"
+        summary: "To get monthly attendance status"
+        description: "This API will allow class-teacher to get monthly attendance status."
+        produces:
+          - "application/json"
+        parameters:
+          - in: path
+            name: sectionId
+            required: true
+            description: ID of the section
+            schema:
+              type: string
         responses:
           200:
             description: "successful"
