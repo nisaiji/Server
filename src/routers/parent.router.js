@@ -12,6 +12,7 @@ parentRouter.put("/auth-update",parentAuthentication,authUpdateParentValidation,
 parentRouter.put("/profile-update",parentAuthentication,profileUpdateParentValidation,profileUpdateParentController);
 parentRouter.get("/children",parentAuthentication,getChildrenParentController);
 parentRouter.get("/holiday-events",parentAuthentication,getHolidayEventParentController);
+
 // parentRouter.post("/register/:studentId",classTeacherAuthentication,registerParentValidation, registerParentController);
 // parentRouter.post("/admin-register/:studentId", adminAuthentication, registerParentValidation, adminRegisterParentController);
 // parentRouter.post("/link-student-with-existing-parent/:studentId",classTeacherAuthentication,registerExistingParentValidation,registerExistingParentController);

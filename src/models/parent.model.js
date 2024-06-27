@@ -8,6 +8,10 @@ const parentSchema = mongoose.Schema({
   fullname: {
     type: String
   },
+  isLoginAlready:{
+    type:Boolean,
+    default:false
+  },
   phone:{
     type: String,
     unique: true,

@@ -11,6 +11,10 @@ const teacherSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  isLoginAlready:{
+    type:Boolean,
+    default:false
+  },
   dob: {
     type: String
   },

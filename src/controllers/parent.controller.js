@@ -101,14 +101,17 @@ export async function loginParentController(req, res) {
       phone: parent["phone"],
       adminId:parent["admin"],
     });
-    return res.send(success(200, { accessToken }));
+    const isLoginAlready = parent["isLoginAlready"];
+    parent["isLoginAlready"] = true;
+    await parent.save();
+    return res.send(success(200, { accessToken,isLoginAlready }));
   } catch (err) {
     return res.send(error(500, err.message));
   }
 }
 
 export async function registerExistingParentController(req, res) {
-  try {
+  try{
     const studentId = req.params.studentId;
     const { parentId } = req.body;
     const parent = await findParentById(parentId);

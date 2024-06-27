@@ -82,8 +82,11 @@ export async function loginClassTeacherController(req, res) {
       sectionName: section["name"],
       className: Class["name"]
     });
+    const isLoginAlready = classTeacher["isLoginAlready"];
+    classTeacher["isLoginAlready"] = true;
+    await classTeacher.save();
     return res.send(
-      success(200, { accessToken, firstname: classTeacher["firstname"] })
+      success(200, { accessToken, firstname: classTeacher["firstname"] ,isLoginAlready})
     );
   } catch (err) {
     return res.send(error(500, err.message));

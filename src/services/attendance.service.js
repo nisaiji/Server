@@ -190,3 +190,15 @@ export async function updateAttendance({ attendanceId, attendance }) {
     throw error;
   }
 }
+
+
+export async function getMonthlyAttendance({studentId , regex}){
+  try {
+    console.log({regex})
+    const attendace = await attendanceModel.find({student:studentId,date:regex})
+    console.log({attendace})
+    return attendace;
+  } catch (error) {
+    throw error;    
+  }
+}
