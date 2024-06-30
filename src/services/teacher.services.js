@@ -1,5 +1,6 @@
 import sectionModel from "../models/section.model.js";
 import teacherModel from "../models/teacher.model.js";
+import mongoose from "mongoose";
 
 export async function checkPhoneExists({ phone }) {
   try {
@@ -9,6 +10,7 @@ export async function checkPhoneExists({ phone }) {
     throw error;
   }
 }
+
 export async function findTeacher({ user }) {
   try {
     const teacher = await teacherModel.findOne({
@@ -19,6 +21,7 @@ export async function findTeacher({ user }) {
     throw error;
   }
 }
+
 export async function checkTeacherExist(username, email) {
   try {
     const teacher = await teacherModel.findOne({
@@ -59,6 +62,7 @@ export async function findClassTeacherByUsername(username) {
     return err;
   }
 }
+
 export async function findClassTeacherByEmail(email) {
   try {
     const classTeacher = await teacherModel.findOne({ email });
@@ -77,9 +81,13 @@ export async function findTeacherById(id) {
   }
 }
 
-export async function updateAuthTeacher({id,username,email,password}){
+export async function updateAuthTeacher({ id, username, email, password }) {
   try {
-    const teacher = await teacherModel.findByIdAndUpdate(id , {username,email,password});
+    const teacher = await teacherModel.findByIdAndUpdate(id, {
+      username,
+      email,
+      password
+    });
     return teacher;
   } catch (error) {
     throw error;
@@ -87,9 +95,28 @@ export async function updateAuthTeacher({id,username,email,password}){
 }
 
 //firstname, lastname,phone, dob,bloodGroup,gender,university,degree
-export async function updateProfileTeacher({id,firstname,lastname,phone,dob,bloodGroup,gender,university,degree}){
+export async function updateProfileTeacher({
+  id,
+  firstname,
+  lastname,
+  phone,
+  dob,
+  bloodGroup,
+  gender,
+  university,
+  degree
+}) {
   try {
-    const teacher = await teacherModel.findByIdAndUpdate(id , {firstname,lastname,phone,dob,bloodGroup,gender,university,degree});
+    const teacher = await teacherModel.findByIdAndUpdate(id, {
+      firstname,
+      lastname,
+      phone,
+      dob,
+      bloodGroup,
+      gender,
+      university,
+      degree
+    });
     return teacher;
   } catch (error) {
     throw error;
@@ -157,7 +184,10 @@ export async function getAllTeachers(adminId) {
 
 export async function getNonClassTeachers(adminId) {
   try {
-    const teachers = await teacherModel.aggregate([
+    const objectIdAdminId = new mongoose.Types.ObjectId(adminId);
+    // console.log({ objectIdAdminId });
+
+    const teachers = teacherModel.aggregate([
       {
         $lookup: {
           from: "sections",
@@ -169,7 +199,7 @@ export async function getNonClassTeachers(adminId) {
       {
         $match: {
           sections: { $size: 0 },
-          admin:adminId
+          admin: objectIdAdminId
         }
       },
       {

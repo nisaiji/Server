@@ -20,7 +20,7 @@ studentRouter.get("/search/:name",classTeacherAuthentication,searchStudentOfSect
 studentRouter.put("/update/:studentId",classTeacherAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/admin-update/:studentId",adminAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/parent-update/:studentId",parentAuthentication,parentUpdateStudentValidation,parentUpdateStudentController)
-// studentRouter.put("/upload-photo",);
+studentRouter.put("/upload-photo",);
 
 // studentRouter.put("/admin-update-student/:studentId", adminAuthentication,adminRegisterStudentValidation,adminUpdateStudentController);
 // studentRouter.get("/student-list/:sectionId/:pageNo", classTeacherAuthentication, getStudentListOfSectionController);
