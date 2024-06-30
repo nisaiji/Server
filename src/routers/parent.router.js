@@ -1,9 +1,7 @@
 import express from "express";
-import {adminGetParentController,adminRegisterParentController,authUpdateParentController,getChildrenParentController,getHolidayEventParentController,loginParentController,profileUpdateParentController,registerExistingParentController,registerParentController,updateParentController,} from "../controllers/parent.controller.js";
-import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
+import {authUpdateParentController,getChildrenParentController,getHolidayEventParentController,loginParentController,profileUpdateParentController} from "../controllers/parent.controller.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
-import {authUpdateParentValidation, loginParentValidation,profileUpdateParentValidation,registerExistingParentValidation,registerParentValidation,updateParentValidation,} from "../middlewares/validation/parent.validation.middleware.js";
-import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
+import {authUpdateParentValidation, loginParentValidation,profileUpdateParentValidation} from "../middlewares/validation/parent.validation.middleware.js";
 
 const parentRouter = express.Router();
 
@@ -12,7 +10,7 @@ parentRouter.put("/auth-update",parentAuthentication,authUpdateParentValidation,
 parentRouter.put("/profile-update",parentAuthentication,profileUpdateParentValidation,profileUpdateParentController);
 parentRouter.get("/children",parentAuthentication,getChildrenParentController);
 parentRouter.get("/holiday-events",parentAuthentication,getHolidayEventParentController);
-
+// parentRouter.
 // parentRouter.post("/register/:studentId",classTeacherAuthentication,registerParentValidation, registerParentController);
 // parentRouter.post("/admin-register/:studentId", adminAuthentication, registerParentValidation, adminRegisterParentController);
 // parentRouter.post("/link-student-with-existing-parent/:studentId",classTeacherAuthentication,registerExistingParentValidation,registerExistingParentController);

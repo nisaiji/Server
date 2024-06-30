@@ -4,9 +4,10 @@ import { adminAuthentication } from "../middlewares/authentication/admin.authent
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 import {addToSectionStudentValidation,deleteStudentValidation,parentUpdateStudentValidation,registerStudentValidation, updateStudentValidation} from "../middlewares/validation/student.validation.middleware.js";
-// import { adminUpdateStudent } from "../services/student.service.js";
 
 const studentRouter = express.Router();
+
+
 
 studentRouter.post("/register",classTeacherAuthentication,registerStudentValidation,registerStudentController);
 studentRouter.post("/admin-register",adminAuthentication,registerStudentValidation,adminRegisterStudentController);
@@ -19,10 +20,9 @@ studentRouter.get("/search/:name",classTeacherAuthentication,searchStudentOfSect
 studentRouter.put("/update/:studentId",classTeacherAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/admin-update/:studentId",adminAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/parent-update/:studentId",parentAuthentication,parentUpdateStudentValidation,parentUpdateStudentController)
-
+// studentRouter.put("/upload-photo",);
 
 // studentRouter.put("/admin-update-student/:studentId", adminAuthentication,adminRegisterStudentValidation,adminUpdateStudentController);
 // studentRouter.get("/student-list/:sectionId/:pageNo", classTeacherAuthentication, getStudentListOfSectionController);
-
 
 export default studentRouter; 

@@ -7,39 +7,6 @@ import { parentAuthentication } from "../middlewares/authentication/parent.authe
 
 const attendanceRouter = express.Router(); 
 
-/** 
- * @swagger
- * /attendance/mark-attendance:
- *   post:
- *     security:
- *       - Authorization: []
- *     summary: to mark the attendance of student
- *     description: This API will mark the attendance of a student,if already marked then it will update, but before it ensure class teacher is authentic and authorized.it requires classTeacher login token.
- *     tags:
- *       - Attendance
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               studentId:
- *                 type: string
- *               sectionId:
- *                 type: string
- *               isPresent:
- *                 type: string
- *     responses:
- *       200:
- *         description: "attendance marked successfully"
- *       400:
- *         description: "Unauthorized!"
- *       500:
- *         description: "Server side error"
- */
-// attendanceRouter.post("/mark-attendance", classTeacherAuthentication,markPresentValidation,classTeacherAuthorization,markAttendanceController);
-
 attendanceRouter.post("/mark-attendance/:sectionId", classTeacherAuthentication,markAttendanceController);
 attendanceRouter.post("/parent-mark-attendance/",parentAuthentication,parentMarkAttendanceController);
 attendanceRouter.put("/update-attendance/", classTeacherAuthentication,markAttendanceController);

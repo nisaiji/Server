@@ -17,6 +17,7 @@ const registerAdminSchema = Joi.object({
     "string.max": "Affiliation no. length must be smaller than 50 chars",
     "any.required": "Affiliation no. is required!"
   }),
+
   phone: Joi.string()
     .pattern(/^[1-5][0-9]{9}$/)
     .message("invalid phone number")
@@ -36,9 +37,12 @@ const registerAdminSchema = Joi.object({
       "string.email": "Invalid Email Id",
       "any.required": "Email is required!"
     }),
+
   password: Joi.string()
     .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
     .required()
+    .min(8)
+    .max(16)
     .messages({
       "string.pattern":
         "Password should contains alpha-numberic special symbols",
@@ -60,4 +64,7 @@ const loginAdminSchema = Joi.object({
   })
 });
 
-export { registerAdminSchema, loginAdminSchema };
+export{ registerAdminSchema, loginAdminSchema };
+
+
+

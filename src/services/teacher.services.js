@@ -168,7 +168,8 @@ export async function getNonClassTeachers(adminId) {
       },
       {
         $match: {
-          sections: { $size: 0 }
+          sections: { $size: 0 },
+          admin:adminId
         }
       },
       {
