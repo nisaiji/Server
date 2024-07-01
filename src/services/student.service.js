@@ -105,8 +105,9 @@ export async function getStudentList({ limit, page, sectionId }) {
     const students = await studentModel
       .find({ section: sectionId })
       .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .exec();
+      .skip((page - 1) * limit).populate("parent")
+      .exec()
+      console.log(students)
     return students;
   } catch (error) {
     return error;
@@ -127,7 +128,7 @@ export async function getAllStudentList({ adminId, limit, page }) {
     const students = await studentModel
       .find({ admin: adminId })
       .limit(limit * 1)
-      .skip((page - 1) * limit)
+      .skip((page - 1) * limit).populate("parent")
       .exec();
     return students;
   } catch (error) {

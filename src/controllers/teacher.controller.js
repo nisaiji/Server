@@ -57,7 +57,7 @@ export async function loginClassTeacherController(req, res) {
     const { user, password } = req.body;
     const classTeacher = await findTeacher({ user });
     if (!classTeacher) {
-      return res.send(error(404, "class teacher doesn't exist"));
+      return res.send(error(404, "unauthorized user"));
     }
     const matchPassword = await checkPasswordMatch(
       password,
@@ -65,7 +65,7 @@ export async function loginClassTeacherController(req, res) {
     );
 
     if (!matchPassword) {
-      return res.send(error(404, "incorrect password"));
+      return res.send(error(404, "unauthorized user"));
     }
     const section = await findSectionByClassTeacherId(classTeacher["_id"]);
     if (!section) {

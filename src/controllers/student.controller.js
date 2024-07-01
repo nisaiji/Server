@@ -1,53 +1,16 @@
 import { findAdminByID } from "../services/admin.services.js";
 import { findClassById } from "../services/class.sevices.js";
-import {
-  checkParentExist,
-  deleteParentById,
-  findParentById,
-  registerParent,
-  updateInfoParent,
-  updateParent
-} from "../services/parent.services.js";
+import {checkParentExist,deleteParentById,findParentById,registerParent,updateInfoParent,updateParent} from "../services/parent.services.js";
 import { hashPassword } from "../services/password.service.js";
-import {
-  checkStudentExistInSection,
-  findSectionByClassTeacherId,
-  findSectionById
-} from "../services/section.services.js";
-import {
-  adminRegisterStudent,
-  adminUpdateStudent,
-  checkStudentExist,
-  deleteStudentById,
-  findStudentById,
-  findStudentSiblings,
-  getAllStudentCount,
-  getAllStudentList,
-  getStudentCount,
-  getStudentList,
-  getStudentListBySectionId,
-  registerStudent,
-  searchStudentByName,
-  updateStudent,
-  updateStudentByParent
-} from "../services/student.service.js";
-import {
-  findClassTeacherById,
-  findTeacherById
-} from "../services/teacher.services.js";
+import {checkStudentExistInSection,findSectionByClassTeacherId,findSectionById} from "../services/section.services.js";
+import {adminRegisterStudent,adminUpdateStudent,checkStudentExist,deleteStudentById,findStudentById,findStudentSiblings,getAllStudentCount,
+  getAllStudentList,getStudentCount,getStudentList,getStudentListBySectionId,registerStudent,searchStudentByName,updateStudent,updateStudentByParent} from "../services/student.service.js";
+import {findClassTeacherById,findTeacherById} from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
   try {
-    const {
-      firstname,
-      lastname,
-      gender,
-      parentName,
-      phone,
-      sectionId,
-      classId
-    } = req.body;
+    const {firstname,lastname,gender,parentName,phone,sectionId,classId} = req.body;
     const teacherId = req.teacherId;
     const adminId = req.adminId;
     const teacher = await findTeacherById(teacherId);
@@ -68,21 +31,13 @@ export async function registerStudentController(req, res) {
     let parent = await checkParentExist({ phone });
     if (!parent) {
       console.log({ hashedPassword });
-      parent = await registerParent({
-        fullname: parentName,
-        phone,
-        password: hashedPassword,
-        admin:adminId
-      });
+      parent = await registerParent({fullname: parentName,phone,password: hashedPassword,admin:adminId});
     }
     if (!parent) {
       return res.send(error(400, "can't register/find parent"));
     }
 
-    const existingStudent = await checkStudentExist({
-      firstname,
-      parentId: parent["_id"]
-    });
+    const existingStudent = await checkStudentExist({firstname,parentId: parent["_id"]});
     if (existingStudent) {
       return res.send(error(400, "student already exists"));
     }
@@ -106,15 +61,7 @@ export async function registerStudentController(req, res) {
 
 export async function adminRegisterStudentController(req, res) {
   try {
-    const {
-      firstname,
-      lastname,
-      gender,
-      parentName,
-      phone,
-      sectionId,
-      classId
-    } = req.body;
+    const {firstname,lastname,gender,parentName,phone,sectionId,classId} = req.body;
     const adminId = req.adminId;
     const admin = await findAdminByID(adminId);
     if (!admin) {

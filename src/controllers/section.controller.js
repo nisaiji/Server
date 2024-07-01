@@ -1,16 +1,6 @@
-import {
-  checkClassExistById,
-  checkSectionExist,
-  createSection,
-  deleteSection,
-  findSectionById,
-  getAllSection,
-  getClassSections
-} from "../services/section.services.js";
-import {
-  findClassTeacherById,
-  findTeacherById
-} from "../services/teacher.services.js";
+import {checkClassExistById,checkSectionExist,createSection,deleteSection,findSectionById,
+  getAllSection,getClassSections} from "../services/section.services.js";
+import {findClassTeacherById,findTeacherById} from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerSectionController(req, res) {
@@ -73,9 +63,7 @@ export async function replaceTeacherController(req, res) {
 
     section["classTeacher"] = teacherId;
     await section.save();
-    return res.send(
-      success(200, "new teacher assigned to section sucessfully")
-    );
+    return res.send(success(200, "new teacher assigned to section sucessfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }

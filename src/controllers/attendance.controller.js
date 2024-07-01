@@ -125,10 +125,7 @@ export async function checkAttendaceMarkedController(req, res) {
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
-    const checkAttendanceMarked = await checkAttendanceAlreadyMarked({
-      sectionId,
-      currDate,
-    });
+    const checkAttendanceMarked = await checkAttendanceAlreadyMarked({sectionId,currDate,});
     if (checkAttendanceMarked) {
       return res.send(error(400, "attendance already marked"));
     }
@@ -142,26 +139,12 @@ export async function attendanceDailyStatusController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const date = new Date();
-    const currDate =
-      date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-    // const holidayEvent = await checkHolidayEvent({ currDate, adminId });
-    // console.log({sectionId})
+    const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+ 
     const totalStudentCount = await getStudentCount({ sectionId });
-    const presentStudentCount = await getPresentStudentCount({
-      sectionId,
-      currDate,
-    });
-    const absentStudentCount = await getAbsentStudentCount({
-      sectionId,
-      currDate,
-    });
-    return res.send(
-      success(200, {
-        totalStudentCount,
-        presentStudentCount,
-        absentStudentCount,
-      })
-    );
+    const presentStudentCount = await getPresentStudentCount({sectionId,currDate,});
+    const absentStudentCount = await getAbsentStudentCount({sectionId,currDate,});
+    return res.send(success(200, {totalStudentCount,presentStudentCount,absentStudentCount,}));
   } catch (err) {
     return res.send(error(500, err.message));
   }

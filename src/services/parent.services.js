@@ -174,7 +174,7 @@ export async function checkStudentAlreadyLinkedToParent(studentId) {
 
 export async function getChildrenOfParent(parentId){
   try {
-    const children = await studentModel.find({parent:parentId});
+    const children = await studentModel.find({parent:parentId}).populate({path:"section",select:"name"}).populate({path:"classId",select:"name"});
     return children;
   } catch (error) {
     throw error;
