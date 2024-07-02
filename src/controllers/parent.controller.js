@@ -69,11 +69,13 @@ export async function loginParentController(req, res) {
     if (!matchPassword) {
       return res.send(error(404, "unauthorized user"));
     }
+    const email = parent["email"] || "abc@email.com";
     const accessToken = generateAccessToken({
       role: "parent",
       parentId: parent["_id"],
       phone: parent["phone"],
       adminId:parent["admin"],
+      email
     });
     const isLoginAlready = parent["isLoginAlready"];
     parent["isLoginAlready"] = true;
