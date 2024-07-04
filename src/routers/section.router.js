@@ -3,8 +3,6 @@ import {deleteSectionController,getAllSectionsController,getClassSectionsControl
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { deleteSectionAuthorization } from "../middlewares/authorization/deleteSection.authorization.middleware.js";
 import { registerSectionValidation } from "../middlewares/validation/section.validation.middleware.js";
-// import { adminAuthentication } from "../middlewares/admin.authentication.middleware.js";
-// import { registerSectionValidation } from "../middlewares/section.validation.middleware.js";
 
 const sectionRouter = express.Router();
 

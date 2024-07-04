@@ -63,6 +63,22 @@ const parentUpdateSchema = Joi.object({
       "string.base": "Address must be a string."
     }),
 });
+const parentProfileUpdateSchema = Joi.object({
+      email: Joi.string()
+      .email({
+        minDomainSegments: 2,
+      })
+      .messages({
+        "string.email": "Email must be a valid email address."
+      }),
+     phone: Joi.string()
+    .pattern(/^[1-5][0-9]{9}$/)
+    .length(10)
+    .messages({
+      "string.pattern.base": "Phone number must have 10-digit number starting with 1-5.",
+      "string.length": "Phone number must be exactly 10 characters long."
+    }),
+});
 
 const existingParentRegisterSchema = Joi.object({
   studentId: Joi.string()
@@ -82,13 +98,13 @@ const existingParentRegisterSchema = Joi.object({
 });
 
 const parentLoginSchema = Joi.object({
-  username: Joi.string()
+  user: Joi.string()
     .min(5)
     .max(15)
     .required()
     .messages({
-      "string.min": "Username must be at least 5 characters long.",
-      "string.max": "Username must be no more than 15 characters long.",
+      "string.min": "user credentials must be at least 5 characters long.",
+      "string.max": "user credentials must be no more than 15 characters long.",
       "any.required": "Username is required."
     }),
   password: Joi.string()
@@ -98,4 +114,22 @@ const parentLoginSchema = Joi.object({
     }),
 });
 
-export { parentRegisterSchema, parentLoginSchema, existingParentRegisterSchema, parentUpdateSchema };
+
+const parentAuthUpdateSchema = Joi.object({
+  username: Joi.string()
+    .required()
+    .messages({ 
+      "any.required": "username is required" }),
+  email: Joi.string()
+      .email({
+        minDomainSegments: 2,
+      })
+      .optional()
+      .messages({
+        "string.email": "Invalid email format.",
+        "any.required": "Email is required."
+      }),
+  password:Joi.string().required()
+});
+
+export { parentRegisterSchema, parentLoginSchema, existingParentRegisterSchema, parentUpdateSchema,parentAuthUpdateSchema,parentProfileUpdateSchema };

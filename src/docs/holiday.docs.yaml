@@ -1,5 +1,5 @@
 paths:
-  /Holiday-Event/create-event: 
+  /holiday-event/register: 
     post:
       security:
         - Authorization: []    
@@ -18,11 +18,11 @@ paths:
                properties:
                  date:
                    type: string
-                 name:
+                 title:
                    type: string
-                 teacherHoliday:
+                 holiday:
                    type: string
-                 studentHoliday:
+                 event:
                    type: string
                  description:
                    type: string
@@ -36,14 +36,14 @@ paths:
         500:
           description: "Internal Server Error"
 
-  /Holiday-Event/: 
+  /holiday-event/: 
     get:
       security:
         - Authorization: []    
       tags:
       - "Holiday-Event"
       summary: "To get a list Holiday Event"
-      description: "This API will allow admin to get a list of holiday event"
+      description: "This API will allow admin to get a list of holiday event."
       produces:
       - "application/json"
       responses:
@@ -56,8 +56,8 @@ paths:
         500:
           description: "Internal Server Error"
   
-  /Holiday-Event/{eventId}: 
-    post:
+  /holiday-event/{eventId}: 
+    delete:
       security:
         - Authorization: []    
       tags:
@@ -68,28 +68,11 @@ paths:
       - "application/json"
       parameters:
        - in: path
-         name: studentId
+         name: eventId
          required: true
-         description: ID of the student
+         description: ID of the holiday/event.
          schema:
             type: string
-      requestBody:
-         required: true
-         content:
-           application/json:
-             schema:
-               type: object
-               properties:
-                 date:
-                   type: string
-                 name:
-                   type: string
-                 teacherHoliday:
-                   type: string
-                 studentHoliday:
-                   type: string
-                 description:
-                   type: string
       responses:
         200:
           description: "successful"
@@ -99,4 +82,6 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
+
+   
     

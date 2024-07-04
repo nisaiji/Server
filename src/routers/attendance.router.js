@@ -2,51 +2,21 @@ import express from "express";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { classTeacherAuthorization } from "../middlewares/authorization/classTeacher.authorization.middleware.js";
 import { markPresentValidation } from "../middlewares/validation/attendance.validation.middleware.js";
-import { markAttendanceController,checkAttendaceMarkedController,attendanceDailyStatusController, attendanceWeeklyStatusController, attendanceMonthlyStatusController } from "../controllers/attendance.controller.js";
+import { markAttendanceController,checkAttendaceMarkedController,attendanceDailyStatusController, attendanceWeeklyStatusController, attendanceMonthlyStatusController, parentMarkAttendanceController, getMisMatchAttendanceController, parentMonthlyAttendanceStatusController, checkParentAttendaceMarkedController } from "../controllers/attendance.controller.js";
+import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 
-const attendanceRouter = express.Router();
-
-/**
- * @swagger
- * /attendance/mark-attendance:
- *   post:
- *     security:
- *       - Authorization: []
- *     summary: to mark the attendance of student
- *     description: This API will mark the attendance of a student,if already marked then it will update, but before it ensure class teacher is authentic and authorized.it requires classTeacher login token.
- *     tags:
- *       - Attendance
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               studentId:
- *                 type: string
- *               sectionId:
- *                 type: string
- *               isPresent:
- *                 type: string
- *     responses:
- *       200:
- *         description: "attendance marked successfully"
- *       400:
- *         description: "Unauthorized!"
- *       500:
- *         description: "Server side error"
- */
-// attendanceRouter.post("/mark-attendance", classTeacherAuthentication,markPresentValidation,classTeacherAuthorization,markAttendanceController);
+const attendanceRouter = express.Router(); 
 
 attendanceRouter.post("/mark-attendance/:sectionId", classTeacherAuthentication,markAttendanceController);
-
+attendanceRouter.post("/parent-mark-attendance/",parentAuthentication,parentMarkAttendanceController);
+attendanceRouter.put("/update-attendance/", classTeacherAuthentication,markAttendanceController);
+attendanceRouter.get("/mismatch-attendance/:sectionId",classTeacherAuthentication,getMisMatchAttendanceController);
 attendanceRouter.get("/check-attendance-marked/:sectionId",classTeacherAuthentication,checkAttendaceMarkedController);
-
+attendanceRouter.get("/check-parent-attendance-marked/:studentId",parentAuthentication,checkParentAttendaceMarkedController);
 attendanceRouter.get("/daily-status/:sectionId",classTeacherAuthentication,attendanceDailyStatusController);
-
 attendanceRouter.get("/weekly-status/:sectionId",classTeacherAuthentication,attendanceWeeklyStatusController);
-
 attendanceRouter.get("/monthly-status/:sectionId",classTeacherAuthentication,attendanceMonthlyStatusController);
+attendanceRouter.get("/parent-monthly-attendance-status/:studentId/:month",parentAuthentication,parentMonthlyAttendanceStatusController)
 
-export default attendanceRouter;
+
+export default attendanceRouter

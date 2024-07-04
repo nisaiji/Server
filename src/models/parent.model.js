@@ -2,15 +2,19 @@ import mongoose from "mongoose";
 // import addressSchema from "./Schemas/address.schema";
 
 const parentSchema = mongoose.Schema({
-  firstname: {
-    type: String,
+  username:{
+    type: String
   },
-  lastname: {
-    type: String,
+  fullname: {
+    type: String
   },
-  phone: {
+  isLoginAlready:{
+    type:Boolean,
+    default:false
+  },
+  phone:{
     type: String,
-    unique:true,
+    unique: true,
     required: true
   },
   email: {
@@ -20,10 +24,10 @@ const parentSchema = mongoose.Schema({
   password: {
     type: String
   },
-  address: {
-    type: String,
-    default: "abc xyz india"
-  },
+  admin: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "admin"
+  }
 });
 
 const parentModel = mongoose.model("parent", parentSchema);

@@ -4,7 +4,7 @@ import { error, success } from "../utills/responseWrapper.js";
 
 export async function createHolidayEventController(req,res){
     try {
-        const{title,teacherHoliday,studentHoliday,description} = req.body;
+        const{title,holiday,event,description} = req.body;
         const date = new Date(req.body["date"]);
         const adminId = req.adminId;
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -15,13 +15,11 @@ export async function createHolidayEventController(req,res){
         if(holidayEvent){
             return res.send(error(400,"holiday event already exists"));
         }
-        const createdHolidayEvent = await createHolidayEvent({formattedDate,day,title,teacherHoliday,studentHoliday,description,adminId});
+        const createdHolidayEvent = await createHolidayEvent({formattedDate,day,title,holiday,event,description,adminId});
         if(createdHolidayEvent instanceof Error){
             return res.send(error(400,"holiday event cann't be created"));
         }
-        return res.send(success(200,"holiday event has been created sucessfully"));
-
-        
+        return res.send(success(200,"holiday event has been created sucessfully")); 
     } catch (err) {
         return res.send(error(500,err.message));       
     }

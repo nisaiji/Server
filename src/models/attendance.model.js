@@ -5,18 +5,22 @@ const attendanceSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    day:{
+    day:{ 
         type:String,
         required:true,
     },
-    isPresent:{
-        type:Boolean,
-        required:true,
+    parentAttendance:{
+        type:String,
+        default:""
+    },
+    teacherAttendance:{
+        type:String,
+        default:""
     },
     student:{
         type: mongoose.Schema.Types.ObjectId,
         ref:"student"
-    },
+    }, 
     section:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"section"

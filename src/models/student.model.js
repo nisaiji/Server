@@ -5,7 +5,7 @@ const studentSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  lastname: {
+  lastname:{
     type: String,
     required: true
   },
@@ -13,13 +13,13 @@ const studentSchema = mongoose.Schema({
     type: String,
     required:true
   },
-  age: {
-    type: Number,
+  bloodGroup:{
+    type:String,
   },
-  email: {
+  dob:{
     type: String,
   },
-  address: {
+  address:{
     type: String
   },
   parent: {

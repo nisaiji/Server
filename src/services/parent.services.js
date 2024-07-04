@@ -1,4 +1,6 @@
+import holidayEventModel from "../models/holidayEvent.model.js";
 import parentModel from "../models/parent.model.js";
+import studentModel from "../models/student.model.js";
 
 
 export async function checkParentExist({phone}){
@@ -10,9 +12,19 @@ export async function checkParentExist({phone}){
   }
 }
 
-export async function registerParent({firstname,phone}){
+export async function registerParent({fullname,phone,password,admin}){
   try {
-    const parent = await parentModel.create({firstname, phone});
+    console.log({password});
+    const parent = await parentModel.create({fullname, phone,password,admin});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function updateParent({fullname,phone}){
+  try {
+    console.log({password});
+    const parent = await parentModel.create({fullname, phone,password});
     return parent;
   } catch (error) {
     throw error;
@@ -109,6 +121,42 @@ export async function findParentById(_id) {
   }
 }
 
+
+export async function updateInfoParent({parentId,fullname,phone}){
+  try {
+    const parent = await parentModel.findByIdAndUpdate(parentId,{fullname,phone});
+    return parent;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+export async function updateAuthParent({id,username,password}){
+  try {
+    const parent = await parentModel.findByIdAndUpdate(id , {username,password});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function updateProfileParent({id,phone,email}){
+  try {
+    const parent = await parentModel.findByIdAndUpdate(id , {phone,email});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function findParent(user){
+  try {
+    const parent = await parentModel.findOne({$or:[{username:user},{email:user},{phone:user}]})    
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export function checkChildExist(children, childId) {
   return children.includes(childId);
 }
@@ -119,5 +167,26 @@ export async function checkStudentAlreadyLinkedToParent(studentId) {
     return parent;
   } catch (error) {
     return error;
+  }
+}
+
+
+
+export async function getChildrenOfParent(parentId){
+  try {
+    const children = await studentModel.find({parent:parentId}).populate({path:"section",select:"name"}).populate({path:"classId",select:"name"});
+    return children;
+  } catch (error) {
+    throw error;
+    
+  }
+}
+
+export async function getAllEventHolidays(adminId){
+  try {
+    const holidayEvents = await holidayEventModel.find({admin:adminId});
+    return holidayEvents;
+  } catch (error) {
+    throw error;    
   }
 }

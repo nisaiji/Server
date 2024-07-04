@@ -1,9 +1,4 @@
-import {
-  checkClassExists,
-  deleteClass,
-  getClassList,
-  registerClass,
-} from "../services/class.sevices.js";
+import {checkClassExists,deleteClass,getClassList,registerClass,} from "../services/class.sevices.js";
 import { checkClassExistById } from "../services/section.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 

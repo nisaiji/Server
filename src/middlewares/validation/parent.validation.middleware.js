@@ -1,7 +1,9 @@
 import { error } from "../../utills/responseWrapper.js";
 import {
   existingParentRegisterSchema,
+  parentAuthUpdateSchema,
   parentLoginSchema,
+  parentProfileUpdateSchema,
   parentRegisterSchema,
   parentUpdateSchema
 } from "../../validators/parentSchema.validator.js";
@@ -61,9 +63,9 @@ export async function registerExistingParentValidation(req, res, next) {
 }
 export async function loginParentValidation(req, res, next) {
   try {
-    const { username, password } = req.body;
+    const { user, password } = req.body;
     const { error: schemaError } = parentLoginSchema.validate({
-      username,
+      user,
       password
     });
     if (schemaError) {
@@ -86,5 +88,41 @@ export async function updateParentValidation(req,res,next){
     next();
   } catch (err){
     return res.send(error(500,err.message));    
+  }
+}
+
+
+// -------------------------
+export async function authUpdateParentValidation(req, res, next) {
+  try {
+    const { username, email, password } = req.body;
+    const { error: schemaError } = parentAuthUpdateSchema.validate({
+      username,
+      password
+    });
+
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next()
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function profileUpdateParentValidation(req, res, next) {
+  try {
+    const {phone,email} = req.body;
+    const { error: schemaError } = parentProfileUpdateSchema.validate({
+      phone,
+      email
+    });
+
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next()
+  } catch (err) {
+    return res.send(error(500, err.message));
   }
 }

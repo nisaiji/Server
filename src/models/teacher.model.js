@@ -11,6 +11,10 @@ const teacherSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  isLoginAlready:{
+    type:Boolean,
+    default:false
+  },
   dob: {
     type: String
   },
@@ -46,3 +50,7 @@ const teacherSchema = mongoose.Schema({
 const teacherModel = mongoose.model("teacher", teacherSchema);
 
 export default teacherModel;
+
+
+
+

@@ -7,6 +7,9 @@ import sectionRouter from "./section.router.js";
 import attendanceRouter from "./attendance.router.js";
 import holidayEventRouter from "./holidayEvent.router.js";
 import classRouter from "./class.router.js";
+import adminDashboardRouter from "./dashBoardAdmin.router.js";
+import parentDashboardRouter from "./dashBoardParent.router.js";
+import teacherDashboardRouter from "./dashBoardTeacher.router.js";
 
 const router = express();
 
@@ -18,5 +21,8 @@ router.use("/class", classRouter);
 router.use("/section", sectionRouter);
 router.use("/attendance", attendanceRouter);
 router.use("/holiday-event", holidayEventRouter);
+router.use("/admin-dashboard",adminDashboardRouter);
+router.use("/parent-dashboard",parentDashboardRouter);
+router.use("/teacher-dashboard",teacherDashboardRouter);
 
 export default router;
