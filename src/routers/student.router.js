@@ -1,9 +1,10 @@
 import express from "express";
-import {addToSectionStudentController,adminRegisterStudentController,adminUpdateStudentController,deleteStudentController,getAllStudentListForAdminController,getAllStudentOfSectionController,getAllStudentOfSectionForAdminController,getStudentListOfSectionController,parentUpdateStudentController,registerStudentController,searchStudentOfSectionController,updateStudentController} from "../controllers/student.controller.js";
+import {addToSectionStudentController,adminRegisterStudentController,adminUpdateStudentController,deleteStudentController,getAllStudentListForAdminController,getAllStudentOfSectionController,getAllStudentOfSectionForAdminController,getMonthlyAttendanceCountController,getStudentListOfSectionController,parentUpdateStudentController,registerStudentController,searchStudentOfSectionController,updateStudentController} from "../controllers/student.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 import {addToSectionStudentValidation,deleteStudentValidation,parentUpdateStudentValidation,registerStudentValidation, updateStudentValidation} from "../middlewares/validation/student.validation.middleware.js";
+import { getMonthlyAttendance } from "../services/attendance.service.js";
 
 const studentRouter = express.Router();
 
@@ -20,6 +21,7 @@ studentRouter.get("/search/:name",classTeacherAuthentication,searchStudentOfSect
 studentRouter.put("/update/:studentId",classTeacherAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/admin-update/:studentId",adminAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/parent-update/:studentId",parentAuthentication,parentUpdateStudentValidation,parentUpdateStudentController)
+studentRouter.get("/monthly-count/:studentId",parentAuthentication,getMonthlyAttendanceCountController)
 // studentRouter.put("/upload-photo",);
 
 // studentRouter.put("/admin-update-student/:studentId", adminAuthentication,adminRegisterStudentValidation,adminUpdateStudentController);

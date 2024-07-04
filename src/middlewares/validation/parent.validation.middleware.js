@@ -98,7 +98,6 @@ export async function authUpdateParentValidation(req, res, next) {
     const { username, email, password } = req.body;
     const { error: schemaError } = parentAuthUpdateSchema.validate({
       username,
-      email,
       password
     });
 
@@ -113,9 +112,10 @@ export async function authUpdateParentValidation(req, res, next) {
 
 export async function profileUpdateParentValidation(req, res, next) {
   try {
-    const {phone } = req.body;
+    const {phone,email} = req.body;
     const { error: schemaError } = parentProfileUpdateSchema.validate({
-      phone
+      phone,
+      email
     });
 
     if (schemaError) {

@@ -2,6 +2,8 @@ import attendanceModel from "../models/attendance.model.js";
 import holidayEventModel from "../models/holidayEvent.model.js";
 import sectionModel from "../models/section.model.js";
 
+
+
 export async function matchClassTeacherAndSection(classTeacherId, sectionId) {
   try {
     const matchedSection = await sectionModel.findOne({
@@ -84,6 +86,15 @@ export async function checkAttendanceAlreadyMarked({ sectionId, currDate }) {
     throw error;
   }
 }
+export async function checkAttendanceAlreadyMarkedByParent({ studentId, currDate }) {
+  try {
+    const attendanceMarked = await attendanceModel.findOne({$and: [{ student: studentId }, { date: currDate },{parentAttendance:"present"}]});
+    console.log({attendanceMarked})
+    return attendanceMarked;
+  } catch (error) {
+    throw error;
+  }
+}
 
 export async function checkAttendanceMarkedByTeacher({ studentId, currDate }) {
   try {
@@ -94,6 +105,21 @@ export async function checkAttendanceMarkedByTeacher({ studentId, currDate }) {
         { teacherAttendance: { $ne: "" } }
       ]
     });
+    return attendance;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getAttendaceByStudentId({ studentId, currDate }) {
+  try {
+    const attendance = await attendanceModel.findOne({
+      $and: [
+        { student: studentId },
+        { date: currDate },
+      ]
+    });
+    // console.log({attendance})
     return attendance;
   } catch (error) {
     throw error;

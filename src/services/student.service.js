@@ -257,9 +257,22 @@ export async function updateStudentByParent({studentId,bloodGroup,dob,address}){
 export async function searchStudentByName({name,sectionId}){
   try {
     const regex = new RegExp(name, 'i'); 
-    const students = await studentModel.find({firstname: { $regex: regex },section:sectionId});    
+    const students = await studentModel.find({firstname: { $regex: regex },section:sectionId}).populate({path:"parent",select:"phone"});    
     return students;
   } catch (error) {
     throw error;    
   }
 }
+
+
+export async function getStudentMonthlyAttendanceCount({studentId , regex}){
+  try {
+    console.log({regex})
+    const attendace = await attendanceModel.find({student:studentId,date:regex,teacherAttendance:"present"});
+    console.log({attendace})
+    return attendace;
+  } catch (error) {
+    throw error;    
+  }
+}
+

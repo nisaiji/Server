@@ -1,5 +1,5 @@
 import attendanceModel from "../models/attendance.model.js";
-import {checkAttendanceAlreadyMarked,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyAttendance,markAttendanceByParent,markAttendanceByTeacher, updateAttendance,} from "../services/attendance.service.js";
+import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyAttendance,markAttendanceByParent,markAttendanceByTeacher, updateAttendance,} from "../services/attendance.service.js";
 import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount,} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -126,6 +126,27 @@ export async function checkAttendaceMarkedController(req, res) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
     const checkAttendanceMarked = await checkAttendanceAlreadyMarked({sectionId,currDate,});
+    if (checkAttendanceMarked) {
+      return res.send(error(400, "attendance already marked"));
+    }
+    return res.send(success(200, "attendance haven't marked today"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function checkParentAttendaceMarkedController(req, res) {
+  try {
+    const studentId = req.params.studentId;
+    const parentId = req.parentId;
+    const adminId = req.adminId;
+    const date = new Date();
+    const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    const holidayEvent = await checkHolidayEvent({ currDate, adminId });
+    if (holidayEvent) {
+      return res.send(error(400, "today is scheduled as holiday!"));
+    }
+    const checkAttendanceMarked = await checkAttendanceAlreadyMarkedByParent({studentId,currDate});
     if (checkAttendanceMarked) {
       return res.send(error(400, "attendance already marked"));
     }

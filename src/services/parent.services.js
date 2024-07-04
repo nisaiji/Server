@@ -131,17 +131,17 @@ export async function updateInfoParent({parentId,fullname,phone}){
   }
 }
 
-export async function updateAuthParent({id,username,email,password}){
+export async function updateAuthParent({id,username,password}){
   try {
-    const parent = await parentModel.findByIdAndUpdate(id , {username,email,password});
+    const parent = await parentModel.findByIdAndUpdate(id , {username,password});
     return parent;
   } catch (error) {
     throw error;
   }
 }
-export async function updateProfileParent({id,phone}){
+export async function updateProfileParent({id,phone,email}){
   try {
-    const parent = await parentModel.findByIdAndUpdate(id , {phone});
+    const parent = await parentModel.findByIdAndUpdate(id , {phone,email});
     return parent;
   } catch (error) {
     throw error;

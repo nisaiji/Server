@@ -64,6 +64,13 @@ const parentUpdateSchema = Joi.object({
     }),
 });
 const parentProfileUpdateSchema = Joi.object({
+      email: Joi.string()
+      .email({
+        minDomainSegments: 2,
+      })
+      .messages({
+        "string.email": "Email must be a valid email address."
+      }),
      phone: Joi.string()
     .pattern(/^[1-5][0-9]{9}$/)
     .length(10)

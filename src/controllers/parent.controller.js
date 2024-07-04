@@ -178,14 +178,14 @@ export async function adminGetParentController(req, res) {
 
 export async function authUpdateParentController(req, res) {
   try {
-    const { username, email, password } = req.body;
+    const { username, password } = req.body;
     const parentId = req.parentId;
     const parent = await findParentById(parentId);
     if (!parent) {
       return res.send(error(400, "parent doesn't exists"));
     }
     const hashedPassword = await hashPassword(password);
-    const updatedParent = await updateAuthParent({id: parentId,username,email,password: hashedPassword});
+    const updatedParent = await updateAuthParent({id: parentId,username,password: hashedPassword});
     if (updatedParent instanceof Error) {
       return res.send(error(400, "parent auth details can't be updated"));
     }
@@ -197,13 +197,13 @@ export async function authUpdateParentController(req, res) {
 
 export async function profileUpdateParentController(req, res) {
   try {
-    const { phone } = req.body;
+    const { phone,email } = req.body;
     const parentId = req.parentId;
     const parent = await findParentById(parentId);
     if (!parent) {
       return res.send(error(400, "parent doesn't exists"));
     }
-    const updatedParent = await updateProfileParent({ id: parentId, phone });
+    const updatedParent = await updateProfileParent({ id: parentId, phone,email });
     if (updatedParent instanceof Error) {
       return res.send(error(400, "parent auth details can't be updated"));
     }
