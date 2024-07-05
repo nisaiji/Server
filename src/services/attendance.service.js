@@ -110,6 +110,20 @@ export async function checkAttendanceMarkedByTeacher({ studentId, currDate }) {
     throw error;
   }
 }
+// export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
+//   try {
+//     const attendance = await attendanceModel.findOne({
+//       $and: [
+//         { student: studentId },
+//         { date: currDate },
+//         { parentAttendance: { $ne: "" } }
+//       ]
+//     });
+//     return attendance;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 export async function getAttendaceByStudentId({ studentId, currDate }) {
   try {
@@ -201,6 +215,7 @@ export async function getMisMatchAttendance({ sectionId, date }) {
 export async function findAttendanceById(attendanceId) {
   try {
     const attendance = await attendanceModel.findById(attendanceId);
+    return attendance;
   } catch (error) {
     throw error;
   }
@@ -208,10 +223,12 @@ export async function findAttendanceById(attendanceId) {
 
 export async function updateAttendance({ attendanceId, attendance }) {
   try {
-    const attendance = await attendanceModel.findByIdAndUpdate(attendanceId, {
+    console.log({ attendanceId, attendance });
+    const result = await attendanceModel.findByIdAndUpdate(attendanceId, {
       teacherAttendance: attendance
     });
-    return attendance;
+    console.log({result});
+    return result;
   } catch (error) {
     throw error;
   }

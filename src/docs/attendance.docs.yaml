@@ -112,9 +112,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  attendanceId:
+                  present:
                     type: string
-                  attendance:
+                  absent:
                     type: string
         responses:
           200:
@@ -261,7 +261,6 @@ paths:
           500:
             description: "Internal Server Error"
 
-
 /attendance/parent-monthly-attendance-status/{studentId}/{month}:
   get:
     security: 
@@ -294,4 +293,3 @@ paths:
         description: "Forbidden"
       500:
         description: "Internal Server Error"
-

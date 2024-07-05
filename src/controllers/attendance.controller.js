@@ -75,6 +75,10 @@ export async function parentMarkAttendanceController(req, res) {
     if(isTeacherMarkedAttendance){
       return res.send(error(400,"parent can't mark attendance,teacher already marked."));
     }
+    const isParentMarkedAttendance = await checkAttendanceMarkedByParent({studentId,currDate});
+    if(isParentMarkedAttendance){
+      return res.send(error(400,"attendance already marked by parent"));
+    }
     const markAttendance = await markAttendanceByParent({studentId,currDate,day,attendance});
     if(markAttendance instanceof Error){
       return res.send(error(400,"parent is unable to mark attendance"));
@@ -262,17 +266,18 @@ export async function getMisMatchAttendanceController(req,res){
 
 export async function updateAttendanceController(req,res){
   try {
-    const{attendanceId,attendance} = req.body;
-    const attendanceInstance = await findAttendanceById(attendanceId);
-    if(!(attendance==="present" || attendance==="absent")){
-      return res.send(error(400,"invalid attendance value"));
+    const{present,absent} = req.body;
+
+    let length = present?.length;
+    for(let i=0;i<length; i++){
+      const attendanceInstance = await findAttendanceById(present[i]);
+      const updatedAttendance = await updateAttendance({attendanceId:present[i],attendance:"present"});
     }
-    if(!attendanceInstance){
-      return res.send(error(400,"attendance is not registered"));
-    }
-    const updatedAttendance = await updateAttendance({attendanceId,attendance});
-    if(updatedAttendance instanceof Error){
-      return res.send(error(400,"can't update attendance"));
+    
+    length = absent?.length;
+    for(let i=0;i<length; i++){
+      const attendanceInstance = await findAttendanceById(absent[i]);
+      const updatedAttendance = await updateAttendance({attendanceId:absent[i],attendance:"absent"});
     }
     return res.send(success(200,"attendance updated successfully"))
     
@@ -280,6 +285,26 @@ export async function updateAttendanceController(req,res){
     return res.send(error(500,err.message)) ;   
   }
 }
+// export async function updateAttendanceController(req,res){
+//   try {
+//     const{attendanceId,attendance} = req.body;
+//     const attendanceInstance = await findAttendanceById(attendanceId);
+//     if(!(attendance==="present" || attendance==="absent")){
+//       return res.send(error(400,"invalid attendance value"));
+//     }
+//     if(!attendanceInstance){
+//       return res.send(error(400,"attendance is not registered"));
+//     }
+//     const updatedAttendance = await updateAttendance({attendanceId,attendance});
+//     if(updatedAttendance instanceof Error){
+//       return res.send(error(400,"can't update attendance"));
+//     }
+//     return res.send(success(200,"attendance updated successfully"))
+    
+//   } catch (err) {
+//     return res.send(error(500,err.message)) ;   
+//   }
+// }
 
 export async function parentMonthlyAttendanceStatusController(req,res){
   try {
@@ -319,5 +344,8 @@ Date.prototype.getWeekDates = function () {
 
   return { monday, sunday };
 };
+
+
+
 
 
