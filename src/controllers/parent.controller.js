@@ -1,6 +1,6 @@
 import { generateAccessToken } from "../services/JWTToken.service.js";
 import {checkChildExist,checkStudentAlreadyLinkedToParent,createParent,findParent,findParentById,findParentByPhoneNo, findParentByUsername,
-  getAllEventHolidays,getChildrenOfParent, updateAuthParent,updateProfileParent} from "../services/parent.services.js";
+  getAllEventHolidays,getChildrenOfParent, updateAuthParent,updateProfileInfoParent,updateProfileParent} from "../services/parent.services.js";
 import {checkPasswordMatch,hashPassword} from "../services/password.service.js";
 import { findStudentById } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
@@ -174,7 +174,6 @@ export async function adminGetParentController(req, res) {
   }
 }
 
-// ------------------------------
 
 export async function authUpdateParentController(req, res) {
   try {
@@ -213,6 +212,24 @@ export async function profileUpdateParentController(req, res) {
   }
 }
 
+export async function profileInfoUpdateParentController(req, res) {
+  try {
+    const { fullname,age,gender,address,qualification,occupation } = req.body;
+    const parentId = req.parentId;
+    const parent = await findParentById(parentId);
+    if (!parent) {
+      return res.send(error(400, "parent doesn't exists"));
+    }
+    const updatedParent = await updateProfileInfoParent({ id: parentId, fullname,age,gender,address,qualification,occupation});
+    if (updatedParent instanceof Error) {
+      return res.send(error(400, "parent profile details can't be updated"));
+    }
+    return res.send(success(200, "parent profile details updated successfully"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
 export async function getChildrenParentController(req, res) {
   try {
     const parentId = req.parentId;
@@ -238,3 +255,30 @@ export async function getHolidayEventParentController(req,res){
     return res.send(error(500,err.message));
   }
 }
+
+
+
+export async function passwordChangeController(req,res){
+  try {
+    const {oldPassword , newPassword} = req.body;
+    const parentId = req.parentId;
+    const parent = await findParentById(parentId);
+    if (!parent) {
+      return res.send(error(404, "unauthorized user"));
+    }
+    const matchPassword = await checkPasswordMatch(oldPassword, parent.password);
+    if (!matchPassword) {
+      return res.send(error(404, "wrong password"));
+    }
+    const hashedPassword = await hashPassword(newPassword);
+    parent["password"] = hashedPassword;
+    await parent.save();
+    
+    return res.send(success(200,"password updated successfully"));
+    
+  } catch (err) {
+    return res.send(error(500,err.message));
+  }
+}
+
+

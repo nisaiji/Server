@@ -1,15 +1,18 @@
 import express from "express";
-import {authUpdateParentController,getChildrenParentController,getHolidayEventParentController,loginParentController,profileUpdateParentController} from "../controllers/parent.controller.js";
+import {authUpdateParentController,getChildrenParentController,getHolidayEventParentController,loginParentController,passwordChangeController,profileInfoUpdateParentController,profileUpdateParentController} from "../controllers/parent.controller.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
-import {authUpdateParentValidation, loginParentValidation,profileUpdateParentValidation} from "../middlewares/validation/parent.validation.middleware.js";
+import {authUpdateParentValidation, loginParentValidation,profileInfoUpdateParentValidation,profileUpdateParentValidation} from "../middlewares/validation/parent.validation.middleware.js";
 
 const parentRouter = express.Router();
 
 parentRouter.post("/login", loginParentValidation, loginParentController);
 parentRouter.put("/auth-update",parentAuthentication,authUpdateParentValidation,authUpdateParentController);
 parentRouter.put("/profile-update",parentAuthentication,profileUpdateParentValidation,profileUpdateParentController);
+parentRouter.put("/profile-info-update",parentAuthentication,profileInfoUpdateParentValidation,profileInfoUpdateParentController);
 parentRouter.get("/children",parentAuthentication,getChildrenParentController);
 parentRouter.get("/holiday-events",parentAuthentication,getHolidayEventParentController);
+parentRouter.put("/password-change",parentAuthentication,passwordChangeController)
+
 // parentRouter.
 // parentRouter.post("/register/:studentId",classTeacherAuthentication,registerParentValidation, registerParentController);
 // parentRouter.post("/admin-register/:studentId", adminAuthentication, registerParentValidation, adminRegisterParentController);
