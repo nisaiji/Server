@@ -235,12 +235,46 @@ export async function updateAttendance({ attendanceId, attendance }) {
 }
 
 
-export async function getMonthlyAttendance({studentId , regex}){
+export async function getMonthlyPresentCount({studentId , regex}){
   try {
     console.log({regex})
-    const attendace = await attendanceModel.find({student:studentId,date:regex})
+    const attendace = await attendanceModel.find({student:studentId,date:regex,teacherAttendance:"present"})
     console.log({attendace})
-    return attendace;
+    return attendace.length;
+  } catch (error) {
+    throw error;    
+  }
+}
+export async function getTotalMonthlyAttendanceCount({regex}){
+  try {
+    console.log({regex})
+    const attendance = await attendanceModel.aggregate([{$match:{date:regex}},{$group:{_id:"$day"}},{$count:"total"}])
+    if(attendance.length>0)
+    return attendance[0]["total"];
+
+    return 0;
+  } catch (error) {
+    throw error;    
+  }
+}
+export async function getYearlyPresentCount({studentId , regex}){
+  try {
+    console.log({regex})
+    const attendace = await attendanceModel.find({student:studentId,date:regex,teacherAttendance:"present"})
+    console.log({attendace})
+    return attendace.length;
+  } catch (error) {
+    throw error;    
+  }
+}
+export async function getTotalYearlyAttendanceCount({regex}){
+  try {
+    console.log({regex})
+    const attendance = await attendanceModel.aggregate([{$match:{date:regex}},{$group:{_id:"$day"}},{$count:"total"}])
+    if(attendance.length>0)
+    return attendance[0]["total"];
+
+    return 0;
   } catch (error) {
     throw error;    
   }

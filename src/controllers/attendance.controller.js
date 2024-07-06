@@ -1,6 +1,5 @@
-import attendanceModel from "../models/attendance.model.js";
-import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyAttendance,markAttendanceByParent,markAttendanceByTeacher, updateAttendance,} from "../services/attendance.service.js";
-import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount,} from "../services/student.service.js";
+import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyPresentCount,getTotalMonthlyAttendanceCount,markAttendanceByParent,markAttendanceByTeacher, updateAttendance} from "../services/attendance.service.js";
+import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function markAttendanceController(req, res) {
@@ -308,21 +307,44 @@ export async function updateAttendanceController(req,res){
 
 export async function parentMonthlyAttendanceStatusController(req,res){
   try {
-    const studentId = req.params.studentId;
-    const month = req.params.month;
+     const {studentId,month,year} = req.body;
     const date = new Date();
     const parentId = req.parentId;
-    if(!studentId || !month){
+    if(!studentId || !month || !year){
       return res.send(error(400,"studentId and month is required"));
     }    
     const monthStr = month.toString();
-    const yearStr = date.getFullYear().toString();
+    const yearStr = year.toString();
     const regex = new RegExp(`^\\d{1,2}-${monthStr}-${yearStr}$`);
-    const monthlyAttendance = await getMonthlyAttendance({studentId,regex});
-    if(monthlyAttendance instanceof Error){
-      return res.send(error(400,"can't get monthly attendance"));
-    }
-    return res.send(success(200,{monthlyAttendance}));
+    const monthlyAttendanceCount = await getMonthlyPresentCount({studentId,regex});
+    const totalMonthlyAttendanceCount = await getTotalMonthlyAttendanceCount({regex});
+    console.log({monthlyAttendanceCount,totalMonthlyAttendanceCount})
+    // if(monthlyAttendance instanceof Error){
+    //   return res.send(error(400,"can't get monthly attendance"));
+    // }
+    return res.send(success(200,{monthlyAttendanceCount,totalMonthlyAttendanceCount}));
+  } catch (err) {
+    return res.send(error(500,err.message));  
+  }
+}
+
+export async function parentYearlyAttendanceStatusController(req,res){
+  try {
+     const {studentId,year} = req.body;
+    const date = new Date();
+    const parentId = req.parentId;
+    if(!studentId ||  !year){
+      return res.send(error(400,"studentId and year is required"));
+    }    
+    const monthStr ="\\d{1,2}";
+    const yearStr = year.toString();
+    const regex = new RegExp(`^\\d{1,2}-${monthStr}-${yearStr}$`);
+
+    const yearlyAttendanceCount = await getYearlyPresentCount({studentId,regex});
+    const totalYearlyAttendanceCount = await getTotalYearlyAttendanceCount({regex});
+    
+    console.log({yearlyAttendanceCount,totalYearlyAttendanceCount})
+    return res.send(success(200,{monthlyAttendanceCount,totalMonthlyAttendanceCount}));
   } catch (err) {
     return res.send(error(500,err.message));  
   }

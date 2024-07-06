@@ -4,7 +4,7 @@ import { adminAuthentication } from "../middlewares/authentication/admin.authent
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 import {addToSectionStudentValidation,deleteStudentValidation,parentUpdateStudentValidation,registerStudentValidation, updateStudentValidation} from "../middlewares/validation/student.validation.middleware.js";
-import { getMonthlyAttendance } from "../services/attendance.service.js";
+// import { getMonthlyAttendance } from "../services/attendance.service.js";
 
 const studentRouter = express.Router();
 
@@ -22,6 +22,7 @@ studentRouter.put("/update/:studentId",classTeacherAuthentication,updateStudentV
 studentRouter.put("/admin-update/:studentId",adminAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/parent-update/:studentId",parentAuthentication,parentUpdateStudentValidation,parentUpdateStudentController)
 studentRouter.get("/monthly-count/:studentId",parentAuthentication,getMonthlyAttendanceCountController)
+// sudentRouter.get("/get-parent",)
 // studentRouter.put("/upload-photo",);
 
 // studentRouter.put("/admin-update-student/:studentId", adminAuthentication,adminRegisterStudentValidation,adminUpdateStudentController);

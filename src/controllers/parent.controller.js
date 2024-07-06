@@ -174,7 +174,6 @@ export async function adminGetParentController(req, res) {
   }
 }
 
-
 export async function authUpdateParentController(req, res) {
   try {
     const { username, password } = req.body;
