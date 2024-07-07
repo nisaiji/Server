@@ -261,14 +261,47 @@ paths:
           500:
             description: "Internal Server Error"
 
-  /attendance/parent-monthly-attendance-status:
-    post:
+  /attendance/parent-monthly-attendance-status/{studentId}/{month}:
+    get:
       security: 
         - Authorization: []
       tags:
         - "Attendance"
       summary: "Get monthly attendance status for parent"
       description: "This API allows a parent to get the monthly attendance status of their child."
+      produces:
+        - "application/json"
+      parameters:
+        - in: path
+          name: studentId
+          required: true
+          description: "ID of the student"
+          schema:
+            type: string
+        - in: path
+          name: month
+          required: true
+          description: "Month for which attendance status is requested"
+          schema:
+            type: string
+      responses:
+        200:
+          description: "Successful operation"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /attendance/parent-monthly-attendance-count:
+    post:
+      security: 
+        - Authorization: []
+      tags:
+        - "Attendance"
+      summary: "Get monthly attendance count for parent"
+      description: "This API allows a parent to get the monthly attendance count of their child."
       produces:
         - "application/json"
       requestBody:
@@ -281,6 +314,37 @@ paths:
                 studentId:
                   type: string
                 month:
+                  type: string
+                year:
+                  type: string
+      responses:
+        200:
+          description: "Successful operation"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /attendance/parent-yearly-attendance-count:
+    post:
+      security: 
+        - Authorization: []
+      tags:
+        - "Attendance"
+      summary: "Get yearly attendance count for parent"
+      description: "This API allows a parent to get the yearly attendance count of their child."
+      produces:
+        - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
                   type: string
                 year:
                   type: string

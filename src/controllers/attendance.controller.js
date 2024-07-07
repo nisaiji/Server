@@ -1,4 +1,4 @@
-import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyPresentCount,getTotalMonthlyAttendanceCount,markAttendanceByParent,markAttendanceByTeacher, updateAttendance} from "../services/attendance.service.js";
+import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyAttendance,getMonthlyPresentCount,getTotalMonthlyAttendanceCount,markAttendanceByParent,markAttendanceByTeacher, updateAttendance} from "../services/attendance.service.js";
 import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -284,6 +284,7 @@ export async function updateAttendanceController(req,res){
     return res.send(error(500,err.message)) ;   
   }
 }
+
 // export async function updateAttendanceController(req,res){
 //   try {
 //     const{attendanceId,attendance} = req.body;
@@ -305,7 +306,30 @@ export async function updateAttendanceController(req,res){
 //   }
 // }
 
-export async function parentMonthlyAttendanceStatusController(req,res){
+export async function parentMonthlyAttendanceStatusController(req, res) {
+  try {
+    const studentId = req.params.studentId;
+    const month = req.params.month;
+    const date = new Date();
+    const parentId = req.parentId;
+    if (!studentId || !month) {
+      return res.send(error(400, "studentId and month is required"));
+    }
+    const monthStr = month.toString();
+    const yearStr = date.getFullYear().toString();
+    const regex = new RegExp(`^\\d{1,2}-${monthStr}-${yearStr}$`);
+    const monthlyAttendance = await getMonthlyAttendance({ studentId, regex });
+    console.log(monthlyAttendance);
+    if (monthlyAttendance instanceof Error) {
+      return res.send(error(400, "can't get monthly attendance"));
+    }
+    return res.send(success(200, { monthlyAttendance }));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function parentMonthlyAttendanceCountController(req,res){
   try {
      const {studentId,month,year} = req.body;
     const date = new Date();
@@ -328,7 +352,7 @@ export async function parentMonthlyAttendanceStatusController(req,res){
   }
 }
 
-export async function parentYearlyAttendanceStatusController(req,res){
+export async function parentYearlyAttendanceCountController(req,res){
   try {
      const {studentId,year} = req.body;
     const date = new Date();
@@ -366,8 +390,5 @@ Date.prototype.getWeekDates = function () {
 
   return { monday, sunday };
 };
-
-
-
 
 

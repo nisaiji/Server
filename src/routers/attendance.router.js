@@ -2,7 +2,7 @@ import express from "express";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { classTeacherAuthorization } from "../middlewares/authorization/classTeacher.authorization.middleware.js";
 import { markPresentValidation } from "../middlewares/validation/attendance.validation.middleware.js";
-import { markAttendanceController,checkAttendaceMarkedController,attendanceDailyStatusController, attendanceWeeklyStatusController, attendanceMonthlyStatusController, parentMarkAttendanceController, getMisMatchAttendanceController, parentMonthlyAttendanceStatusController, checkParentAttendaceMarkedController, updateAttendanceController, parentYearlyAttendanceStatusController } from "../controllers/attendance.controller.js";
+import { markAttendanceController,checkAttendaceMarkedController,attendanceDailyStatusController, attendanceWeeklyStatusController, attendanceMonthlyStatusController, parentMarkAttendanceController, getMisMatchAttendanceController, parentMonthlyAttendanceStatusController, checkParentAttendaceMarkedController, updateAttendanceController , parentMonthlyAttendanceCountController, parentYearlyAttendanceCountController } from "../controllers/attendance.controller.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 
 const attendanceRouter = express.Router(); 
@@ -16,8 +16,9 @@ attendanceRouter.get("/check-parent-attendance-marked/:studentId",parentAuthenti
 attendanceRouter.get("/daily-status/:sectionId",classTeacherAuthentication,attendanceDailyStatusController);
 attendanceRouter.get("/weekly-status/:sectionId",classTeacherAuthentication,attendanceWeeklyStatusController);
 attendanceRouter.get("/monthly-status/:sectionId",classTeacherAuthentication,attendanceMonthlyStatusController);
-attendanceRouter.post("/parent-monthly-attendance-status",parentAuthentication,parentMonthlyAttendanceStatusController)
-attendanceRouter.post("/parent-yearly-attendance-status",parentAuthentication,parentYearlyAttendanceStatusController)
+attendanceRouter.get("/parent-monthly-attendance-status/:studentId/:month",parentAuthentication,parentMonthlyAttendanceStatusController)
+attendanceRouter.post("/parent-monthly-attendance-count",parentAuthentication,parentMonthlyAttendanceCountController)
+attendanceRouter.post("/parent-yearly-attendance-count",parentAuthentication,parentYearlyAttendanceCountController)
 
 
 export default attendanceRouter

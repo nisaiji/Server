@@ -153,7 +153,6 @@ export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
     throw error;
   }
 }
-
 export async function markAttendanceByParent({
   studentId,
   currDate,
@@ -172,7 +171,6 @@ export async function markAttendanceByParent({
     throw error;
   }
 }
-
 export async function markAttendanceByTeacher({
   attendanceId,
   teacherAttendance,
@@ -192,7 +190,6 @@ export async function markAttendanceByTeacher({
     throw error;
   }
 }
-
 export async function getMisMatchAttendance({ sectionId, date }) {
   try {
     const attendance = await attendanceModel
@@ -211,7 +208,6 @@ export async function getMisMatchAttendance({ sectionId, date }) {
     throw error;
   }
 }
-
 export async function findAttendanceById(attendanceId) {
   try {
     const attendance = await attendanceModel.findById(attendanceId);
@@ -220,7 +216,6 @@ export async function findAttendanceById(attendanceId) {
     throw error;
   }
 }
-
 export async function updateAttendance({ attendanceId, attendance }) {
   try {
     console.log({ attendanceId, attendance });
@@ -233,8 +228,6 @@ export async function updateAttendance({ attendanceId, attendance }) {
     throw error;
   }
 }
-
-
 export async function getMonthlyPresentCount({studentId , regex}){
   try {
     console.log({regex})
@@ -279,3 +272,17 @@ export async function getTotalYearlyAttendanceCount({regex}){
     throw error;    
   }
 }
+
+export async function getMonthlyAttendance({ studentId, regex }) {
+  try {
+    console.log({studentId, regex})
+    const attendace = await attendanceModel.find({
+      student: studentId,
+      date: regex,
+    });
+    return attendace;
+  } catch (error) {
+    throw error;
+  }
+}
+
