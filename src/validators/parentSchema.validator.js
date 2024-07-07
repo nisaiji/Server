@@ -80,6 +80,29 @@ const parentProfileUpdateSchema = Joi.object({
     }),
 });
 
+const parentProfileInfoUpdateSchema = Joi.object({
+      fullname: Joi.string().required().messages({
+        "any.required": "full name is required."
+      }),
+      age: Joi.number().required().messages({
+        "any.required":"age is required."
+      }),
+      gender: Joi.string().required().messages({
+        "any.required":"gender is required."
+      }),
+      address: Joi.string().required().messages({
+        "any.required":"address is required."
+      }),
+
+      qualification: Joi.string().required().messages({
+        "any.required":"qualification is required."
+      }),
+      occupation: Joi.string().required().messages({
+        "any.required":"occupation is required."
+      }),
+ 
+});
+
 const existingParentRegisterSchema = Joi.object({
   studentId: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
@@ -114,7 +137,6 @@ const parentLoginSchema = Joi.object({
     }),
 });
 
-
 const parentAuthUpdateSchema = Joi.object({
   username: Joi.string()
     .required()
@@ -132,4 +154,4 @@ const parentAuthUpdateSchema = Joi.object({
   password:Joi.string().required()
 });
 
-export { parentRegisterSchema, parentLoginSchema, existingParentRegisterSchema, parentUpdateSchema,parentAuthUpdateSchema,parentProfileUpdateSchema };
+export { parentRegisterSchema,parentProfileInfoUpdateSchema,  parentLoginSchema, existingParentRegisterSchema, parentUpdateSchema,parentAuthUpdateSchema,parentProfileUpdateSchema };

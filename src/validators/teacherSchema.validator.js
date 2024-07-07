@@ -18,15 +18,7 @@ const teacherAuthUpdateSchema = Joi.object({
       "string.min":"username should be atleast 5 chars long",
       "string.max":"username can be atmost 15 chars long.",
       "any.required": "username is required" }),
-  email: Joi.string()
-      .email({
-        minDomainSegments: 2,
-      })
-      .optional()
-      .messages({
-        "string.email": "Invalid email format.",
-        "any.required": "Email is required."
-      }),
+
   password:Joi.string().required()
 });
 

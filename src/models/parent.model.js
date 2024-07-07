@@ -8,6 +8,21 @@ const parentSchema = mongoose.Schema({
   fullname: {
     type: String
   },
+  age:{
+    type:Number
+  },
+  gender:{
+    type:String
+  },
+  address:{
+    type:String
+  },
+  qualification:{
+    type:String
+  },
+  occupation:{
+    type:String
+  },
   isLoginAlready:{
     type:Boolean,
     default:false

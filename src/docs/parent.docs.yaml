@@ -80,6 +80,69 @@ paths:
         500:
           description: "Server error"
 
+# fullName,age,gender,address,qualification,occupation
+  /parent/profile-info-update:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update profile-info of parent"
+      description: "This API will udpate profile-details of a parent. It requires parent login token."
+      tags:
+      - "Parent"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                age:
+                  type: string
+                gender:
+                  type: string
+                address:
+                  type: string
+                qualification:
+                  type: string
+                occupation:
+                  type: string
+      responses:
+        200:
+          description: "parent updated successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /parent/password-change:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update password of parent"
+      description: "This API will udpate password of a parent. It requires parent login token."
+      tags:
+      - "Parent"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        200:
+          description: "password updated successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
 
   /parent/children:
     get:
@@ -87,6 +150,23 @@ paths:
         - Authorization: []
       summary: "To get children"
       description: "This API will get children of parent. It requires parent login token."
+      tags:
+      - "Parent"
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+
+  /parent/get-info:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get parent info"
+      description: "This API will get parent. It requires parent login token."
       tags:
       - "Parent"
       responses:

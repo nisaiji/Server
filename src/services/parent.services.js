@@ -148,6 +148,15 @@ export async function updateProfileParent({id,phone,email}){
   }
 }
 
+export async function updateProfileInfoParent({id,fullname,age,gender,address,qualification,occupation}){
+  try {
+    const parent = await parentModel.findByIdAndUpdate(id , {fullname,age,gender,address,qualification,occupation});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function findParent(user){
   try {
     const parent = await parentModel.findOne({$or:[{username:user},{email:user},{phone:user}]})    
@@ -170,8 +179,6 @@ export async function checkStudentAlreadyLinkedToParent(studentId) {
   }
 }
 
-
-
 export async function getChildrenOfParent(parentId){
   try {
     const children = await studentModel.find({parent:parentId}).populate({path:"section",select:"name"}).populate({path:"classId",select:"name"});
@@ -188,5 +195,14 @@ export async function getAllEventHolidays(adminId){
     return holidayEvents;
   } catch (error) {
     throw error;    
+  }
+}
+
+export async function getParentById(id){
+  try {
+    const parent = await parentModel.findById(id).select({"password":0});
+    return parent;
+  } catch (error) {
+    throw error;
   }
 }

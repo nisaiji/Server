@@ -4,11 +4,11 @@ import { adminAuthentication } from "../middlewares/authentication/admin.authent
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
 import {addToSectionStudentValidation,deleteStudentValidation,parentUpdateStudentValidation,registerStudentValidation, updateStudentValidation} from "../middlewares/validation/student.validation.middleware.js";
-import { getMonthlyAttendance } from "../services/attendance.service.js";
+// import { getMonthlyAttendance } from "../services/attendance.service.js";
 
 const studentRouter = express.Router();
 
-
+ 
 
 studentRouter.post("/register",classTeacherAuthentication,registerStudentValidation,registerStudentController);
 studentRouter.post("/admin-register",adminAuthentication,registerStudentValidation,adminRegisterStudentController);

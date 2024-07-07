@@ -36,7 +36,7 @@ export async function registerTeacherController(req, res) {
     if (existingTeacher) {
       return res.send(error(400, "phone number already registered"));
     }
-    const password = firstname + phone;
+    const password = firstname+"@"+ phone;
     const hashedPassword = await hashPassword(password);
     const teacher = await createTeacher({
       firstname,
@@ -65,7 +65,7 @@ export async function loginClassTeacherController(req, res) {
     );
 
     if (!matchPassword) {
-      return res.send(error(404, "unauthorized user"));
+      return res.send(error(404, "unauthorized password user"));
     }
     const section = await findSectionByClassTeacherId(classTeacher["_id"]);
     if (!section) {
@@ -95,7 +95,7 @@ export async function loginClassTeacherController(req, res) {
 
 export async function authUpdateTeacherController(req, res) {
   try {
-    const { username, email, password } = req.body;
+    const { username, password } = req.body;
     const teacherId = req.teacherId;
     const teacher = await findTeacherById(teacherId);
     if (!teacher) {
@@ -105,7 +105,6 @@ export async function authUpdateTeacherController(req, res) {
     const updatedTeacher = await updateAuthTeacher({
       id: teacherId,
       username,
-      email,
       password: hashedPassword
     });
     if (updatedTeacher instanceof Error) {
@@ -292,5 +291,28 @@ export async function updateTeacherController(req, res) {
     return res.send(success(200, "teacher updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
+  }
+}
+
+
+export async function changePasswordTeacherController(req,res){
+  try {
+    const {oldPassword , newPassword} = req.body;
+    const teacherId = req.teacherId;
+    const teacher = await findTeacherById(teacherId);
+    if (!teacher) {
+      return res.send(error(404, "unauthorized user"));
+    }
+    const matchPassword = await checkPasswordMatch(oldPassword, teacher.password);
+    if (!matchPassword) {
+      return res.send(error(404, "wrong password"));
+    }
+    const hashedPassword = await hashPassword(newPassword);
+    teacher["password"] = hashedPassword;
+    await teacher.save();
+    
+    return res.send(success(200,"password updated successfully"));
+  } catch (err) {
+    return res.send(error(500,err.message));
   }
 }

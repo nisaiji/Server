@@ -110,6 +110,20 @@ export async function checkAttendanceMarkedByTeacher({ studentId, currDate }) {
     throw error;
   }
 }
+// export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
+//   try {
+//     const attendance = await attendanceModel.findOne({
+//       $and: [
+//         { student: studentId },
+//         { date: currDate },
+//         { parentAttendance: { $ne: "" } }
+//       ]
+//     });
+//     return attendance;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 export async function getAttendaceByStudentId({ studentId, currDate }) {
   try {
@@ -139,7 +153,6 @@ export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
     throw error;
   }
 }
-
 export async function markAttendanceByParent({
   studentId,
   currDate,
@@ -158,7 +171,6 @@ export async function markAttendanceByParent({
     throw error;
   }
 }
-
 export async function markAttendanceByTeacher({
   attendanceId,
   teacherAttendance,
@@ -178,7 +190,6 @@ export async function markAttendanceByTeacher({
     throw error;
   }
 }
-
 export async function getMisMatchAttendance({ sectionId, date }) {
   try {
     const attendance = await attendanceModel
@@ -197,34 +208,81 @@ export async function getMisMatchAttendance({ sectionId, date }) {
     throw error;
   }
 }
-
 export async function findAttendanceById(attendanceId) {
   try {
     const attendance = await attendanceModel.findById(attendanceId);
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function updateAttendance({ attendanceId, attendance }) {
-  try {
-    const attendance = await attendanceModel.findByIdAndUpdate(attendanceId, {
-      teacherAttendance: attendance
-    });
     return attendance;
   } catch (error) {
     throw error;
   }
 }
-
-
-export async function getMonthlyAttendance({studentId , regex}){
+export async function updateAttendance({ attendanceId, attendance }) {
+  try {
+    console.log({ attendanceId, attendance });
+    const result = await attendanceModel.findByIdAndUpdate(attendanceId, {
+      teacherAttendance: attendance
+    });
+    console.log({result});
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function getMonthlyPresentCount({studentId , regex}){
   try {
     console.log({regex})
-    const attendace = await attendanceModel.find({student:studentId,date:regex})
+    const attendace = await attendanceModel.find({student:studentId,date:regex,teacherAttendance:"present"})
     console.log({attendace})
-    return attendace;
+    return attendace.length;
   } catch (error) {
     throw error;    
   }
 }
+export async function getTotalMonthlyAttendanceCount({regex}){
+  try {
+    console.log({regex})
+    const attendance = await attendanceModel.aggregate([{$match:{date:regex}},{$group:{_id:"$day"}},{$count:"total"}])
+    if(attendance.length>0)
+    return attendance[0]["total"];
+
+    return 0;
+  } catch (error) {
+    throw error;    
+  }
+}
+export async function getYearlyPresentCount({studentId , regex}){
+  try {
+    console.log({regex})
+    const attendace = await attendanceModel.find({student:studentId,date:regex,teacherAttendance:"present"})
+    console.log({attendace})
+    return attendace.length;
+  } catch (error) {
+    throw error;    
+  }
+}
+export async function getTotalYearlyAttendanceCount({regex}){
+  try {
+    console.log({regex})
+    const attendance = await attendanceModel.aggregate([{$match:{date:regex}},{$group:{_id:"$day"}},{$count:"total"}])
+    if(attendance.length>0)
+    return attendance[0]["total"];
+
+    return 0;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+export async function getMonthlyAttendance({ studentId, regex }) {
+  try {
+    console.log({studentId, regex})
+    const attendace = await attendanceModel.find({
+      student: studentId,
+      date: regex,
+    });
+    return attendace;
+  } catch (error) {
+    throw error;
+  }
+}
+

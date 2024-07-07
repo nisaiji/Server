@@ -3,6 +3,7 @@ import {
   existingParentRegisterSchema,
   parentAuthUpdateSchema,
   parentLoginSchema,
+  parentProfileInfoUpdateSchema,
   parentProfileUpdateSchema,
   parentRegisterSchema,
   parentUpdateSchema
@@ -117,6 +118,20 @@ export async function profileUpdateParentValidation(req, res, next) {
       phone,
       email
     });
+
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next()
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+export async function profileInfoUpdateParentValidation(req, res, next) {
+  try {
+    const {fullname,age,gender,address,qualification,occupation} = req.body;
+    // console.log({fullname,age,gender,address,qualification,occupation})
+    const { error: schemaError } = parentProfileInfoUpdateSchema.validate({fullname,age,gender,address,qualification,occupation});
 
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));

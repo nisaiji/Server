@@ -70,8 +70,6 @@ paths:
               properties:
                 username:
                   type: string
-                email:
-                  type: string
                 password:
                   type: string
       responses:
@@ -116,6 +114,33 @@ paths:
       responses:
         200:
           description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/password-change:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update password of teacher"
+      description: "This API will udpate password of a teacher. It requires teacher login token."
+      tags:
+      - "Teacher"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        200:
+          description: "password updated successfully"
         400:
           description: "Unauthorized request"
         500:
