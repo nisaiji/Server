@@ -81,11 +81,10 @@ export async function findTeacherById(id) {
   }
 }
 
-export async function updateAuthTeacher({ id, username, email, password }) {
+export async function updateAuthTeacher({ id, username, password }) {
   try {
     const teacher = await teacherModel.findByIdAndUpdate(id, {
       username,
-      email,
       password
     });
     return teacher;

@@ -8,7 +8,7 @@ import {addToSectionStudentValidation,deleteStudentValidation,parentUpdateStuden
 
 const studentRouter = express.Router();
 
-
+ 
 
 studentRouter.post("/register",classTeacherAuthentication,registerStudentValidation,registerStudentController);
 studentRouter.post("/admin-register",adminAuthentication,registerStudentValidation,adminRegisterStudentController);
@@ -22,7 +22,6 @@ studentRouter.put("/update/:studentId",classTeacherAuthentication,updateStudentV
 studentRouter.put("/admin-update/:studentId",adminAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/parent-update/:studentId",parentAuthentication,parentUpdateStudentValidation,parentUpdateStudentController)
 studentRouter.get("/monthly-count/:studentId",parentAuthentication,getMonthlyAttendanceCountController)
-// sudentRouter.get("/get-parent",)
 // studentRouter.put("/upload-photo",);
 
 // studentRouter.put("/admin-update-student/:studentId", adminAuthentication,adminRegisterStudentValidation,adminUpdateStudentController);

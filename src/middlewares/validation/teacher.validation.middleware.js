@@ -30,17 +30,16 @@ export async function registerTeacherValidation(req, res, next) {
 
 export async function authUpdateTeacherValidation(req, res, next) {
   try {
-    const { username, email, password } = req.body;
+    const { username, password } = req.body;
     const { error: schemaError } = teacherAuthUpdateSchema.validate({
       username,
-      email,
       password
     });
 
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }
-    next()
+    next();
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -48,7 +47,16 @@ export async function authUpdateTeacherValidation(req, res, next) {
 
 export async function profileUpdateTeacherValidation(req, res, next) {
   try {
-    const { firstname, lastname,phone, dob,bloodGroup,gender,university,degree} = req.body;
+    const {
+      firstname,
+      lastname,
+      phone,
+      dob,
+      bloodGroup,
+      gender,
+      university,
+      degree
+    } = req.body;
     const { error: schemaError } = teacherProfileUpdateSchema.validate({
       firstname,
       lastname,
@@ -57,13 +65,13 @@ export async function profileUpdateTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree 
+      degree
     });
 
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }
-    next()
+    next();
   } catch (err) {
     return res.send(error(500, err.message));
   }

@@ -66,8 +66,8 @@ export async function registerStudentController(req, res) {
     if (!Class) {
       return res.send(error(400, "Class doesn't exists"));
     }
-
-    const password = parentName + phone;
+    const gardianName = parentName.split(" ");
+    const password = gardianName[0]+"@" + phone;
     const hashedPassword = await hashPassword(password);
     let parent = await checkParentExist({ phone });
     if (!parent) {

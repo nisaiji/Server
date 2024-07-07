@@ -1,6 +1,6 @@
 import { generateAccessToken } from "../services/JWTToken.service.js";
 import {checkChildExist,checkStudentAlreadyLinkedToParent,createParent,findParent,findParentById,findParentByPhoneNo, findParentByUsername,
-  getAllEventHolidays,getChildrenOfParent, updateAuthParent,updateProfileInfoParent,updateProfileParent} from "../services/parent.services.js";
+  getAllEventHolidays,getChildrenOfParent, getParentById, updateAuthParent,updateProfileInfoParent,updateProfileParent} from "../services/parent.services.js";
 import {checkPasswordMatch,hashPassword} from "../services/password.service.js";
 import { findStudentById } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
@@ -239,7 +239,6 @@ export async function getChildrenParentController(req, res) {
   }
 }
 
-
 export async function getHolidayEventParentController(req,res){
   try {
     const parentId = req.parentId;
@@ -254,8 +253,6 @@ export async function getHolidayEventParentController(req,res){
     return res.send(error(500,err.message));
   }
 }
-
-
 
 export async function passwordChangeController(req,res){
   try {
@@ -280,4 +277,16 @@ export async function passwordChangeController(req,res){
   }
 }
 
+export async function getParentController(req,res){
+  try {
+    const parentId = req.parentId;
+    const parent = await getParentById(parentId);
+    if(!parent){
+      return res.send(error(400,"user not found."));
+    }  
+    return res.send(success(200,parent));  
+  } catch (err) {
+    return res.send(error(500,err.message));
+  }
+}
 
