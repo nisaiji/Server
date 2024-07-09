@@ -129,7 +129,7 @@ const teacherUpdateSchema = Joi.object({
       "any.required": "Phone number is required."
     }),
   dob: Joi.string().required().messages({
-    "any.required": "date of birth is required."
+    "any.required": "date of birth is required.",
   }),
   bloodGroup: Joi.string().required().messages({
     "any.required": "blood group is required."

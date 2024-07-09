@@ -8,17 +8,32 @@ export async function markAttendanceController(req, res) {
     const sectionId = req.params.sectionId;
     const classTeacherId = req.teacherId;
     const adminId = req.adminId;
+
+
+    if(present.length==0 && absent.length==0){
+      return res.send(error(400,"no student provided"));
+    }
+
     const date = new Date();
     const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
     if (day === "Sunday") {
       return res.send(error(400, "today is sunday"));
     }
-    const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+
+    const currDate = date.setHours(0,0,0,0);
+    console.log({date,currDate});
     const holidayEvent = await checkHolidayEvent({ currDate, adminId });
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
+
+    const studentID = present.length>0?present[0]["_id"]:absent[0]["_id"];
+    const isTeacherMarkedAttendance = await checkAttendanceMarkedByTeacher({studentId:studentID,currDate});
+    if(isTeacherMarkedAttendance){
+      return res.send(error(400,"attendance already marked by teacher"));
+    }
+
     present.map(async (student) => {
       const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],currDate});
       if(parentMarkedAttendance){
@@ -65,7 +80,9 @@ export async function parentMarkAttendanceController(req, res) {
     if (day === "Sunday") {
       return res.send(error(400, "today is sunday"));
     }
-    const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    // const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    const currDate = date.setHours(0,0,0,0);
+    // console.log({date,currDate});
     const holidayEvent = await checkHolidayEvent({ currDate, adminId });
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
@@ -122,8 +139,8 @@ export async function checkAttendaceMarkedController(req, res) {
     const adminId = req.adminId;
     const sectionId = req.params.sectionId;
     const date = new Date();
-    const currDate =
-      date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    const currDate = date.setHours(0,0,0,0);
+      // date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
     const holidayEvent = await checkHolidayEvent({ currDate, adminId });
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
@@ -144,7 +161,8 @@ export async function checkParentAttendaceMarkedController(req, res) {
     const parentId = req.parentId;
     const adminId = req.adminId;
     const date = new Date();
-    const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    // const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    const currDate = date.setHours(0,0,0,0);
     const holidayEvent = await checkHolidayEvent({ currDate, adminId });
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
@@ -163,7 +181,8 @@ export async function attendanceDailyStatusController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const date = new Date();
-    const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    const currDate = date.setHours(0,0,0,0);
+    // const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
  
     const totalStudentCount = await getStudentCount({ sectionId });
     const presentStudentCount = await getPresentStudentCount({sectionId,currDate,});
@@ -214,9 +233,10 @@ export async function attendanceMonthlyStatusController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const date = new Date();
-    // const { firstDay, lastDay } = date.getMonthDates();
-    var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-    var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).toLocaleDateString('en-CA');
+    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).toLocaleDateString('en-CA');
+    
+    
     const monthDates = [];
     let currentDate = new Date(firstDay);
     while (currentDate <= lastDay) {

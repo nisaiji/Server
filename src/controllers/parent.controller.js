@@ -289,4 +289,3 @@ export async function getParentController(req,res){
     return res.send(error(500,err.message));
   }
 }
-

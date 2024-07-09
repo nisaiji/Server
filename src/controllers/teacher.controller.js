@@ -66,7 +66,7 @@ export async function loginClassTeacherController(req, res) {
     );
 
     if (!matchPassword) {
-      return res.send(error(404, "unauthorized password user"));
+      return res.send(error(404, "unauthorized  user"));
     }
     const section = await findSectionByClassTeacherId(classTeacher["_id"]);
     if (!section) {

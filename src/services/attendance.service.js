@@ -153,6 +153,20 @@ export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
     throw error;
   }
 }
+// export async function checkAttendanceMarkedByTeacher({ studentId, currDate }) {
+//   try {
+//     const attendance = await attendanceModel.findOne({
+//       $and: [
+//         { student: studentId },
+//         { date: currDate },
+//         { teacherAttendance: { $ne: "" } }
+//       ]
+//     });
+//     return attendance;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 export async function markAttendanceByParent({
   studentId,
   currDate,
