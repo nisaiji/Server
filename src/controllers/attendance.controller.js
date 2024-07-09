@@ -1,4 +1,4 @@
-import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyAttendance,getMonthlyPresentCount,getTotalMonthlyAttendanceCount,markAttendanceByParent,markAttendanceByTeacher, updateAttendance} from "../services/attendance.service.js";
+import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyAttendance,getMonthlyPresentCount,getTotalMonthlyAttendanceCount,getTotalYearlyAttendanceCount,getYearlyPresentCount,markAttendanceByParent,markAttendanceByTeacher, updateAttendance} from "../services/attendance.service.js";
 import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -207,16 +207,9 @@ export async function attendanceWeeklyStatusController(req, res) {
     }
     let weeklyAttendance = await Promise.all(
       weekDates.map(async (date) => {
-        const currDate =
-          date.getDate() +
-          "-" +
-          (date.getMonth() + 1) +
-          "-" +
-          date.getFullYear();
-        const presentStudentCount = await getPresentStudentCount({
-          sectionId,
-          currDate,
-        });
+        // const currDate =date.getDate() +"-" +(date.getMonth() + 1) +"-" +date.getFullYear();
+        const currDate =date.setHours(0,0,0,0);
+        const presentStudentCount = await getPresentStudentCount({sectionId,currDate,});
         return presentStudentCount;
       })
     );
@@ -289,14 +282,14 @@ export async function updateAttendanceController(req,res){
 
     let length = present?.length;
     for(let i=0;i<length; i++){
-      const attendanceInstance = await findAttendanceById(present[i]);
-      const updatedAttendance = await updateAttendance({attendanceId:present[i],attendance:"present"});
+      const attendanceInstance = await findAttendanceById(present[i]["attendanceId"]);
+      const updatedAttendance = await updateAttendance({attendanceId:present[i]["attendanceId"],attendance:"present"});
     }
     
     length = absent?.length;
     for(let i=0;i<length; i++){
-      const attendanceInstance = await findAttendanceById(absent[i]);
-      const updatedAttendance = await updateAttendance({attendanceId:absent[i],attendance:"absent"});
+      const attendanceInstance = await findAttendanceById(absent[i]["attendanceId"]);
+      const updatedAttendance = await updateAttendance({attendanceId:absent[i]["attendanceId"],attendance:"absent"});
     }
     return res.send(success(200,"attendance updated successfully"))
     
@@ -352,20 +345,27 @@ export async function parentMonthlyAttendanceStatusController(req, res) {
 export async function parentMonthlyAttendanceCountController(req,res){
   try {
      const {studentId,month,year} = req.body;
-    const date = new Date();
     const parentId = req.parentId;
     if(!studentId || !month || !year){
       return res.send(error(400,"studentId and month is required"));
     }    
-    const monthStr = month.toString();
-    const yearStr = year.toString();
-    const regex = new RegExp(`^\\d{1,2}-${monthStr}-${yearStr}$`);
-    const monthlyAttendanceCount = await getMonthlyPresentCount({studentId,regex});
-    const totalMonthlyAttendanceCount = await getTotalMonthlyAttendanceCount({regex});
+
+    if(month<0 || month>11){
+      return res.send(error(400,"invalid month"));
+    }
+
+    const date = new Date();
+    const firstDayStr = new Date(year, month, 1).toLocaleDateString('en-CA');
+    const lastDayStr = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
+
+    const firstDay = new Date(firstDayStr);
+    const lastDay = new Date(lastDayStr);
+
+
+    const monthlyAttendanceCount = await getMonthlyPresentCount({studentId,firstDay,lastDay});
+    const totalMonthlyAttendanceCount = await getTotalMonthlyAttendanceCount({firstDay,lastDay});
+
     console.log({monthlyAttendanceCount,totalMonthlyAttendanceCount})
-    // if(monthlyAttendance instanceof Error){
-    //   return res.send(error(400,"can't get monthly attendance"));
-    // }
     return res.send(success(200,{monthlyAttendanceCount,totalMonthlyAttendanceCount}));
   } catch (err) {
     return res.send(error(500,err.message));  
@@ -374,21 +374,27 @@ export async function parentMonthlyAttendanceCountController(req,res){
 
 export async function parentYearlyAttendanceCountController(req,res){
   try {
-     const {studentId,year} = req.body;
-    const date = new Date();
-    const parentId = req.parentId;
+     const {studentId} = req.body;
+     let {year} = req.body;
+     year = Number(year);
+     const parentId = req.parentId;
+
     if(!studentId ||  !year){
       return res.send(error(400,"studentId and year is required"));
-    }    
-    const monthStr ="\\d{1,2}";
-    const yearStr = year.toString();
-    const regex = new RegExp(`^\\d{1,2}-${monthStr}-${yearStr}$`);
-
-    const yearlyAttendanceCount = await getYearlyPresentCount({studentId,regex});
-    const totalYearlyAttendanceCount = await getTotalYearlyAttendanceCount({regex});
+    }   
     
-    console.log({yearlyAttendanceCount,totalYearlyAttendanceCount})
-    return res.send(success(200,{monthlyAttendanceCount,totalMonthlyAttendanceCount}));
+    const date = new Date();
+    const firstDayStr = new Date(year, 3, 1).toLocaleDateString('en-CA');
+    const lastDayStr = new Date(year+1, 2, 31).toLocaleDateString('en-CA');
+
+    const firstDay = new Date(firstDayStr);
+    const lastDay = new Date(lastDayStr);
+
+    const presentCount = await getYearlyPresentCount({studentId,firstDay,lastDay});
+    const totalCount = await getTotalYearlyAttendanceCount({studentId,firstDay,lastDay});
+    
+    // console.log({yearlyAttendanceCount,totalYearlyAttendanceCount})
+    return res.send(success(200,{presentCount,totalCount}));
   } catch (err) {
     return res.send(error(500,err.message));  
   }
