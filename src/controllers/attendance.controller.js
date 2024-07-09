@@ -372,6 +372,35 @@ export async function parentMonthlyAttendanceCountController(req,res){
   }
 }
 
+export async function teacherMonthlyAttendanceCountController(req,res){
+  try {
+     const {studentId,month,year} = req.body;
+     if(!studentId || !month || !year){
+       return res.send(error(400,"studentId and month is required"));
+     }    
+
+    if(month<0 || month>11){
+      return res.send(error(400,"invalid month"));
+    }
+
+    const date = new Date();
+    const firstDayStr = new Date(year, month, 1).toLocaleDateString('en-CA');
+    const lastDayStr = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
+
+    const firstDay = new Date(firstDayStr);
+    const lastDay = new Date(lastDayStr);
+
+
+    const monthlyAttendanceCount = await getMonthlyPresentCount({studentId,firstDay,lastDay});
+    const totalMonthlyAttendanceCount = await getTotalMonthlyAttendanceCount({firstDay,lastDay});
+
+    console.log({monthlyAttendanceCount,totalMonthlyAttendanceCount})
+    return res.send(success(200,{monthlyAttendanceCount,totalMonthlyAttendanceCount}));
+  } catch (err) {
+    return res.send(error(500,err.message));  
+  }
+}
+
 export async function parentYearlyAttendanceCountController(req,res){
   try {
      const {studentId} = req.body;
@@ -394,6 +423,32 @@ export async function parentYearlyAttendanceCountController(req,res){
     const totalCount = await getTotalYearlyAttendanceCount({studentId,firstDay,lastDay});
     
     // console.log({yearlyAttendanceCount,totalYearlyAttendanceCount})
+    return res.send(success(200,{presentCount,totalCount}));
+  } catch (err) {
+    return res.send(error(500,err.message));  
+  }
+}
+
+export async function teacherYearlyAttendanceCountController(req,res){
+  try {
+     const {studentId} = req.body;
+     let {year} = req.body;
+     year = Number(year);
+
+    if(!studentId ||  !year){
+      return res.send(error(400,"studentId and year is required"));
+    }   
+    
+    const date = new Date();
+    const firstDayStr = new Date(year, 3, 1).toLocaleDateString('en-CA');
+    const lastDayStr = new Date(year+1, 2, 31).toLocaleDateString('en-CA');
+
+    const firstDay = new Date(firstDayStr);
+    const lastDay = new Date(lastDayStr);
+
+    const presentCount = await getYearlyPresentCount({studentId,firstDay,lastDay});
+    const totalCount = await getTotalYearlyAttendanceCount({studentId,firstDay,lastDay});
+    
     return res.send(success(200,{presentCount,totalCount}));
   } catch (err) {
     return res.send(error(500,err.message));  

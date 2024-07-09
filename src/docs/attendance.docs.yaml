@@ -314,9 +314,9 @@ paths:
                 studentId:
                   type: string
                 month:
-                  type: string
+                  type: number
                 year:
-                  type: string
+                  type: number
       responses:
         200:
           description: "Successful operation"
@@ -347,7 +347,71 @@ paths:
                 studentId:
                   type: string
                 year:
+                  type: number
+      responses:
+        200:
+          description: "Successful operation"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /attendance/teacher-monthly-attendance-count:
+    post:
+      security: 
+        - Authorization: []
+      tags:
+        - "Attendance"
+      summary: "Get monthly attendance count for teacher"
+      description: "This API allows a teacher to get the monthly attendance count of student."
+      produces:
+        - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
                   type: string
+                month:
+                  type: number
+                year:
+                  type: number
+      responses:
+        200:
+          description: "Successful operation"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /attendance/teacher-yearly-attendance-count:
+    post:
+      security: 
+        - Authorization: []
+      tags:
+        - "Attendance"
+      summary: "Get yearly attendance count for teacher"
+      description: "This API allows a teacher to get the yearly attendance count of student."
+      produces:
+        - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                year:
+                  type: number
       responses:
         200:
           description: "Successful operation"
