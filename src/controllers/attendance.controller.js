@@ -323,15 +323,20 @@ export async function parentMonthlyAttendanceStatusController(req, res) {
   try {
     const studentId = req.params.studentId;
     const month = req.params.month;
-    const date = new Date();
     const parentId = req.parentId;
+    const year = 2024;
     if (!studentId || !month) {
       return res.send(error(400, "studentId and month is required"));
     }
-    const monthStr = month.toString();
-    const yearStr = date.getFullYear().toString();
-    const regex = new RegExp(`^\\d{1,2}-${monthStr}-${yearStr}$`);
-    const monthlyAttendance = await getMonthlyAttendance({ studentId, regex });
+
+    const date = new Date();
+    const firstDayStr = new Date(year, month, 1).toLocaleDateString('en-CA');
+    const lastDayStr = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
+
+    const firstDay = new Date(firstDayStr);
+    const lastDay = new Date(lastDayStr);
+
+    const monthlyAttendance = await getMonthlyAttendance({ studentId, firstDay , lastDay });
     console.log(monthlyAttendance);
     if (monthlyAttendance instanceof Error) {
       return res.send(error(400, "can't get monthly attendance"));
