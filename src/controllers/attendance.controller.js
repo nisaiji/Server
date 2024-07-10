@@ -226,33 +226,30 @@ export async function attendanceMonthlyStatusController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const date = new Date();
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).toLocaleDateString('en-CA');
-    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).toLocaleDateString('en-CA');
-    
-    
+    const firstDayStr = new Date(date.getFullYear(), date.getMonth(), 1).toLocaleDateString('en-CA');;
+    const lastDayStr = new Date(date.getFullYear(), date.getMonth() + 1, 0).toLocaleDateString('en-CA');;
+
+    const firstDay = new Date(firstDayStr)
+    const lastDay = new Date(lastDayStr)
+
+
     const monthDates = [];
-    let currentDate = new Date(firstDay);
+    let currentDate = new Date(firstDay); 
+
     while (currentDate <= lastDay) {
-      monthDates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
+      monthDates.push(new Date(currentDate)); 
+      currentDate.setDate(currentDate.getDate() + 1); 
+     }
+    console.log({monthDates});
     let monthlyAttendance = await Promise.all(
       monthDates.map(async (date) => {
-        const currDate =
-          date.getDate() +
-          "-" +
-          (date.getMonth() + 1) +
-          "-" +
-          date.getFullYear();
-        const presentStudentCount = await getPresentStudentCount({
-          sectionId,
-          currDate,
-        });
+        const tempDate = date.setHours(0,0,0,0);
+        console.log({tempDate})
+        const presentStudentCount = await getPresentStudentCount({sectionId,currDate:tempDate});
         return presentStudentCount;
       })
     );
     const totalStudentCount = await getStudentCount({ sectionId });
-    console.log(monthlyAttendance);
     return res.send(success(200, { monthlyAttendance, totalStudentCount }));
   } catch (err) {
     return res.send(error(500, err.message));
