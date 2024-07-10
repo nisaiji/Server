@@ -137,7 +137,6 @@ export async function getAttendaceByStudentId({ studentId, currDate }) {
     const attendance = await attendanceModel.findOne({
       $and: [{ student: studentId }, { date: currDate }]
     });
-    // console.log({attendance})
     return attendance;
   } catch (error) {
     throw error;
@@ -145,6 +144,7 @@ export async function getAttendaceByStudentId({ studentId, currDate }) {
 }
 export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
   try {
+   
     const attendance = await attendanceModel.findOne({
       $and: [
         { student: studentId },
@@ -358,6 +358,7 @@ export async function getMonthlyAttendance({ studentId, firstDay, lastDay }) {
   try {
     const attendace = await attendanceModel.find({
       student: studentId,
+      teacherAttendance:"present",
       date: {
         $gte: firstDay,
         $lte: lastDay

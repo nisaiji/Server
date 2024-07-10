@@ -404,11 +404,21 @@ export async function searchStudentOfSectionController(req, res) {
       return res.status(400).send({ error: "section does not exist" });
     }
 
+    
     const students = await searchStudentByName({ name, sectionId });
 
     if (students instanceof Error) {
       return res.status(400).send({ error: "can't search students" });
     }
+
+    const date = new Date();
+    const currDate = date.setHours(0,0,0,0);
+    for(let i = 0; i<students.length;i++){
+      const attendanceDoc = await getAttendaceByStudentId({studentId:students[i]["_id"],currDate:date});
+      const attendance = attendanceDoc["teacherAttendance"]?attendanceDoc["teacherAttendance"]:"not marked";
+      students[i] = {...students[i]["_doc"],"attendance":attendance}
+    }
+
 
     return res.send(success(200,students));
   } catch (err) {
