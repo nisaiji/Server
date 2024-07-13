@@ -197,7 +197,8 @@ export async function attendanceWeeklyStatusController(req, res) {
         const startOfDay = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), 0, 0, 0, 0).getTime();
         const endOfDay = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), 23, 59, 59, 999).getTime();    
         const presentStudentCount = await getPresentStudentCount({sectionId,startOfDay,endOfDay});
-        return presentStudentCount;
+        const absentStudentCount = await getAbsentStudentCount({sectionId,startOfDay,endOfDay});
+        return [presentStudentCount,absentStudentCount];  
       })
     );
 
