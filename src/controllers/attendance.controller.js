@@ -8,39 +8,41 @@ export async function markAttendanceController(req, res) {
     const sectionId = req.params.sectionId;
     const classTeacherId = req.teacherId;
     const adminId = req.adminId;
+    const date = new Date();
+    const currDate = date.getTime();
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
+
 
 
     if(present.length==0 && absent.length==0){
       return res.send(error(400,"no student provided"));
     }
 
-    const date = new Date();
     const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
     if (day === "Sunday") {
       return res.send(error(400, "today is sunday"));
     }
 
-    const currDate = date.setHours(0,0,0,0);
-    console.log({date,currDate});
-    const holidayEvent = await checkHolidayEvent({ currDate, adminId });
+    const holidayEvent = await checkHolidayEvent({adminId,startOfDay,endOfDay});
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
 
     const studentID = present.length>0?present[0]["_id"]:absent[0]["_id"];
-    const isTeacherMarkedAttendance = await checkAttendanceMarkedByTeacher({studentId:studentID,currDate});
+    const isTeacherMarkedAttendance = await checkAttendanceMarkedByTeacher({studentId:studentID,startOfDay,endOfDay});
     if(isTeacherMarkedAttendance){
       return res.send(error(400,"attendance already marked by teacher"));
     }
 
     present.map(async (student) => {
-      const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],currDate});
+      const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],startOfDay,endOfDay});
       if(parentMarkedAttendance){
         const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:"present",sectionId,classTeacherId,adminId})
       }
       else{
-        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:"present",studentId: student._id,sectionId,classTeacherId,adminId,});
+        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:"present",studentId: student._id,sectionId,classTeacherId,adminId});
       }
     });
     absent.map(async (student) => {
@@ -49,11 +51,11 @@ export async function markAttendanceController(req, res) {
         const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:"absent",sectionId,classTeacherId,adminId})
       }
       else{
-        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:"absent",studentId: student._id,sectionId,classTeacherId,adminId,});
+        const createdAttendance = await createAttendance({currDate,day,teacherAttendance:"absent",studentId: student._id,sectionId,classTeacherId,adminId});
       }
     });
-    const misMatchAttendance = await getMisMatchAttendance({sectionId,date:currDate});
-    return res.send(success(200, {misMatchAttendance}));
+    // const misMatchAttendance = await getMisMatchAttendance({sectionId,date:currDate});
+    return res.send(success(200, "attendance marked successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -64,6 +66,12 @@ export async function parentMarkAttendanceController(req, res) {
     const { studentId,attendance} = req.body;
     const parentId = req.parentId;
     const adminId = req.adminId;
+    const date = new Date();
+    const currDate = date.getTime();
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
+
+
     if(!(attendance==="present" || attendance==="absent")){
       return res.send(error(400,"invalid attendance value"));
     }
@@ -71,27 +79,29 @@ export async function parentMarkAttendanceController(req, res) {
       return res.send(error(400,"studentId is required"));
     }
     const student = await findStudentById(studentId);
+    if(!student){
+      return res.send(error(400,"student not found"));
+    }
     if((student["parent"].toString())!==parentId){
       return res.send(error(400,"parent is not authorized to mark attendance."));
     }
-    const date = new Date();
+
+
     const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
-    if (day === "Sunday") {
+    if (day === "Sunday"){
       return res.send(error(400, "today is sunday"));
     }
-    // const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-    const currDate = date.setHours(0,0,0,0);
-    // console.log({date,currDate});
+
     const holidayEvent = await checkHolidayEvent({ currDate, adminId });
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
-    const isTeacherMarkedAttendance = await checkAttendanceMarkedByTeacher({studentId,currDate});
+    const isTeacherMarkedAttendance = await checkAttendanceMarkedByTeacher({studentId,startOfDay , endOfDay});
     if(isTeacherMarkedAttendance){
       return res.send(error(400,"parent can't mark attendance,teacher already marked."));
     }
-    const isParentMarkedAttendance = await checkAttendanceMarkedByParent({studentId,currDate});
+    const isParentMarkedAttendance = await checkAttendanceMarkedByParent({studentId,startOfDay , endOfDay});
     if(isParentMarkedAttendance){
       return res.send(error(400,"attendance already marked by parent"));
     }
@@ -105,47 +115,20 @@ export async function parentMarkAttendanceController(req, res) {
   }
 }
 
-// export async function markAttendanceController(req,res){
-//     try {
-//         const{studentId , sectionId,isPresent} = req.body;
-//         const classTeacherId = req.classTeacherId;
-//         const adminId = req.adminId;
-//         const date = new Date();
-//         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-//         const day = daysOfWeek[date.getDay()];
-//         if(day==="Sunday"){
-//             return res.send(error(400,"today is sunday"));
-//         }
-//         const currDate = date.getDate()+"-"+(date.getMonth()+1)+"-"+date.getFullYear();
-//         const holidayEvent = await checkHolidayEvent({currDate,adminId});
-//         if(holidayEvent){
-//             return res.send(error(400,"today is scheduled as holiday!"));
-//         }
-//         const attendance = await checkAttendanceAlreadyMarked({studentId,currDate});
-//         if(attendance){
-//             attendance["isPresent"] = isPresent;
-//             await attendance.save();
-//             return res.send(success(400,"attendance updated successfully"));
-//         }
-//         const createdAttendance = await createAttendance({currDate,day,isPresent,studentId,sectionId,classTeacherId,adminId});
-//         return res.send(success(200,"attendance marked sucessfully"));
-//     } catch (err) {
-//         return res.send(error(500,err.message));
-//     }
-// }
-
 export async function checkAttendaceMarkedController(req, res) {
   try {
     const adminId = req.adminId;
     const sectionId = req.params.sectionId;
     const date = new Date();
-    const currDate = date.setHours(0,0,0,0);
-      // date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-    const holidayEvent = await checkHolidayEvent({ currDate, adminId });
+
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
+
+    const holidayEvent = await checkHolidayEvent({adminId,startOfDay,endOfDay });
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
-    const checkAttendanceMarked = await checkAttendanceAlreadyMarked({sectionId,currDate,});
+    const checkAttendanceMarked = await checkAttendanceAlreadyMarked({sectionId,startOfDay,endOfDay});
     if (checkAttendanceMarked) {
       return res.send(error(400, "attendance already marked"));
     }
@@ -161,13 +144,15 @@ export async function checkParentAttendaceMarkedController(req, res) {
     const parentId = req.parentId;
     const adminId = req.adminId;
     const date = new Date();
-    // const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-    const currDate = date.setHours(0,0,0,0);
+    const currDate = date.getTime();
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
+ 
     const holidayEvent = await checkHolidayEvent({ currDate, adminId });
     if (holidayEvent) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
-    const checkAttendanceMarked = await checkAttendanceAlreadyMarkedByParent({studentId,currDate});
+    const checkAttendanceMarked = await checkAttendanceAlreadyMarkedByParent({studentId,startOfDay,endOfDay});
     if (checkAttendanceMarked) {
       return res.send(error(400, "attendance already marked"));
     }
@@ -181,12 +166,13 @@ export async function attendanceDailyStatusController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const date = new Date();
-    const currDate = date.setHours(0,0,0,0);
-    // const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
+    const currDate = date.getTime();
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
  
     const totalStudentCount = await getStudentCount({ sectionId });
-    const presentStudentCount = await getPresentStudentCount({sectionId,currDate,});
-    const absentStudentCount = await getAbsentStudentCount({sectionId,currDate,});
+    const presentStudentCount = await getPresentStudentCount({sectionId,startOfDay,endOfDay});
+    const absentStudentCount = await getAbsentStudentCount({sectionId,startOfDay,endOfDay});
     return res.send(success(200, {totalStudentCount,presentStudentCount,absentStudentCount,}));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -198,18 +184,19 @@ export async function attendanceWeeklyStatusController(req, res) {
     const sectionId = req.params.sectionId;
     const date = new Date();
     const { monday, sunday } = date.getWeekDates();
-    // console.log(sectionId,adminId,monday,sunday);
+
     const weekDates = [];
     let currentDate = new Date(monday);
     while (currentDate <= sunday) {
-      weekDates.push(new Date(currentDate));
+      weekDates.push(new Date(currentDate).getTime());
       currentDate.setDate(currentDate.getDate() + 1);
     }
     let weeklyAttendance = await Promise.all(
       weekDates.map(async (date) => {
-        // const currDate =date.getDate() +"-" +(date.getMonth() + 1) +"-" +date.getFullYear();
-        const currDate =date.setHours(0,0,0,0);
-        const presentStudentCount = await getPresentStudentCount({sectionId,currDate,});
+        const currDate = new Date(date);
+        const startOfDay = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), 0, 0, 0, 0).getTime();
+        const endOfDay = new Date(currDate.getFullYear(), currDate.getMonth(), currDate.getDate(), 23, 59, 59, 999).getTime();    
+        const presentStudentCount = await getPresentStudentCount({sectionId,startOfDay,endOfDay});
         return presentStudentCount;
       })
     );
@@ -226,26 +213,26 @@ export async function attendanceMonthlyStatusController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const date = new Date();
-    const firstDayStr = new Date(date.getFullYear(), date.getMonth(), 1).toLocaleDateString('en-CA');;
-    const lastDayStr = new Date(date.getFullYear(), date.getMonth() + 1, 0).toLocaleDateString('en-CA');;
 
-    const firstDay = new Date(firstDayStr)
-    const lastDay = new Date(lastDayStr)
+    const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+    const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getTime();
 
 
     const monthDates = [];
-    let currentDate = new Date(firstDay); 
+    let currentDate = new Date(firstDayOfMonth); 
 
-    while (currentDate <= lastDay) {
-      monthDates.push(new Date(currentDate)); 
+    while (currentDate <= lastDayOfMonth) {
+      monthDates.push(new Date(currentDate).getTime()); 
       currentDate.setDate(currentDate.getDate() + 1); 
      }
-    console.log({monthDates});
-    let monthlyAttendance = await Promise.all(
-      monthDates.map(async (date) => {
-        const tempDate = date.setHours(0,0,0,0);
-        console.log({tempDate})
-        const presentStudentCount = await getPresentStudentCount({sectionId,currDate:tempDate});
+
+     let monthlyAttendance = await Promise.all(
+      monthDates.map(async (d) => {
+        const date = new Date(d);
+        console.log({date})
+        const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+        const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();    
+        const presentStudentCount = await getPresentStudentCount({sectionId,startOfDay,endOfDay});
         return presentStudentCount;
       })
     );
@@ -260,13 +247,16 @@ export async function getMisMatchAttendanceController(req,res){
   try {
     const sectionId = req.params.sectionId;
     const date = new Date();
+    const currDate = date.getTime();
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
     const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
     if (day === "Sunday") {
       return res.send(error(400, "today is sunday"));
     }
-    const currDate = date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
-    const misMatchAttendance = await getMisMatchAttendance({sectionId,date:currDate});
+ 
+    const misMatchAttendance = await getMisMatchAttendance({sectionId,startOfDay,endOfDay});
     return res.send(success(200,{misMatchAttendance}));    
   } catch (err) {
     return res.send(error(500,err.message));
@@ -330,6 +320,7 @@ export async function parentMonthlyAttendanceStatusController(req, res) {
     const firstDayStr = new Date(year, month, 1).toLocaleDateString('en-CA');
     const lastDayStr = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
 
+    console.log({firstDayStr,lastDayStr})
     const firstDay = new Date(firstDayStr);
     const lastDay = new Date(lastDayStr);
 
@@ -473,5 +464,3 @@ Date.prototype.getWeekDates = function () {
 
   return { monday, sunday };
 };
-
-

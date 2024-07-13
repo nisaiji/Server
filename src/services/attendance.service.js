@@ -74,26 +74,23 @@ export async function checkHolidayEvent(data) {
   }
 }
 
-export async function checkAttendanceAlreadyMarked({ sectionId, currDate }) {
+export async function checkAttendanceAlreadyMarked({ sectionId, startOfDay,endOfDay }) {
   try {
     const attendanceMarked = await attendanceModel.findOne({
-      $and: [{ section: sectionId }, { date: currDate }]
+      $and: [{ section: sectionId }, { date: {$gte:startOfDay,$lte:endOfDay} }]
     });
     return attendanceMarked;
   } catch (error) {
     throw error;
   }
 }
-export async function checkAttendanceAlreadyMarkedByParent({
-  studentId,
-  currDate
-}) {
+export async function checkAttendanceAlreadyMarkedByParent({studentId,startOfDay,endOfDay}) {
   try {
     const attendanceMarked = await attendanceModel.findOne({
       $and: [
         { student: studentId },
-        { date: currDate },
-        { parentAttendance: "present" }
+        { date: {$gte:startOfDay,$lte:endOfDay} },
+        { $or:[{parentAttendance: "present"},{parentAttendance: "absent"}] }
       ]
     });
     console.log({ attendanceMarked });
@@ -103,15 +100,18 @@ export async function checkAttendanceAlreadyMarkedByParent({
   }
 }
 
-export async function checkAttendanceMarkedByTeacher({ studentId, currDate }) {
+export async function checkAttendanceMarkedByTeacher({ studentId, startOfDay, endOfDay }) {
   try {
+    console.log({startOfDay, endOfDay})
     const attendance = await attendanceModel.findOne({
-      $and: [
-        { student: studentId },
-        { date: currDate },
-        { teacherAttendance: { $ne: "" } }
-      ]
+      student: studentId,
+      date: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      },
+      teacherAttendance: { $ne: "" }
     });
+    console.log(attendance);
     return attendance;
   } catch (error) {
     throw error;
@@ -142,13 +142,15 @@ export async function getAttendaceByStudentId({ studentId, currDate }) {
     throw error;
   }
 }
-export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
+export async function checkAttendanceMarkedByParent({ studentId, startOfDay , endOfDay }) {
   try {
-   
     const attendance = await attendanceModel.findOne({
       $and: [
         { student: studentId },
-        { date: currDate },
+        { date: {
+          $gte: startOfDay,
+          $lte: endOfDay
+        } },
         { parentAttendance: { $ne: "" } }
       ]
     });
@@ -171,12 +173,7 @@ export async function checkAttendanceMarkedByParent({ studentId, currDate }) {
 //     throw error;
 //   }
 // }
-export async function markAttendanceByParent({
-  studentId,
-  currDate,
-  day,
-  attendance
-}) {
+export async function markAttendanceByParent({studentId,currDate,day,attendance}){
   try {
     const markedAttendance = await attendanceModel.create({
       student: studentId,
@@ -208,17 +205,14 @@ export async function markAttendanceByTeacher({
     throw error;
   }
 }
-export async function getMisMatchAttendance({ sectionId, date }) {
+export async function getMisMatchAttendance({ sectionId, startOfDay,endOfDay }) {
   try {
     const attendance = await attendanceModel
       .find({
         section: sectionId,
-        date: date,
-        parentAttendance: { $ne: "" },
-        $or: [
-          { teacherAttendance: "present", parentAttendance: "absent" },
-          { teacherAttendance: "absent", parentAttendance: "present" }
-        ]
+        date: {$gte: startOfDay,$lte: endOfDay},
+        teacherAttendance: "absent", 
+        parentAttendance: "present" 
       })
       .populate("student");
     return attendance;
@@ -239,7 +233,6 @@ export async function updateAttendance({ attendanceId, attendance }) {
     const result = await attendanceModel.findByIdAndUpdate(attendanceId, {
       teacherAttendance: attendance
     });
-    console.log({ result });
     return result;
   } catch (error) {
     throw error;
@@ -268,8 +261,12 @@ export async function getTotalMonthlyAttendanceCount({ firstDay, lastDay }) {
         $match: {
           date: {
             $gte: firstDay,
-            $lte: lastDay
-          }
+            $lt: lastDay
+          },
+          $or: [
+            { teacherAttendance: "present" },
+            { teacherAttendance: "absent" }
+          ]
         }
       },
       {
@@ -311,8 +308,12 @@ export async function getTotalYearlyAttendanceCount({ firstDay, lastDay }) {
         $match: {
           date: {
             $gte: firstDay,
-            $lte: lastDay
-          }
+            $lt: lastDay
+          },
+          $or: [
+            { teacherAttendance: "present" },
+            { teacherAttendance: "absent" }
+          ]
         }
       },
       {
