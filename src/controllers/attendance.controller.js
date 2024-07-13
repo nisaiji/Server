@@ -46,7 +46,7 @@ export async function markAttendanceController(req, res) {
       }
     });
     absent.map(async (student) => {
-      const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],currDate});
+      const parentMarkedAttendance = await checkAttendanceMarkedByParent({studentId:student["_id"],startOfDay,endOfDay});
       if(parentMarkedAttendance){
         const teacherMarkedAttendance = await markAttendanceByTeacher({attendanceId:parentMarkedAttendance["_id"],teacherAttendance:"absent",sectionId,classTeacherId,adminId})
       }
