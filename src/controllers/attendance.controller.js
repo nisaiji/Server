@@ -344,17 +344,12 @@ export async function parentMonthlyAttendanceCountController(req,res){
     }
 
     const date = new Date();
-    const firstDayStr = new Date(year, month, 1);
-    const lastDayStr = new Date(year, month + 1, 0);
-
-    console.log({firstDayStr,lastDayStr});
-
-    const firstDay = new Date(firstDayStr);
-    const lastDay = new Date(lastDayStr);
+    const firstDayOfMonth = new Date(Date.UTC(year, month, 1)).getTime();
+    const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0)).getTime();
 
 
-    const monthlyAttendanceCount = await getMonthlyPresentCount({studentId,firstDay,lastDay});
-    const totalMonthlyAttendanceCount = await getTotalMonthlyAttendanceCount({firstDay,lastDay});
+    const monthlyAttendanceCount = await getMonthlyPresentCount({studentId,firstDayOfMonth,lastDayOfMonth});
+    const totalMonthlyAttendanceCount = await getTotalMonthlyAttendanceCount({firstDayOfMonth,lastDayOfMonth});
 
     console.log({monthlyAttendanceCount,totalMonthlyAttendanceCount})
     return res.send(success(200,{monthlyAttendanceCount,totalMonthlyAttendanceCount}));
@@ -404,14 +399,13 @@ export async function parentYearlyAttendanceCountController(req,res){
     }   
     
     const date = new Date();
-    const firstDayStr = new Date(year, 3, 1).toLocaleDateString('en-CA');
-    const lastDayStr = new Date(year+1, 2, 31).toLocaleDateString('en-CA');
+    const firstDayOfMonth = new Date(Date.UTC(year, 0, 1)).getTime();
+    const lastDayOfMonth = new Date(Date.UTC(year, 12, 0)).getTime();
+    console.log({firstDayOfMonth,lastDayOfMonth})
 
-    const firstDay = new Date(firstDayStr);
-    const lastDay = new Date(lastDayStr);
 
-    const presentCount = await getYearlyPresentCount({studentId,firstDay,lastDay});
-    const totalCount = await getTotalYearlyAttendanceCount({studentId,firstDay,lastDay});
+    const presentCount = await getYearlyPresentCount({studentId,firstDayOfMonth,lastDayOfMonth});
+    const totalCount = await getTotalYearlyAttendanceCount({studentId,firstDayOfMonth,lastDayOfMonth});
     
     // console.log({yearlyAttendanceCount,totalYearlyAttendanceCount})
     return res.send(success(200,{presentCount,totalCount}));

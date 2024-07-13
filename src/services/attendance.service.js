@@ -238,14 +238,14 @@ export async function updateAttendance({ attendanceId, attendance }) {
     throw error;
   }
 }
-export async function getMonthlyPresentCount({ studentId, firstDay, lastDay }) {
+export async function getMonthlyPresentCount({ studentId, firstDayOfMonth, lastDayOfMonth }) {
   try {
     const count = await attendanceModel.countDocuments({
       student: studentId,
       teacherAttendance: "present",
       date: {
-        $gte: firstDay,
-        $lte: lastDay
+        $gte: firstDayOfMonth,
+        $lte: lastDayOfMonth
       }
     });
     return count;
@@ -254,14 +254,14 @@ export async function getMonthlyPresentCount({ studentId, firstDay, lastDay }) {
   }
 }
 
-export async function getTotalMonthlyAttendanceCount({ firstDay, lastDay }) {
+export async function getTotalMonthlyAttendanceCount({ firstDayOfMonth, lastDayOfMonth }) {
   try {
     const totalCount = await attendanceModel.aggregate([
       {
         $match: {
           date: {
-            $gte: firstDay,
-            $lt: lastDay
+            $gte: firstDayOfMonth,
+            $lt: lastDayOfMonth
           },
           $or: [
             { teacherAttendance: "present" },
@@ -271,7 +271,12 @@ export async function getTotalMonthlyAttendanceCount({ firstDay, lastDay }) {
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: { $toDate: "$date" }
+            }
+          }
         }
       },
       {
@@ -285,14 +290,14 @@ export async function getTotalMonthlyAttendanceCount({ firstDay, lastDay }) {
   }
 }
 
-export async function getYearlyPresentCount({ studentId, firstDay, lastDay }) {
+export async function getYearlyPresentCount({ studentId, firstDayOfMonth, lastDayOfMonth }) {
   try {
     const count = await attendanceModel.countDocuments({
       student: studentId,
       teacherAttendance: "present",
       date: {
-        $gte: firstDay,
-        $lte: lastDay
+        $gte: firstDayOfMonth,
+        $lte: lastDayOfMonth
       }
     });
     return count;
@@ -301,14 +306,14 @@ export async function getYearlyPresentCount({ studentId, firstDay, lastDay }) {
   }
 }
 
-export async function getTotalYearlyAttendanceCount({ firstDay, lastDay }) {
+export async function getTotalYearlyAttendanceCount({ firstDayOfMonth, lastDayOfMonth }) {
   try {
     const totalCount = await attendanceModel.aggregate([
       {
         $match: {
           date: {
-            $gte: firstDay,
-            $lt: lastDay
+            $gte: firstDayOfMonth,
+            $lt: lastDayOfMonth
           },
           $or: [
             { teacherAttendance: "present" },
@@ -318,7 +323,12 @@ export async function getTotalYearlyAttendanceCount({ firstDay, lastDay }) {
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: { $toDate: "$date" }
+            }
+          }
         }
       },
       {
