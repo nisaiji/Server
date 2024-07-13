@@ -325,7 +325,12 @@ export async function parentMonthlyAttendanceStatusController(req, res) {
     if (monthlyAttendance instanceof Error) {
       return res.send(error(400, "can't get monthly attendance"));
     }
-    return res.send(success(200, { monthlyAttendance }));
+    const formattedAttendance = monthlyAttendance.map(doc => {
+      const formattedDoc = doc.toObject(); 
+      formattedDoc.date = new Date(doc.date).toISOString(); 
+      return formattedDoc;
+    });
+    return res.send(success(200, { formattedAttendance }));
   } catch (err) {
     return res.send(error(500, err.message));
   }

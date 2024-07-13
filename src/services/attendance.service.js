@@ -369,7 +369,6 @@ export async function getMonthlyAttendance({ studentId, firstDayOfMonth, lastDay
   try {
     const attendace = await attendanceModel.find({
       student: studentId,
-      teacherAttendance:"present",
       date: {
         $gte: firstDayOfMonth,
         $lte: lastDayOfMonth
