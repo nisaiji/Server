@@ -317,14 +317,10 @@ export async function parentMonthlyAttendanceStatusController(req, res) {
     }
 
     const date = new Date();
-    const firstDayStr = new Date(year, month, 1).toLocaleDateString('en-CA');
-    const lastDayStr = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
+    const firstDayOfMonth = new Date(year, month, 1).getTime();
+    const lastDayOfMonth = new Date(year, month + 1, 0).getTime();
 
-    console.log({firstDayStr,lastDayStr})
-    const firstDay = new Date(firstDayStr);
-    const lastDay = new Date(lastDayStr);
-
-    const monthlyAttendance = await getMonthlyAttendance({ studentId, firstDay , lastDay });
+    const monthlyAttendance = await getMonthlyAttendance({ studentId, firstDayOfMonth , lastDayOfMonth});
     console.log(monthlyAttendance);
     if (monthlyAttendance instanceof Error) {
       return res.send(error(400, "can't get monthly attendance"));
@@ -348,8 +344,10 @@ export async function parentMonthlyAttendanceCountController(req,res){
     }
 
     const date = new Date();
-    const firstDayStr = new Date(year, month, 1).toLocaleDateString('en-CA');
-    const lastDayStr = new Date(year, month + 1, 0).toLocaleDateString('en-CA');
+    const firstDayStr = new Date(year, month, 1);
+    const lastDayStr = new Date(year, month + 1, 0);
+
+    console.log({firstDayStr,lastDayStr});
 
     const firstDay = new Date(firstDayStr);
     const lastDay = new Date(lastDayStr);

@@ -355,14 +355,14 @@ export async function getTotalYearlyAttendanceCount({ firstDay, lastDay }) {
 //   }
 // }
 
-export async function getMonthlyAttendance({ studentId, firstDay, lastDay }) {
+export async function getMonthlyAttendance({ studentId, firstDayOfMonth, lastDayOfMonth }) {
   try {
     const attendace = await attendanceModel.find({
       student: studentId,
       teacherAttendance:"present",
       date: {
-        $gte: firstDay,
-        $lte: lastDay
+        $gte: firstDayOfMonth,
+        $lte: lastDayOfMonth
       }
     });
     return attendace;
