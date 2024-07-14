@@ -58,16 +58,14 @@ export async function createAttendance(data) {
 //   }
 // }
 
-export async function checkHolidayEvent(data) {
+export async function checkHolidayEvent({adminId,startOfDay,endOfDay}) {
   try {
-    const { currDate, adminId } = data;
-    // console.log({currDate,adminId});
+
     const checkHoliday = await holidayEventModel.findOne({
-      date: currDate,
+      date: {$gte:startOfDay,$lte:endOfDay},
       admin: adminId,
       holiday: true
     });
-    // console.log(holiday);
     return checkHoliday;
   } catch (error) {
     return error;
