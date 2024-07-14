@@ -379,3 +379,13 @@ export async function getMonthlyAttendance({ studentId, firstDayOfMonth, lastDay
     throw error;
   }
 }
+
+
+export async function findAttendanceByStudentId({studentId,startOfDay,endOfDay}){
+  try {
+    const attendance = await attendanceModel.findOne({student:studentId,date:{$gte:startOfDay,$lte:endOfDay}}).select("date day parentAttendance teacherAttendance")
+    return attendance;
+  } catch (error) {
+    throw error;    
+  }
+}

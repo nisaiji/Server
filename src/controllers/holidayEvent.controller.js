@@ -9,8 +9,11 @@ export async function createHolidayEventController(req,res){
         const adminId = req.adminId;
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const day = daysOfWeek[date.getDay()];
-        const formattedDate = date.getDate()+"-"+(date.getMonth()+1)+"-"+date.getFullYear();
-        
+
+        const currDate = date.getTime();
+        const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+        const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
+
         const holidayEvent = await checkHolidayEventExist({formattedDate,adminId});
         if(holidayEvent){
             return res.send(error(400,"holiday event already exists"));

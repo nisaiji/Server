@@ -21,9 +21,9 @@ export async function markAttendanceController(req, res) {
 
     const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
-    if (day === "Sunday") {
-      return res.send(error(400, "today is sunday"));
-    }
+    // if (day === "Sunday") {
+    //   return res.send(error(400, "today is sunday"));
+    // }
 
     const holidayEvent = await checkHolidayEvent({adminId,startOfDay,endOfDay});
     if (holidayEvent) {

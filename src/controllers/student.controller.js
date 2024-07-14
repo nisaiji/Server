@@ -1,5 +1,5 @@
 import { findAdminByID } from "../services/admin.services.js";
-import {findAttendanceById,getAttendaceByStudentId} from "../services/attendance.service.js";
+import {findAttendanceById,findAttendanceByStudentId,getAttendaceByStudentId} from "../services/attendance.service.js";
 import { findClassById } from "../services/class.sevices.js";
 import {checkParentExist,deleteParentById,findParentById,registerParent,updateInfoParent,updateParent} from "../services/parent.services.js";
 import { hashPassword } from "../services/password.service.js";
@@ -394,6 +394,10 @@ export async function searchStudentOfSectionController(req, res) {
   try {
     const name = req.params.name;
     const sectionId = req.sectionId;
+    const date = new Date();
+    const currDate = date.getTime();
+    const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+    const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
 
     if (!sectionId) {
       return res.send(error(400,"section id is required"));
@@ -411,8 +415,17 @@ export async function searchStudentOfSectionController(req, res) {
       return res.status(400).send({ error: "can't search students" });
     }
 
+    const studentWithAttendance = await Promise.all(
+      students.map(async (student) => {
+        const attendance = await findAttendanceByStudentId({ studentId: student["_id"], startOfDay, endOfDay });
+        return { ...student.toObject(), attendance };
+      })
+    );
+    
+    
 
-    return res.send(success(200,students));
+
+    return res.send(success(200,studentWithAttendance));
   } catch (err) {
     return res.status(500).send({ error: err.message });
   }
