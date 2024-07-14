@@ -17,11 +17,11 @@ export async function createHolidayEventController(req,res){
         const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
         const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
 
-        const holidayEvent = await checkHolidayEventExist({formattedDate,adminId});
+        const holidayEvent = await checkHolidayEventExist({adminId,startOfDay,endOfDay});
         if(holidayEvent){
             return res.send(error(400,"holiday event already exists"));
         }
-        const createdHolidayEvent = await createHolidayEvent({formattedDate,day,title,holiday,event,description,adminId});
+        const createdHolidayEvent = await createHolidayEvent({currDate,day,title,holiday,event,description,adminId});
         if(createdHolidayEvent instanceof Error){
             return res.send(error(400,"holiday event cann't be created"));
         }
@@ -39,7 +39,12 @@ export async function getHolidayEventController(req,res){
             return res.send(error(400,"admin doesn't exists"));
         }
         const eventList = await getEventList({adminId});
-        return res.send(success(200,eventList));
+        const updateEventList = eventList.map(doc => {
+            const formattedDoc = doc.toObject();
+            formattedDoc.date = new Date(doc.date)
+            return formattedDoc;
+          });
+        return res.send(success(200,updateEventList));
     } catch (err) {
         return res.send(error(500,err.message));       
     }

@@ -2,17 +2,9 @@ import holidayEventModel from "../models/holidayEvent.model.js";
 
 export async function createHolidayEvent(data) {
   try {
-    const {
-      formattedDate,
-      day,
-      title,
-      holiday,
-      event,
-      description,
-      adminId
-    } = data;
+    const {currDate,day,title,holiday,event,description,adminId} = data;
     const holidayEvent = await holidayEventModel.create({
-      date: formattedDate,
+      date: currDate,
       day,
       title,
       holiday,
@@ -26,11 +18,10 @@ export async function createHolidayEvent(data) {
   }
 }
 
-export async function checkHolidayEventExist(data) {
+export async function checkHolidayEventExist({adminId,startOfDay,endOfDay}) {
   try {
-    const { formattedDate, adminId } = data;
     const holidayEvent = await holidayEventModel.findOne({
-      date: formattedDate,
+      date: {$gte:startOfDay,$lte:endOfDay},
       admin: adminId
     });
     return holidayEvent;
