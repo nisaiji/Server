@@ -6,6 +6,9 @@ export async function createHolidayEventController(req,res){
     try {
         const{title,holiday,event,description} = req.body;
         const date = new Date(req.body["date"]);
+        if(date instanceof Error){
+            return res.send(error(400,"invalid date"))
+        }
         const adminId = req.adminId;
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const day = daysOfWeek[date.getDay()];

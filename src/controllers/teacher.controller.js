@@ -73,6 +73,7 @@ export async function loginClassTeacherController(req, res) {
       return res.send(error(400, "teacher is not assigned to any section"));
     }
     const Class = await findClassById(section["classId"]);
+    const teacherEmail = classTeacher["email"]?classTeacher["email"]:"abc@gmail.com"
     const accessToken = generateAccessToken({
       role: "teacher",
       teacherId: classTeacher["_id"],
@@ -81,7 +82,8 @@ export async function loginClassTeacherController(req, res) {
       sectionId: section["_id"],
       classId: Class["_id"],
       sectionName: section["name"],
-      className: Class["name"]
+      className: Class["name"],
+      email:teacherEmail
     });
     const isLoginAlready = classTeacher["isLoginAlready"];
     classTeacher["isLoginAlready"] = true;
