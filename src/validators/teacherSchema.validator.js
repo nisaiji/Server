@@ -22,6 +22,30 @@ const teacherAuthUpdateSchema = Joi.object({
   password:Joi.string().required()
 });
 
+
+const teacherAuthInfoUpdateSchema = Joi.object({
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net", "org", "io", "co"] }
+    })
+    .optional()
+    .messages({
+      "string.email": "Invalid email format.",
+      "any.required": "Email is required."
+    }),
+    
+  phone: Joi.string()
+    .pattern(/^[1-5][0-9]{9}$/)
+    .length(10)
+    .required()
+    .messages({
+      "string.pattern.base": "Invalid phone number format.",
+      "string.length": "Phone number must be 10 characters.",
+      "any.required": "Phone number is required."
+    })
+});
+
 // firstname, lastname,phone, dob,bloodGroup,gender,university,degree
 const teacherProfileUpdateSchema = Joi.object({
   firstname: Joi.string()
@@ -105,7 +129,7 @@ const teacherUpdateSchema = Joi.object({
       "any.required": "Phone number is required."
     }),
   dob: Joi.string().required().messages({
-    "any.required": "date of birth is required."
+    "any.required": "date of birth is required.",
   }),
   bloodGroup: Joi.string().required().messages({
     "any.required": "blood group is required."
@@ -192,5 +216,6 @@ export {
   markTeacherAsClassTeacherSchema,
   teacherDeleteSchema,
   teacherAuthUpdateSchema,
-  teacherProfileUpdateSchema
+  teacherProfileUpdateSchema,
+  teacherAuthInfoUpdateSchema
 };

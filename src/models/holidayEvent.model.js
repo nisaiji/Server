@@ -2,7 +2,7 @@ import mongoose from "mongoose";
  
 const holidayEventSchema =new mongoose.Schema({
     date:{
-        type:String,
+        type:Number,
         required:true,
     },
     day:{

@@ -93,6 +93,18 @@ export async function updateAuthTeacher({ id, username, password }) {
   }
 }
 
+export async function updateAuthInfoTeacher({ id, email, phone }) {
+  try {
+    const teacher = await teacherModel.findByIdAndUpdate(id, {
+      email,
+      phone
+    });
+    return teacher;
+  } catch (error) {
+    throw error;
+  }
+}
+
 //firstname, lastname,phone, dob,bloodGroup,gender,university,degree
 export async function updateProfileTeacher({
   id,

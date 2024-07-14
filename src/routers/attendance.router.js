@@ -19,6 +19,8 @@ attendanceRouter.get("/monthly-status/:sectionId",classTeacherAuthentication,att
 attendanceRouter.get("/parent-monthly-attendance-status/:studentId/:month",parentAuthentication,parentMonthlyAttendanceStatusController)
 attendanceRouter.post("/parent-monthly-attendance-count",parentAuthentication,parentMonthlyAttendanceCountController)
 attendanceRouter.post("/parent-yearly-attendance-count",parentAuthentication,parentYearlyAttendanceCountController)
+attendanceRouter.post("/teacher-monthly-attendance-count",classTeacherAuthentication,parentMonthlyAttendanceCountController)
+attendanceRouter.post("/teacher-yearly-attendance-count",classTeacherAuthentication,parentYearlyAttendanceCountController)
 
 
 export default attendanceRouter

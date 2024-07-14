@@ -6,16 +6,22 @@ export async function createHolidayEventController(req,res){
     try {
         const{title,holiday,event,description} = req.body;
         const date = new Date(req.body["date"]);
+        if(date instanceof Error){
+            return res.send(error(400,"invalid date"))
+        }
         const adminId = req.adminId;
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const day = daysOfWeek[date.getDay()];
-        const formattedDate = date.getDate()+"-"+(date.getMonth()+1)+"-"+date.getFullYear();
-        
-        const holidayEvent = await checkHolidayEventExist({formattedDate,adminId});
+
+        const currDate = date.getTime();
+        const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
+        const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
+
+        const holidayEvent = await checkHolidayEventExist({adminId,startOfDay,endOfDay});
         if(holidayEvent){
             return res.send(error(400,"holiday event already exists"));
         }
-        const createdHolidayEvent = await createHolidayEvent({formattedDate,day,title,holiday,event,description,adminId});
+        const createdHolidayEvent = await createHolidayEvent({currDate,day,title,holiday,event,description,adminId});
         if(createdHolidayEvent instanceof Error){
             return res.send(error(400,"holiday event cann't be created"));
         }
@@ -33,7 +39,12 @@ export async function getHolidayEventController(req,res){
             return res.send(error(400,"admin doesn't exists"));
         }
         const eventList = await getEventList({adminId});
-        return res.send(success(200,eventList));
+        const updateEventList = eventList.map(doc => {
+            const formattedDoc = doc.toObject();
+            formattedDoc.date = new Date(doc.date)
+            return formattedDoc;
+          });
+        return res.send(success(200,updateEventList));
     } catch (err) {
         return res.send(error(500,err.message));       
     }

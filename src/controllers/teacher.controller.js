@@ -16,7 +16,8 @@ import {
   updateClassTeacherById,
   updateTeacherById,
   updateAuthTeacher,
-  updateProfileTeacher
+  updateProfileTeacher,
+  updateAuthInfoTeacher
 } from "../services/teacher.services.js";
 import {
   checkPasswordMatch,
@@ -65,13 +66,14 @@ export async function loginClassTeacherController(req, res) {
     );
 
     if (!matchPassword) {
-      return res.send(error(404, "unauthorized password user"));
+      return res.send(error(404, "unauthorized  user"));
     }
     const section = await findSectionByClassTeacherId(classTeacher["_id"]);
     if (!section) {
       return res.send(error(400, "teacher is not assigned to any section"));
     }
     const Class = await findClassById(section["classId"]);
+    const teacherEmail = classTeacher["email"]?classTeacher["email"]:"abc@gmail.com"
     const accessToken = generateAccessToken({
       role: "teacher",
       teacherId: classTeacher["_id"],
@@ -80,7 +82,8 @@ export async function loginClassTeacherController(req, res) {
       sectionId: section["_id"],
       classId: Class["_id"],
       sectionName: section["name"],
-      className: Class["name"]
+      className: Class["name"],
+      email:teacherEmail
     });
     const isLoginAlready = classTeacher["isLoginAlready"];
     classTeacher["isLoginAlready"] = true;
@@ -106,6 +109,28 @@ export async function authUpdateTeacherController(req, res) {
       id: teacherId,
       username,
       password: hashedPassword
+    });
+    if (updatedTeacher instanceof Error) {
+      return res.send(error(400, "details cann't be updated"));
+    }
+    return res.send(success(200, "teacher updated successfully"));
+  } catch (err) {
+    return re.send(error(500, err.message));
+  }
+}
+
+export async function authInfoUpdateTeacherController(req, res) {
+  try {
+    const { email, phone } = req.body;
+    const teacherId = req.teacherId;
+    const teacher = await findTeacherById(teacherId);
+    if (!teacher) {
+      return res.send(error(400, "teacher doesn't exists"));
+    }
+    const updatedTeacher = await updateAuthInfoTeacher({
+      id: teacherId,
+      email,
+      phone
     });
     if (updatedTeacher instanceof Error) {
       return res.send(error(400, "details cann't be updated"));
@@ -293,7 +318,6 @@ export async function updateTeacherController(req, res) {
     return res.send(error(500, err.message));
   }
 }
-
 
 export async function changePasswordTeacherController(req,res){
   try {

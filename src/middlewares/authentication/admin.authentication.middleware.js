@@ -17,7 +17,6 @@ export async function adminAuthentication(req, res, next) {
       return res.send(error(404, "admin doesn't exists"));
     }
     req.adminId = decoded.adminId;
-    console.log("authentication called");
     next();
   } catch (err) {
     res.send(error(500, err.message));

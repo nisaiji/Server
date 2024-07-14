@@ -7,7 +7,8 @@ import {
   teacherUpdationSchema,
   teacherUpdateSchema,
   teacherAuthUpdateSchema,
-  teacherProfileUpdateSchema
+  teacherProfileUpdateSchema,
+  teacherAuthInfoUpdateSchema
 } from "../../validators/teacherSchema.validator.js";
 
 export async function registerTeacherValidation(req, res, next) {
@@ -34,6 +35,24 @@ export async function authUpdateTeacherValidation(req, res, next) {
     const { error: schemaError } = teacherAuthUpdateSchema.validate({
       username,
       password
+    });
+
+    if (schemaError) {
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next();
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+
+export async function authInfoUpdateTeacherValidation(req, res, next) {
+  try {
+    const { email, phone } = req.body;
+    const { error: schemaError } = teacherAuthInfoUpdateSchema.validate({
+      email,
+      phone
     });
 
     if (schemaError) {

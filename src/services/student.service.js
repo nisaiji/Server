@@ -116,7 +116,7 @@ export async function getStudentList({ limit, page, sectionId }) {
 
 export async function getStudentListBySectionId({ sectionId }) {
   try {
-    const students = await studentModel.find({ section: sectionId });
+    const students = await studentModel.find({ section: sectionId }).populate("parent");
     return students;
   } catch (error) {
     return error;
@@ -148,26 +148,24 @@ export async function getStudentCount({ sectionId}) {
   }
 }
 
-export async function getPresentStudentCount({ sectionId, currDate }) {
+export async function getPresentStudentCount({ sectionId, startOfDay,endOfDay}) {
   try {
-    // console.log({sectionId,currDate})
     const presentCount = await attendanceModel.countDocuments({
-      $and: [{ section: sectionId }, { date: currDate }, { teacherAttendance: "present" }]
+      $and: [{ section: sectionId }, { date: {$gte:startOfDay,$lte:endOfDay} }, { teacherAttendance: "present" }]
     });
-    // console.log(presentCount)
+    console.log(presentCount)
     return presentCount;
   } catch (error) {
     throw error;
   }
 }
 
-export async function getAbsentStudentCount({ sectionId, currDate }) {
+export async function getAbsentStudentCount({ sectionId, startOfDay,endOfDay}) {
   try {
-    // console.log({sectionId,currDate})
     const absentCount = await attendanceModel.countDocuments({
-      $and: [{ section: sectionId }, { date: currDate }, { teacherAttendance: "absent" }]
+      $and: [{ section: sectionId }, { date: {$gte:startOfDay,$lte:endOfDay} }, { teacherAttendance: "absent" }]
     });
-    // console.log(absentCount)
+    console.log(absentCount)
     return absentCount;
   } catch (error) {
     throw error;
