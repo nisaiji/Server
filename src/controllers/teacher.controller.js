@@ -17,7 +17,8 @@ import {
   updateTeacherById,
   updateAuthTeacher,
   updateProfileTeacher,
-  updateAuthInfoTeacher
+  updateAuthInfoTeacher,
+  checkTeacherIsClassTeacher
 } from "../services/teacher.services.js";
 import {
   checkPasswordMatch,
@@ -152,14 +153,18 @@ export async function profileUpdateTeacherController(req, res) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
     } = req.body;
+    let {address} = req.body;
     const teacherId = req.teacherId;
     const teacher = await findTeacherById(teacherId);
     if (!teacher) {
       return res.send(error(400, "teacher doesn't exists"));
     }
     // const hashedPassword = await hashPassword(password);
+    if(!address){
+      address = teacher["address"]?teacher["address"]:"";
+    }
     const updatedTeacher = await updateProfileTeacher({
       id: teacherId,
       firstname,
@@ -169,7 +174,8 @@ export async function profileUpdateTeacherController(req, res) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
+      address
     });
     if (updateAuthTeacher instanceof Error) {
       return res.send(error(400, "details cann't be updated"));
@@ -234,7 +240,10 @@ export async function markTeacherAsClassTeacherController(req, res) {
 export async function deleteTeacherController(req, res) {
   try {
     const teacherId = req.params.teacherId;
-    // console.log({teacherId})
+    const isClassTeacher = await checkTeacherIsClassTeacher({teacherId});
+    if(isClassTeacher){
+      return res.send(error(400,"Teacher is assigned to section. Can't delete teacher"));
+    }
     const teacher = await deleteTeacher(teacherId);
     if (!teacher) {
       return res.send(error(400, "can not find teacher"));

@@ -1,17 +1,17 @@
 import { findAdminByID } from "../services/admin.services.js";
 import {findAttendanceById,findAttendanceByStudentId,getAttendaceByStudentId} from "../services/attendance.service.js";
 import { findClassById } from "../services/class.sevices.js";
-import {checkParentExist,deleteParentById,findParentById,registerParent,updateInfoParent,updateParent} from "../services/parent.services.js";
+import {checkParentExist,deleteParentById,findParentById,registerParent,updateInfoParent,updateParent, updateParentInfo} from "../services/parent.services.js";
 import { hashPassword } from "../services/password.service.js";
 import {checkStudentExistInSection,findSectionByClassTeacherId,findSectionById} from "../services/section.services.js";
 import {adminRegisterStudent,adminUpdateStudent,checkStudentExist,deleteStudentById,findStudentById,findStudentSiblings,getAllStudentCount,
-        getAllStudentList,getStudentCount,getStudentList,getStudentListBySectionId,registerStudent,searchStudentByName,updateStudent,updateStudentByParent} from "../services/student.service.js";
+        getAllStudentList,getStudentCount,getStudentList,getStudentListBySectionId,registerStudent,searchStudentByName,updateStudent,updateStudentByParent, updateStudentInfo} from "../services/student.service.js";
 import {findClassTeacherById,findTeacherById} from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
   try {
-    const {firstname,lastname,gender,parentName,phone,sectionId,classId} = req.body;
+    const {rollNumber,firstname,lastname,gender,parentName,phone,sectionId,classId} = req.body;
     const teacherId = req.teacherId;
     const adminId = req.adminId;
     const teacher = await findTeacherById(teacherId);
@@ -51,6 +51,7 @@ export async function registerStudentController(req, res) {
       return res.send(error(400, "student already exists"));
     }
     const student = await registerStudent({
+      rollNumber,
       firstname,
       lastname,
       gender,
@@ -71,6 +72,7 @@ export async function registerStudentController(req, res) {
 export async function adminRegisterStudentController(req, res) {
   try {
     const {
+      rollNumber,
       firstname,
       lastname,
       gender,
@@ -119,6 +121,7 @@ export async function adminRegisterStudentController(req, res) {
       return res.send(error(400, "student already exists"));
     }
     const student = await registerStudent({
+      rollNumber,
       firstname,
       lastname,
       gender,
@@ -385,6 +388,39 @@ export async function parentUpdateStudentController(req, res) {
     }
 
     return res.send(success(200, "student updated successfully"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function studentParentUpdateStudentController(req, res) {
+  try {
+    const { rollNumber,firstname,lastname,gender,bloodGroup,dob,address,
+      parentFullname,parentGender,parentAge,parentEmail,parentPhone,
+      parentQualification,parentOccupation,parentAddress } = req.body;
+
+    const studentId = req.params.studentId;
+    const student = await findStudentById(studentId);
+    if (!student) {
+      return res.send(error(400, "Student doesn't exists"));
+    }
+    
+    const parent = await findParentById(student["parent"]);
+    if(!parent){
+      return res.send(error(400,"Parent doesn't found"));
+    }
+
+    const updatedStudent = await updateStudentInfo({id:student["_id"],rollNumber,firstname,lastname,gender,bloodGroup,dob,address});
+    if (updatedStudent instanceof Error) {
+      return res.send(error(400, "Student can't updated"));
+    }
+
+    const updatedParent = await updateParentInfo({id:student["parent"],fullname:parentFullname,gender:parentGender,age:parentAge,email:parentEmail,phone:parentPhone,qualification:parentQualification,occupation:parentOccupation,address:parentAddress});
+    if (updatedParent instanceof Error) {
+      return res.send(error(400, "Teacher can't updated"));
+    }
+
+    return res.send(success(200, "Student and Parent updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }

@@ -9,6 +9,4 @@ holidayEventRouter.post("/register",adminAuthentication,createHolidayEventValida
 holidayEventRouter.get("/",adminAuthentication,getHolidayEventController);
 holidayEventRouter.delete("/:eventId",adminAuthentication,deleteHolidayEventController);
 
-
-
 export default holidayEventRouter;

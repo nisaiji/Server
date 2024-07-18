@@ -205,14 +205,15 @@ export async function markAttendanceByTeacher({
 }
 export async function getMisMatchAttendance({ sectionId, startOfDay,endOfDay }) {
   try {
-    const attendance = await attendanceModel
-      .find({
-        section: sectionId,
-        date: {$gte: startOfDay,$lte: endOfDay},
-        teacherAttendance: "absent", 
-        parentAttendance: "present" 
-      })
-      .populate("student");
+    const attendance = await attendanceModel.find({
+      section: sectionId,
+      date: { $gte: startOfDay, $lte: endOfDay },
+      $or: [
+        { teacherAttendance: "absent", parentAttendance: "present" },
+        { teacherAttendance: "present", parentAttendance: "absent" }
+      ]
+    }).populate("student");
+    
     return attendance;
   } catch (error) {
     throw error;

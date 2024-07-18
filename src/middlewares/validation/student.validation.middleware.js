@@ -5,6 +5,7 @@ import {
   parentUpdateStudentSchema,
   registerStudentSchema,
   studentAddToSectionSchema,
+  studentParentUpdateStudentSchema,
   updateStudentSchema,
 } from "../../validators/studentSchema.validator.js";
 
@@ -43,6 +44,7 @@ import {
 export async function registerStudentValidation(req, res, next) {
   try {
     const {
+      rollNumber,
       firstname,
       lastname,
       gender,
@@ -52,6 +54,7 @@ export async function registerStudentValidation(req, res, next) {
       classId,
     } = req.body;
     const { error: schemaError } = registerStudentSchema.validate({
+      rollNumber,
       firstname,
       lastname,
       gender,
@@ -179,6 +182,21 @@ export async function parentUpdateStudentValidation(req,res,next){
       dob,
       address
     });
+  
+    if (schemaError){
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next();
+    
+  } catch (err) {
+    return res.send(error(500,err.message));
+  }
+}
+
+export async function studentParentUpdateStudentValidation(req,res,next){
+  try {
+    const {rollNumber,firstname,lastname,gender,bloodGroup,dob,address,parentFullname,parentGender,parentAge,parentEmail,parentPhone,parentQualification,parentOccupation,parentAddress} = req.body;
+    const { error: schemaError } = studentParentUpdateStudentSchema.validate({rollNumber,firstname,lastname,gender,bloodGroup,dob,address,parentFullname,parentGender,parentAge,parentEmail,parentPhone,parentQualification,parentOccupation,parentAddress});
   
     if (schemaError){
       return res.send(error(400, schemaError.details[0].message));

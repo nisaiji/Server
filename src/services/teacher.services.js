@@ -115,7 +115,8 @@ export async function updateProfileTeacher({
   bloodGroup,
   gender,
   university,
-  degree
+  degree,
+  address
 }) {
   try {
     const teacher = await teacherModel.findByIdAndUpdate(id, {
@@ -126,7 +127,8 @@ export async function updateProfileTeacher({
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
+      address
     });
     return teacher;
   } catch (error) {
@@ -177,6 +179,15 @@ export async function deleteTeacher(id) {
       { classTeacher: id },
       { $unset: { classTeacher: 1 } }
     );
+    return teacher;
+  } catch (error) {
+    return error;
+  }
+}
+
+export async function checkTeacherIsClassTeacher({teacherId}) {
+  try {
+    const teacher = await sectionModel.findOne({classTeacher:teacherId});
     return teacher;
   } catch (error) {
     return error;

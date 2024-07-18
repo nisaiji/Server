@@ -78,6 +78,7 @@ const teacherProfileUpdateSchema = Joi.object({
   gender:Joi.string().required().messages({"any.required":"gender is required."}),
   university:Joi.string().required().messages({"any.required":"university is required."}),
   degree:Joi.string().required().messages({"any.required":"degree is required."}),
+  address:Joi.string()
 });
 
 

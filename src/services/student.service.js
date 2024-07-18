@@ -13,6 +13,7 @@ export async function checkStudentExist({ firstname, parentId }) {
 }
 
 export async function registerStudent({
+  rollNumber,
   firstname,
   lastname,
   gender,
@@ -24,6 +25,7 @@ export async function registerStudent({
   try {
     console.log({ classId });
     const student = await studentModel.create({
+      rollNumber,
       firstname,
       lastname,
       gender,
@@ -224,6 +226,14 @@ export async function updateStudent({studentId,firstname,lastname,gender}){
   }
 }
 
+export async function updateStudentInfo({id,rollNumber,firstname,lastname,gender,bloodGroup,dob,address}){
+  try {
+    const student = await studentModel.findByIdAndUpdate(id,{rollNumber,firstname,lastname,gender,bloodGroup,dob,address});    
+    return student;
+  } catch (error) {
+    throw error;    
+  }
+}
 
 export async function updateStudentByParent({studentId,bloodGroup,dob,address}){
   try {
