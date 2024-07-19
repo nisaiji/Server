@@ -116,7 +116,6 @@ export async function updateProfileTeacher({
   gender,
   university,
   degree,
-  address
 }) {
   try {
     const teacher = await teacherModel.findByIdAndUpdate(id, {
@@ -128,7 +127,6 @@ export async function updateProfileTeacher({
       gender,
       university,
       degree,
-      address
     });
     return teacher;
   } catch (error) {
@@ -153,7 +151,8 @@ export async function updateClassTeacherById({
   bloodGroup,
   gender,
   university,
-  degree
+  degree,
+  address
 }) {
   try {
     const teacher = await teacherModel.findByIdAndUpdate(id, {
@@ -164,7 +163,8 @@ export async function updateClassTeacherById({
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
+      address
     });
     return teacher;
   } catch (error) {

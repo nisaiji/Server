@@ -155,16 +155,13 @@ export async function profileUpdateTeacherController(req, res) {
       university,
       degree,
     } = req.body;
-    let {address} = req.body;
     const teacherId = req.teacherId;
     const teacher = await findTeacherById(teacherId);
     if (!teacher) {
       return res.send(error(400, "teacher doesn't exists"));
     }
     // const hashedPassword = await hashPassword(password);
-    if(!address){
-      address = teacher["address"]?teacher["address"]:"";
-    }
+
     const updatedTeacher = await updateProfileTeacher({
       id: teacherId,
       firstname,
@@ -175,7 +172,6 @@ export async function profileUpdateTeacherController(req, res) {
       gender,
       university,
       degree,
-      address
     });
     if (updateAuthTeacher instanceof Error) {
       return res.send(error(400, "details cann't be updated"));
@@ -199,9 +195,13 @@ export async function updateClassTeacherController(req, res) {
       university,
       degree
     } = req.body;
+    let {address} = req.body;
     const classTeacher = await findClassTeacherById(teacherId);
     if (!classTeacher) {
       return res.send(error(400, "class teacher doesn't exists"));
+    }
+    if(!address){
+      address = classTeacher["address"]?classTeacher["address"]:"";
     }
     const updatedTeacher = await updateClassTeacherById({
       id: teacherId,
@@ -212,7 +212,8 @@ export async function updateClassTeacherController(req, res) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
+      address
     });
     return res.send(success(200, "class teacher updated successfully"));
   } catch (err) {
