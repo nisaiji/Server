@@ -8,6 +8,7 @@ export async function markAttendanceController(req, res) {
     const sectionId = req.params.sectionId;
     const classTeacherId = req.teacherId;
     const adminId = req.adminId;
+    const date = new Date();
     const currDate = date.getTime();
     const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
     const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
