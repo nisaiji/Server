@@ -284,3 +284,15 @@ export async function getStudentMonthlyAttendanceCount({studentId , regex}){
   }
 }
 
+export async function searchStudentByNameForAdmin({ name, adminId }) {
+  try {
+    const regex = new RegExp(name, "i");
+    const students = await studentModel
+      .find({ firstname: { $regex: regex }, admin: adminId })
+      .populate("parent");
+    return students;
+  } catch (error) {
+    throw error;
+  }
+}
+

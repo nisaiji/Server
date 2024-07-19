@@ -5,7 +5,7 @@ import {checkParentExist,deleteParentById,findParentById,registerParent,updateIn
 import { hashPassword } from "../services/password.service.js";
 import {checkStudentExistInSection,findSectionByClassTeacherId,findSectionById} from "../services/section.services.js";
 import {adminRegisterStudent,adminUpdateStudent,checkStudentExist,deleteStudentById,findStudentById,findStudentSiblings,getAllStudentCount,
-        getAllStudentList,getStudentCount,getStudentList,getStudentListBySectionId,registerStudent,searchStudentByName,updateStudent,updateStudentByParent, updateStudentInfo} from "../services/student.service.js";
+        getAllStudentList,getStudentCount,getStudentList,getStudentListBySectionId,registerStudent,searchStudentByName,searchStudentByNameForAdmin,updateStudent,updateStudentByParent, updateStudentInfo} from "../services/student.service.js";
 import {findClassTeacherById,findTeacherById} from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -465,6 +465,20 @@ export async function searchStudentOfSectionController(req, res) {
   } catch (err) {
     return res.status(500).send({ error: err.message });
   }
+}
+
+export async function searchStudentForAdminController(req, res) {
+  try {
+    const name = req.params.name;
+    const adminId = req.adminId;
+    const students = await searchStudentByNameForAdmin({ name,adminId });
+    if (students instanceof Error) {
+      return res.status(400).send({ error: "can't search students" });
+    }
+    return res.send(success(200, students));
+  } catch (err) {
+    return res.status(500).send({ error: err.message });
+  }
 }
 
 export async function getMonthlyAttendanceCountController(req,res){

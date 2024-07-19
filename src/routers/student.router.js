@@ -1,5 +1,5 @@
 import express from "express";
-import {addToSectionStudentController,adminRegisterStudentController,adminUpdateStudentController,deleteStudentController,getAllStudentListForAdminController,getAllStudentOfSectionController,getAllStudentOfSectionForAdminController,getMonthlyAttendanceCountController,getStudentListOfSectionController,parentUpdateStudentController,registerStudentController,searchStudentOfSectionController,studentParentUpdateStudentController,updateStudentController} from "../controllers/student.controller.js";
+import {addToSectionStudentController,adminRegisterStudentController,adminUpdateStudentController,deleteStudentController,getAllStudentListForAdminController,getAllStudentOfSectionController,getAllStudentOfSectionForAdminController,getMonthlyAttendanceCountController,getStudentListOfSectionController,parentUpdateStudentController,registerStudentController,searchStudentForAdminController,searchStudentOfSectionController,studentParentUpdateStudentController,updateStudentController} from "../controllers/student.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
@@ -18,6 +18,7 @@ studentRouter.get(" /section-students/:sectionId",classTeacherAuthentication,get
 studentRouter.get("/admin-section-students/:sectionId",adminAuthentication,getAllStudentOfSectionForAdminController);
 studentRouter.get("/all-students/:pageNo",adminAuthentication,getAllStudentListForAdminController);
 studentRouter.get("/search/:name",classTeacherAuthentication,searchStudentOfSectionController);
+studentRouter.get("/admin-search/:name",adminAuthentication,searchStudentForAdminController);
 studentRouter.put("/update/:studentId",classTeacherAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/admin-update/:studentId",adminAuthentication,updateStudentValidation, updateStudentController);
 studentRouter.put("/parent-update/:studentId",parentAuthentication,parentUpdateStudentValidation,parentUpdateStudentController);
