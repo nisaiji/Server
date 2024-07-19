@@ -152,7 +152,8 @@ export async function updateClassTeacherById({
   gender,
   university,
   degree,
-  address
+  address,
+  email
 }) {
   try {
     const teacher = await teacherModel.findByIdAndUpdate(id, {
@@ -164,7 +165,8 @@ export async function updateClassTeacherById({
       gender,
       university,
       degree,
-      address
+      address,
+      email
     });
     return teacher;
   } catch (error) {

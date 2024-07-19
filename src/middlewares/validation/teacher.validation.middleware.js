@@ -122,7 +122,8 @@ export async function updateClassTeacherValidation(req, res, next) {
       gender,
       university,
       degree,
-      address
+      address,
+      email
     } = req.body;
     const { error: schemaError } = teacherUpdateSchema.validate({
       teacherId,
@@ -134,7 +135,8 @@ export async function updateClassTeacherValidation(req, res, next) {
       gender,
       university,
       degree,
-      address
+      address,
+      email
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));

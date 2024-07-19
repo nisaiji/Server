@@ -193,7 +193,8 @@ export async function updateClassTeacherController(req, res) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
+      email
     } = req.body;
     let {address} = req.body;
     const classTeacher = await findClassTeacherById(teacherId);
@@ -213,7 +214,8 @@ export async function updateClassTeacherController(req, res) {
       gender,
       university,
       degree,
-      address
+      address,
+      email
     });
     return res.send(success(200, "class teacher updated successfully"));
   } catch (err) {
