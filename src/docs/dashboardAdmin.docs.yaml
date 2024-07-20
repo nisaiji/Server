@@ -92,3 +92,57 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
+
+  /admin-dashboard/weekly-attendance/{sectionId}: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+      - "Admin Dashboard"
+      summary: "To get weekly attendance status"
+      description: "This API will get weekly attendance data to admin."
+      produces:
+      - "application/json"
+      parameters:
+        - in: path
+          name: sectionId
+          required: true
+          description: ID of the section
+          schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /admin-dashboard/monthly-attendance/{sectionId}: 
+    get:
+      security:
+        - Authorization: []
+      tags:
+      - "Admin Dashboard"
+      summary: "To get monthly attendance data."
+      description: "This API will get teacher count to admin."
+      produces:
+      - "application/json"
+      parameters:
+        - in: path
+          name: sectionId
+          required: true
+          description: ID of the section
+          schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
