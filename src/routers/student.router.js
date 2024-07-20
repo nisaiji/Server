@@ -14,7 +14,7 @@ studentRouter.post("/register",classTeacherAuthentication,registerStudentValidat
 studentRouter.post("/admin-register",adminAuthentication,registerStudentValidation,adminRegisterStudentController);
 studentRouter.delete("/delete/:studentId", classTeacherAuthentication, deleteStudentValidation, deleteStudentController);
 studentRouter.delete("/admin-delete/:studentId",adminAuthentication, deleteStudentValidation, deleteStudentController);
-studentRouter.get(" /section-students/:sectionId",classTeacherAuthentication,getAllStudentOfSectionController);
+studentRouter.get("/section-students/:sectionId",classTeacherAuthentication,getAllStudentOfSectionController);
 studentRouter.get("/admin-section-students/:sectionId",adminAuthentication,getAllStudentOfSectionForAdminController);
 studentRouter.get("/all-students/:pageNo",adminAuthentication,getAllStudentListForAdminController);
 studentRouter.get("/search/:name",classTeacherAuthentication,searchStudentOfSectionController);
