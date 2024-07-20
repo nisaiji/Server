@@ -24,7 +24,7 @@ studentRouter.put("/admin-update/:studentId",adminAuthentication,updateStudentVa
 studentRouter.put("/parent-update/:studentId",parentAuthentication,parentUpdateStudentValidation,parentUpdateStudentController);
 studentRouter.put("/student-parent-update/:studentId",adminAuthentication,studentParentUpdateStudentValidation,studentParentUpdateStudentController);
 studentRouter.get("/monthly-count/:studentId",parentAuthentication,getMonthlyAttendanceCountController);
-// studentRouter.put("/upload-photo",);
+studentRouter.put("/upload-photo",);
 
 // studentRouter.put("/admin-update-student/:studentId", adminAuthentication,adminRegisterStudentValidation,adminUpdateStudentController);
 // studentRouter.get("/student-list/:sectionId/:pageNo", classTeacherAuthentication, getStudentListOfSectionController);

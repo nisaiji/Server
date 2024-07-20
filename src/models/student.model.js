@@ -22,6 +22,9 @@ const studentSchema = mongoose.Schema({
   dob:{
     type: String,
   },
+  photo:{
+    type: String,
+  },
   address:{
     type: String
   },
