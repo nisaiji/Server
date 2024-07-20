@@ -296,3 +296,11 @@ export async function searchStudentByNameForAdmin({ name, adminId }) {
   }
 }
 
+export async function uploadStudentPhoto({studentId,photo}){
+  try {
+    const student = studentModel.findByIdAndUpdate(studentId,{photo});
+    return student;
+  } catch (error) {
+    throw error;    
+  }
+}

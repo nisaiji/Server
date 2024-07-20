@@ -5,7 +5,7 @@ import {checkParentExist,deleteParentById,findParentById,registerParent,updateIn
 import { hashPassword } from "../services/password.service.js";
 import {checkStudentExistInSection,findSectionByClassTeacherId,findSectionById} from "../services/section.services.js";
 import {adminRegisterStudent,adminUpdateStudent,checkStudentExist,deleteStudentById,findStudentById,findStudentSiblings,getAllStudentCount,
-        getAllStudentList,getStudentCount,getStudentList,getStudentListBySectionId,registerStudent,searchStudentByName,searchStudentByNameForAdmin,updateStudent,updateStudentByParent, updateStudentInfo} from "../services/student.service.js";
+        getAllStudentList,getStudentCount,getStudentList,getStudentListBySectionId,registerStudent,searchStudentByName,searchStudentByNameForAdmin,updateStudent,updateStudentByParent, updateStudentInfo, uploadStudentPhoto} from "../services/student.service.js";
 import {findClassTeacherById,findTeacherById} from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -488,5 +488,34 @@ export async function getMonthlyAttendanceCountController(req,res){
     
   } catch (err) {
     return res.send(error(500,err.message));
+  }
+}
+
+export async function uploadStudentPhotoController(req,res){
+  try {
+    const{photo} = req.body;
+    const parentId = req.parentId;
+    const studentId = req.params.studentId;
+
+    if(!photo){
+      return res.send(error(400,"Photo is required"));
+    }
+
+    const student = await findStudentById(studentId);
+    if(!student){
+      return res.send(error(400,"Student not found"));
+    }
+
+    if(student["parent"].toString()!==parentId){
+      return res.send("Unauthorized user for photo upload");
+    }
+
+    const updatedStudent = await uploadStudentPhoto({studentId,photo});
+    if(updatedStudent instanceof Error){
+      return res.send(error(400,"Photo not uploaded."));
+    }
+    return res.send(success(200,"Photo uploaded successfully"));
+  } catch (err) {
+    res.send(error(500,err.message));    
   }
 }
