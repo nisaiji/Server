@@ -283,6 +283,10 @@ export async function getTotalMonthlyAttendanceCount({ firstDayOfMonth, lastDayO
       }
     ]);
 
+    if(totalCount.length==0){
+      return 0;
+    }
+
     return totalCount[0]["countValue"];
   } catch (error) {
     throw error;
@@ -334,7 +338,9 @@ export async function getTotalYearlyAttendanceCount({ firstDayOfMonth, lastDayOf
         $count: "countValue"
       }
     ]);
-
+    if(totalCount.length==0){
+      return 0;
+    }
     return totalCount[0]["countValue"];
   } catch (error) {
     throw error;

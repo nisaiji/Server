@@ -409,7 +409,6 @@ export async function parentYearlyAttendanceCountController(req,res){
     const presentCount = await getYearlyPresentCount({studentId,firstDayOfMonth,lastDayOfMonth});
     const totalCount = await getTotalYearlyAttendanceCount({studentId,firstDayOfMonth,lastDayOfMonth});
     
-    // console.log({yearlyAttendanceCount,totalYearlyAttendanceCount})
     return res.send(success(200,{presentCount,totalCount}));
   } catch (err) {
     return res.send(error(500,err.message));  
