@@ -150,10 +150,10 @@ export async function checkParentAttendaceMarkedController(req, res) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
     const checkAttendanceMarked = await checkAttendanceAlreadyMarkedByParent({studentId,startOfDay,endOfDay});
-    if (checkAttendanceMarked) {
-      return res.send(error(400, "attendance already marked"));
-    }
-    return res.send(success(200, "attendance haven't marked today"));
+    const parentAttendance = checkAttendanceMarked?checkAttendanceMarked["parentAttendance"]:null;
+    const teacherAttendance = checkAttendanceMarked?checkAttendanceMarked["teacherAttendance"]:null;
+
+    return res.send(success(200, {parentAttendance,teacherAttendance}));
   } catch (err) {
     return res.send(error(500, err.message));
   }

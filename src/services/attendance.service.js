@@ -85,13 +85,9 @@ export async function checkAttendanceAlreadyMarked({ sectionId, startOfDay,endOf
 export async function checkAttendanceAlreadyMarkedByParent({studentId,startOfDay,endOfDay}) {
   try {
     const attendanceMarked = await attendanceModel.findOne({
-      $and: [
-        { student: studentId },
-        { date: {$gte:startOfDay,$lte:endOfDay} },
-        { $or:[{parentAttendance: "present"},{parentAttendance: "absent"}] }
-      ]
+        student: studentId ,
+        date: {$gte:startOfDay,$lte:endOfDay} 
     });
-    console.log({ attendanceMarked });
     return attendanceMarked;
   } catch (error) {
     throw error;
