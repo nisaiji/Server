@@ -287,6 +287,64 @@ paths:
         500:
           description: "Internal Server Error"
 
+  /student/student-parent-update/{studentId}: 
+    put:
+      security:
+        - Authorization: []
+      tags:
+      - "Student"
+      summary: "To update student and parent details"
+      description: "This API will allow admin to update student and parent info."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of student.
+         schema:
+            type: string
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 rollNumber:
+                   type: string
+                 firstname:
+                   type: string
+                 lastname:
+                   type: string
+                 gender:
+                   type: string
+                 bloodGroup:
+                   type: string
+                 dob:
+                   type: string
+                 address:
+                   type: string
+                 parentFullname:
+                   type: string
+                 parentGender:
+                   type: string
+                 parentAge:
+                   type: number
+                 parentEmail:
+                   type: string
+                 parentPhone:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
   /student/admin-update/{studentId}: 
     put:
       security:
@@ -510,3 +568,38 @@ paths:
         500:
           description: "Internal Server Error"
 
+  /student/photo-upload/{studentId}: 
+    put:
+      security:
+        - Authorization: []    
+      tags:
+      - "Student"
+      summary: "upload photo of student"
+      description: "This API will allow parent to upload photo of student."
+      produces:
+      - "application/json"
+      parameters:
+       - in: path
+         name: studentId
+         required: true
+         description: ID of student.
+         schema:
+            type: string
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 photo:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"

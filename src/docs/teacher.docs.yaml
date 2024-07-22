@@ -201,6 +201,8 @@ paths:
                   type: string
                 phone:
                   type: string
+                address:
+                  type: string
       responses:
         200:
           description: "teacher registered successfully"

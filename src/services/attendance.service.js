@@ -85,13 +85,9 @@ export async function checkAttendanceAlreadyMarked({ sectionId, startOfDay,endOf
 export async function checkAttendanceAlreadyMarkedByParent({studentId,startOfDay,endOfDay}) {
   try {
     const attendanceMarked = await attendanceModel.findOne({
-      $and: [
-        { student: studentId },
-        { date: {$gte:startOfDay,$lte:endOfDay} },
-        { $or:[{parentAttendance: "present"},{parentAttendance: "absent"}] }
-      ]
+        student: studentId ,
+        date: {$gte:startOfDay,$lte:endOfDay} 
     });
-    console.log({ attendanceMarked });
     return attendanceMarked;
   } catch (error) {
     throw error;
@@ -205,14 +201,15 @@ export async function markAttendanceByTeacher({
 }
 export async function getMisMatchAttendance({ sectionId, startOfDay,endOfDay }) {
   try {
-    const attendance = await attendanceModel
-      .find({
-        section: sectionId,
-        date: {$gte: startOfDay,$lte: endOfDay},
-        teacherAttendance: "absent", 
-        parentAttendance: "present" 
-      })
-      .populate("student");
+    const attendance = await attendanceModel.find({
+      section: sectionId,
+      date: { $gte: startOfDay, $lte: endOfDay },
+      $or: [
+        { teacherAttendance: "absent", parentAttendance: "present" },
+        { teacherAttendance: "present", parentAttendance: "absent" }
+      ]
+    }).populate("student");
+    
     return attendance;
   } catch (error) {
     throw error;
@@ -282,6 +279,10 @@ export async function getTotalMonthlyAttendanceCount({ firstDayOfMonth, lastDayO
       }
     ]);
 
+    if(totalCount.length==0){
+      return 0;
+    }
+
     return totalCount[0]["countValue"];
   } catch (error) {
     throw error;
@@ -333,7 +334,9 @@ export async function getTotalYearlyAttendanceCount({ firstDayOfMonth, lastDayOf
         $count: "countValue"
       }
     ]);
-
+    if(totalCount.length==0){
+      return 0;
+    }
     return totalCount[0]["countValue"];
   } catch (error) {
     throw error;

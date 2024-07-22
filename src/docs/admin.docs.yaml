@@ -68,3 +68,24 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
+
+  /admin/profile: 
+    get:
+      security: 
+        - Authorization: []
+      tags:
+      - "Admin"
+      summary: "to get admin profile"
+      description: "This API will get  admin profile."
+      operationId: "adminProfile"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"

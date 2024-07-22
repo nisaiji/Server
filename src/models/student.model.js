@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 
 const studentSchema = mongoose.Schema({
+  rollNumber:{
+    type:String
+  },
   firstname: {
     type: String,
     required: true
@@ -17,6 +20,9 @@ const studentSchema = mongoose.Schema({
     type:String,
   },
   dob:{
+    type: String,
+  },
+  photo:{
     type: String,
   },
   address:{

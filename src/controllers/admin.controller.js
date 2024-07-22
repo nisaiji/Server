@@ -1,7 +1,7 @@
 import {generateAccessToken,generateRefreshToken} from "../services/JWTToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";
-import {checkAdminExist,createAdmin,findAdminByAdminName,findAdminByEmail} from "../services/admin.services.js";
+import {checkAdminExist,createAdmin,findAdminByAdminName,findAdminByEmail, getAdminById} from "../services/admin.services.js";
 import { hashPassword } from "../services/password.service.js";
 
 export async function registerAdminController(req, res) {
@@ -48,5 +48,15 @@ export async function loginAdminController(req, res) {
     return res.send(success(200, { accessToken,username:admin.adminName}));
   } catch (err) {
     return res.send(error(500, err.message));
+  }
+}
+
+export async function getAdminProfileController(req,res){
+  try {
+    const adminId = req.adminId;
+    const admin = await getAdminById({adminId});    
+    return res.send(success(200,admin));
+  } catch (err) {
+    return res.send(error(500,err.message));
   }
 }

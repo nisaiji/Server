@@ -8,6 +8,7 @@ export async function markAttendanceController(req, res) {
     const sectionId = req.params.sectionId;
     const classTeacherId = req.teacherId;
     const adminId = req.adminId;
+    const date = new Date();
     const currDate = date.getTime();
     const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
     const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
@@ -149,10 +150,10 @@ export async function checkParentAttendaceMarkedController(req, res) {
       return res.send(error(400, "today is scheduled as holiday!"));
     }
     const checkAttendanceMarked = await checkAttendanceAlreadyMarkedByParent({studentId,startOfDay,endOfDay});
-    if (checkAttendanceMarked) {
-      return res.send(error(400, "attendance already marked"));
-    }
-    return res.send(success(200, "attendance haven't marked today"));
+    const parentAttendance = checkAttendanceMarked?checkAttendanceMarked["parentAttendance"]:null;
+    const teacherAttendance = checkAttendanceMarked?checkAttendanceMarked["teacherAttendance"]:null;
+
+    return res.send(success(200, {parentAttendance,teacherAttendance}));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -408,7 +409,6 @@ export async function parentYearlyAttendanceCountController(req,res){
     const presentCount = await getYearlyPresentCount({studentId,firstDayOfMonth,lastDayOfMonth});
     const totalCount = await getTotalYearlyAttendanceCount({studentId,firstDayOfMonth,lastDayOfMonth});
     
-    // console.log({yearlyAttendanceCount,totalYearlyAttendanceCount})
     return res.send(success(200,{presentCount,totalCount}));
   } catch (err) {
     return res.send(error(500,err.message));  

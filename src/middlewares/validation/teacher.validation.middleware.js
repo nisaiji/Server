@@ -74,7 +74,7 @@ export async function profileUpdateTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
     } = req.body;
     const { error: schemaError } = teacherProfileUpdateSchema.validate({
       firstname,
@@ -84,7 +84,7 @@ export async function profileUpdateTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
     });
 
     if (schemaError) {
@@ -121,7 +121,9 @@ export async function updateClassTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
+      address,
+      email
     } = req.body;
     const { error: schemaError } = teacherUpdateSchema.validate({
       teacherId,
@@ -132,7 +134,9 @@ export async function updateClassTeacherValidation(req, res, next) {
       bloodGroup,
       gender,
       university,
-      degree
+      degree,
+      address,
+      email
     });
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));

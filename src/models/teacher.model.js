@@ -41,6 +41,9 @@ const teacherSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  address:{
+    type:String
+  },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"

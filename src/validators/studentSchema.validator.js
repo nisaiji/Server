@@ -55,6 +55,7 @@ import Joi from "joi";
 // });
 
 const registerStudentSchema = Joi.object({
+  rollNumber:Joi.string(),
   firstname: Joi.string().required().messages({
     "any.required": "First name is required.",
   }),
@@ -130,6 +131,53 @@ const parentUpdateStudentSchema = Joi.object({
     "any.required": "Address is required.",
   }),
 })
+const studentParentUpdateStudentSchema = Joi.object({
+  rollNumber:Joi.string().required().messages({
+    "any.required":"Roll Number is required"
+  }),
+  firstname:Joi.string().required().messages({
+    "any.required":"first name is required"
+  }),
+  lastname:Joi.string().required().messages({
+    "any.required":"last name is required"
+  }),
+  gender:Joi.string().required().messages({
+    "any.required":"gender is required"
+  }),
+  bloodGroup: Joi.string().required().messages({
+    "any.required": "Blood Group is required.",
+  }),
+  dob: Joi.string().required().messages({
+    "any.required": "date of birth is required.",
+  }),
+  address: Joi.string().required().messages({
+    "any.required": "Address is required.",
+  }),
+  parentFullname: Joi.string().required().messages({
+    "any.required": "parent name is required.",
+  }),
+  parentGender: Joi.string().required().messages({
+    "any.required": "parent gender is required.",
+  }),
+  parentAge: Joi.number().required().messages({
+    "any.required": "parent age is required.",
+  }),
+  parentEmail: Joi.string().required().messages({
+    "any.required": "parent email is required.",
+  }),
+  parentPhone: Joi.string().required().messages({
+    "any.required": "parent phone number is required.",
+  }),
+  parentQualification: Joi.string().required().messages({
+    "any.required": "parent qualification is required.",
+  }),
+  parentOccupation: Joi.string().required().messages({
+    "any.required": "parent occupation is required.",
+  }),
+  parentAddress: Joi.string().required().messages({
+    "any.required": "parent address is required.",
+  }),
+})
 
 export {
   registerStudentSchema,
@@ -137,4 +185,5 @@ export {
   studentAddToSectionSchema,
   updateStudentSchema,
   parentUpdateStudentSchema,
+  studentParentUpdateStudentSchema
 };

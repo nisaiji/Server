@@ -142,7 +142,12 @@ const teacherUpdateSchema = Joi.object({
   }),
   degree: Joi.string().required().messages({
     "any.required": "degree is required."
-  })
+  }),
+  address: Joi.string(),
+  email: Joi.string().email({minDomainSegments: 2,tlds: { allow: ["com", "net", "org", "io", "co"] }}).required().messages({
+      "string.email": "Invalid email format.",
+      "any.required":"email is required"
+    }),
 });
 const teacherUpdationSchema = Joi.object({
   teacherId: Joi.string()

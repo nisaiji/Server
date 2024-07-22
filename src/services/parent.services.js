@@ -30,6 +30,14 @@ export async function updateParent({fullname,phone}){
     throw error;
   }
 }
+export async function updateParentInfo({id,fullname,gender,age,email,phone,qualification,occupation,address}){
+  try {
+    const parent = await parentModel.findByIdAndUpdate(id,{fullname,gender,age,email,phone,qualification,occupation,address});
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
 
 
 export async function deleteParentById(parentId){
