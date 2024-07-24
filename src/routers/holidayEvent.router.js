@@ -6,7 +6,7 @@ import { createHolidayEventController, deleteHolidayEventController, getHolidayE
 const holidayEventRouter = express.Router();
 
 holidayEventRouter.post("/register",adminAuthentication,createHolidayEventValidation,createHolidayEventController);
-holidayEventRouter.get("/",adminAuthentication,getHolidayEventController);
+holidayEventRouter.post("/",adminAuthentication,getHolidayEventController);
 holidayEventRouter.delete("/:eventId",adminAuthentication,deleteHolidayEventController);
 
 export default holidayEventRouter;

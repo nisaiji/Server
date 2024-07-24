@@ -37,7 +37,7 @@ paths:
           description: "Internal Server Error"
 
   /holiday-event/: 
-    get:
+    post:
       security:
         - Authorization: []    
       tags:
@@ -46,6 +46,17 @@ paths:
       description: "This API will allow admin to get a list of holiday event."
       produces:
       - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 month:
+                   type: number
+                 year:
+                   type: string
       responses:
         200:
           description: "successful"

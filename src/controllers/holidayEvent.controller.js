@@ -33,12 +33,15 @@ export async function createHolidayEventController(req,res){
 
 export async function getHolidayEventController(req,res){
     try {
+        const {month,year} = req.body;
+        const startOfMonth = new Date(year, month, 1).getTime();
+        const endOfMonth = new Date(year, month + 1, 0).getTime();
         const adminId = req.adminId;
         const admin = await findAdminByID(adminId);
         if(!admin){
             return res.send(error(400,"admin doesn't exists"));
         }
-        const eventList = await getEventList({adminId});
+        const eventList = await getEventList({adminId,startOfMonth,endOfMonth});
         const updateEventList = eventList.map(doc => {
             const formattedDoc = doc.toObject();
             formattedDoc.date = new Date(doc.date)

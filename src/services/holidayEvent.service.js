@@ -30,9 +30,9 @@ export async function checkHolidayEventExist({adminId,startOfDay,endOfDay}) {
   }
 }
 
-export async function getEventList({ adminId }) {
+export async function getEventList({ adminId,startOfMonth,endOfMonth }) {
   try {
-    const holidayEventList = await holidayEventModel.find({ admin: adminId });
+    const holidayEventList = await holidayEventModel.find({ admin: adminId,date: {$gte:startOfMonth,$lte:endOfMonth} });
     // console.log(holidayEventList);
     return holidayEventList;
   } catch (error) {
