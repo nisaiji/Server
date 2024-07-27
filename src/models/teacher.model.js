@@ -30,7 +30,7 @@ const teacherSchema = mongoose.Schema({
   university: {
     type: String
   },
-  degree: {
+  degree: { 
     type: String
   },
   password: {

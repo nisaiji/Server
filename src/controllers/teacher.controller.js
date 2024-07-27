@@ -18,7 +18,8 @@ import {
   updateAuthTeacher,
   updateProfileTeacher,
   updateAuthInfoTeacher,
-  checkTeacherIsClassTeacher
+  checkTeacherIsClassTeacher,
+  findSectionOfTeacher
 } from "../services/teacher.services.js";
 import {
   checkPasswordMatch,
@@ -292,6 +293,11 @@ export async function getTeacherListController(req, res) {
   try {
     const adminId = req.adminId;
     const teacherList = await getTeacherList({ adminId});
+    // console.log({teacherList})
+    for(let i=0;i<teacherList.length; i++){
+      section = await findSectionOfTeacher({teacherid:teacherList[i]["_id"]});
+      console.log({section})
+    }
     return res.send(success(200, { teacherList }));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -300,10 +306,17 @@ export async function getTeacherListController(req, res) {
 
 export async function getAllClassTeachersController(req, res) {
   try {
-    console.log("teacher api called");
+    // console.log("teacher api called");
     const adminId = req.adminId;
     const classTeacherList = await getAllClassTeachers(adminId);
-    return res.send(success(200, classTeacherList));
+    const teachers = [];
+    for(let i = 0; i<classTeacherList?.length; i++){
+      const section = await findSectionOfTeacher({teacherId:classTeacherList[i]["_id"]})
+      const teacher = {...classTeacherList[i]["_doc"],"class":section?.classId.name, section:section?.name}
+      teachers.push(teacher)
+      
+    }
+    return res.send(success(200, teachers));
   } catch (err) {
     return res.send(error(500, err.message));
   }

@@ -130,8 +130,7 @@ export async function getAllStudentList({ adminId, limit, page }) {
     const students = await studentModel
       .find({ admin: adminId })
       .limit(limit * 1)
-      .skip((page - 1) * limit).populate("parent")
-      .exec();
+      .skip((page - 1) * limit).populate("parent").populate({path:"section",select:{name:1}}).populate({path:"classId",select:{name:1}}).exec();
     return students;
   } catch (error) {
     return error;
@@ -265,7 +264,7 @@ export async function updateStudentByParent({studentId,bloodGroup,dob,address}){
 export async function searchStudentByName({name,sectionId}){
   try {
     const regex = new RegExp(name, 'i'); 
-    const students = await studentModel.find({firstname: { $regex: regex },section:sectionId}).populate({path:"parent",select:"phone"});    
+    const students = await studentModel.find({firstname: { $regex: regex },section:sectionId}).populate({path:"parent",select:"phone"}).populate({path:"section",select:{name:1}}).populate({path:"classId",select:{name:1}});    
     return students;
   } catch (error) {
     throw error;    

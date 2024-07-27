@@ -10,7 +10,7 @@ const classSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "section"
     }
-  ],
+  ], 
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin",
