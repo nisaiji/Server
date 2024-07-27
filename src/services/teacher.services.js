@@ -250,9 +250,9 @@ export async function getAllClassTeachers(adminId) {
   }
 }
 
-export async function getTeacherList({ adminId }) {
+export async function getTeacherList({ adminId,limit,pageNo }) {
   try {
-    const teachers = await teacherModel.find({ admin: adminId });
+    const teachers = await teacherModel.find({ admin: adminId }).limit(limit*1).skip((pageNo-1)*limit).exec();
     return teachers;
   } catch (error) {
     return error;

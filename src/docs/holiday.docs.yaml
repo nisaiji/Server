@@ -1,31 +1,38 @@
+openapi: 3.0.1
+info:
+  title: Holiday Event API
+  version: 1.0.0
 paths:
   /holiday-event/register: 
     post:
       security:
-        - Authorization: []    
+        - Authorization: []
       tags:
-      - "Holiday-Event"
+        - "Holiday-Event"
       summary: "To create a Holiday Event"
       description: "This API will allow admin to create holiday event"
-      produces:
-      - "application/json"
       requestBody:
-         required: true
-         content:
-           application/json:
-             schema:
-               type: object
-               properties:
-                 date:
-                   type: string
-                 title:
-                   type: string
-                 holiday:
-                   type: string
-                 event:
-                   type: string
-                 description:
-                   type: string
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  example: "2024-12-25"
+                title:
+                  type: string
+                  example: "Christmas Party"
+                holiday:
+                  type: string
+                  example: "Christmas"
+                event:
+                  type: string
+                  example: "Party"
+                description:
+                  type: string
+                  example: "An event to celebrate Christmas"
       responses:
         200:
           description: "successful"
@@ -36,27 +43,27 @@ paths:
         500:
           description: "Internal Server Error"
 
-  /holiday-event/: 
+  /holiday-event: 
     post:
       security:
-        - Authorization: []    
+        - Authorization: []
       tags:
-      - "Holiday-Event"
-      summary: "To get a list Holiday Event"
-      description: "This API will allow admin to get a list of holiday event."
-      produces:
-      - "application/json"
+        - "Holiday-Event"
+      summary: "To get a list of Holiday Events"
+      description: "This API will allow admin to get a list of holiday events."
       requestBody:
-         required: true
-         content:
-           application/json:
-             schema:
-               type: object
-               properties:
-                 month:
-                   type: number
-                 year:
-                   type: string
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                month:
+                  type: number
+                  example: 12
+                year:
+                  type: string
+                  example: 2024
       responses:
         200:
           description: "successful"
@@ -66,24 +73,23 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
-  
+
   /holiday-event/{eventId}: 
     delete:
       security:
-        - Authorization: []    
+        - Authorization: []
       tags:
-      - "Holiday-Event"
-      summary: "To delete a event"
-      description: "This API will allow admin to delete holiday event"
-      produces:
-      - "application/json"
+        - "Holiday-Event"
+      summary: "To delete a Holiday Event"
+      description: "This API will allow admin to delete a holiday event"
       parameters:
-       - in: path
-         name: eventId
-         required: true
-         description: ID of the holiday/event.
-         schema:
+        - in: path
+          name: eventId
+          required: true
+          description: ID of the holiday/event.
+          schema:
             type: string
+            example: "1234"
       responses:
         200:
           description: "successful"
@@ -94,5 +100,46 @@ paths:
         500:
           description: "Internal Server Error"
 
-   
-    
+    put:
+      security:
+        - Authorization: []
+      tags:
+        - "Holiday-Event"
+      summary: "To update a Holiday Event"
+      description: "This API will allow admin to update holiday event"
+      parameters:
+        - in: path
+          name: eventId
+          required: true
+          description: ID of the holiday/event.
+          schema:
+            type: string
+            example: "1234"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Christmas Party"
+                holiday:
+                  type: string
+                  example: "Christmas"
+                event:
+                  type: string
+                  example: "Party"
+                description:
+                  type: string
+                  example: "An event to celebrate Christmas"
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"

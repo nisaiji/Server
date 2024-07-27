@@ -1,5 +1,5 @@
 import { findAdminByID } from "../services/admin.services.js";
-import { checkHolidayEventExist, createHolidayEvent,deleteHolidayEventById,getEventList, getHolidayEventById } from "../services/holidayEvent.service.js";
+import { checkHolidayEventExist, createHolidayEvent,deleteHolidayEventById,getEventList, getHolidayEventById, updateHolidayEvent } from "../services/holidayEvent.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function createHolidayEventController(req,res){
@@ -50,6 +50,26 @@ export async function getHolidayEventController(req,res){
         return res.send(success(200,updateEventList));
     } catch (err) {
         return res.send(error(500,err.message));       
+    }
+}
+
+export async function updateHolidayEventController(req,res){
+    try {
+        const eventId = req.params.eventId;
+        const {title,description,holiday,event} = req.body;
+        const holidayEvent = await getHolidayEventById({eventId});
+
+        if(!holidayEvent){
+            return res.send(error(400,"Event not found."));
+        }
+        const updatedHolidayEvent = await updateHolidayEvent({eventId,title,description,holiday,event});
+        if(updateHolidayEvent instanceof Error){
+            return res.send(error(400,"Holiday-event can't updated"));
+        }
+
+        return res.send(success(200,"Holiday event updated successfully"));
+    } catch (err) {
+        return res.send(error(500,err.message));        
     }
 }
 

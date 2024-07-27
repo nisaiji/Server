@@ -40,6 +40,15 @@ export async function getEventList({ adminId,startOfMonth,endOfMonth }) {
   }
 }
 
+export async function updateHolidayEvent({eventId,title,description,holiday,event}){
+  try {
+    const holidayEvent = await holidayEventModel.findByIdAndUpdate(eventId,{title,description,holiday,event});
+    return holidayEvent;
+  } catch (error) {
+    throw error;    
+  }
+}
+
 export async function getHolidayEventById({eventId}){
   try {
     const event = await holidayEventModel.findById(eventId);
