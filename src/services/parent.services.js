@@ -197,10 +197,10 @@ export async function getChildrenOfParent(parentId){
   }
 }
 
-export async function getAllEventHolidays(adminId){
+export async function getAllEventHolidays({adminId,startOfMonth,endOfMonth }){
   try {
-    const holidayEvents = await holidayEventModel.find({admin:adminId});
-    return holidayEvents;
+    const holidayEventList = await holidayEventModel.find({ admin: adminId,date: {$gte:startOfMonth,$lte:endOfMonth} });
+    return holidayEventList;
   } catch (error) {
     throw error;    
   }

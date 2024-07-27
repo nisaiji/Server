@@ -124,3 +124,13 @@ export async function getSectionStudents({sectionId,adminId}){
   const students = await studentModel.find({section:sectionId,admin:adminId});
   return students;
 }
+
+export async function findSectionInfoById({sectionId}){
+  try {
+    const section = await sectionModel.findById(sectionId).select({students:0}).populate({path:"classId",select:{"name":1}}).populate({path:"classTeacher",select:{firstname:1,lastname:1}});
+    return section;
+    
+  } catch (error) {
+    throw error;    
+  }
+}

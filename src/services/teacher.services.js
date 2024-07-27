@@ -199,7 +199,6 @@ export async function checkTeacherIsClassTeacher({teacherId}) {
 export async function getAllTeachers(adminId) {
   try {
     const teacherlist = await teacherModel.find({ admin: adminId });
-    console.log(teacherlist);
     return teacherlist;
   } catch (error) {
     return error;
@@ -232,7 +231,6 @@ export async function getNonClassTeachers(adminId) {
         }
       }
     ]);
-    // console.log(teachers);
     return teachers;
   } catch (error) {
     throw error;
@@ -250,9 +248,9 @@ export async function getAllClassTeachers(adminId) {
   }
 }
 
-export async function getTeacherList({ adminId,limit,pageNo }) {
+export async function getTeacherList({ adminId }) {
   try {
-    const teachers = await teacherModel.find({ admin: adminId }).limit(limit*1).skip((pageNo-1)*limit).exec();
+    const teachers = await teacherModel.find({ admin: adminId });
     return teachers;
   } catch (error) {
     return error;

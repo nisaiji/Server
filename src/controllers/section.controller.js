@@ -1,4 +1,5 @@
 import {checkClassExistById,checkSectionExist,createSection,deleteSection,findSectionById,
+  findSectionInfoById,
   getAllSection,getClassSections} from "../services/section.services.js";
 import {findClassTeacherById,findTeacherById} from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
@@ -97,5 +98,21 @@ export async function deleteSectionController(req, res) {
     return res.send(success(200, "section deleted successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
+  }
+}
+
+
+export async function getSectionController(req,res){
+  try {
+    console.log("controller")
+    const sectionId = req.params.sectionId;
+    const section = await findSectionInfoById({sectionId});
+    if(!section){
+      return res.send(error(400,"Section not found."));
+    }
+    return res.send(success(200,section));
+
+  } catch (err) {
+    return res.send(error(500,err.message));    
   }
 }

@@ -11,7 +11,7 @@ parentRouter.put("/profile-update",parentAuthentication,profileUpdateParentValid
 parentRouter.put("/profile-info-update",parentAuthentication,profileInfoUpdateParentValidation,profileInfoUpdateParentController);
 parentRouter.get("/get-info",parentAuthentication,getParentController);
 parentRouter.get("/children",parentAuthentication,getChildrenParentController);
-parentRouter.get("/holiday-events",parentAuthentication,getHolidayEventParentController);
+parentRouter.post("/holiday-events",parentAuthentication,getHolidayEventParentController);
 parentRouter.put("/password-change",parentAuthentication,passwordChangeController)
 
 // parentRouter.

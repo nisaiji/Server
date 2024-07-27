@@ -291,9 +291,7 @@ export async function getTeachersController(req, res) {
 export async function getTeacherListController(req, res) {
   try {
     const adminId = req.adminId;
-    const pageNo = req.params.pageNo;
-    const limit = 10;
-    const teacherList = await getTeacherList({ adminId,limit,pageNo });
+    const teacherList = await getTeacherList({ adminId});
     return res.send(success(200, { teacherList }));
   } catch (err) {
     return res.send(error(500, err.message));

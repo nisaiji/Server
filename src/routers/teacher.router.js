@@ -15,7 +15,7 @@ teacherRouter.put("/profile-update",classTeacherAuthentication,profileUpdateTeac
 teacherRouter.put("/admin-class-teacher/:teacherId",adminAuthentication,updateClassTeacherValidation, updateClassTeacherController);
 teacherRouter.delete("/:teacherId",adminAuthentication,deleteTeacherValidation,deleteTeacherController);
 teacherRouter.get("/get/:teacherId", adminAuthentication, getTeachersController);
-teacherRouter.get("/teacher-list/:pageNo",adminAuthentication,getTeacherListController);
+teacherRouter.get("/teacher-list",adminAuthentication,getTeacherListController);
 teacherRouter.get("/unassigned-teachers",adminAuthentication, getUnassignedTeacherController);
 teacherRouter.put("/admin-teacher/:teacherId", adminAuthentication,registerTeacherValidation, updateTeacherController);
 teacherRouter.put("/password-change", classTeacherAuthentication, changePasswordTeacherController);

@@ -118,7 +118,7 @@ export async function getStudentList({ limit, page, sectionId }) {
 
 export async function getStudentListBySectionId({ sectionId }) {
   try {
-    const students = await studentModel.find({ section: sectionId }).populate("parent");
+    const students = await studentModel.find({ section: sectionId }).populate("parent").populate({path:"section",select:{name:1}}).populate({path:"classId",select:{name:1}});
     return students;
   } catch (error) {
     return error;

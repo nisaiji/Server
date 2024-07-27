@@ -241,12 +241,15 @@ export async function getChildrenParentController(req, res) {
 
 export async function getHolidayEventParentController(req,res){
   try {
+    const {month,year} = req.body;
     const parentId = req.parentId;
     const adminId = req.adminId;
+    const startOfMonth = new Date(year, month, 1).getTime();
+    const endOfMonth = new Date(year, month + 1, 0).getTime();
     if(!adminId){
       return res.send(error(400,"admin id is required"));
     }
-    const holidayEvents = await getAllEventHolidays(adminId);
+    const holidayEvents = await getAllEventHolidays({adminId,startOfMonth,endOfMonth});
 
     return res.send(success(200,holidayEvents)); 
   } catch (err) {
