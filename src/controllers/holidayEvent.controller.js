@@ -6,6 +6,7 @@ export async function createHolidayEventController(req,res){
     try {
         const{title,holiday,event,description} = req.body;
         const date = new Date(req.body["date"]);
+        console.log({date})
         if(date instanceof Error){
             return res.send(error(400,"invalid date"))
         }
@@ -13,7 +14,7 @@ export async function createHolidayEventController(req,res){
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const day = daysOfWeek[date.getDay()];
 
-        const currDate = date.getTime();
+        const currDate = date.setHours(0,0,0,0);
         const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
         const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
 
