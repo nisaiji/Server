@@ -42,12 +42,12 @@ export async function getHolidayEventController(req,res){
             return res.send(error(400,"admin doesn't exists"));
         }
         const eventList = await getEventList({adminId,startOfMonth,endOfMonth});
-        const updateEventList = eventList.map(doc => {
-            const formattedDoc = doc.toObject();
-            formattedDoc.date = new Date(doc.date)
-            return formattedDoc;
-          });
-        return res.send(success(200,updateEventList));
+        // const updateEventList = eventList.map(doc => {
+        //     const formattedDoc = doc.toObject();
+        //     formattedDoc.date = new Date(doc.date)
+        //     return formattedDoc;
+        //   });
+        return res.send(success(200,eventList));
     } catch (err) {
         return res.send(error(500,err.message));       
     }
