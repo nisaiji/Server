@@ -288,7 +288,7 @@ export async function searchStudentByNameForAdmin({ name, adminId }) {
     const regex = new RegExp(name, "i");
     const students = await studentModel
       .find({ firstname: { $regex: regex }, admin: adminId })
-      .populate("parent");
+      .populate("parent").populate({path:"section",select:{name:1}}).populate({path:"classId",select:{name:1}});
     return students;
   } catch (error) {
     throw error;

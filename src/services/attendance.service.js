@@ -289,14 +289,14 @@ export async function getTotalMonthlyAttendanceCount({ firstDayOfMonth, lastDayO
   }
 }
 
-export async function getYearlyPresentCount({ studentId, firstDayOfMonth, lastDayOfMonth }) {
+export async function getYearlyPresentCount({ studentId, firstDayOfYear, lastDayOfYear }) {
   try {
     const count = await attendanceModel.countDocuments({
       student: studentId,
       teacherAttendance: "present",
       date: {
-        $gte: firstDayOfMonth,
-        $lte: lastDayOfMonth
+        $gte: firstDayOfYear,
+        $lte: lastDayOfYear
       }
     });
     return count;
@@ -305,14 +305,15 @@ export async function getYearlyPresentCount({ studentId, firstDayOfMonth, lastDa
   }
 }
 
-export async function getTotalYearlyAttendanceCount({ firstDayOfMonth, lastDayOfMonth }) {
+export async function getTotalYearlyAttendanceCount({sectionId, firstDayOfYear, lastDayOfYear }) {
   try {
     const totalCount = await attendanceModel.aggregate([
       {
         $match: {
+          section:sectionId,
           date: {
-            $gte: firstDayOfMonth,
-            $lt: lastDayOfMonth
+            $gte: firstDayOfYear,
+            $lt: lastDayOfYear
           },
           $or: [
             { teacherAttendance: "present" },
@@ -334,6 +335,7 @@ export async function getTotalYearlyAttendanceCount({ firstDayOfMonth, lastDayOf
         $count: "countValue"
       }
     ]);
+    console.log({totalCount})
     if(totalCount.length==0){
       return 0;
     }
@@ -386,6 +388,48 @@ export async function findAttendanceByStudentId({studentId,startOfDay,endOfDay})
   try {
     const attendance = await attendanceModel.findOne({student:studentId,date:{$gte:startOfDay,$lte:endOfDay}}).select("date day parentAttendance teacherAttendance")
     return attendance;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+export async function findTotalMonthlyAttendanceCountOfSection({sectionId,firstDayOfMonth,lastDayOfMonth}){
+  try {
+    const totalCount = await attendanceModel.aggregate([
+      {
+        $match: {
+          section:sectionId,
+          date: {
+            $gte: firstDayOfMonth,
+            $lt: lastDayOfMonth
+          },
+          $or: [
+            { teacherAttendance: "present" },
+            { teacherAttendance: "absent" }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: { $toDate: "$date" }
+            }
+          }
+        }
+      },
+      {
+        $count: "countValue"
+      }
+    ]);
+
+    if(totalCount.length==0){
+      return 0;
+    }
+
+    return totalCount[0]["countValue"];
+    return count;
   } catch (error) {
     throw error;    
   }
