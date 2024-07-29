@@ -15,6 +15,15 @@ const adminSchema = mongoose.Schema({
     required: true,
     unique: true
   },
+  principal:{
+    type: String,
+  },
+  schoolBoard:{
+    type: String,
+  },
+  schoolNumber:{
+    type:String
+  },
   phone: {
     type: String,
     required: true
@@ -33,6 +42,33 @@ const adminSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  city:{
+    type:String
+  },
+  state:{
+    type:String
+  },
+  website:{
+    type:String
+  },
+  facebook:{
+    type:String
+  },
+  instagram:{
+    type:String
+  },
+  linkedin:{
+    type:String
+  },
+  twitter:{
+    type:String
+  },
+  whatsapp:{
+    type:String
+  },
+  youtube:{
+    type:String
+  }
 });
 
 const adminModel = mongoose.model("admin", adminSchema);

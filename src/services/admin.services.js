@@ -72,3 +72,21 @@ export async function findAdminByID(id) {
     return err;
   }
 }
+
+export async function updateAdminById({adminId, schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName }){
+  try {
+    const admin = await adminModel.findByIdAndUpdate(adminId,{ schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName });
+    return admin;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+export async function  updateSocialProfileAdminById({adminId,phone,website,facebook,instagram,linkedin,twitter,whatsapp,youtube }){
+  try {
+    const admin = await adminModel.findByIdAndUpdate(adminId,{ phone,website,facebook,instagram,linkedin,twitter,whatsapp,youtube});
+    return admin;
+  } catch (error) {
+    throw error;    
+  }
+}

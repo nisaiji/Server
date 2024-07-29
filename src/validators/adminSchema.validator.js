@@ -52,6 +52,46 @@ const registerAdminSchema = Joi.object({
     "string.required": "Address is required!"
   })
 });
+//  schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName
+// register the school
+const updateAdminProfileSchema = Joi.object({
+  adminName: Joi.string().min(5).max(15).required().messages({
+    "string.min": "admin name should be atleast 5 chars long",
+    "string.max": "admin name length must be smaller than 15 chars",
+    "any.required": "admin name is required!"
+  }),
+  schoolName: Joi.string().min(8).max(500).required().messages({
+    "string.min": "school name should be atleast 8 chars long",
+    "string.max": "school name length must be smaller than 500 chars",
+    "any.required": "school name is required!"
+  }),
+  principalName: Joi.string().required().messages({
+    "any.required": "Principal name is required!"
+  }),
+  schoolBoard: Joi.string().required().messages({
+    "any.required": "School board is required!"
+  }),
+  affiliationNo: Joi.string().min(5).max(50).required().messages({
+    "string.min": "Affiliation no. should be atleast 5 chars long",
+    "string.max": "Affiliation no. length must be smaller than 50 chars",
+    "any.required": "Affiliation no. is required!"
+  }),
+  schoolNumber: Joi.string().min(5).max(50).required().messages({
+    "string.min": "School number should be atleast 5 chars long",
+    "string.max": "School number length must be smaller than 50 chars",
+    "any.required": "School number is required!"
+  }),
+
+  address: Joi.string().required().messages({
+    "string.required": "Address is required!"
+  }),
+  city: Joi.string().required().messages({
+    "string.required": "city is required!"
+  }),
+  state: Joi.string().required().messages({
+    "string.required": "state is required!"
+  })
+});
 
 // login school
 const loginAdminSchema = Joi.object({
@@ -64,7 +104,4 @@ const loginAdminSchema = Joi.object({
   })
 });
 
-export{ registerAdminSchema, loginAdminSchema };
-
-
-
+export { registerAdminSchema, loginAdminSchema, updateAdminProfileSchema };
