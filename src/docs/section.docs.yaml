@@ -101,7 +101,6 @@ paths:
         500:
           description: "Internal Server Error"
 
-
   /section/{sectionId}:    
     delete:
       security:
@@ -129,4 +128,29 @@ paths:
         500:
           description: "Internal Server Error"
 
-
+  /section/section-info/{sectionId}:        
+    get:
+      security:
+        - Authorization: []
+      tags:
+        - "Section"
+      summary: "To get a section"
+      description: "This API will allow admin to get a section."
+      produces:
+        - "application/json"
+      parameters:
+        - in: path
+          name: sectionId
+          required: true
+          description: ID of the section
+          schema:
+            type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"

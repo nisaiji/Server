@@ -178,13 +178,26 @@ paths:
           description: "Server error"
 
   /parent/holiday-events:
-    get:
+    post:
       security:
         - Authorization: []
       summary: "To get event-holidays"
       description: "This API will get holiday-events to parent. It requires parent login token."
       tags:
       - "Parent"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                month:
+                  type: number
+                  example: 12
+                year:
+                  type: string
+                  example: 2024
       responses:
         200:
           description: "teacher registered successfully"

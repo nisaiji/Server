@@ -1,11 +1,12 @@
 import { findAdminByID } from "../services/admin.services.js";
-import { checkHolidayEventExist, createHolidayEvent,deleteHolidayEventById,getEventList, getHolidayEventById } from "../services/holidayEvent.service.js";
+import { checkHolidayEventExist, createHolidayEvent,deleteHolidayEventById,getEventList, getHolidayEventById, updateHolidayEvent } from "../services/holidayEvent.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function createHolidayEventController(req,res){
     try {
         const{title,holiday,event,description} = req.body;
         const date = new Date(req.body["date"]);
+        console.log({date})
         if(date instanceof Error){
             return res.send(error(400,"invalid date"))
         }
@@ -13,7 +14,7 @@ export async function createHolidayEventController(req,res){
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const day = daysOfWeek[date.getDay()];
 
-        const currDate = date.getTime();
+        const currDate = date.setHours(0,0,0,0);
         const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
         const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
 
@@ -33,20 +34,43 @@ export async function createHolidayEventController(req,res){
 
 export async function getHolidayEventController(req,res){
     try {
+        const {month,year} = req.body;
+        const startOfMonth = new Date(year, month, 1).getTime();
+        const endOfMonth = new Date(year, month + 1, 0).getTime();
         const adminId = req.adminId;
         const admin = await findAdminByID(adminId);
         if(!admin){
             return res.send(error(400,"admin doesn't exists"));
         }
-        const eventList = await getEventList({adminId});
-        const updateEventList = eventList.map(doc => {
-            const formattedDoc = doc.toObject();
-            formattedDoc.date = new Date(doc.date)
-            return formattedDoc;
-          });
-        return res.send(success(200,updateEventList));
+        const eventList = await getEventList({adminId,startOfMonth,endOfMonth});
+        // const updateEventList = eventList.map(doc => {
+        //     const formattedDoc = doc.toObject();
+        //     formattedDoc.date = new Date(doc.date)
+        //     return formattedDoc;
+        //   });
+        return res.send(success(200,eventList));
     } catch (err) {
         return res.send(error(500,err.message));       
+    }
+}
+
+export async function updateHolidayEventController(req,res){
+    try {
+        const eventId = req.params.eventId;
+        const {title,description,holiday,event} = req.body;
+        const holidayEvent = await getHolidayEventById({eventId});
+
+        if(!holidayEvent){
+            return res.send(error(400,"Event not found."));
+        }
+        const updatedHolidayEvent = await updateHolidayEvent({eventId,title,description,holiday,event});
+        if(updateHolidayEvent instanceof Error){
+            return res.send(error(400,"Holiday-event can't updated"));
+        }
+
+        return res.send(success(200,"Holiday event updated successfully"));
+    } catch (err) {
+        return res.send(error(500,err.message));        
     }
 }
 

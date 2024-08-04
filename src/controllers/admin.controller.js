@@ -1,7 +1,7 @@
 import {generateAccessToken,generateRefreshToken} from "../services/JWTToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";
-import {checkAdminExist,createAdmin,findAdminByAdminName,findAdminByEmail, getAdminById} from "../services/admin.services.js";
+import {checkAdminExist,createAdmin,findAdminByAdminName,findAdminByEmail, getAdminById, updateAdminById, updateSocialProfileAdminById} from "../services/admin.services.js";
 import { hashPassword } from "../services/password.service.js";
 
 export async function registerAdminController(req, res) {
@@ -26,6 +26,50 @@ export async function registerAdminController(req, res) {
       return res.send(error(400, "admin couldn't be registered"));
     }
     return res.send(success(201, "admin registered successfully!"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function profileUpdateAdminController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const { schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName } = req.body;
+    
+    const admin = await getAdminById({adminId});
+    if(!admin){
+      return res.send(error(400,"Admin not exists"));
+    }
+
+    const updatedAdmin = await updateAdminById({adminId, schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName });
+
+    if (updatedAdmin instanceof Error) {
+      return res.send(error(400, "Admin couldn't be updated"));
+    }
+
+    return res.send(success(201, "Admin updated successfully!"));
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function socialProfileUpdateAdminController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const { phone,website,facebook,instagram,linkedin,twitter,whatsapp,youtube} = req.body;
+    
+    const admin = await getAdminById({adminId});
+    if(!admin){
+      return res.send(error(400,"Admin not exists"));
+    }
+
+    const updatedAdmin = await updateSocialProfileAdminById({adminId,phone,website,facebook,instagram,linkedin,twitter,whatsapp,youtube });
+
+    if (updatedAdmin instanceof Error) {
+      return res.send(error(400, "Admin couldn't be updated"));
+    }
+
+    return res.send(success(201, "Admin updated successfully!"));
   } catch (err) {
     return res.send(error(500, err.message));
   }

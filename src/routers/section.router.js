@@ -1,5 +1,5 @@
 import express from "express";
-import {deleteSectionController,getAllSectionsController,getClassSectionsController,registerSectionController, replaceTeacherController,} from "../controllers/section.controller.js";
+import {deleteSectionController,getAllSectionsController,getClassSectionsController,getSectionController,registerSectionController, replaceTeacherController,} from "../controllers/section.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { deleteSectionAuthorization } from "../middlewares/authorization/deleteSection.authorization.middleware.js";
 import { registerSectionValidation } from "../middlewares/validation/section.validation.middleware.js";
@@ -10,6 +10,6 @@ sectionRouter.post("/register",adminAuthentication,registerSectionValidation,reg
 sectionRouter.post("/replace-teacher",adminAuthentication,replaceTeacherController);
 sectionRouter.get("/all", adminAuthentication, getAllSectionsController);
 sectionRouter.get("/:classId", adminAuthentication, getClassSectionsController);
+sectionRouter.get("/section-info/:sectionId",adminAuthentication,getSectionController);
 sectionRouter.delete("/:sectionId",adminAuthentication,deleteSectionAuthorization,deleteSectionController);
-
 export default sectionRouter;

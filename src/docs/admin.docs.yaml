@@ -31,7 +31,7 @@ paths:
                    type: string
       responses:
         200:
-          description: "successful"
+          description: "Successful"
         422:
           description: "Unprocessable Entity"
         403:
@@ -61,7 +61,7 @@ paths:
                    type: string
       responses:
         200:
-          description: "successful"
+          description: "Successful"
         422:
           description: "Unprocessable Entity"
         403:
@@ -75,17 +75,98 @@ paths:
         - Authorization: []
       tags:
       - "Admin"
-      summary: "to get admin profile"
-      description: "This API will get  admin profile."
-      operationId: "adminProfile"
+      summary: "To get admin profile."
+      description: "This API will get the admin profile."
+      operationId: "AdminProfile"
       produces:
       - "application/json"
       responses:
         200:
-          description: "successful"
+          description: "Successful"
         422:
           description: "Unprocessable Entity"
         403:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
+
+    put:
+      security:
+        - Authorization: []
+      summary: "To update an admin profile"
+      description: "This API will allow an admin to update their profile. It requires an admin login token."
+      tags:
+      - "Admin"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                schoolName:
+                  type: string
+                principalName:
+                  type: string
+                schoolBoard:
+                  type: string
+                schoolNumber:
+                  type: string
+                affiliationNo:
+                  type: string
+                address:
+                  type: string
+                city:
+                  type: string
+                state:
+                  type: string
+                email:
+                  type: string
+                adminName:
+                  type: string
+      responses:
+        200:
+          description: "Profile updated successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /admin/social-profile:
+    put:
+      security:
+        - Authorization: []
+      summary: "To update a social profile"
+      description: "This API will allow an admin to update their social profile. It requires an admin login token."
+      tags:
+      - "Admin"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                website:
+                  type: string
+                facebook:
+                  type: string
+                instagram:
+                  type: string
+                linkedin:
+                  type: string
+                twitter:
+                  type: string
+                whatsapp:
+                  type: string
+                youtube:
+                  type: string
+      responses:
+        200:
+          description: "Social profile updated successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"

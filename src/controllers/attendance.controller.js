@@ -1,4 +1,4 @@
-import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,getMisMatchAttendance,getMonthlyAttendance,getMonthlyPresentCount,getTotalMonthlyAttendanceCount,getTotalYearlyAttendanceCount,getYearlyPresentCount,markAttendanceByParent,markAttendanceByTeacher, updateAttendance} from "../services/attendance.service.js";
+import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,findTotalMonthlyAttendanceCountOfSection,getMisMatchAttendance,getMonthlyAttendance,getMonthlyPresentCount,getTotalMonthlyAttendanceCount,getTotalYearlyAttendanceCount,getYearlyPresentCount,markAttendanceByParent,markAttendanceByTeacher, updateAttendance} from "../services/attendance.service.js";
 import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -20,9 +20,9 @@ export async function markAttendanceController(req, res) {
     const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
 
-    if (day === "Sunday") {
-      return res.send(error(400, "today is sunday"));
-    }
+    // if (day === "Sunday") {
+    //   return res.send(error(400, "today is sunday"));
+    // }
 
     const holidayEvent = await checkHolidayEvent({adminId,startOfDay,endOfDay});
     if (holidayEvent) {
@@ -330,7 +330,7 @@ export async function parentMonthlyAttendanceStatusController(req, res) {
     return res.send(success(200, { formattedAttendance }));
   } catch (err) {
     return res.send(error(500, err.message));
-  }
+  } 
 }
 
 export async function parentMonthlyAttendanceCountController(req,res){
@@ -349,9 +349,14 @@ export async function parentMonthlyAttendanceCountController(req,res){
     const firstDayOfMonth = new Date(Date.UTC(year, month, 1)).getTime();
     const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0)).getTime();
 
+    const student = await findStudentById(studentId);
+    if(!student){
+      return res.send(error(400,"Student not found"));
+    }
+
 
     const monthlyAttendanceCount = await getMonthlyPresentCount({studentId,firstDayOfMonth,lastDayOfMonth});
-    const totalMonthlyAttendanceCount = await getTotalMonthlyAttendanceCount({firstDayOfMonth,lastDayOfMonth});
+    const totalMonthlyAttendanceCount = await findTotalMonthlyAttendanceCountOfSection({sectionId:student["section"],firstDayOfMonth,lastDayOfMonth});
 
     console.log({monthlyAttendanceCount,totalMonthlyAttendanceCount})
     return res.send(success(200,{monthlyAttendanceCount,totalMonthlyAttendanceCount}));
@@ -401,13 +406,16 @@ export async function parentYearlyAttendanceCountController(req,res){
     }   
     
     const date = new Date();
-    const firstDayOfMonth = new Date(Date.UTC(year, 0, 1)).getTime();
-    const lastDayOfMonth = new Date(Date.UTC(year, 12, 0)).getTime();
-    console.log({firstDayOfMonth,lastDayOfMonth})
+    const firstDayOfYear = new Date(Date.UTC(year, 0, 1)).getTime();
+    const lastDayOfYear = new Date(Date.UTC(year, 12, 0)).getTime();
 
+    const student = await findStudentById(studentId);
+    if(!student){
+      return res.send(error(400,"Student not found."));
+    }
 
-    const presentCount = await getYearlyPresentCount({studentId,firstDayOfMonth,lastDayOfMonth});
-    const totalCount = await getTotalYearlyAttendanceCount({studentId,firstDayOfMonth,lastDayOfMonth});
+    const presentCount = await getYearlyPresentCount({studentId,firstDayOfYear,lastDayOfYear});
+    const totalCount = await getTotalYearlyAttendanceCount({sectionId:student["section"],firstDayOfYear,lastDayOfYear});
     
     return res.send(success(200,{presentCount,totalCount}));
   } catch (err) {

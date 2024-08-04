@@ -81,6 +81,12 @@ export async function findTeacherById(id) {
   }
 }
 
+export async function findSectionOfTeacher({teacherId}){
+  const teacherObjectId = new mongoose.Types.ObjectId(teacherId);
+  const section = await sectionModel.findOne({classTeacher:teacherObjectId}).populate({path:"classId",select:{name:1}});
+  return section;
+}
+
 export async function updateAuthTeacher({ id, username, password }) {
   try {
     const teacher = await teacherModel.findByIdAndUpdate(id, {
@@ -199,7 +205,6 @@ export async function checkTeacherIsClassTeacher({teacherId}) {
 export async function getAllTeachers(adminId) {
   try {
     const teacherlist = await teacherModel.find({ admin: adminId });
-    console.log(teacherlist);
     return teacherlist;
   } catch (error) {
     return error;
@@ -232,7 +237,6 @@ export async function getNonClassTeachers(adminId) {
         }
       }
     ]);
-    // console.log(teachers);
     return teachers;
   } catch (error) {
     throw error;
@@ -241,9 +245,7 @@ export async function getNonClassTeachers(adminId) {
 
 export async function getAllClassTeachers(adminId) {
   try {
-    console.log({ adminId });
     const cordinatorlist = await teacherModel.find({ admin: adminId });
-    console.log(cordinatorlist);
     return cordinatorlist;
   } catch (error) {
     return error;
@@ -259,7 +261,7 @@ export async function getTeacherList({ adminId }) {
   }
 }
 
-export async function getTeacherCount({ adminId }) {
+export async function getTeacherCount({ adminId }){
   try {
     const teacherCount = await teacherModel.countDocuments({ admin: adminId });
     return teacherCount;
