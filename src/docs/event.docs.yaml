@@ -1,0 +1,27 @@
+paths:
+  /event/parent-forget-password:
+    post:
+      summary: "To register forget password request"
+      description: "This API allow parent to register forget password request."
+      tags:
+      - "Event"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventType:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        200:
+          description: "event registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"

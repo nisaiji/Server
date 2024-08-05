@@ -4,7 +4,7 @@ import { findClassById } from "../services/class.sevices.js";
 import {checkParentExist,deleteParentById,findParentById,registerParent,updateInfoParent,updateParent, updateParentInfo} from "../services/parent.services.js";
 import { hashPassword } from "../services/password.service.js";
 import {checkStudentExistInSection,findSectionByClassTeacherId,findSectionById} from "../services/section.services.js";
-import {adminRegisterStudent,adminUpdateStudent,checkStudentExist,deleteStudentById,findStudentById,findStudentSiblings,getAllStudentCount,
+import {adminRegisterStudent,adminUpdateStudent,checkPhoneAlreadyExists,checkStudentExist,deleteStudentById,findStudentById,findStudentSiblings,getAllStudentCount,
         getAllStudentList,getStudentCount,getStudentList,getStudentListBySectionId,registerStudent,searchStudentByName,searchStudentByNameForAdmin,updateStudent,updateStudentByParent, updateStudentInfo, uploadStudentPhoto} from "../services/student.service.js";
 import {findClassTeacherById,findTeacherById} from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
@@ -339,6 +339,11 @@ export async function updateStudentController(req, res) {
 
     if (!parent) {
       return res.send(error(400, "parent doesn't exists"));
+    }
+
+    const parentWithDuplicatePhone = await checkPhoneAlreadyExists({parentId:parent["_id"],phone});
+    if(parentWithDuplicatePhone){
+      return res.send(error(400,"Phone number already in use"));
     }
     const updatedStudent = await updateStudent({
       studentId,

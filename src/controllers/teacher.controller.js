@@ -19,7 +19,8 @@ import {
   updateProfileTeacher,
   updateAuthInfoTeacher,
   checkTeacherIsClassTeacher,
-  findSectionOfTeacher
+  findSectionOfTeacher,
+  uploadTeacherPhotoService
 } from "../services/teacher.services.js";
 import {
   checkPasswordMatch,
@@ -363,5 +364,29 @@ export async function changePasswordTeacherController(req,res){
     return res.send(success(200,"password updated successfully"));
   } catch (err) {
     return res.send(error(500,err.message));
+  }
+}
+
+export async function updloadPhotoTeacherController(req,res){
+  try {
+    const{photo} = req.body;
+    const teacherId = req.teacherId;
+
+    if(!photo){
+      return res.send(error(400,"Photo is required"));
+    }
+
+    const teacher = await findTeacherById(teacherId);
+    if(!teacher){
+      return res.send(error(400,"Teacher not found"));
+    }
+
+    const updatedTeacher = await uploadTeacherPhotoService({teacherId,photo});
+    if(updatedTeacher instanceof Error){
+      return res.send(error(400,"Photo not uploaded."));
+    }
+    return res.send(success(200,"Photo uploaded successfully"));
+  } catch (err) {
+    res.send(error(500,err.message));    
   }
 }

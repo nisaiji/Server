@@ -304,3 +304,11 @@ export async function updateTeacherById(
   }
 }
 
+export async function uploadTeacherPhotoService({teacherId,photo}){
+  try {
+    const teacher = teacherModel.findByIdAndUpdate(teacherId,{photo});
+    return teacher;
+  } catch (error) {
+    throw error;    
+  }
+}

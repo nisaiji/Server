@@ -66,7 +66,6 @@ export async function getAdminById({adminId}) {
 export async function findAdminByID(id) {
   try {
     const admin = await adminModel.findById(id);
-    // console.log(admin);
     return admin;
   } catch (err) {
     return err;

@@ -10,7 +10,7 @@ import classRouter from "./class.router.js";
 import adminDashboardRouter from "./dashBoardAdmin.router.js";
 import parentDashboardRouter from "./dashBoardParent.router.js";
 import teacherDashboardRouter from "./dashBoardTeacher.router.js";
-
+import eventRouter from "./event.router.js";
 const router = express();
 
 router.use("/admin", adminRouter);
@@ -19,6 +19,7 @@ router.use("/teacher", teacherRouter);
 router.use("/student", studentRouter);
 router.use("/class", classRouter);
 router.use("/section", sectionRouter);
+router.use("/event", eventRouter);
 router.use("/attendance", attendanceRouter);
 router.use("/holiday-event", holidayEventRouter);
 router.use("/admin-dashboard",adminDashboardRouter);

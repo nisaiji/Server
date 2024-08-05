@@ -1,5 +1,5 @@
 import express from "express";
-import {registerTeacherController,deleteTeacherController, loginClassTeacherController, getAllClassTeachersController,  getTeacherListController,  updateTeacherController, updateClassTeacherController,  getTeachersController,  getUnassignedTeacherController, authUpdateTeacherController, profileUpdateTeacherController, changePasswordTeacherController, authInfoUpdateTeacherController } from "../controllers/teacher.controller.js";
+import {registerTeacherController,deleteTeacherController, loginClassTeacherController, getAllClassTeachersController,  getTeacherListController,  updateTeacherController, updateClassTeacherController,  getTeachersController,  getUnassignedTeacherController, authUpdateTeacherController, profileUpdateTeacherController, changePasswordTeacherController, authInfoUpdateTeacherController, updloadPhotoTeacherController } from "../controllers/teacher.controller.js";
 import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
 import {authInfoUpdateTeacherValidation, authUpdateTeacherValidation, deleteTeacherValidation, loginClassTeacherValidation,markTeacherAsClassTeacherValidation, profileUpdateTeacherValidation, registerTeacherValidation, updateClassTeacherValidation, updateTeacherValidation} from "../middlewares/validation/teacher.validation.middleware.js";
@@ -19,6 +19,8 @@ teacherRouter.get("/teacher-list",adminAuthentication,getTeacherListController);
 teacherRouter.get("/unassigned-teachers",adminAuthentication, getUnassignedTeacherController);
 teacherRouter.put("/admin-teacher/:teacherId", adminAuthentication,registerTeacherValidation, updateTeacherController);
 teacherRouter.put("/password-change", classTeacherAuthentication, changePasswordTeacherController);
+teacherRouter.put("/photo-upload",classTeacherAuthentication,updloadPhotoTeacherController);
+
 
 export default teacherRouter;
 

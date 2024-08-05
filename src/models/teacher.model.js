@@ -43,6 +43,9 @@ const teacherSchema = mongoose.Schema({
   },
   address:{
     type:String
+  },  
+  photo:{
+    type: String,
   },
   admin: {
     type: mongoose.Schema.Types.ObjectId,

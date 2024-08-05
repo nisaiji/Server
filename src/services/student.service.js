@@ -1,4 +1,5 @@
 import attendanceModel from "../models/attendance.model.js";
+import parentModel from "../models/parent.model.js";
 import studentModel from "../models/student.model.js";
 
 export async function checkStudentExist({ firstname, parentId }) {
@@ -299,6 +300,15 @@ export async function uploadStudentPhoto({studentId,photo}){
   try {
     const student = studentModel.findByIdAndUpdate(studentId,{photo});
     return student;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+export async function checkPhoneAlreadyExists({parentId,phone}){
+  try {
+    const parent = await parentModel.findOne({phone, _id: { $ne: parentId }});
+    return parent;
   } catch (error) {
     throw error;    
   }

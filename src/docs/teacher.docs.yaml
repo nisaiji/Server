@@ -342,3 +342,33 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+
+
+  /teacher/photo-upload: 
+    put:
+      security:
+        - Authorization: []    
+      tags:
+      - "Teacher"
+      summary: "Upload photo of teacher"
+      description: "This API will allow teacher to upload their photo."
+      produces:
+      - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 photo:
+                   type: string
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
