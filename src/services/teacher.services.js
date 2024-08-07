@@ -148,34 +148,42 @@ export async function findClassTeacherById(id) {
     return error;
   }
 }
-export async function updateClassTeacherById({
-  id,
-  firstname,
-  lastname,
-  dob,
-  phone,
-  bloodGroup,
-  gender,
-  university,
-  degree,
-  address,
-  email
-}) {
+export async function updateClassTeacherById(data) {
   try {
-    const teacher = await teacherModel.findByIdAndUpdate(id, {
-      firstname,
-      lastname,
-      dob,
-      phone,
-      bloodGroup,
-      gender,
-      university,
-      degree,
-      address,
-      email
-    });
+    const{id,firstname,lastname,dob,phone,bloodGroup,gender,university,degree,address,email} = data;
+    const teacher = await teacherModel.findById(id);
+    if(!teacher){
+      throw new Error("Teacher not found");
+    }
+
+    teacher["firstname"] = firstname;
+    teacher["lastname"] = lastname;
+    teacher["phone"] = phone;
+
+    if(dob){
+      teacher["dob"] = dob;
+    }
+    if(bloodGroup){
+      teacher["bloodGroup"] = bloodGroup;
+    }
+    if(gender){
+      teacher["gender"] = gender;
+    }
+    if(university){
+      teacher["university"] = university;
+    }
+    if(degree){
+      teacher["degree"] = degree;
+    }
+    if(address){
+      teacher["address"] = address;
+    }
+    if(email){
+      teacher["email"] = email;
+    }
+
     return teacher;
-  } catch (error) {
+  } catch (error){
     throw error;
   }
 }

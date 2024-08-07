@@ -61,22 +61,16 @@ export async function adminRegisterParentController(req, res) {
 export async function loginParentController(req, res) {
   try {
     const { user, password } = req.body;
-    const parent = await findParent(user);
+    const parent = await findParent({user});
     if (!parent) {
-      return res.send(error(404, "unauthorized user"));
+      return res.send(error(404, "Unauthorized user"));
     }
     const matchPassword = await checkPasswordMatch(password, parent.password);
     if (!matchPassword) {
-      return res.send(error(404, "unauthorized user"));
+      return res.send(error(404, "Unauthorized user"));
     }
     const email = parent["email"] || "abc@email.com";
-    const accessToken = generateAccessToken({
-      role: "parent",
-      parentId: parent["_id"],
-      phone: parent["phone"],
-      adminId:parent["admin"],
-      email
-    });
+    const accessToken = generateAccessToken({role: "parent",parentId: parent["_id"],phone: parent["phone"],adminId:parent["admin"],email});
     const isLoginAlready = parent["isLoginAlready"];
     parent["isLoginAlready"] = true;
     await parent.save();
@@ -178,16 +172,16 @@ export async function authUpdateParentController(req, res) {
   try {
     const { username, password } = req.body;
     const parentId = req.parentId;
-    const parent = await findParentById(parentId);
+    const parent = await findParentById({id:parentId});
     if (!parent) {
-      return res.send(error(400, "parent doesn't exists"));
+      return res.send(error(400, "Parent doesn't exists"));
     }
     const hashedPassword = await hashPassword(password);
     const updatedParent = await updateAuthParent({id: parentId,username,password: hashedPassword});
     if (updatedParent instanceof Error) {
-      return res.send(error(400, "parent auth details can't be updated"));
+      return res.send(error(400, "Parent auth details can't be updated"));
     }
-    return res.send(success(200, "parent auth details updated successfully"));
+    return res.send(success(200, "Parent auth details updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -197,15 +191,15 @@ export async function profileUpdateParentController(req, res) {
   try {
     const { phone,email } = req.body;
     const parentId = req.parentId;
-    const parent = await findParentById(parentId);
+    const parent = await findParentById({id:parentId});
     if (!parent) {
-      return res.send(error(400, "parent doesn't exists"));
+      return res.send(error(400, "Parent doesn't exists"));
     }
     const updatedParent = await updateProfileParent({ id: parentId, phone,email });
     if (updatedParent instanceof Error) {
-      return res.send(error(400, "parent auth details can't be updated"));
+      return res.send(error(400, "Parent auth details can't be updated"));
     }
-    return res.send(success(200, "parent profile details updated successfully"));
+    return res.send(success(200, "Parent profile details updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -215,15 +209,15 @@ export async function profileInfoUpdateParentController(req, res) {
   try {
     const { fullname,age,gender,address,qualification,occupation } = req.body;
     const parentId = req.parentId;
-    const parent = await findParentById(parentId);
+    const parent = await findParentById({id:parentId});
     if (!parent) {
-      return res.send(error(400, "parent doesn't exists"));
+      return res.send(error(400, "Parent doesn't exists"));
     }
     const updatedParent = await updateProfileInfoParent({ id: parentId, fullname,age,gender,address,qualification,occupation});
     if (updatedParent instanceof Error) {
-      return res.send(error(400, "parent profile details can't be updated"));
+      return res.send(error(400, "Parent profile details can't be updated"));
     }
-    return res.send(success(200, "parent profile details updated successfully"));
+    return res.send(success(200, "Parent profile details updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -232,7 +226,7 @@ export async function profileInfoUpdateParentController(req, res) {
 export async function getChildrenParentController(req, res) {
   try {
     const parentId = req.parentId;
-    const children = await getChildrenOfParent(parentId);
+    const children = await getChildrenOfParent({id:parentId});
     return res.send(success(200, children));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -247,7 +241,7 @@ export async function getHolidayEventParentController(req,res){
     const startOfMonth = new Date(year, month, 1).getTime();
     const endOfMonth = new Date(year, month + 1, 0).getTime();
     if(!adminId){
-      return res.send(error(400,"admin id is required"));
+      return res.send(error(400,"Admin id is required"));
     }
     const holidayEvents = await getAllEventHolidays({adminId,startOfMonth,endOfMonth});
 
@@ -283,9 +277,9 @@ export async function passwordChangeController(req,res){
 export async function getParentController(req,res){
   try {
     const parentId = req.parentId;
-    const parent = await getParentById(parentId);
+    const parent = await getParentById({id:parentId});
     if(!parent){
-      return res.send(error(400,"user not found."));
+      return res.send(error(400,"Parent not found"));
     }  
     return res.send(success(200,parent));  
   } catch (err) {

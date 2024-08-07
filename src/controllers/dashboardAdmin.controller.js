@@ -1,5 +1,5 @@
 import { getHolidayEventsOfSchool, getParentCountOfSchool, getPresentCountOfSchool, getTeacherCountOfSchool, getTotalStudentCountOfSchool } from "../services/dashboardAdmin.services.js";
-import { getAbsentStudentCount, getPresentStudentCount, getStudentCount } from "../services/student.service.js";
+import { getAbsentStudentCount, getPresentStudentCount, studentCountOfSectionService } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function getPresentStudentsController(req,res){
@@ -87,7 +87,7 @@ export async function weeklyAttendanceOfSchoolController(req,res){
       })
     );
 
-    const totalStudentCount = await getStudentCount({ sectionId});
+    const totalStudentCount = await studentCountOfSectionService({ sectionId});
     return res.send(success(200, { weeklyAttendance, totalStudentCount }));  
   } catch (err) {
     return res.send(error(500,err.message));    
@@ -121,7 +121,7 @@ export async function monthlyAttendanceOfSchoolController(req,res){
         return presentStudentCount;
       })
     );
-    const totalStudentCount = await getStudentCount({ sectionId });
+    const totalStudentCount = await studentCountOfSectionService({ sectionId });
     return res.send(success(200, { monthlyAttendance, totalStudentCount }));
   } catch (err) {
     return res.send(error(500, err.message));

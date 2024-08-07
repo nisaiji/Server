@@ -14,6 +14,10 @@ const parentSchema = mongoose.Schema({
   gender:{
     type:String
   },
+  isActive:{
+    type:Boolean,
+    default:true
+  },
   address:{
     type:String
   },

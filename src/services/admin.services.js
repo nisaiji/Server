@@ -72,9 +72,9 @@ export async function findAdminByID(id) {
   }
 }
 
-export async function updateAdminById({adminId, schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName }){
+export async function updateAdminById({adminId, schoolName,principal,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName }){
   try {
-    const admin = await adminModel.findByIdAndUpdate(adminId,{ schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName });
+    const admin = await adminModel.findByIdAndUpdate(adminId,{ schoolName,principal,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName });
     return admin;
   } catch (error) {
     throw error;    

@@ -41,7 +41,7 @@ export async function profileUpdateAdminController(req, res) {
       return res.send(error(400,"Admin not exists"));
     }
 
-    const updatedAdmin = await updateAdminById({adminId, schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName });
+    const updatedAdmin = await updateAdminById({adminId, schoolName,principal:principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName });
 
     if (updatedAdmin instanceof Error) {
       return res.send(error(400, "Admin couldn't be updated"));

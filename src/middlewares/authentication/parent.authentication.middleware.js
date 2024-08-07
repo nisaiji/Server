@@ -11,9 +11,9 @@ export async function parentAuthentication(req, res, next) {
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
-    const parent = await findParentById(decoded.parentId);
+    const parent = await findParentById({id:decoded.parentId});
     if (!parent) {
-      return res.send(error(404, "parent doesn't exists"));
+      return res.send(error(404, "Parent doesn't exists"));
     }
     req.parentId = decoded.parentId;
     req.adminId = decoded.adminId;

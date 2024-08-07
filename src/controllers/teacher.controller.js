@@ -187,17 +187,7 @@ export async function profileUpdateTeacherController(req, res) {
 export async function updateClassTeacherController(req, res) {
   try {
     const teacherId = req.params.teacherId;
-    const {
-      firstname,
-      lastname,
-      dob,
-      phone,
-      bloodGroup,
-      gender,
-      university,
-      degree,
-      email
-    } = req.body;
+    const {firstname,lastname,dob,phone,bloodGroup,gender,university,degree,email} = req.body;
     let {address} = req.body;
     const classTeacher = await findClassTeacherById(teacherId);
     if (!classTeacher) {
@@ -206,19 +196,7 @@ export async function updateClassTeacherController(req, res) {
     if(!address){
       address = classTeacher["address"]?classTeacher["address"]:"";
     }
-    const updatedTeacher = await updateClassTeacherById({
-      id: teacherId,
-      firstname,
-      lastname,
-      dob,
-      phone,
-      bloodGroup,
-      gender,
-      university,
-      degree,
-      address,
-      email
-    });
+    const updatedTeacher = await updateClassTeacherById({id: teacherId,firstname,lastname,dob,phone,bloodGroup,gender,university,degree,address,email});
     return res.send(success(200, "class teacher updated successfully"));
   } catch (err) {
     return res.send(error(500, err.message));

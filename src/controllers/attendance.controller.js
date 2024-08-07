@@ -1,5 +1,5 @@
 import {checkAttendanceAlreadyMarked,checkAttendanceAlreadyMarkedByParent,checkAttendanceMarkedByParent,checkAttendanceMarkedByTeacher,checkHolidayEvent,createAttendance,findAttendanceById,findTotalMonthlyAttendanceCountOfSection,getMisMatchAttendance,getMonthlyAttendance,getMonthlyPresentCount,getTotalMonthlyAttendanceCount,getTotalYearlyAttendanceCount,getYearlyPresentCount,markAttendanceByParent,markAttendanceByTeacher, updateAttendance} from "../services/attendance.service.js";
-import {findStudentById,getAbsentStudentCount,getPresentStudentCount,getStudentCount} from "../services/student.service.js";
+import {findStudentById,getAbsentStudentCount,getPresentStudentCount,studentCountOfSectionService} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function markAttendanceController(req, res) {
@@ -20,9 +20,9 @@ export async function markAttendanceController(req, res) {
     const daysOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
     const day = daysOfWeek[date.getDay()];
 
-    // if (day === "Sunday") {
-    //   return res.send(error(400, "today is sunday"));
-    // }
+    if (day === "Sunday") {
+      return res.send(error(400, "today is sunday"));
+    }
 
     const holidayEvent = await checkHolidayEvent({adminId,startOfDay,endOfDay});
     if (holidayEvent) {
@@ -167,7 +167,7 @@ export async function attendanceDailyStatusController(req, res) {
     const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
     const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
  
-    const totalStudentCount = await getStudentCount({ sectionId });
+    const totalStudentCount = await studentCountOfSectionService({ sectionId });
     const presentStudentCount = await getPresentStudentCount({sectionId,startOfDay,endOfDay});
     const absentStudentCount = await getAbsentStudentCount({sectionId,startOfDay,endOfDay});
     return res.send(success(200, {totalStudentCount,presentStudentCount,absentStudentCount,}));
@@ -199,7 +199,7 @@ export async function attendanceWeeklyStatusController(req, res) {
       })
     );
 
-    const totalStudentCount = await getStudentCount({ sectionId});
+    const totalStudentCount = await studentCountOfSectionService({ sectionId});
     return res.send(success(200, { weeklyAttendance, totalStudentCount }));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -233,7 +233,7 @@ export async function attendanceMonthlyStatusController(req, res) {
         return presentStudentCount;
       })
     );
-    const totalStudentCount = await getStudentCount({ sectionId });
+    const totalStudentCount = await studentCountOfSectionService({ sectionId });
     return res.send(success(200, { monthlyAttendance, totalStudentCount }));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -281,27 +281,6 @@ export async function updateAttendanceController(req,res){
     return res.send(error(500,err.message)) ;   
   }
 }
-
-// export async function updateAttendanceController(req,res){
-//   try {
-//     const{attendanceId,attendance} = req.body;
-//     const attendanceInstance = await findAttendanceById(attendanceId);
-//     if(!(attendance==="present" || attendance==="absent")){
-//       return res.send(error(400,"invalid attendance value"));
-//     }
-//     if(!attendanceInstance){
-//       return res.send(error(400,"attendance is not registered"));
-//     }
-//     const updatedAttendance = await updateAttendance({attendanceId,attendance});
-//     if(updatedAttendance instanceof Error){
-//       return res.send(error(400,"can't update attendance"));
-//     }
-//     return res.send(success(200,"attendance updated successfully"))
-    
-//   } catch (err) {
-//     return res.send(error(500,err.message)) ;   
-//   }
-// }
 
 export async function parentMonthlyAttendanceStatusController(req, res) {
   try {

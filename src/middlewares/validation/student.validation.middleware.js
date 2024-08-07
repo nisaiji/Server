@@ -133,9 +133,7 @@ export async function deleteStudentValidation(req, res, next) {
   try {
     try {
       const studentId = req.params.studentId;
-      const { error: schemaError } = deleteStudentSchema.validate({
-        studentId,
-      });
+      const { error: schemaError } = deleteStudentSchema.validate({studentId});
       if (schemaError) {
         return res.send(error(400, schemaError.details[0].message));
       }
@@ -195,7 +193,7 @@ export async function parentUpdateStudentValidation(req,res,next){
 
 export async function studentParentUpdateStudentValidation(req,res,next){
   try {
-    const {rollNumber,firstname,lastname,gender,bloodGroup,dob,address,parentFullname,parentGender,parentAge,parentEmail,parentPhone,parentQualification,parentOccupation,parentAddress} = req.body;
+    const {firstname,lastname,gender,bloodGroup,dob,address,parentFullname,parentGender,parentAge,parentEmail,parentPhone,parentQualification,parentOccupation,parentAddress} = req.body;
     const { error: schemaError } = studentParentUpdateStudentSchema.validate({rollNumber,firstname,lastname,gender,bloodGroup,dob,address,parentFullname,parentGender,parentAge,parentEmail,parentPhone,parentQualification,parentOccupation,parentAddress});
   
     if (schemaError){

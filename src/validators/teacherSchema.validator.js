@@ -100,7 +100,7 @@ const teacherRegisterSchema = Joi.object({
     })
 });
 
-const teacherUpdateSchema = Joi.object({
+const  teacherUpdateSchema = Joi.object({
   teacherId: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .required()
@@ -127,26 +127,6 @@ const teacherUpdateSchema = Joi.object({
       "string.pattern.base": "Invalid phone number format.",
       "string.length": "Phone number must be 10 characters.",
       "any.required": "Phone number is required."
-    }),
-  dob: Joi.string().required().messages({
-    "any.required": "date of birth is required.",
-  }),
-  bloodGroup: Joi.string().required().messages({
-    "any.required": "blood group is required."
-  }),
-  gender: Joi.string().required().messages({
-    "any.required": "gender is required."
-  }),
-  university: Joi.string().required().messages({
-    "any.required": "university is required."
-  }),
-  degree: Joi.string().required().messages({
-    "any.required": "degree is required."
-  }),
-  address: Joi.string(),
-  email: Joi.string().email({minDomainSegments: 2,tlds: { allow: ["com", "net", "org", "io", "co"] }}).required().messages({
-      "string.email": "Invalid email format.",
-      "any.required":"email is required"
     }),
 });
 const teacherUpdationSchema = Joi.object({

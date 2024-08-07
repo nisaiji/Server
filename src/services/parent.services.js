@@ -30,8 +30,9 @@ export async function updateParent({fullname,phone}){
     throw error;
   }
 }
-export async function updateParentInfo({id,fullname,gender,age,email,phone,qualification,occupation,address}){
+export async function updateParentInfo(data){
   try {
+    const {id,fullname,gender,age,email,phone,qualification,occupation,address} = data;
     const parent = await parentModel.findByIdAndUpdate(id,{fullname,gender,age,email,phone,qualification,occupation,address});
     return parent;
   } catch (error) {
@@ -40,9 +41,11 @@ export async function updateParentInfo({id,fullname,gender,age,email,phone,quali
 }
 
 
-export async function deleteParentById(parentId){
+export async function diActivateParentByIdService(data){
   try {
-    const parent = await parentModel.findByIdAndDelete(parentId);
+    const {id} = data;
+    console.log("Id "+id)
+    const parent = await parentModel.findByIdAndUpdate(id,{isActive:false});
     return parent;
   } catch (error) {
     throw error;    
@@ -120,12 +123,13 @@ export async function findParentByPhoneNo(phoneNo) {
   }
 }
 
-export async function findParentById(_id) {
+export async function findParentById(data) {
   try {
-    const parent = await parentModel.findById({ _id });
+    const {id} = data;
+    const parent = await parentModel.findById({ _id:id, isActive:true });
     return parent;
   } catch (error) {
-    return error;
+    throw error;
   }
 }
 
@@ -147,8 +151,9 @@ export async function updateAuthParent({id,username,password}){
     throw error;
   }
 }
-export async function updateProfileParent({id,phone,email}){
+export async function updateProfileParent(data){
   try {
+    const{id,phone,email} = data;
     const parent = await parentModel.findByIdAndUpdate(id , {phone,email});
     return parent;
   } catch (error) {
@@ -165,9 +170,10 @@ export async function updateProfileInfoParent({id,fullname,age,gender,address,qu
   }
 }
 
-export async function findParent(user){
+export async function findParent(data){
   try {
-    const parent = await parentModel.findOne({$or:[{username:user},{email:user},{phone:user}]})    
+    const {user} = data;
+    const parent = await parentModel.findOne({$or:[{username:user},{email:user},{phone:user}],isActive:true})    
     return parent;
   } catch (error) {
     throw error;
@@ -187,8 +193,9 @@ export async function checkStudentAlreadyLinkedToParent(studentId) {
   }
 }
 
-export async function getChildrenOfParent(parentId){
+export async function getChildrenOfParent(data){
   try {
+    const{id} = data;
     const children = await studentModel.find({parent:parentId}).populate({path:"section",select:"name"}).populate({path:"classId",select:"name"});
     return children;
   } catch (error) {
@@ -206,9 +213,10 @@ export async function getAllEventHolidays({adminId,startOfMonth,endOfMonth }){
   }
 }
 
-export async function getParentById(id){
+export async function getParentById(data){
   try {
-    const parent = await parentModel.findById(id).select({"password":0});
+    const {id} = data;
+    const parent = await parentModel.findOne({id,isActive:true}).select({"password":0});
     return parent;
   } catch (error) {
     throw error;

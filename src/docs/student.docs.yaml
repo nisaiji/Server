@@ -172,7 +172,7 @@ paths:
       description: "This API will allow admin to get a list of section students."
       produces:
       - "application/json"
-      parameters:
+      parameters:   
        - in: path
          name: sectionId
          required: true

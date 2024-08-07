@@ -12,6 +12,10 @@ const studentSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  isActive:{
+    type:Boolean,
+    default: true
+  },
   gender: {
     type: String,
     required:true
