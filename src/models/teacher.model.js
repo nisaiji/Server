@@ -56,7 +56,3 @@ const teacherSchema = mongoose.Schema({
 const teacherModel = mongoose.model("teacher", teacherSchema);
 
 export default teacherModel;
-
-
-
-

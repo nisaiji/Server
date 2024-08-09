@@ -16,10 +16,11 @@ export async function parentForgetPasswordController(req,res){
   }
 }
 
-export async function teacherForgetPasswordController(req,res){
+export async function teacherForgetPasswordEvent(req,res){
   try {
+    const{phone,className,sectionName} = req.body;
     
-  } catch (err) {
+  } catch (err){
     return res.send(error(500,err.message));
   }
 }

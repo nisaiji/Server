@@ -224,7 +224,6 @@ export async function searchStudentByName(data){
   }
 }
 
-
 export async function getStudentMonthlyAttendanceCount({studentId , regex}){
   try {
     console.log({regex})

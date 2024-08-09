@@ -20,6 +20,7 @@ teacherRouter.get("/unassigned-teachers",adminAuthentication, getUnassignedTeach
 teacherRouter.put("/admin-teacher/:teacherId", adminAuthentication,registerTeacherValidation, updateTeacherController);
 teacherRouter.put("/password-change", classTeacherAuthentication, changePasswordTeacherController);
 teacherRouter.put("/photo-upload",classTeacherAuthentication,updloadPhotoTeacherController);
+teacherRouter.post("/forget-password")
 
 
 export default teacherRouter;
