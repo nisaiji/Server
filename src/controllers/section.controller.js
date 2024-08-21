@@ -1,7 +1,7 @@
 import {checkClassExistById,checkSectionExist,createSection,deleteSection,findSectionById,
   findSectionInfoById,
   getAllSection,getClassSections} from "../services/section.services.js";
-import {findClassTeacherById,findTeacherById} from "../services/teacher.services.js";
+import { getTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerSectionController(req, res) {
@@ -17,11 +17,11 @@ export async function registerSectionController(req, res) {
       return res.send(error(400, "section name already exist"));
     }
     const section = await createSection(name, teacherId, classId, adminId);
-    const classTeacher = await findTeacherById(teacherId);
+    const classTeacher = await getTeacherService({_id:teacherId, isActive:true});
     if (!classTeacher) {
       return res.send(error(400, "cordinator doesn't exist"));
     }
-    classTeacher?.section?.push(section["_id"]);
+    classTeacher.section = section["_id"];
     classTeacher.isClassTeacher = true;
     await classTeacher.save();
     existingClass["section"]?.push(section["_id"]);
@@ -50,7 +50,7 @@ export async function replaceTeacherController(req, res) {
     if (!section) {
       return res.send(error(400, "section doesn't exists"));
     }
-    const teacher = await findTeacherById(teacherId);
+    const teacher = await getTeacherByIdService(teacherId);
     if (!teacher) {
       return res.send(error(400, "teacher doesn't exists"));
     }

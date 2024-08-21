@@ -7,6 +7,7 @@ import router from "./src/routers/index.router.js";
 import { config } from "./src/config/config.js";
 import cookieParser from "cookie-parser";
 import swaggerDocs from "./swagger.js";
+import 'module-alias/register.js'
 const PORT = config.port || 4000;
 
 const app = express();

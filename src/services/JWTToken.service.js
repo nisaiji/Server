@@ -4,7 +4,7 @@ import { config } from "../config/config.js";
 
 const secretKey = config.accessTokenSecretKey || "ThisIsASecretKeyForJWTToken";
 
-export  function generateAccessToken(data){
+export  function getAccessTokenService(data){
     try {
         const token = Jwt.sign(data, secretKey,{expiresIn:'1d'});
         return token;

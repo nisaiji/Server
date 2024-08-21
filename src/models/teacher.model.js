@@ -22,7 +22,12 @@ const teacherSchema = mongoose.Schema({
     type: String
   },
   email: {
-    type: String
+    type: String,
+    sparse: true, 
+  },
+  isActive:{
+    type: Boolean,
+    default: true
   },
   gender: {
     type: String
@@ -39,6 +44,7 @@ const teacherSchema = mongoose.Schema({
   },
   phone: {
     type: String,
+    unique:true,
     required: true
   },
   address:{
@@ -46,6 +52,11 @@ const teacherSchema = mongoose.Schema({
   },  
   photo:{
     type: String,
+  },
+  section:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "section",
+    default: null
   },
   admin: {
     type: mongoose.Schema.Types.ObjectId,

@@ -1,26 +1,19 @@
 import express from "express";
-import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
-import { classTeacherAuthorization } from "../middlewares/authorization/classTeacher.authorization.middleware.js";
-import { markPresentValidation } from "../middlewares/validation/attendance.validation.middleware.js";
-import { markAttendanceController,checkAttendaceMarkedController,attendanceDailyStatusController, attendanceWeeklyStatusController, attendanceMonthlyStatusController, parentMarkAttendanceController, getMisMatchAttendanceController, parentMonthlyAttendanceStatusController, checkParentAttendaceMarkedController, updateAttendanceController , parentMonthlyAttendanceCountController, parentYearlyAttendanceCountController } from "../controllers/attendance.controller.js";
-import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
+import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
+import { checkAttendaceMarkedController, getMisMatchAttendanceController, checkParentAttendaceMarkedController, updateAttendanceController, attendanceStatusOfSectionController, attendanceCountOfStudentController, attendanceByTeacherController, attendanceByParentController } from "../controllers/attendance.controller.js";
+import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
+import { markAttendanceByTeacherValidation } from "../middlewares/validation/teacher.validation.middleware.js";
+ 
+const attendanceRouter = express.Router();  
 
-const attendanceRouter = express.Router(); 
+attendanceRouter.post("/teacher", teacherAuthenticate, attendanceByTeacherController);
+attendanceRouter.post("/parent",parentAuthenticate,attendanceByParentController);
+attendanceRouter.put("/teacher", teacherAuthenticate,updateAttendanceController);
+attendanceRouter.get("/mismatch",teacherAuthenticate,getMisMatchAttendanceController);
+attendanceRouter.get("/teacher/is-marked",teacherAuthenticate,checkAttendaceMarkedController);
+attendanceRouter.get("/parent/is-marked/:studentId",parentAuthenticate,checkParentAttendaceMarkedController);
+attendanceRouter.get("/status",teacherAuthenticate,attendanceStatusOfSectionController);
+attendanceRouter.post("/parent/count",parentAuthenticate,attendanceCountOfStudentController)
+attendanceRouter.post("/teacher/count",teacherAuthenticate,attendanceCountOfStudentController)
 
-attendanceRouter.post("/mark-attendance/:sectionId", classTeacherAuthentication,markAttendanceController);
-attendanceRouter.post("/parent-mark-attendance/",parentAuthentication,parentMarkAttendanceController);
-attendanceRouter.put("/update-attendance/", classTeacherAuthentication,updateAttendanceController);
-attendanceRouter.get("/mismatch-attendance/:sectionId",classTeacherAuthentication,getMisMatchAttendanceController);
-attendanceRouter.get("/check-attendance-marked/:sectionId",classTeacherAuthentication,checkAttendaceMarkedController);
-attendanceRouter.get("/check-parent-attendance-marked/:studentId",parentAuthentication,checkParentAttendaceMarkedController);
-attendanceRouter.get("/daily-status/:sectionId",classTeacherAuthentication,attendanceDailyStatusController);
-attendanceRouter.get("/weekly-status/:sectionId",classTeacherAuthentication,attendanceWeeklyStatusController);
-attendanceRouter.get("/monthly-status/:sectionId",classTeacherAuthentication,attendanceMonthlyStatusController);
-attendanceRouter.get("/parent-monthly-attendance-status/:studentId/:month",parentAuthentication,parentMonthlyAttendanceStatusController)
-attendanceRouter.post("/parent-monthly-attendance-count",parentAuthentication,parentMonthlyAttendanceCountController)
-attendanceRouter.post("/parent-yearly-attendance-count",parentAuthentication,parentYearlyAttendanceCountController)
-attendanceRouter.post("/teacher-monthly-attendance-count",classTeacherAuthentication,parentMonthlyAttendanceCountController)
-attendanceRouter.post("/teacher-yearly-attendance-count",classTeacherAuthentication,parentYearlyAttendanceCountController)
-
-
-export default attendanceRouter
+export default attendanceRouter 

@@ -5,20 +5,18 @@ const sectionSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  studentCount:{
+    type: Number,
+    default: 0
+  },
   classId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "class"
   },
-  classTeacher: {
+  teacher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "teacher"
   },
-  students: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "student"
-    }
-  ],
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"

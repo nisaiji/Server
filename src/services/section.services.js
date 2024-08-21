@@ -3,6 +3,15 @@ import sectionModel from "../models/section.model.js";
 import studentModel from "../models/student.model.js";
 import teacherModel from "../models/teacher.model.js";
 
+export async function getSectionByIdService(id){
+  try {
+    const section = await sectionModel.findById(id);
+    return section;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function checkSectionExist(name, classId, adminId) {
   try {
     console.log({ name, classId, adminId });
@@ -21,7 +30,7 @@ export async function createSection(name, classTeacher, classId, admin) {
     const section = await sectionModel.create({
       name,
       classId,
-      classTeacher,
+      teacher:classTeacher,
       admin,
     });
     return section;
@@ -69,14 +78,12 @@ export async function getClassSections(classId) {
   }
 }
 
-export async function findSectionByClassTeacherId(id) {
+export async function getSectionByTeacherId(id) {
   try {
-    // console.log(id);
-    const section = await sectionModel.findOne({ classTeacher: id });
-    // console.log(section);
+    const section = await sectionModel.findOne({ teacher: id });
     return section;
   } catch (error) {
-    return error;
+    throw error;
   }
 }
 

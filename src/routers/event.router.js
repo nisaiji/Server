@@ -1,19 +1,12 @@
-import express from 'express';
-import { parentAuthentication } from '../middlewares/authentication/parent.authentication.middleware.js';
-import { classTeacherAuthentication } from '../middlewares/authentication/classTeacher.authentication.middleware.js';
-import {teacherForgetPasswordEvent} from "../controllers/event.controller.js";
-import { adminAuthentication } from '../middlewares/authentication/admin.authentication.middleware.js';
-import { parentForgetPasswordValidation } from '../middlewares/validation/event.validation.middleware.js';
-import { parentForgetPasswordMiddleware, teacherForgetPasswordMiddleware } from '../middlewares/authorization/event.authorization.middleware.js';
-
+import express from "express";
+import { teacherForgetPasswordEvent } from "../controllers/event.controller.js";
 
 const eventRouter = express.Router();
 
-eventRouter.post("/forget-password",teacherForgetPasswordEvent);
+eventRouter.post("/forget-password", teacherForgetPasswordEvent);
 
-// eventRouter.post("/parent-forget-password",parentAuthentication,parentForgetPasswordValidation,parentForgetPasswordMiddleware, parentForgetPasswordController);
+// eventRouter.post("/parent-forget-password",parentAuthenticate,parentForgetPasswordValidation,parentForgetPasswordMiddleware, parentForgetPasswordController);
 // eventRouter.post("/teacher-forget-password",teacherForgetPasswordMiddleware, teacherForgetPasswordController);
-// eventRouter.get("/admin-forget-password-requests",adminAuthentication, adminAllForgetPasswordRequestsController);
-
+// eventRouter.get("/admin-forget-password-requests",adminAuthenticate, adminAllForgetPasswordRequestsController);
 
 export default eventRouter;

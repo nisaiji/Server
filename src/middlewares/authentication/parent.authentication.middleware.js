@@ -3,7 +3,7 @@ import { error } from "../../utills/responseWrapper.js";
 import Jwt from "jsonwebtoken";
 import { config } from "../../config/config.js";
 
-export async function parentAuthentication(req, res, next) {
+export async function parentAuthenticate(req, res, next) {
   try {
     const token = req.header("Authorization");
     if (!token) {

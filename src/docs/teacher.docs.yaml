@@ -1,5 +1,5 @@
 paths:
-  /teacher/register:
+  /teacher:
     post:
       security:
         - Authorization: []
@@ -19,6 +19,43 @@ paths:
                 lastname:
                   type: string
                 phone:
+                  type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+    put:
+      security:
+        - Authorization: []
+      summary: "To update profile-details of teacher"
+      description: "This API will udpate profile-details of a teacher. It requires class teacher login token."
+      tags:
+      - "Teacher"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+                dob:
+                  type: string
+                bloodGroup:
+                  type: string
+                gender:
+                  type: string
+                university:
+                  type: string
+                degree:
                   type: string
       responses:
         200:
@@ -53,7 +90,62 @@ paths:
         500:
           description: "Server error"
 
-  /teacher/auth-update:
+  /teacher/all:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get all teachers"
+      description: "This API will allow admin to get all teachers. It requires admin login token."
+      tags:
+      - "Teacher"
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/{teacherId}:
+    delete:
+      security:
+        - Authorization: []
+      summary: "To delete a teacher"
+      description: "This API will allow admin to delete a teacher. It requires admin login token."
+      tags:
+      - "Teacher"
+      parameters:
+       - in: path
+         name: teacherId
+         required: true
+         description: ID of the teacher
+         schema:
+            type: string
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+  
+  /teacher/unassigned:
+    get:
+      security:
+        - Authorization: []
+      summary: "To get a unassigned teachers"
+      description: "This API will allow admin to get a list of unassigned teachers. It requires admin login token."
+      tags:
+      - "Teacher"
+      responses:
+        200:
+          description: "teacher registered successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
+  /teacher/auth:
     put:
       security:
         - Authorization: []
@@ -107,73 +199,7 @@ paths:
         500:
           description: "Server error"
 
-  /teacher/profile-update:
-    put:
-      security:
-        - Authorization: []
-      summary: "To update profile-details of teacher"
-      description: "This API will udpate profile-details of a teacher. It requires class teacher login token."
-      tags:
-      - "Teacher"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                firstname:
-                  type: string
-                lastname:
-                  type: string
-                phone:
-                  type: string
-                dob:
-                  type: string
-                bloodGroup:
-                  type: string
-                gender:
-                  type: string
-                university:
-                  type: string
-                degree:
-                  type: string
-      responses:
-        200:
-          description: "teacher registered successfully"
-        400:
-          description: "Unauthorized request"
-        500:
-          description: "Server error"
-
-  /teacher/password-change:
-    put:
-      security:
-        - Authorization: []
-      summary: "To update password of teacher"
-      description: "This API will udpate password of a teacher. It requires teacher login token."
-      tags:
-      - "Teacher"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                oldPassword:
-                  type: string
-                newPassword:
-                  type: string
-      responses:
-        200:
-          description: "password updated successfully"
-        400:
-          description: "Unauthorized request"
-        500:
-          description: "Server error"
-
-  /teacher/admin-class-teacher/{teacherId}:
+  /teacher/admin/{teacherId}:
     put:
       security:
         - Authorization: []
@@ -211,115 +237,14 @@ paths:
         500:
           description: "Server error"
   
-  /teacher/all:
-    get:
-      security:
-        - Authorization: []
-      summary: "To get all teachers"
-      description: "This API will allow admin to get all teachers. It requires admin login token."
-      tags:
-      - "Teacher"
-      responses:
-        200:
-          description: "teacher registered successfully"
-        400:
-          description: "Unauthorized request"
-        500:
-          description: "Server error"
-
-  /teacher/{teacherId}:
-    delete:
-      security:
-        - Authorization: []
-      summary: "To delete a teacher"
-      description: "This API will allow admin to delete a teacher. It requires admin login token."
-      tags:
-      - "Teacher"
-      parameters:
-       - in: path
-         name: teacherId
-         required: true
-         description: ID of the teacher
-         schema:
-            type: string
-      responses:
-        200:
-          description: "teacher registered successfully"
-        400:
-          description: "Unauthorized request"
-        500:
-          description: "Server error"
-  
-  /teacher/get/{teacherId}:
-    get:
-      security:
-        - Authorization: []
-      summary: "To get a teacher"
-      description: "This API will allow admin to get a teacher. It requires admin login token."
-      tags:
-      - "Teacher"
-      parameters:
-       - in: path
-         name: teacherId
-         required: true
-         description: ID of the teacher
-         schema:
-            type: string
-      responses:
-        200:
-          description: "teacher registered successfully"
-        400:
-          description: "Unauthorized request"
-        500:
-          description: "Server error"
-  
-  /teacher/teacher-list:
-    get:
-      security:
-        - Authorization: []
-      summary: "To get a teacher list"
-      description: "This API will allow admin to get a teacher list. It requires admin login token."
-      tags:
-      - "Teacher"
-      responses:
-        200:
-          description: "teacher registered successfully"
-        400:
-          description: "Unauthorized request"
-        500:
-          description: "Server error"
-  
-  /teacher/unassigned-teachers:
-    get:
-      security:
-        - Authorization: []
-      summary: "To get a unassigned teachers"
-      description: "This API will allow admin to get a list of unassigned teachers. It requires admin login token."
-      tags:
-      - "Teacher"
-      responses:
-        200:
-          description: "teacher registered successfully"
-        400:
-          description: "Unauthorized request"
-        500:
-          description: "Server error"
-
-  /teacher/admin-teacher/{teacherId}:
+  /teacher/password-change:
     put:
       security:
         - Authorization: []
-      summary: Update a teacher's details
-      description: This API updates a teacher's details. It requires an admin login token.
+      summary: "To update password of teacher"
+      description: "This API will udpate password of a teacher. It requires teacher login token."
       tags:
-        - Teacher
-      parameters:
-        - in: path
-          name: teacherId
-          required: true
-          description: ID of the teacher
-          schema:
-            type: string
+      - "Teacher"
       requestBody:
         required: true
         content:
@@ -327,22 +252,17 @@ paths:
             schema:
               type: object
               properties:
-                firstname:
+                oldPassword:
                   type: string
-                lastname:
-                  type: string
-                phone:
+                newPassword:
                   type: string
       responses:
-        '200':
-          description: Teacher updated successfully
-        '400':
-          description: Bad request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Internal server error
-
+        200:
+          description: "password updated successfully"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
 
   /teacher/photo-upload: 
     put:

@@ -1,125 +1,9 @@
-import { findStudentById } from "../../services/student.service.js";
 import { error } from "../../utills/responseWrapper.js";
-import {
-  deleteStudentSchema,
-  parentUpdateStudentSchema,
-  registerStudentSchema,
-  studentAddToSectionSchema,
-  studentParentUpdateStudentSchema,
-  updateStudentSchema,
-} from "../../validators/studentSchema.validator.js";
-
-// export async function registerStudentValidation(req, res, next) {
-//   try {
-//     const {
-//       rollNumber,
-//       firstname,
-//       lastname,
-//       gender,
-//       age,
-//       phone,
-//       email,
-//       address,
-//     } = req.body;
-//     const { error: schemaError } = registerStudentSchema.validate({
-//       rollNumber,
-//       firstname,
-//       lastname,
-//       gender,
-//       age,
-//       email,
-//       phone,
-//       address,
-//     });
-
-//     if (schemaError) {
-//       return res.send(error(400, schemaError.details[0].message));
-//     }
-//     next();
-//   } catch (err) {
-//     return res.send(error(500, err.message));
-//   }
-// }
+import {deleteStudentSchema, registerStudentSchema, studentParentUpdateStudentSchema, updateStudentByAdminSchema,updateStudentByParentSchema,updateStudentByTeacherSchema} from "../../validators/studentSchema.validator.js";
 
 export async function registerStudentValidation(req, res, next) {
   try {
-    const {
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      parentName,
-      phone,
-      sectionId,
-      classId,
-    } = req.body;
-    const { error: schemaError } = registerStudentSchema.validate({
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      parentName,
-      phone,
-      sectionId,
-      classId,
-    });
-
-    if (schemaError) {
-      return res.send(error(400, schemaError.details[0].message));
-    }
-    next();
-  } catch (err) {
-    return res.send(error(500, err.message));
-  }
-}
-
-export async function adminUpdateStudentValidation(req, res, next) {
-  try {
-    const studentId = req.params.studentId;
-    const {
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      age,
-      phone,
-      email,
-      address,
-      sectionId,
-      classId,
-    } = req.body;
-    const { error: schemaError } = adminUpdateStudentSchema.validate({
-      studentId,
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      age,
-      email,
-      phone,
-      address,
-      sectionId,
-      classId,
-    });
-
-    if (schemaError) {
-      return res.send(error(400, schemaError.details[0].message));
-    }
-    next();
-  } catch (err) {
-    return res.send(error(500, err.message));
-  }
-}
-
-export async function addToSectionStudentValidation(req, res, next) {
-  try {
-    const studentId = req.params.studentId;
-    const { sectionId } = req.body;
-    // console.log()
-    const { error: schemaError } = studentAddToSectionSchema.validate({
-      studentId,
-      sectionId,
-    });
+    const { error: schemaError } = registerStudentSchema.validate(req.body);
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }
@@ -131,7 +15,6 @@ export async function addToSectionStudentValidation(req, res, next) {
 
 export async function deleteStudentValidation(req, res, next) {
   try {
-    try {
       const studentId = req.params.studentId;
       const { error: schemaError } = deleteStudentSchema.validate({studentId});
       if (schemaError) {
@@ -141,28 +24,11 @@ export async function deleteStudentValidation(req, res, next) {
     } catch (err) {
       return res.send(error(500, err.message));
     }
-  } catch (err) {
-    return res.send(error(500, err.message));
-  }
 }
 
-export async function updateStudentValidation(req, res, next) {
+export async function updateStudentByTeacherValidation(req, res, next) {
   try {
-    const {
-      firstname,
-      lastname,
-      gender,
-      parentName,
-      phone,
-    } = req.body;
-    const { error: schemaError } = updateStudentSchema.validate({
-      firstname,
-      lastname,
-      gender,
-      parentName,
-      phone,
-    });
-  
+    const { error: schemaError } = updateStudentByTeacherSchema.validate(req.body);
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }
@@ -172,35 +38,40 @@ export async function updateStudentValidation(req, res, next) {
   }
 }
 
-export async function parentUpdateStudentValidation(req,res,next){
+export async function updateStudentByAdminValidation(req, res, next) {
   try {
-    const {bloodGroup,dob,address} = req.body;
-    const { error: schemaError } = parentUpdateStudentSchema.validate({
-      bloodGroup,
-      dob,
-      address
-    });
-  
-    if (schemaError){
+    const { error: schemaError } = updateStudentByAdminSchema.validate(req.body);
+    if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }
     next();
-    
+  } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function updateStudentByParentValidation(req,res,next){
+  try {
+    const { error: schemaError } = updateStudentByParentSchema.validate(req.body);
+    if (schemaError){
+      return res.send(error(400, schemaError.details[0].message));
+    }
+    next(); 
   } catch (err) {
     return res.send(error(500,err.message));
   }
 }
 
+
+// ----------------------------------------------------------
+
 export async function studentParentUpdateStudentValidation(req,res,next){
   try {
-    const {firstname,lastname,gender,bloodGroup,dob,address,parentFullname,parentGender,parentAge,parentEmail,parentPhone,parentQualification,parentOccupation,parentAddress} = req.body;
-    const { error: schemaError } = studentParentUpdateStudentSchema.validate({rollNumber,firstname,lastname,gender,bloodGroup,dob,address,parentFullname,parentGender,parentAge,parentEmail,parentPhone,parentQualification,parentOccupation,parentAddress});
-  
+    const { error: schemaError } = studentParentUpdateStudentSchema.validate(req.body);
     if (schemaError){
       return res.send(error(400, schemaError.details[0].message));
     }
     next();
-    
   } catch (err) {
     return res.send(error(500,err.message));
   }

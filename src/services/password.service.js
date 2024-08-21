@@ -1,20 +1,21 @@
 import bcrypt from "bcrypt";
 
-export async function hashPassword(password) {
+export async function hashPasswordService(password) {
   try {
     const hashedPassword = await bcrypt.hash(password, 13);
     return hashedPassword;
   } catch (error) {
     return error;
   }
-}
+} 
 
-
-export async function checkPasswordMatch(password, encryptedPassword){
+export async function matchPasswordService(passwords) {
   try {
-    const matchPassword = await bcrypt.compare(password , encryptedPassword);
+    const{enteredPassword,storedPassword} = passwords;
+    console.log({enteredPassword,storedPassword})
+    const matchPassword = await bcrypt.compare(enteredPassword,storedPassword);
     return matchPassword;
   } catch (error) {
-    return error;    
+    throw error;
   }
 }

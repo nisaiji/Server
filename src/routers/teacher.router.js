@@ -1,28 +1,22 @@
 import express from "express";
-import {registerTeacherController,deleteTeacherController, loginClassTeacherController, getAllClassTeachersController,  getTeacherListController,  updateTeacherController, updateClassTeacherController,  getTeachersController,  getUnassignedTeacherController, authUpdateTeacherController, profileUpdateTeacherController, changePasswordTeacherController, authInfoUpdateTeacherController, updloadPhotoTeacherController } from "../controllers/teacher.controller.js";
-import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
-import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
-import {authInfoUpdateTeacherValidation, authUpdateTeacherValidation, deleteTeacherValidation, loginClassTeacherValidation,markTeacherAsClassTeacherValidation, profileUpdateTeacherValidation, registerTeacherValidation, updateClassTeacherValidation, updateTeacherValidation} from "../middlewares/validation/teacher.validation.middleware.js";
+import {registerTeacherController,deleteTeacherController,  updateTeacherController, changePasswordTeacherController, loginTeacherController, getAllTeacherOfAdminController, getTeacherController, getAllNonSectionTeacherController } from "../controllers/teacher.controller.js";
+import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
+import {emailPhoneUpdateTeacherValidation, loginTeacherValidation, photoUpdateTeacherValidation, registerTeacherValidation, updateTeacherValidation, UsernamePasswordUpdateTeacherValidation} from "../middlewares/validation/teacher.validation.middleware.js";
  
 const teacherRouter = express.Router();
 
-teacherRouter.post("/register", adminAuthentication, registerTeacherValidation,  registerTeacherController);
-teacherRouter.post("/login",loginClassTeacherValidation,loginClassTeacherController);
-teacherRouter.get("/all",adminAuthentication,getAllClassTeachersController);
-teacherRouter.put("/auth-update",classTeacherAuthentication,authUpdateTeacherValidation,authUpdateTeacherController); 
-teacherRouter.put("/auth-info-update",classTeacherAuthentication,authInfoUpdateTeacherValidation,authInfoUpdateTeacherController); 
-teacherRouter.put("/profile-update",classTeacherAuthentication,profileUpdateTeacherValidation,profileUpdateTeacherController); 
-teacherRouter.put("/admin-class-teacher/:teacherId",adminAuthentication,updateClassTeacherValidation, updateClassTeacherController);
-teacherRouter.delete("/:teacherId",adminAuthentication,deleteTeacherValidation,deleteTeacherController);
-teacherRouter.get("/get/:teacherId", adminAuthentication, getTeachersController);
-teacherRouter.get("/teacher-list",adminAuthentication,getTeacherListController);
-teacherRouter.get("/unassigned-teachers",adminAuthentication, getUnassignedTeacherController);
-teacherRouter.put("/admin-teacher/:teacherId", adminAuthentication,registerTeacherValidation, updateTeacherController);
-teacherRouter.put("/password-change", classTeacherAuthentication, changePasswordTeacherController);
-teacherRouter.put("/photo-upload",classTeacherAuthentication,updloadPhotoTeacherController);
-teacherRouter.post("/forget-password")
+teacherRouter.post("/", adminAuthenticate, registerTeacherValidation,  registerTeacherController);
+teacherRouter.post("/login", loginTeacherValidation, loginTeacherController);
+teacherRouter.get("/all", adminAuthenticate, getAllTeacherOfAdminController);
+teacherRouter.get("/unassigned", adminAuthenticate, getAllNonSectionTeacherController);
+teacherRouter.get("/:teacherId", adminAuthenticate, getTeacherController);
+teacherRouter.put("/auth", teacherAuthenticate, UsernamePasswordUpdateTeacherValidation, updateTeacherController); 
+teacherRouter.put("/auth-info-update", teacherAuthenticate, emailPhoneUpdateTeacherValidation, updateTeacherController); 
+teacherRouter.put("/", teacherAuthenticate, updateTeacherValidation, updateTeacherController); 
+teacherRouter.put("/admin/:teacherId", adminAuthenticate, updateTeacherValidation, updateTeacherController);
+teacherRouter.put("/password-change", teacherAuthenticate, changePasswordTeacherController);
+teacherRouter.put("/photo-upload", teacherAuthenticate, photoUpdateTeacherValidation, updateTeacherController);
+teacherRouter.delete("/:teacherId", adminAuthenticate, deleteTeacherController);
 
-
-export default teacherRouter;
-
-
+export default teacherRouter;   

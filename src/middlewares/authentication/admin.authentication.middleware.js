@@ -1,19 +1,19 @@
 import { error } from "../../utills/responseWrapper.js";
 import Jwt from "jsonwebtoken";
 import { config } from "../../config/config.js";
-import { findAdminByID } from "../../services/admin.services.js";
+import { getAdminService } from "../../services/admin.services.js";
 
-export async function adminAuthentication(req, res, next) {
+export async function adminAuthenticate(req, res, next) {
   try {
     const token = req.header("Authorization");
-    // console.log(token)
-    if (!token) {
-      return res.send(error(404, "Authorization token is required!"));
+    if (!token){
+      return res.send(error(404, "Authorization token is required"));
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
-    const admin = await findAdminByID(decoded.adminId);
-    if (!admin) {
+    const _id = decoded.adminId;
+    const admin = await getAdminService({_id, isActive:true});
+    if (!admin){
       return res.send(error(404, "admin doesn't exists"));
     }
     req.adminId = decoded.adminId;

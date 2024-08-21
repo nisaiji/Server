@@ -2,14 +2,8 @@ import { error } from "../../utills/responseWrapper.js";
 import { registerSectionSchema } from "../../validators/sectionSchema.validator.js";
 
 export async function registerSectionValidation(req, res, next) {
-  try {
-    const { name, teacherId, classId } = req.body;
-    const { error: schemaError } = registerSectionSchema.validate({
-      name,
-      teacherId,
-      classId
-    });
-
+  try {   
+    const { error: schemaError } = registerSectionSchema.validate(req.body);
     if (schemaError) {
       return res.send(error(400, schemaError.details[0].message));
     }

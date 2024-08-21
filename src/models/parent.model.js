@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-// import addressSchema from "./Schemas/address.schema";
 
 const parentSchema = mongoose.Schema({
   username:{

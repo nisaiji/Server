@@ -1,5 +1,5 @@
 paths:
-  /admin/register: 
+  /admin: 
     post:
       tags:
       - "Admin"
@@ -25,7 +25,7 @@ paths:
                    type: string
                  phone:
                    type: string
-                 adminName:
+                 username:
                    type: string
                  password:
                    type: string
@@ -38,38 +38,6 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
-
-  /admin/login: 
-    post:
-      tags:
-      - "Admin"
-      summary: "Login admin to system."
-      description: "This API will log in admin to the system."
-      operationId: "LoginAdmin"
-      produces:
-      - "application/json"
-      requestBody:
-         required: true
-         content:
-           application/json:
-             schema:
-               type: object
-               properties:
-                 email:
-                   type: string
-                 password:
-                   type: string
-      responses:
-        200:
-          description: "Successful"
-        422:
-          description: "Unprocessable Entity"
-        403:
-          description: "Forbidden"
-        500:
-          description: "Internal Server Error"
-
-  /admin/profile: 
     get:
       security: 
         - Authorization: []
@@ -89,7 +57,6 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
-
     put:
       security:
         - Authorization: []
@@ -122,7 +89,7 @@ paths:
                   type: string
                 email:
                   type: string
-                adminName:
+                username:
                   type: string
       responses:
         200:
@@ -132,7 +99,37 @@ paths:
         500:
           description: "Server error"
 
-  /admin/social-profile:
+  /admin/login: 
+    post:
+      tags:
+      - "Admin"
+      summary: "Login admin to system."
+      description: "This API will log in admin to the system."
+      operationId: "LoginAdmin"
+      produces:
+      - "application/json"
+      requestBody:
+         required: true
+         content:
+           application/json:
+             schema:
+               type: object
+               properties:
+                 email:
+                   type: string
+                 password:
+                   type: string
+      responses:
+        200:
+          description: "Successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /admin/social:
     put:
       security:
         - Authorization: []

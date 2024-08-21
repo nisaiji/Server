@@ -2,21 +2,69 @@ import mongoose from "mongoose";
 import attendanceModel from "../models/attendance.model.js";
 import parentModel from "../models/parent.model.js";
 import studentModel from "../models/student.model.js";
+import { getSectionByIdService } from "./section.services.js";
 
-export async function checkStudentExist(data) {
+
+
+export async function getStudentService(paramObj){
   try {
-    const { firstname, parentId } = data;
-    const student = await studentModel.findOne({$or: [{ $and: [{ firstname }, { parent: parentId }] }]});
+    const student = await studentModel.findOne(paramObj);
     return student;
-  } catch (error) {
-    throw error;
+  }catch (error) {
+    throw error;    
   }
 }
+
+export async function getStudentsService(paramObj){
+  try {
+    const students = await studentModel.find(paramObj);
+    return students;
+  } catch (error) {
+    throw error;    
+  }
+
+}
+
+// export async function createStudentService(data) {
+//   try {
+//     const{rollNumber,firstname,lastname,gender,adminId,parentId,sectionId,classId} = data;
+//     // const student = await studentModel.create({rollNumber,firstname,lastname,gender,admin: adminId,parent: parentId,section: sectionId,classId});
+//     const student = await studentModel.new();
+//     if(firstname){
+//       student["firstname"] = firstname;
+//     }
+//     if(lastname){
+//       student["lastname"] = lastname;
+//     }
+//     if(gender){
+//       student["gender"] = gender;
+//     }
+//     const section = await getSectionByIdService(sectionId);
+//     section["studentCount"] = section["studentCount"]+1;
+//     await section.save();
+//     return student;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
+
+
+
+
+
+
+
+// ----------------------------------------
+
+
 
 export async function registerStudent(data) {
   try {
     const{rollNumber,firstname,lastname,gender,adminId,parentId,sectionId,classId} = data;
     const student = await studentModel.create({rollNumber,firstname,lastname,gender,admin: adminId,parent: parentId,section: sectionId,classId});
+    const section = await getSectionByIdService(sectionId);
+    section["studentCount"] = section["studentCount"]+1;
+    await section.save();
     return student;
   } catch (error) {
     throw error;
@@ -29,26 +77,6 @@ export async function adminRegisterStudent(data) {
     const student = await studentModel.create({rollNumber,firstname,lastname,gender,age,phone,email,address,admin: adminId,section: sectionId,classId});
     return student;
   } catch (error){
-    throw error;
-  }
-}
-
-export async function findStudentById(data) {
-  try {
-    const {id} = data;
-    const student = await studentModel.findOne({_id:id , isActive:true});
-    return student;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function findStudentSiblings(data) {
-  try {
-    const{parentId} = data;
-    const siblings = await studentModel.find({ parent: parentId,isActive:true });
-    return siblings;
-  } catch (error) {
     throw error;
   }
 }

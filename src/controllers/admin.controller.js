@@ -1,106 +1,116 @@
-import {generateAccessToken,generateRefreshToken} from "../services/JWTToken.service.js";
+import { getAccessTokenService } from "../services/JWTToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";
-import {checkAdminExist,createAdmin,findAdminByAdminName,findAdminByEmail, getAdminById, updateAdminById, updateSocialProfileAdminById} from "../services/admin.services.js";
-import { hashPassword } from "../services/password.service.js";
+import {getAdminService, registerAdminService, updateAdminByIdService } from "../services/admin.services.js";
+import { hashPasswordService } from "../services/password.service.js";
+import { StatusCodes } from "http-status-codes";
 
 export async function registerAdminController(req, res) {
   try {
-    const {schoolName,affiliationNo,address,email,phone,adminName,password} = req.body;
-
-    const existingSchool = await checkAdminExist(adminName, email,affiliationNo);
-
-    if (existingSchool && existingSchool?.adminName === adminName) {
-      return res.send(error(400, "admin name already exist"));
+    const {affiliationNo, email, phone, username, password } = req.body;
+    const admin = await getAdminService({$or:[{username}, {email}, {affiliationNo}],isActive:true});
+    if (admin && admin?.username === username) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Admin name already exist"));
     }
-    if (existingSchool && existingSchool?.email === email) {
-      return res.send(error(400, "email already exist"));
+    if (admin && admin?.email === email) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Email already exist"));
     }
-    if (existingSchool && existingSchool?.affiliationNo === affiliationNo) {
-      return res.send(error(400, "affiliationNo already exist"));
+    if (admin && admin?.affiliationNo === affiliationNo) {
+      return res.status(StatusCodes.CONFLICT).send(error(400, "Affiliation no already exist"));
     }
-
-    const hashedPassword = await hashPassword(password);
-    const admin = await createAdmin(schoolName,affiliationNo,address,email,phone,adminName,hashedPassword);
-    if (admin instanceof Error) {
-      return res.send(error(400, "admin couldn't be registered"));
+    const hashedPassword = await hashPasswordService(password);
+    req.body["password"] = hashedPassword;
+    const newAdmin = await registerAdminService(req.body);
+    if (newAdmin instanceof Error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, "Admin couldn't be registered"));
     }
-    return res.send(success(201, "admin registered successfully!"));
+    return res.status(StatusCodes.CREATED).send(success(201, "Admin registered successfully"));
   } catch (err) {
-    return res.send(error(500, err.message));
-  }
-}
-
-export async function profileUpdateAdminController(req, res) {
-  try {
-    const adminId = req.adminId;
-    const { schoolName,principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName } = req.body;
-    
-    const admin = await getAdminById({adminId});
-    if(!admin){
-      return res.send(error(400,"Admin not exists"));
-    }
-
-    const updatedAdmin = await updateAdminById({adminId, schoolName,principal:principalName,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, adminName });
-
-    if (updatedAdmin instanceof Error) {
-      return res.send(error(400, "Admin couldn't be updated"));
-    }
-
-    return res.send(success(201, "Admin updated successfully!"));
-  } catch (err) {
-    return res.send(error(500, err.message));
-  }
-}
-
-export async function socialProfileUpdateAdminController(req, res) {
-  try {
-    const adminId = req.adminId;
-    const { phone,website,facebook,instagram,linkedin,twitter,whatsapp,youtube} = req.body;
-    
-    const admin = await getAdminById({adminId});
-    if(!admin){
-      return res.send(error(400,"Admin not exists"));
-    }
-
-    const updatedAdmin = await updateSocialProfileAdminById({adminId,phone,website,facebook,instagram,linkedin,twitter,whatsapp,youtube });
-
-    if (updatedAdmin instanceof Error) {
-      return res.send(error(400, "Admin couldn't be updated"));
-    }
-
-    return res.send(success(201, "Admin updated successfully!"));
-  } catch (err) {
-    return res.send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 export async function loginAdminController(req, res) {
   try {
     const { email, password } = req.body;
-    const admin = await findAdminByEmail(email);
+  
+    const admin = await getAdminService({ email, isActive:true });
     if (!admin) {
-      return res.send(error(404, "unauthorized user"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
     const matchPassword = await bcrypt.compare(password, admin.password);
     if (!matchPassword) {
-      return res.send(error(404, "unauthorized user"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
-    const accessToken = generateAccessToken({role: "admin",adminId: admin["_id"],phone: admin["phone"]});
-    const refreshToken = generateRefreshToken({role: "admin",adminId: admin["_id"],phone: admin["phone"]});
-    res.cookie("jwt", refreshToken);
-    return res.send(success(200, { accessToken,username:admin.adminName}));
+    const accessToken = getAccessTokenService({
+      role: "admin",
+      adminId: admin["_id"],
+      phone: admin["phone"]
+    });
+    return res.status(StatusCodes.OK).send(success(200, { accessToken, username: admin.username }));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
-export async function getAdminProfileController(req,res){
+export async function updateAdminController(req, res) {
+  try {
+    const{schoolName,principal,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, phone, username, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
+    const fieldsToBeUpdated = {};
+    const adminId = req.adminId;
+    const duplicateAdmin = await getAdminService({$or: [{username}, {email}, {phone}], _id:{$ne:adminId}});
+    if(duplicateAdmin && duplicateAdmin["username"]==username){
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists."));
+    }
+    if(duplicateAdmin && duplicateAdmin["email"]==email){
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Email already exists."));
+    }
+    if(duplicateAdmin && duplicateAdmin["phone"]==phone){
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already exists."));
+    }
+
+    const admin = await getAdminService({_id:adminId, isActive:true});
+    if (!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not exists"));
+    }
+    if(schoolName){ fieldsToBeUpdated["schoolName"] = schoolName; }
+    if(principal){ fieldsToBeUpdated["principal"] = principal; }
+    if(schoolBoard){ fieldsToBeUpdated["schoolBoard"] = schoolBoard; }
+    if(schoolNumber){ fieldsToBeUpdated["schoolNumber"] = schoolNumber; }
+    if(affiliationNo){ fieldsToBeUpdated["affiliationNo"] = affiliationNo; }
+    if(address){ fieldsToBeUpdated["address"] = address; }
+    if(city){ fieldsToBeUpdated["city"] = city; }
+    if(state){ fieldsToBeUpdated["state"] = state; }
+    if(email){ fieldsToBeUpdated["email"] = email; }
+    if(phone){ fieldsToBeUpdated["phone"] = phone; }
+    if(username){ fieldsToBeUpdated["username"] = username; }
+    if(website){ fieldsToBeUpdated["website"] = website; }
+    if(facebook){ fieldsToBeUpdated["facebook"] = facebook; }
+    if(instagram){ fieldsToBeUpdated["instagram"] = instagram; }
+    if(instagram){ fieldsToBeUpdated["instagram"] = instagram; }
+    if(twitter){ fieldsToBeUpdated["twitter"] = twitter; }
+    if(whatsapp){ fieldsToBeUpdated["whatsapp"] = whatsapp; }
+    if(youtube){ fieldsToBeUpdated["youtube"] = youtube; }
+
+    const updatedAdmin = await updateAdminByIdService({id:adminId, fieldsToBeUpdated});
+    if (updatedAdmin instanceof Error) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, "Admin couldn't be updated"));
+    }
+    return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getAdminController(req, res) {
   try {
     const adminId = req.adminId;
-    const admin = await getAdminById({adminId});    
-    return res.send(success(200,admin));
+    const admin = await getAdminService({_id:adminId, isActive:true});
+    return res.status(StatusCodes.OK).send(success(200, admin));
   } catch (err) {
-    return res.send(error(500,err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

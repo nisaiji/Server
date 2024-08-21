@@ -1,5 +1,5 @@
 paths:
-  /class/register: 
+  /class: 
     post:
       security:
         - Authorization: []
@@ -28,7 +28,7 @@ paths:
         500:
           description: "Internal Server Error"
 
-  /class/delete-student/{classId}: 
+  /class/{classId}: 
     delete:
       security:
         - Authorization: []
@@ -55,7 +55,7 @@ paths:
         500:
           description: "Internal Server Error"
 
-  /class/class-list: 
+  /class/all: 
     get:
       security:
         - Authorization: []

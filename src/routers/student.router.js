@@ -1,25 +1,27 @@
 import express from "express";
-import {addToSectionStudentController,adminRegisterStudentController,deleteStudentController,getAllStudentListForAdminController,getAllStudentOfSectionController,getAllStudentOfSectionForAdminController,getStudentListOfSectionController,parentUpdateStudentController,registerStudentController,searchStudentForAdminController,searchStudentOfSectionController,studentParentUpdateStudentController,updateStudentController, uploadStudentPhotoController} from "../controllers/student.controller.js";
-import { adminAuthentication } from "../middlewares/authentication/admin.authentication.middleware.js";
-import { classTeacherAuthentication } from "../middlewares/authentication/classTeacher.authentication.middleware.js";
-import { parentAuthentication } from "../middlewares/authentication/parent.authentication.middleware.js";
-import {deleteStudentValidation,parentUpdateStudentValidation,registerStudentValidation, studentParentUpdateStudentValidation, updateStudentValidation} from "../middlewares/validation/student.validation.middleware.js";
+import { adminRegisterStudentController, deleteStudentController, getAllStudentListForAdminController, getAllStudentOfSectionController, getAllStudentOfSectionForAdminController, getStudentListOfSectionController,
+  parentUpdateStudentController, registerStudentController, searchStudentForAdminController, searchStudentOfSectionController, studentParentUpdateStudentController, updateStudentController, uploadStudentPhotoController } from "../controllers/student.controller.js";
+import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
+import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
+import {deleteStudentValidation, registerStudentValidation, studentParentUpdateStudentValidation, updateStudentByAdminValidation, updateStudentByParentValidation, updateStudentByTeacherValidation } from "../middlewares/validation/student.validation.middleware.js";
 
 const studentRouter = express.Router();
 
-studentRouter.post("/register",classTeacherAuthentication,registerStudentValidation,registerStudentController);
-studentRouter.post("/admin-register",adminAuthentication,registerStudentValidation,adminRegisterStudentController);
-studentRouter.delete("/delete/:studentId", classTeacherAuthentication, deleteStudentValidation, deleteStudentController);
-studentRouter.delete("/admin-delete/:studentId",adminAuthentication, deleteStudentValidation, deleteStudentController);
-studentRouter.get("/section-students/:sectionId",classTeacherAuthentication,getAllStudentOfSectionController);
-studentRouter.get("/admin-section-students/:sectionId",adminAuthentication,getAllStudentOfSectionForAdminController);
-studentRouter.get("/all-students/:pageNo",adminAuthentication,getAllStudentListForAdminController);
-studentRouter.get("/search/:name",classTeacherAuthentication,searchStudentOfSectionController);
-studentRouter.get("/admin-search/:name",adminAuthentication,searchStudentForAdminController);
-studentRouter.put("/photo-upload/:studentId",parentAuthentication,uploadStudentPhotoController);
-studentRouter.put("/update/:studentId",classTeacherAuthentication,updateStudentValidation, updateStudentController);
-studentRouter.put("/admin-update/:studentId",adminAuthentication,updateStudentValidation, updateStudentController);
-studentRouter.put("/parent-update/:studentId",parentAuthentication,parentUpdateStudentValidation,parentUpdateStudentController);
-studentRouter.put("/student-parent-update/:studentId",adminAuthentication,studentParentUpdateStudentValidation,studentParentUpdateStudentController);
-
-export default studentRouter; 
+studentRouter.post("/teacher", teacherAuthenticate, registerStudentValidation, registerStudentController );
+studentRouter.post("/admin", adminAuthenticate, registerStudentValidation, adminRegisterStudentController );
+studentRouter.delete("/teacher/:studentId", teacherAuthenticate, deleteStudentValidation, deleteStudentController );
+studentRouter.delete("/admin/:studentId", adminAuthenticate, deleteStudentValidation, deleteStudentController );
+studentRouter.get("/teacher-section/:sectionId", teacherAuthenticate, getAllStudentOfSectionController );
+studentRouter.get("/admin-section/:sectionId", adminAuthenticate, getAllStudentOfSectionForAdminController );
+studentRouter.get("/:pageNo", adminAuthenticate, getAllStudentListForAdminController );
+studentRouter.get("/teacher/search/:name", teacherAuthenticate, searchStudentOfSectionController );
+studentRouter.get("/admin/search/:name", adminAuthenticate, searchStudentForAdminController );
+studentRouter.put("/photo-upload/:studentId", parentAuthenticate, uploadStudentPhotoController );
+     
+studentRouter.put("/teacher/:studentId", teacherAuthenticate, updateStudentByTeacherValidation, updateStudentController );
+studentRouter.put("/admin/:studentId", adminAuthenticate, updateStudentByAdminValidation, updateStudentController );
+studentRouter.put("/parent/:studentId", parentAuthenticate, updateStudentByParentValidation, parentUpdateStudentController );
+studentRouter.put("/student-parent-update/:studentId", adminAuthenticate, studentParentUpdateStudentValidation, studentParentUpdateStudentController );
+  
+export default studentRouter;
