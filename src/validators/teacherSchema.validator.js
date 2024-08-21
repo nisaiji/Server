@@ -1,19 +1,5 @@
 import Joi from "joi";
 
-const markAttendanceByTeacherSchema = Joi.object({
-  present: Joi.array().items(Joi.object()).required().messages({
-      'array.base': 'Present should be an array of student IDs.',
-      'array.includes': 'Each item in the present array must be a object.',
-      'any.required': 'The present array is required.'
-    }),
-  absent: Joi.array().items(Joi.object()).required().messages({
-      'array.base': 'Absent should be an array of student IDs.',
-      'array.includes': 'Each item in the absent array must be a object.',
-      'any.required': 'The absent array is required.'
-    })
-});
-
-
 const teacherRegisterSchema = Joi.object({
   firstname: Joi.string().required().messages({
     "any.required": "First name is required."
@@ -99,6 +85,5 @@ export {
   teacherRegisterSchema,
   teacherUsernamePasswordUpdateSchema,
   teacherEmailPhoneUpdateSchema,
-  markAttendanceByTeacherSchema,
   teacherPhotoUpdateSchema
 };

@@ -5,8 +5,7 @@ import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionByIdService } from "../services/section.services.js";
 import { getTeacherService } from "../services/teacher.services.js";
-
-
+ 
 export async function attendanceByTeacherController(req, res) { 
   try {
     const {sectionId, present, absent} = req.body;
@@ -180,7 +179,10 @@ export async function updateAttendanceController(req,res){
 export async function checkAttendaceMarkedController(req, res) {
   try {
     const adminId = req.adminId;
-    const sectionId = req.params.sectionId;
+    const sectionId = (req.sectionId)?(req.sectionId):(req.params.sectionId);
+    if(!sectionId){
+      return res.status(StatusCodes.BAD_GATEWAY).send(error(502, "Section id is required."));
+    }
     const date = new Date();
 
     const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
@@ -228,8 +230,7 @@ export async function checkParentAttendaceMarkedController(req, res) {
 
 export async function attendanceStatusOfSectionController(req, res) {
   try {
-    const sectionId = req.params.sectionId;
-    const {startTime, endTime} = req.body;
+    const {sectionId, startTime, endTime} = req.body;
  
     const section = await getSectionByIdService(sectionId);
     const totalStudent = section["studentCount"];
@@ -258,15 +259,18 @@ export async function attendanceStatusOfStudentController(req, res) {
 }
 
 export async function attendanceCountOfStudentController(req, res){
-  try {
-    const studentId = req.params.studentId;
-    const adminId = req.adminId;
-    const{startTime, endTime} = req.body;
+  try { 
+    const{studentId, startTime, endTime} = req.body;
+
+    const student = await getStudentService({_id:studentId});
+    if(!student){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+    }
 
     const studentAttendance = await getAttendancesService({student:studentId, data:{$gte: startTime, $lte:endTime}});
-    const sectionAttendance = await getSectionAttendancesService({admin:adminId, date:{$gte:startTime, $lte:endTime}});
+    const sectionAttendance = await getSectionAttendancesService({section:student["section"], date:{$gte:startTime, $lte:endTime}});
 
-    const studentAttendanceCount = attendance.length;
+    const studentAttendanceCount = studentAttendance.length;
     const sectionAttendanceCount = sectionAttendance.length;
 
     return res.status(StatusCodes.OK).send(success(200,{studentAttendanceCount, sectionAttendanceCount}));
@@ -275,10 +279,6 @@ export async function attendanceCountOfStudentController(req, res){
   }
 }
 
-
-
-
-//------------------------------------------------------------------
 // export async function attendanceDailyStatusController(req, res) {
 //   try {
 //     const sectionId = req.params.sectionId;
