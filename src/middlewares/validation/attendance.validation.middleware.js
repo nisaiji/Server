@@ -61,4 +61,4 @@ export async function attendanceCountValidation(req, res, next){
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message))
   }
-}
+} 

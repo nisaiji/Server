@@ -42,9 +42,6 @@ const updateAttendanceSchema = Joi.object({
 })
 
 const attendanceStatusSchema = Joi.object({
-  sectionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
-    "any.required":"section id is required!"
-  }),
   startTime: Joi.number().integer().min(0).required().messages({
     'number.base': 'Start time must be a number',
     'number.integer': 'Start time must be an integer',

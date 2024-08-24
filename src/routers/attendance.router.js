@@ -16,4 +16,4 @@ attendanceRouter.post("/status", teacherAuthenticate, attendanceStatusValidation
 attendanceRouter.post("/parent/count", parentAuthenticate, attendanceCountValidation, attendanceCountOfStudentController)
 attendanceRouter.post("/teacher/count", teacherAuthenticate, attendanceCountValidation, attendanceCountOfStudentController)
 
-export default attendanceRouter 
+export default attendanceRouter    

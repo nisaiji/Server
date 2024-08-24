@@ -23,7 +23,6 @@ export async function getAttendancesService(paramObj){
 
 export async function updateAttendanceService(data) {
   try {
-    const{attendanceId, teacherAttendance, parentAttendance,  section, teacher, admin } = data;
     const attendance = await attendanceModel.findById(attendanceId);
     if(teacherAttendance){
       attendance["teacherAttendance"] = teacherAttendance;

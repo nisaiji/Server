@@ -26,7 +26,11 @@ const sectionAttendanceSchema = mongoose.Schema({
     enum:['completed', 'pending'],
     required:true
   }
-})
+},
+{
+  timestamps:true
+}
+)
 
 const sectionAttendanceModel = mongoose.model("sectionAttendance",sectionAttendanceSchema);
 export default sectionAttendanceModel;

@@ -37,7 +37,7 @@ export async function attendanceByTeacherController(req, res) {
     }
 
     present.map(async (student) => {
-      const paramObj = {student:student["_id"], date:{$gte:startOfDay, $lte:endOfDay}, parentAttendance: {$ne:""}};
+      const paramObj = {"student":student["_id"], date:{$gte:startOfDay, $lte:endOfDay}, parentAttendance: {$ne:""}};
       const parentMarkedAttendance = await getAttendanceService(paramObj);
 
       if(parentMarkedAttendance){
@@ -155,14 +155,12 @@ export async function updateAttendanceController(req,res){
 
     const presentLength = present?.length;
     for(let i=0;i<presentLength; i++){
-      const attendanceInstance = await findAttendanceById(present[i]["attendanceId"]);
-      await updateAttendance({attendanceId:present[i]["attendanceId"],attendance:"present"});
+      await updateAttendance({attendanceId:present[i]["_id"],attendance:"present"});
     }
     
     const absentLength = absent?.length;
     for(let i=0;i<absentLength; i++){
-      const attendanceInstance = await findAttendanceById(absent[i]["attendanceId"]);
-      await updateAttendance({attendanceId:absent[i]["attendanceId"],attendance:"absent"});
+      await updateAttendance({attendanceId:absent[i]["_id"],attendance:"absent"});
     }
 
 
@@ -230,7 +228,8 @@ export async function checkParentAttendaceMarkedController(req, res) {
 
 export async function attendanceStatusOfSectionController(req, res) {
   try {
-    const {sectionId, startTime, endTime} = req.body;
+    const sectionId = req.sectionId;
+    const {startTime, endTime} = req.body;
  
     const section = await getSectionByIdService(sectionId);
     const totalStudent = section["studentCount"];
@@ -272,7 +271,7 @@ export async function attendanceCountOfStudentController(req, res){
 
     const studentAttendanceCount = studentAttendance.length;
     const sectionAttendanceCount = sectionAttendance.length;
-
+  
     return res.status(StatusCodes.OK).send(success(200,{studentAttendanceCount, sectionAttendanceCount}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
