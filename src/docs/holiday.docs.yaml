@@ -58,12 +58,12 @@ paths:
             schema:
               type: object
               properties:
-                month:
-                  type: number
-                  example: 12
-                year:
-                  type: string
-                  example: 2024
+                startDate:
+                  type: date
+                  example: "2024-08-26"
+                endDate:
+                  type: date
+                  example: "2024-08-26"
       responses:
         200:
           description: "successful"

@@ -1,58 +1,37 @@
 import classModel from "../models/class.model.js";
-import sectionModel from "../models/section.model.js";
-import teacherModel from "../models/teacher.model.js";
 
-
-
-
-
-export async function checkClassExists({ name, adminId }) {
+export async function getClassService(paramObj){
   try {
-    const existClass = await classModel.findOne({
-      $and: [{ name }, { admin: adminId }],
-    });
-    return existClass;
+    const classInfo = await classModel.findOne(paramObj);
+    return classInfo;
   } catch (error) {
-    return error;
+    throw error;    
   }
 }
 
-export async function registerClass({ name, adminId }) {
+export async function getClassWithSectionsService(paramObj){
   try {
-    const registeredClass = await classModel.create({ name, admin: adminId });
-    return registeredClass;
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function deleteClass(classId) {
-  try {
-    const deletedClass = await classModel.findByIdAndDelete(classId);
-    await sectionModel.deleteMany({ classId });
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function getClassList(adminId) {
-  try {
-    const classes = await classModel
-      .find({admin:adminId})
-      .populate({ path: "section", select: "_id name" })
-      .select("_id name");
+    const classes = await classModel.find(paramObj).populate({ path: "section", select: "_id name" }).select("_id name");
     return classes;
   } catch (error) {
-    return error;
+    throw error;    
   }
 }
 
-export async function findClassById(id) {
+export async function registerClassService(data){
   try {
-    const Class = await classModel.findById(id);
-    return Class;
+    await classModel.create(data);
   } catch (error) {
     throw error;
   }
+
 }
 
+export async function deleteClassService(paramObj){
+  try {
+  const classInfo = await classModel.deleteOne(paramObj);
+  return classInfo;  
+  } catch (error) {
+    throw error;    
+  }
+}

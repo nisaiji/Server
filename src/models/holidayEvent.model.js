@@ -13,6 +13,10 @@ const holidayEventSchema =new mongoose.Schema({
         type:String,
         required:true
     },
+    isActive:{
+        type:String,
+        default:true
+    },
     description:{
         type:String,
     },

@@ -3,6 +3,34 @@ import sectionModel from "../models/section.model.js";
 import studentModel from "../models/student.model.js";
 import teacherModel from "../models/teacher.model.js";
 
+
+export async function getSectionService(paramObj){
+  try {
+    const section = await sectionModel.findOne(paramObj).lean();
+    return section;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+export async function getSectionsService(paramObj){
+  try {
+   const sections = await sectionModel.find(paramObj).lean();
+   return sections; 
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function registerSectionService(data){
+  try {
+    const section = await sectionModel.create(data);
+    return section;
+  } catch (error) {
+    throw error;    
+  }
+}
+
 export async function getSectionByIdService(id){
   try {
     const section = await sectionModel.findById(id);
@@ -12,33 +40,7 @@ export async function getSectionByIdService(id){
   }
 }
 
-export async function checkSectionExist(name, classId, adminId) {
-  try {
-    console.log({ name, classId, adminId });
-    const section = await sectionModel.findOne({
-      $and: [{ name }, { classId }, { admin: adminId }],
-    });
-    console.log(section);
-    return section;
-  } catch (error) {
-    return error;
-  }
-}
 
-export async function createSection(name, classTeacher, classId, admin) {
-  try {
-    const section = await sectionModel.create({
-      name,
-      classId,
-      teacher:classTeacher,
-      admin,
-    });
-    return section;
-  } catch (error) {
-    throw error;
-    // return error;
-  }
-}
 
 export async function findSectionById(_id) {
   try {
@@ -49,9 +51,7 @@ export async function findSectionById(_id) {
   }
 }
 
-export function checkStudentExistInSection(students, student) {
-  return students.includes(student);
-}
+
 
 export async function getAllSection() {
   try {

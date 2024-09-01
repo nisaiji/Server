@@ -14,7 +14,7 @@ const attendanceByTeacherSchema = Joi.object({
         'array.includes': 'Each item in the absent array must be a object.',
         'any.required': 'The absent array is required.'
       })
-  });
+});
 
 const attendanceByParentSchema = Joi.object({
   studentId: Joi.string().length(24).hex().required().messages({

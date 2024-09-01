@@ -1,5 +1,5 @@
 import express from "express";
-import {deleteSectionController,getAllSectionsController,getClassSectionsController,getSectionController,registerSectionController, replaceTeacherController,} from "../controllers/section.controller.js";
+import {deleteSectionController,getSectionController,registerSectionController, replaceTeacherController,} from "../controllers/section.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { deleteSectionAuthorization } from "../middlewares/authorization/deleteSection.authorization.middleware.js";
 import { registerSectionValidation } from "../middlewares/validation/section.validation.middleware.js";

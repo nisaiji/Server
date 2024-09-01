@@ -9,6 +9,6 @@ adminRouter.post("/", adminRegisterValidation, registerAdminController);
 adminRouter.post("/login", adminLoginValidation, loginAdminController);
 adminRouter.put("/", adminAuthenticate, adminProfileUpdateValidation, updateAdminController);
 adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation, updateAdminController);
-adminRouter.get("/",adminAuthenticate, getAdminController);
+adminRouter.get("/", adminAuthenticate, getAdminController);
 
-export default adminRouter; 
+export default adminRouter;

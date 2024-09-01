@@ -1,60 +1,49 @@
-import {checkClassExists,deleteClass,getClassList,registerClass,} from "../services/class.sevices.js";
+import { StatusCodes } from "http-status-codes";
+import { deleteClassService,getClassWithSectionsService,getClassService, registerClassService,} from "../services/class.sevices.js";
 import { checkClassExistById } from "../services/section.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerClassController(req, res) {
   try {
-    // console.log("register class controller called");
     const { name } = req.body;
-    const adminId = req.adminId;
-    const existClass = await checkClassExists({ name, adminId });
-    if (existClass) {
-      return res.send(error(400, "class already exists"));
+    const admin = req.adminId;
+    const classInfo = await getClassService({ name, admin });
+    if (classInfo) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Class already exists"));
     }
 
-    const registeredClass = await registerClass({ name, adminId });
-
-    if (registerClass instanceof Error) {
-      return res.send(error(400, "can't register class"));
-    }
-
-    return res.send(success(200, "class registered successfully!"));
+    await registerClassService({ name, admin });
+    return res.status(StatusCodes.OK).send(success(200, "Class registered successfully"));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 export async function deleteClassController(req, res) {
   try {
     const classId = req.params.classId;
-    const adminId = req.adminId;
-    const existingClass =await checkClassExistById(classId);
-    if (!existingClass) {
-      return res.send(error(400, "class doesn't exists"));
+    const admin = req.adminId;
+    const classInfo = await getClassService({_id:classId});
+    if (!classInfo) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(400, "Class doesn't exists"));
     }
 
-    if (existingClass["section"].length > 0) {
-      return res.send(error(400, "can't delete class, there are sections."));
+    if (classInfo["section"].length > 0) {
+      return res.status(StatusCodes.NOT_ACCEPTABLE).send(error(406, "Class has sections."));
     }
-    // console.log(existingClass);
-    const deletedClass = await deleteClass(classId);
-    // console.log(existingClass);
-    return res.send(success(200, "class deleted successfully"));
+    await deleteClassService({_id:classId});
+    return res.status(StatusCodes.OK).send(success(200, "Class deleted successfully"));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 export async function getClassListController(req, res) {
   try {
-    const adminId = req.adminId;
-    const classlist = await getClassList(adminId);
-    if (classlist instanceof Error) {
-      return res.send(error(400, "can't get list of class"));
-    }
-    // console.log(classlist);
-    return res.send(success(200, classlist));
+    const admin = req.adminId;
+    const classList = await getClassWithSectionsService({ admin });
+      return res.status(StatusCodes.OK).send(success(200, classList));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

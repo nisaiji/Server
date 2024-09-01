@@ -3,7 +3,7 @@ import {matchPasswordService,hashPasswordService} from "../services/password.ser
 import { error, success } from "../utills/responseWrapper.js";
 import { getAccessTokenService } from "../services/JWTToken.service.js";
 import { getSectionByTeacherId } from "../services/section.services.js";
-import { findClassById } from "../services/class.sevices.js";
+import { getClassService } from "../services/class.sevices.js";
 import { StatusCodes } from "http-status-codes";
 import { isValidMongoId } from "../services/mongoose.services.js";
 
@@ -41,7 +41,7 @@ export async function loginTeacherController(req, res) {
     if (!section) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
     }
-    const Class = await findClassById(section["classId"]);
+    const Class = await getClassService({ _id:section["classId"] });
     const teacherEmail = teacher["email"]? teacher["email"]: "abc@gmail.com";
     const accessToken = getAccessTokenService({
       role: "teacher",

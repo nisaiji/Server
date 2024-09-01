@@ -14,9 +14,9 @@ export async function adminAuthenticate(req, res, next) {
     const _id = decoded.adminId;
     const admin = await getAdminService({_id, isActive:true});
     if (!admin){
-      return res.send(error(404, "admin doesn't exists"));
+      return res.send(error(404, "Admin not exists"));
     }
-    req.adminId = decoded.adminId;
+    req.adminId = _id;
     next();
   } catch (err) {
     res.send(error(500, err.message));

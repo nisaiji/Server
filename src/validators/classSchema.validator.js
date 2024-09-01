@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 const createClassSchema = Joi.object({
     name: Joi.string().required().messages({
-        "any.required": "class name is required!"
+        "any.required": "Class name is required!"
       }),
 });
 

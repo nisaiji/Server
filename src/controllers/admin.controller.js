@@ -2,13 +2,13 @@ import { getAccessTokenService } from "../services/JWTToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";
 import {getAdminService, registerAdminService, updateAdminByIdService } from "../services/admin.services.js";
-import { hashPasswordService } from "../services/password.service.js";
+import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
 
 export async function registerAdminController(req, res) {
   try {
     const {affiliationNo, email, phone, username, password } = req.body;
-    const admin = await getAdminService({$or:[{username}, {email}, {affiliationNo}],isActive:true});
+    const admin = await getAdminService({$or:[{username}, {email}, {affiliationNo}, {phone}],isActive:true});
     if (admin && admin?.username === username) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Admin name already exist"));
     }
@@ -18,16 +18,16 @@ export async function registerAdminController(req, res) {
     if (admin && admin?.affiliationNo === affiliationNo) {
       return res.status(StatusCodes.CONFLICT).send(error(400, "Affiliation no already exist"));
     }
+    if (admin && admin?.phone === phone) {
+      return res.status(StatusCodes.CONFLICT).send(error(400, "Phone number already exist"));
+    }
     const hashedPassword = await hashPasswordService(password);
     req.body["password"] = hashedPassword;
-    const newAdmin = await registerAdminService(req.body);
-    if (newAdmin instanceof Error) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, "Admin couldn't be registered"));
-    }
+    await registerAdminService(req.body);
+   
     return res.status(StatusCodes.CREATED).send(success(201, "Admin registered successfully"));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -39,12 +39,20 @@ export async function loginAdminController(req, res) {
     if (!admin) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
-    const matchPassword = await bcrypt.compare(password, admin.password);
+    console.log(admin)
+    const storedPassword = admin.password;
+    const enteredPassword = password;
+    const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
+    console.log("called")
+    debugger
     const accessToken = getAccessTokenService({
       role: "admin",
+      username: admin["username"],
+      schoolName: admin["schoolName"],
+      email: admin["email"],
       adminId: admin["_id"],
       phone: admin["phone"]
     });
@@ -70,10 +78,6 @@ export async function updateAdminController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already exists."));
     }
 
-    const admin = await getAdminService({_id:adminId, isActive:true});
-    if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not exists"));
-    }
     if(schoolName){ fieldsToBeUpdated["schoolName"] = schoolName; }
     if(principal){ fieldsToBeUpdated["principal"] = principal; }
     if(schoolBoard){ fieldsToBeUpdated["schoolBoard"] = schoolBoard; }
@@ -93,10 +97,8 @@ export async function updateAdminController(req, res) {
     if(whatsapp){ fieldsToBeUpdated["whatsapp"] = whatsapp; }
     if(youtube){ fieldsToBeUpdated["youtube"] = youtube; }
 
-    const updatedAdmin = await updateAdminByIdService({id:adminId, fieldsToBeUpdated});
-    if (updatedAdmin instanceof Error) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, "Admin couldn't be updated"));
-    }
+    await updateAdminByIdService({id:adminId, fieldsToBeUpdated});
+
     return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

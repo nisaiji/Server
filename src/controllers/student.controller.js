@@ -1,11 +1,10 @@
 import { getAdminService } from "../services/admin.services.js";
-import { findAttendanceByStudentId } from "../services/attendance.service.js";
-import { findClassById } from "../services/class.sevices.js";
+import {  getAttendanceService } from "../services/attendance.service.js";
+import { getClassService } from "../services/class.sevices.js";
 import {checkParentExist,diActivateParentByIdService,findParentById,registerParent,updateInfoParent,updateParentInfo} from "../services/parent.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import {
-  checkStudentExistInSection,
-  findSectionById
+    findSectionById
 } from "../services/section.services.js";
 import {
   checkPhoneAlreadyExists,
@@ -49,7 +48,7 @@ export async function registerStudentController(req, res) {
     if (!section) {
       return res.send(error(400, "Section doesn't exists"));
     }
-    const Class = await findClassById(classId);
+    const Class = await getClassService({_id:classId});
     if (!Class) {
       return res.send(error(400, "Class doesn't exists"));
     }
@@ -113,7 +112,7 @@ export async function adminRegisterStudentController(req, res) {
     if (!section) {
       return res.send(error(400, "Section doesn't exists"));
     }
-    const Class = await findClassById(classId);
+    const Class = await getClassService({_id:classId});
     if (!Class) {
       return res.send(error(400, "Class doesn't exists"));
     }
@@ -171,10 +170,8 @@ export async function addToSectionStudentController(req, res) {
     if (!section) {
       return res.send(error(400, "Section doesn't exists"));
     }
-    const isStudentExistInSection = checkStudentExistInSection(
-      section.students,
-      studentId
-    );
+    const isStudentExistInSection = section?.students.includes(studentId);
+  
     if (isStudentExistInSection) {
       return res.send(error(400, "Student already exist in section"));
     }
@@ -530,11 +527,7 @@ export async function searchStudentOfSectionController(req, res) {
 
     const studentWithAttendance = await Promise.all(
       students.map(async (student) => {
-        const attendance = await findAttendanceByStudentId({
-          studentId: student["_id"],
-          startOfDay,
-          endOfDay
-        });
+        const attendance = await getAttendanceService({student: student["_id"],date:{$gte:startOfDay, $lte:endOfDay}});
         return { ...student.toObject(), attendance };
       })
     );

@@ -1,6 +1,8 @@
-import {checkClassExistById,checkSectionExist,createSection,deleteSection,findSectionById,
-  findSectionInfoById,
-  getAllSection,getClassSections} from "../services/section.services.js";
+import { StatusCodes } from "http-status-codes";
+import { getClassService } from "../services/class.sevices.js";
+import {deleteSection,
+  
+  getAllSection,getClassSections, getSectionService, registerSectionService} from "../services/section.services.js";
 import { getTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -8,36 +10,69 @@ export async function registerSectionController(req, res) {
   try {
     const { name, teacherId, classId } = req.body;
     const adminId = req.adminId;
-    const existingClass = await checkClassExistById(classId);
-    if (!existingClass) {
-      return res.send(error(400, "class doesn't exists"));
+    const classInfo = await getClassService({ _id:classId });
+    if (!classInfo) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
     }
-    const existingSection = await checkSectionExist(name, classId, adminId);
-    if (existingSection) {
-      return res.send(error(400, "section name already exist"));
+    let section = await getSectionService({name, classId, admin:adminId});
+    if (section) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Section already exists"));
     }
-    const section = await createSection(name, teacherId, classId, adminId);
-    const classTeacher = await getTeacherService({_id:teacherId, isActive:true});
-    if (!classTeacher) {
-      return res.send(error(400, "cordinator doesn't exist"));
+    section = await registerSectionService({name, teacher:teacherId, classId, admin:adminId});
+    const teacher = await getTeacherService({_id:teacherId, isActive:true});
+    if (!teacher) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
-    classTeacher.section = section["_id"];
-    classTeacher.isClassTeacher = true;
-    await classTeacher.save();
-    existingClass["section"]?.push(section["_id"]);
-    await existingClass.save();
-    return res.send(success(201, "section created successfully!"));
+    if(teacher["section"]){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher already assigned to section"));
+    }
+    teacher.section = section["_id"];
+    teacher.isClassTeacher = true;
+    await teacher.save();
+    classInfo["section"]?.push(section["_id"]);
+    await classInfo.save();
+    return res.status(StatusCodes.OK).send(success(201, "Section created successfully!"));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+export async function getSectionController(req,res){
+  try {
+    const _id = req.params.sectionId;
+    const section = await getSectionService({_id});
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(400,"Section not found."));
+    }
+    return res.status(StatusCodes.OK).send(success(200,section));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function deleteSectionController(req, res) {
+  try {
+    const sectionId = req.params.sectionId;
+    const adminId = req.adminId;
+
+    const deletedSection = await deleteSection({ sectionId });
+    if (deletedSection instanceof Error) {
+      return res.send(error(400, "can't delete section"));
+    }
+
+    return res.send(success(200, "section deleted successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
 
 export async function getAllSectionsController(req, res) {
   try {
     const sectionlist = await getAllSection();
     return res.send(success(200, sectionlist));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -45,7 +80,7 @@ export async function replaceTeacherController(req, res) {
   try {
     const adminId = req.adminId;
     const { sectionId, teacherId } = req.body;
-    const section = await findSectionById(sectionId);
+    const section = await getSectionService({_id:sectionId});
     console.log(section);
     if (!section) {
       return res.send(error(400, "section doesn't exists"));
@@ -66,53 +101,8 @@ export async function replaceTeacherController(req, res) {
     await section.save();
     return res.send(success(200, "new teacher assigned to section sucessfully"));
   } catch (err) {
-    return res.send(error(500, err.message));
-  }
-}
-
-export async function getClassSectionsController(req, res) {
-  try {
-    const classId = req.params.classId;
-    const existingClass = await checkClassExistById(classId);
-    if (!existingClass) {
-      return res.send(error(400, "class doesn't exists"));
-    }
-    const sectionlist = await getClassSections(classId);
-    return res.send(success(200, sectionlist));
-  } catch (err) {
-    return res.send(error(500, err.message));
-  }
-}
-
-export async function deleteSectionController(req, res) {
-  try {
-    const sectionId = req.params.sectionId;
-    const adminId = req.adminId;
-    // const section = await findSectionById(sectionId);
-
-    const deletedSection = await deleteSection({ sectionId });
-    if (deletedSection instanceof Error) {
-      return res.send(error(400, "can't delete section"));
-    }
-
-    return res.send(success(200, "section deleted successfully"));
-  } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 
-export async function getSectionController(req,res){
-  try {
-    console.log("controller")
-    const sectionId = req.params.sectionId;
-    const section = await findSectionInfoById({sectionId});
-    if(!section){
-      return res.send(error(400,"Section not found."));
-    }
-    return res.send(success(200,section));
-
-  } catch (err) {
-    return res.send(error(500,err.message));    
-  }
-}

@@ -18,7 +18,6 @@ studentRouter.get("/:pageNo", adminAuthenticate, getAllStudentListForAdminContro
 studentRouter.get("/teacher/search/:name", teacherAuthenticate, searchStudentOfSectionController );
 studentRouter.get("/admin/search/:name", adminAuthenticate, searchStudentForAdminController );
 studentRouter.put("/photo-upload/:studentId", parentAuthenticate, uploadStudentPhotoController );
-     
 studentRouter.put("/teacher/:studentId", teacherAuthenticate, updateStudentByTeacherValidation, updateStudentController );
 studentRouter.put("/admin/:studentId", adminAuthenticate, updateStudentByAdminValidation, updateStudentController );
 studentRouter.put("/parent/:studentId", parentAuthenticate, updateStudentByParentValidation, parentUpdateStudentController );

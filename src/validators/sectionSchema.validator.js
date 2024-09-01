@@ -6,7 +6,7 @@ const registerSectionSchema = Joi.object({
       "string.max": "Name must be max 5 chars long.",
       "any.required": "Name is required."
     }),
-    teacherId: Joi.string().required().messages({
+  teacherId: Joi.string().required().messages({
       "any.required": "Class teacher ID is required."
     }),
   classId: Joi.string().required().messages({
@@ -14,4 +14,4 @@ const registerSectionSchema = Joi.object({
     })
 });
 
-export { registerSectionSchema};
+export { registerSectionSchema };
