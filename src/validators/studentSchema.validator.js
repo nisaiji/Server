@@ -92,6 +92,9 @@ const studentParentUpdateStudentSchema = Joi.object({
   dob:Joi.string().required().messages({
     "any.required":"DOB is required"
   }),
+  address:Joi.string().required().messages({
+    "any.required":"address is required"
+  }),
   bloodGroup:Joi.string().required().messages({
     "any.required":"blood group is required"
   }),
