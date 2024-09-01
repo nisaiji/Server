@@ -40,11 +40,12 @@ export async function registerSectionController(req, res) {
 export async function getSectionController(req,res){
   try {
     const _id = req.params.sectionId;
-    const section = await getSectionService({_id});
+    const[section, teacher] = await Promise.all([ getSectionService({ _id }), getTeacherService({ section:_id }, { firstname:1, lastname:1 }) ]);
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(400,"Section not found."));
     }
-    return res.status(StatusCodes.OK).send(success(200,section));
+  
+    return res.status(StatusCodes.OK).send(success(200,{section, teacher}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

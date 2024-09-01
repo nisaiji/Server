@@ -41,6 +41,13 @@ export async function getSectionByIdService(id){
 }
 
 
+export async function deleteSectionService(paramObj){
+  try {
+    const section = sectionModel.findOneAndDelete(paramObj).lean();
+  } catch (error) {
+    throw error;    
+  }
+}
 
 export async function findSectionById(_id) {
   try {

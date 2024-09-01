@@ -1,8 +1,8 @@
 import teacherModel from "../models/teacher.model.js";
 
-export async function getTeacherService(paramObj) {
+export async function getTeacherService(paramObj, projection={}) {
   try {
-    const teacher = await teacherModel.findOne(paramObj);
+    const teacher = await teacherModel.findOne(paramObj).select(projection);
     return teacher;
   } catch (error) {
     throw error;
