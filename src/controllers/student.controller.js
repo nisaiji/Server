@@ -438,7 +438,7 @@ export async function studentParentUpdateStudentController(req, res) {
     } = req.body;
 
     const studentId = req.params.studentId;
-    const student = await getStudentService({ id: studentId, isActive:true });
+    const student = await getStudentService({ _id: studentId, isActive:true });
     if (!student) {
       return res.send(error(400, "Student doesn't exists"));
     }
