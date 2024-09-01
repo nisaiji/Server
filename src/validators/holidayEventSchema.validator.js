@@ -37,9 +37,6 @@ const updateHolidayEventSchema = Joi.object({
     "any.required":"event(boolean) field is required!"
   }),
   description: Joi.string().allow('').optional(),
-  adminId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
-    "any.required":"Admin Id is required!"
-  })
 });
 
 export {createHolidayEventSchema, getHolidayEventSchema, updateHolidayEventSchema};

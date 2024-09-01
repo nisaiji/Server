@@ -90,11 +90,32 @@ const studentParentUpdateStudentSchema = Joi.object({
   gender:Joi.string().required().messages({
     "any.required":"gender is required"
   }),
+  bloodGroup:Joi.string().required().messages({
+    "any.required":"blood group is required"
+  }),
   parentFullname: Joi.string().required().messages({
     "any.required": "parent name is required.",
   }),
+  parentGender: Joi.string().required().messages({
+    "any.required": "parent gender is required.",
+  }),
+  parentAge: Joi.string().required().messages({
+    "any.required": "parent age is required.",
+  }),
+  parentEmail: Joi.string().required().messages({
+    "any.required": "parent email is required.",
+  }),
   parentPhone: Joi.string().required().messages({
     "any.required": "parent phone number is required.",
+  }),
+  parentQualification: Joi.string().required().messages({
+    "any.required": "parent qualification is required.",
+  }),
+  parentOccupation: Joi.string().required().messages({
+    "any.required": "parent occupation is required.",
+  }),
+  parentAddress: Joi.string().required().messages({
+    "any.required": "parent address is required.",
   }),
 })
 

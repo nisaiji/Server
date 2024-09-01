@@ -347,7 +347,7 @@ export async function updateStudentController(req, res) {
   try {
     const { firstname, lastname, gender, parentName, phone } = req.body;
     const studentId = req.params.studentId;
-    const student = await getStudentService({ id: studentId, isActive:true });
+    const student = await getStudentService({ _id: studentId, isActive:true });
     if (!student) {
       return res.send(error(400, "Student doesn't exists"));
     }
@@ -421,7 +421,6 @@ export async function parentUpdateStudentController(req, res) {
 export async function studentParentUpdateStudentController(req, res) {
   try {
     const {
-      rollNumber,
       firstname,
       lastname,
       gender,
@@ -451,7 +450,6 @@ export async function studentParentUpdateStudentController(req, res) {
 
     const updatedStudent = await updateStudentInfo({
       id: student["_id"],
-      rollNumber,
       firstname,
       lastname,
       gender,
