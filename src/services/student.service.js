@@ -6,15 +6,15 @@ import { getSectionByIdService } from "./section.services.js";
 
 
 
-export async function getStudentService(paramObj){
+export async function getStudentService(paramObj, projection={}){
   try {
-    const student = await studentModel.findOne(paramObj);
-    return student;
+    const student = await studentModel.findOne(paramObj).select(projection);
+    return student; 
   }catch (error) {
     throw error;    
   }
 }
-
+ 
 export async function getStudentsService(paramObj){
   try {
     const students = await studentModel.find(paramObj);

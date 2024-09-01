@@ -3,6 +3,15 @@ import parentModel from "../models/parent.model.js";
 import studentModel from "../models/student.model.js";
 
 
+export async function getParentService(filter, projection={} ){
+  try {
+    const parent = await parentModel.find(paramObj).select(projection);
+    return parent;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function checkParentExist({phone}){
   try {
     const parent = await parentModel.findOne({phone});

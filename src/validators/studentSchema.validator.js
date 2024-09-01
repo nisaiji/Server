@@ -1,7 +1,6 @@
 import Joi from "joi";
 
 const registerStudentSchema = Joi.object({
-  rollNumber:Joi.string(),
   firstname: Joi.string().required().messages({
     "any.required": "First name is required.",
   }),
@@ -89,6 +88,9 @@ const studentParentUpdateStudentSchema = Joi.object({
   }),
   gender:Joi.string().required().messages({
     "any.required":"gender is required"
+  }),
+  dob:Joi.string().required().messages({
+    "any.required":"DOB is required"
   }),
   bloodGroup:Joi.string().required().messages({
     "any.required":"blood group is required"
