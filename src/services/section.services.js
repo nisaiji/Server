@@ -43,7 +43,7 @@ export async function getSectionByIdService(id){
 
 export async function deleteSectionService(paramObj){
   try {
-    const section = sectionModel.findOneAndDelete(paramObj).lean();
+    const section = await sectionModel.findOneAndDelete(paramObj);
   } catch (error) {
     throw error;    
   }

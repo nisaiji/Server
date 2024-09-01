@@ -6,7 +6,7 @@ import { registerSectionValidation } from "../middlewares/validation/section.val
 
 const sectionRouter = express.Router();
 
-sectionRouter.post("/",adminAuthenticate,registerSectionValidation,registerSectionController);
+sectionRouter.post("/", adminAuthenticate, registerSectionValidation, registerSectionController);
 sectionRouter.post("/replace-teacher",adminAuthenticate,replaceTeacherController);
 sectionRouter.get("/:sectionId", adminAuthenticate, getSectionController);
 sectionRouter.delete("/:sectionId", adminAuthenticate,deleteSectionAuthorization,deleteSectionController);

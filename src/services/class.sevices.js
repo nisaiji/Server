@@ -35,3 +35,12 @@ export async function deleteClassService(paramObj){
     throw error;    
   }
 }
+
+export async function updateClassService(filter, update){
+  try {
+    const classInfo = await classModel.updateOne(filter, update);
+    return classInfo;
+  } catch (error) {
+    throw error;
+  }
+}

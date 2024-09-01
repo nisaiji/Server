@@ -1,9 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { getClassService } from "../services/class.sevices.js";
+import { getClassService, updateClassService } from "../services/class.sevices.js";
 import {deleteSection,
   
+  deleteSectionService,
+  
   getAllSection,getClassSections, getSectionService, registerSectionService} from "../services/section.services.js";
-import { getTeacherService } from "../services/teacher.services.js";
+import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerSectionController(req, res) {
@@ -55,12 +57,16 @@ export async function deleteSectionController(req, res) {
   try {
     const sectionId = req.params.sectionId;
     const adminId = req.adminId;
-
-    const deletedSection = await deleteSection({ sectionId });
-    if (deletedSection instanceof Error) {
-      return res.send(error(400, "can't delete section"));
+    let section = await getSectionService({_id:sectionId});
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
-
+    const[sectionInfo, classInfo, teacher] = await Promise.all([
+      deleteSectionService({ _id:sectionId }), 
+      updateClassService({_id:section["classId"]}, {$pull:{section:sectionId}}),
+      updateTeacherService({_id:section["teacher"]}, {section:null}) 
+    ])
+    
     return res.send(success(200, "section deleted successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
