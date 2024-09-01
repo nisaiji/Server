@@ -100,8 +100,7 @@ export async function updateTeacherController(req, res) {
       req.body["password"] = hashedPassword;
     }
 
-    req.body["id"] = teacherId;
-    const updatedTeacher = await updateTeacherService(req.body);
+    const updatedTeacher = await updateTeacherService({_id:teacherId}, req.body);
     if (updatedTeacher instanceof Error) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, "Details cann't be updated"));
     }

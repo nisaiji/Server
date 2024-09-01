@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { deleteClassService,getClassWithSectionsService,getClassService, registerClassService,} from "../services/class.sevices.js";
+import { deleteClassService,getClassWithSectionsService,getClassService, registerClassService, customGetClassWithSectionTeacherService,} from "../services/class.sevices.js";
 import { checkClassExistById } from "../services/section.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -35,6 +35,16 @@ export async function deleteClassController(req, res) {
     return res.status(StatusCodes.OK).send(success(200, "Class deleted successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getClassController(req, res){
+  try {
+    const id = req.params.classId;
+    const classInfo = await customGetClassWithSectionTeacherService({_id:id});
+    return res.status(StatusCodes.OK).send(success(200, {"class":classInfo}));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message))    
   }
 }
 
