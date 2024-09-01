@@ -221,6 +221,7 @@ export async function updateStudentInfo(data){
     if(address){
       student["address"] = address;  
     }
+    await student.save();
     return student;
   } catch (error){
     throw error;    
