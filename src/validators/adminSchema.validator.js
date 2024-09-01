@@ -56,7 +56,7 @@ const updateAdminProfileSchema = Joi.object({
     "string.max": "school name length must be smaller than 500 chars",
     "any.required": "School name is required"
   }),
-  principalName: Joi.string().required().messages({
+  principal: Joi.string().required().messages({
     "any.required": "Principal name is required!"
   }),
   schoolBoard: Joi.string().required().messages({

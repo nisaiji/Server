@@ -62,12 +62,10 @@ export async function findSectionById(_id) {
 
 export async function getAllSection() {
   try {
-    // console.log("get section list called")
     const sections = await sectionModel
       .find({})
       .populate("students")
       // .populate("coordinator");
-    // console.log(sections);
     return sections;
   } catch (error) {
     return error;
@@ -78,7 +76,6 @@ export async function getClassSections(classId) {
   try {
     const sections = await sectionModel
       .find({ classId: classId }).populate('classTeacher');
-      console.log(sections);
     return sections;
   } catch (error) {
     return error;
@@ -139,12 +136,3 @@ export async function getSectionStudents({sectionId,adminId}){
   return students;
 }
 
-export async function findSectionInfoById({sectionId}){
-  try {
-    const section = await sectionModel.findById(sectionId).select({students:0}).populate({path:"classId",select:{"name":1}}).populate({path:"classTeacher",select:{firstname:1,lastname:1}});
-    return section;
-    
-  } catch (error) {
-    throw error;    
-  }
-}

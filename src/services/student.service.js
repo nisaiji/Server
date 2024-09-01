@@ -139,7 +139,6 @@ export async function getPresentStudentCount({ sectionId, startOfDay,endOfDay}) 
     const presentCount = await attendanceModel.countDocuments({
       $and: [{ section: sectionId }, { date: {$gte:startOfDay,$lte:endOfDay} }, { teacherAttendance: "present" }]
     });
-    console.log(presentCount)
     return presentCount;
   } catch (error) {
     throw error;
@@ -151,7 +150,6 @@ export async function getAbsentStudentCount({ sectionId, startOfDay,endOfDay}) {
     const absentCount = await attendanceModel.countDocuments({
       $and: [{ section: sectionId }, { date: {$gte:startOfDay,$lte:endOfDay} }, { teacherAttendance: "absent" }]
     });
-    console.log(absentCount)
     return absentCount;
   } catch (error) {
     throw error;
@@ -179,7 +177,6 @@ export async function adminUpdateStudent({
   email,
   address
 }) {
-  console.log(studentId);
   try {
     const student = await studentModel.findByIdAndUpdate(studentId, {
       rollNumber,
@@ -191,7 +188,6 @@ export async function adminUpdateStudent({
       email,
       address
     });
-    // console.log(student);
     return student;
   } catch (error) {
     throw error;
@@ -254,9 +250,7 @@ export async function searchStudentByName(data){
 
 export async function getStudentMonthlyAttendanceCount({studentId , regex}){
   try {
-    console.log({regex})
     const attendace = await attendanceModel.find({student:studentId,date:regex,teacherAttendance:"present"});
-    console.log({attendace})
     return attendace;
   } catch (error) {
     throw error;    

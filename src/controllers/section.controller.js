@@ -46,7 +46,6 @@ export async function getSectionController(req,res){
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(400,"Section not found."));
     }
-  
     return res.status(StatusCodes.OK).send(success(200,{section, teacher}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

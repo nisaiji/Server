@@ -11,7 +11,6 @@ export async function getPresentStudentsController(req,res){
     const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();
  
     const presentCount = await getPresentCountOfSchool({adminId,startOfDay,endOfDay});
-    console.log({presentCount})
     const totalCount = await getTotalStudentCountOfSchool({adminId});
 
     return res.send(success(200,{presentCount,totalCount}));    
@@ -75,7 +74,6 @@ export async function weeklyAttendanceOfSchoolController(req,res){
       weekDates.push(new Date(currentDate).getTime());
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    console.log({weekDates});
     let weeklyAttendance = await Promise.all(
       weekDates.map(async (date) => {
         const currDate = new Date(date);
@@ -114,7 +112,6 @@ export async function monthlyAttendanceOfSchoolController(req,res){
      let monthlyAttendance = await Promise.all(
       monthDates.map(async (d) => {
         const date = new Date(d);
-        console.log({date})
         const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).getTime();
         const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999).getTime();    
         const presentStudentCount = await getPresentStudentCount({sectionId,startOfDay,endOfDay});

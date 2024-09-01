@@ -171,7 +171,6 @@ export async function changePasswordTeacherController(req, res) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
     const isMatched = await matchPasswordService({enteredPassword:oldPassword,storedPassword:teacher["password"]});
-    console.log(isMatched)
     if (!isMatched){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Wrong password"));
     }

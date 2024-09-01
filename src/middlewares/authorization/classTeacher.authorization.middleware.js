@@ -8,7 +8,6 @@ export async function classTeacherAuthorization(req,res,next){
         const classTeacherId = req.classTeacherId;
         // if class teacher belongs to section it returns section.
         const matchedSection = await matchClassTeacherAndSection(classTeacherId , sectionId);
-        // console.log(matchedSection);
         if(!matchedSection){
             return res.send(error(400,"class teacher does not belong to this section"));
         }

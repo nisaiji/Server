@@ -201,13 +201,12 @@ export async function deleteStudentController(req, res) {
     if (!parent) {
       return res.send(error(400, "Parent doesn't exists"));
     }
-    console.log("delete student");
     const deletedStudent = await diActivateStudentByIdService({
       id: studentId
     });
 
     const siblings = await getStudentService({parent:parentId, isActive:true});
-    if (siblings.length === 0) {
+    if (siblings?.length === 0) {
       const deletedParent = await diActivateParentByIdService({ id: parentId });
     }
     return res.send(success(200, "Student deleted successfully"));

@@ -14,7 +14,6 @@ export async function checkParentExist({phone}){
 
 export async function registerParent({fullname,phone,password,admin}){
   try {
-    console.log({password});
     const parent = await parentModel.create({fullname, phone,password,admin});
     return parent;
   } catch (error) {
@@ -23,7 +22,6 @@ export async function registerParent({fullname,phone,password,admin}){
 }
 export async function updateParent({fullname,phone}){
   try {
-    console.log({password});
     const parent = await parentModel.create({fullname, phone,password});
     return parent;
   } catch (error) {
@@ -44,7 +42,6 @@ export async function updateParentInfo(data){
 export async function diActivateParentByIdService(data){
   try {
     const {id} = data;
-    console.log("Id "+id)
     const parent = await parentModel.findByIdAndUpdate(id,{isActive:false});
     return parent;
   } catch (error) {

@@ -12,7 +12,6 @@ export async function hashPasswordService(password) {
 export async function matchPasswordService(passwords) {
   try {
     const{enteredPassword,storedPassword} = passwords;
-    console.log({enteredPassword,storedPassword})
     const matchPassword = await bcrypt.compare(enteredPassword,storedPassword);
     return matchPassword;
   } catch (error) {
