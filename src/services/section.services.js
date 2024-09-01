@@ -6,7 +6,7 @@ import teacherModel from "../models/teacher.model.js";
 
 export async function getSectionService(paramObj){
   try {
-    const section = await sectionModel.findOne(paramObj).lean();
+    const section = await sectionModel.findOne(paramObj);
     return section;
   } catch (error) {
     throw error;    

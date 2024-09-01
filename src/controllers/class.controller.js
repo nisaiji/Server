@@ -48,6 +48,7 @@ export async function getClassController(req, res){
   }
 }
 
+
 export async function getClassListController(req, res) {
   try {
     const admin = req.adminId;

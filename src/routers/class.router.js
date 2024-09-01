@@ -6,8 +6,8 @@ import { classRegisterValidation } from '../middlewares/validation/class.validat
 const classRouter = express.Router();
 
 classRouter.post("/",adminAuthenticate, classRegisterValidation, registerClassController);
-classRouter.get("/:classId",adminAuthenticate,getClassController);
 classRouter.delete("/:classId",adminAuthenticate, deleteClassController);
 classRouter.get("/all",adminAuthenticate,getClassListController);
+classRouter.get("/:classId",adminAuthenticate,getClassController);
 
 export default classRouter; 

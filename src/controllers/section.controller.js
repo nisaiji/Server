@@ -88,25 +88,31 @@ export async function replaceTeacherController(req, res) {
     const adminId = req.adminId;
     const { sectionId, teacherId } = req.body;
     const section = await getSectionService({_id:sectionId});
-    console.log(section);
-    if (!section) {
-      return res.send(error(400, "section doesn't exists"));
+    if(!section) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section doesn't exists"));
     }
-    const teacher = await getTeacherByIdService(teacherId);
-    if (!teacher) {
-      return res.send(error(400, "teacher doesn't exists"));
+    const[prevTeacher, teacher] = await Promise.all([
+      getTeacherService({_id:section["teacher"]}),
+      getTeacherService({_id:teacherId})
+    ])
+    if(!teacher) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher doesn't exists"));
     }
-    // console.log({ a: section["admin"].to_string(), b: adminId });
-    if (section["admin"].toString() !== adminId) {
-      return res.send(400, "admin doesn't have access to this section");
+    if(teacher["section"]){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(409, "Teacher already occupied"));
     }
-    if (teacher["admin"].toString() !== adminId) {
-      return res.send(400, "admin doesn't have access to this teacher");
-    }
+    
 
-    section["classTeacher"] = teacherId;
-    await section.save();
-    return res.send(success(200, "new teacher assigned to section sucessfully"));
+    section["teacher"] = teacherId;
+    teacher["section"] = sectionId;
+    prevTeacher["section"] = null;
+
+    await Promise.all([
+      section.save(),
+      teacher.save(),
+      prevTeacher.save()
+    ])
+    return res.status(StatusCodes.OK).send(success(200, "Teacher changed successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
