@@ -104,7 +104,7 @@ const studentParentUpdateStudentSchema = Joi.object({
   parentGender: Joi.string().required().messages({
     "any.required": "parent gender is required.",
   }),
-  parentAge: Joi.string().required().messages({
+  parentAge: Joi.number().required().messages({
     "any.required": "parent age is required.",
   }),
   parentEmail: Joi.string().required().messages({
