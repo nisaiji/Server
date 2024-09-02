@@ -10,13 +10,18 @@ const studentRouter = express.Router();
 
 studentRouter.post("/teacher", teacherAuthenticate, registerStudentValidation, registerStudentController );
 studentRouter.post("/admin", adminAuthenticate, registerStudentValidation, adminRegisterStudentController );
+
 studentRouter.delete("/teacher/:studentId", teacherAuthenticate, deleteStudentValidation, deleteStudentController );
 studentRouter.delete("/admin/:studentId", adminAuthenticate, deleteStudentValidation, deleteStudentController );
+
 studentRouter.get("/teacher-section/:sectionId", teacherAuthenticate, getAllStudentOfSectionController );
 studentRouter.get("/admin-section/:sectionId", adminAuthenticate, getAllStudentOfSectionForAdminController );
+
 studentRouter.get("/:pageNo", adminAuthenticate, getAllStudentListForAdminController );
+
 studentRouter.get("/teacher/search/:name", teacherAuthenticate, searchStudentOfSectionController );
 studentRouter.get("/admin/search/:name", adminAuthenticate, searchStudentForAdminController );
+
 studentRouter.put("/photo-upload/:studentId", parentAuthenticate, uploadStudentPhotoController );
 studentRouter.put("/teacher/:studentId", teacherAuthenticate, updateStudentByTeacherValidation, updateStudentController );
 studentRouter.put("/admin/:studentId", adminAuthenticate, updateStudentByAdminValidation, updateStudentController );

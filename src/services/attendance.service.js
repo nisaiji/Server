@@ -32,7 +32,7 @@ export async function updateAttendanceService(data) {
 
 export async function createAttendanceService(data) {
   try {
-    const attendance = await attendanceModel.create(data).lean();
+    const attendance = await attendanceModel.create(data);
     return attendance;
   } catch (error) {
     throw error;

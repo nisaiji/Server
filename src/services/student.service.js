@@ -14,6 +14,15 @@ export async function getStudentService(paramObj, projection={}){
     throw error;    
   }
 }
+
+export async function registerStudentService( data ){
+  try {
+    const student = await studentModel.create(data);
+    return student;
+  } catch (error) {
+    throw error;
+  }
+}
  
 export async function getStudentsService(paramObj){
   try {
@@ -24,6 +33,27 @@ export async function getStudentsService(paramObj){
   }
 
 }
+
+export async function deleteStudentService(paramObj){
+  try {
+    const student = await studentModel.deleteOne(paramObj);
+    return student;
+  } catch (error) {
+    throw error;    
+  }
+
+}
+
+export async function updateStudentService(filter, update){
+  try {
+    const student = await studentModel.findOneAndUpdate(filter, update);
+    return student;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+
 
 // export async function createStudentService(data) {
 //   try {
@@ -89,6 +119,16 @@ export async function diActivateStudentByIdService(data) {
     }
     const student = await studentModel.findByIdAndUpdate(id,{isActive:false});
     return student;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getstudentsService(filter, projection={}, limit=Infinity, page=1) {
+  try {
+    const{ limit, page, sectionId } = data;
+    const students = await studentModel.find({ section: sectionId,isActive:true }).limit(limit * 1).skip((page - 1) * limit).select(projection).populate({path:"parent", select:{fullName:1, email:1, phone:1 }});
+    return students;
   } catch (error) {
     throw error;
   }

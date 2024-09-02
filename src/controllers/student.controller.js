@@ -1,10 +1,11 @@
+import { StatusCodes } from "http-status-codes";
 import { getAdminService } from "../services/admin.services.js";
 import {  getAttendanceService } from "../services/attendance.service.js";
 import { getClassService } from "../services/class.sevices.js";
-import {checkParentExist,diActivateParentByIdService,findParentById,registerParent,updateInfoParent,updateParentInfo} from "../services/parent.services.js";
+import {checkParentExist,diActivateParentByIdService,findParentById,getParentService,registerParent,updateInfoParent,updateParentInfo, updateParentService} from "../services/parent.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import {
-    findSectionById
+    findSectionById, getSectionService
 } from "../services/section.services.js";
 import {
   checkPhoneAlreadyExists,
@@ -21,199 +22,120 @@ import {
   updateStudent,
   updateStudentByParent,
   updateStudentInfo,
-  uploadStudentPhoto
+  uploadStudentPhoto,
+  registerStudentService,
+  updateStudentService
 } from "../services/student.service.js";
 import { getTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
   try {
-    const {
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      parentName,
-      phone,
-      sectionId,
-      classId
-    } = req.body;
+    const {firstname, lastname, gender, parentName, phone, sectionId, classId } = req.body;
     const teacherId = req.teacherId;
     const adminId = req.adminId;
-    const teacher = await getTeacherService({_id:teacherId, isActive:true});
-    if (!teacher) {
-      return res.send(error(400, "Teacher doesn't exists"));
+
+    const [section, classInfo] = await Promise.all([getSectionService({_id:sectionId}), getClassService({_id:classId})]);
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
-    const section = await findSectionById(sectionId);
-    if (!section) {
-      return res.send(error(400, "Section doesn't exists"));
-    }
-    const Class = await getClassService({_id:classId});
-    if (!Class) {
-      return res.send(error(400, "Class doesn't exists"));
-    }
-    const gardianName = parentName.split(" ");
-    const password = gardianName[0] + "@" + phone;
-    const hashedPassword = await hashPasswordService(password);
-    let parent = await checkParentExist({ phone });
-    if (!parent) {
-      parent = await registerParent({
-        fullname: parentName,
-        phone,
-        password: hashedPassword,
-        admin: adminId
-      });
-    }
-    if (!parent) {
-      return res.send(error(400, "Can't register/find parent"));
+    if(!classInfo){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
     }
 
-    const existingStudent = await getStudentService({$or: [{ $and: [{ firstname }, { parent: parent["_id"] }] }]});
-    if (existingStudent) {
-      return res.send(error(400, "Student already exists"));
+ 
+    const parentNames = parentName.split(" ");
+    const password = parentNames[0] + "@" + phone;
+    const hashedPassword = await hashPasswordService(password);
+    let parent = await getParentService({ phone });
+    if (!parent) {
+      parent = await registerParent({ fullname: parentName, phone, password: hashedPassword, admin: adminId });
     }
-    const student = await registerStudent({
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      parentId: parent["_id"],
-      sectionId,
-      classId,
-      adminId
-    });
-    if (student instanceof Error) {
-      return res.send(error(400, "Can't register student"));
+   
+
+    let student = await getStudentService({ firstname, parent: parent["_id"] });
+    if (student) {
+      return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
     }
-    return res.send(success(201, "Student created successfully!"));
+    const studentObj = {firstname, lastname, gender, parent:parent["_id"], section:sectionId, classId, admin:adminId};
+    student = await registerStudentService(studentObj);
+ 
+    return res.status(StatusCodes.OK).send(success(201, "Student created successfully!"));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 export async function adminRegisterStudentController(req, res) {
   try {
-    const {
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      parentName,
-      phone,
-      sectionId,
-      classId
-    } = req.body;
+    const {firstname, lastname, gender, parentName, phone, sectionId, classId } = req.body;
     const adminId = req.adminId;
-    const admin = await getAdminService({_id:adminId, isActive:true});
-    if (!admin) {
-      return res.send(error(400, "Admin doesn't exists"));
+
+    const [section, classInfo] = await Promise.all([getSectionService({_id:sectionId}), getClassService({_id:classId})]);
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
-    const section = await findSectionById(sectionId);
-    if (!section) {
-      return res.send(error(400, "Section doesn't exists"));
-    }
-    const Class = await getClassService({_id:classId});
-    if (!Class) {
-      return res.send(error(400, "Class doesn't exists"));
+    if(!classInfo){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
     }
 
-    const gardianName = parentName.split(" ");
-    const password = gardianName[0] + "@" + phone;
+ 
+    const parentNames = parentName.split(" ");
+    const password = parentNames[0] + "@" + phone;
     const hashedPassword = await hashPasswordService(password);
-    let parent = await checkParentExist({ phone });
-
+    let parent = await getParentService({ phone });
     if (!parent) {
-      parent = await registerParent({
-        fullname: parentName,
-        phone,
-        password: hashedPassword,
-        admin: adminId
-      });
+      parent = await registerParent({ fullname: parentName, phone, password: hashedPassword, admin: adminId });
     }
-    if (!parent) {
-      return res.send(error(400, "Can't register/find parent"));
-    }
+   
 
-    const existingStudent = await getStudentService({$or: [{ $and: [{ firstname }, { parent: parent["_id"] }] }]});
-
-    if (existingStudent) {
-      return res.send(error(400, "Student already exists"));
+    let student = await getStudentService({ firstname, parent: parent["_id"] });
+    if (student) {
+      return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
     }
-    const student = await registerStudent({
-      rollNumber,
-      firstname,
-      lastname,
-      gender,
-      parentId: parent["_id"],
-      sectionId,
-      classId,
-      adminId
-    });
-    if (student instanceof Error) {
-      return res.send(error(400, "can't register student"));
-    }
-    return res.send(success(201, "student created successfully!"));
+    const studentObj = {firstname, lastname, gender, parent:parent["_id"], section:sectionId, classId, admin:adminId};
+    student = await registerStudentService(studentObj);
+ 
+    return res.status(StatusCodes.OK).send(success(201, "Student created successfully!"));
   } catch (err) {
-    return res.send(error(500, err.message));
-  }
-}
-
-export async function addToSectionStudentController(req, res) {
-  try {
-    const studentId = req.params.studentId;
-    const { sectionId } = req.body;
-    const student = await getStudentService({_id:studentId, isActive:true});
-    if (!student) {
-      return res.send(error(400, "Student doesn't exists"));
-    }
-    const section = await findSectionById(sectionId);
-    if (!section) {
-      return res.send(error(400, "Section doesn't exists"));
-    }
-    const isStudentExistInSection = section?.students.includes(studentId);
-  
-    if (isStudentExistInSection) {
-      return res.send(error(400, "Student already exist in section"));
-    }
-    section?.students?.push(studentId);
-    student.section = sectionId;
-    await section.save();
-    await student.save();
-
-    return res.send(
-      success(201, `${student.firstname} added to ${section.name} successfully`)
-    );
-  } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 export async function deleteStudentController(req, res) {
   try {
     const studentId = req.params.studentId;
-    const student = await getStudentService({ _id: studentId, isActive:true });
+    const[student, parent] = await Promise.all([getStudentService({ _id: studentId, isActive:true }), getParentService({_id:student["parent"], isActive:true})])
     if (!student) {
-      return res.send(error(400, "Student doesn't exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student doesn't exists"));
     }
-    const parentId = student["parent"];
-    const parent = await findParentById({ id: parentId });
-
     if (!parent) {
-      return res.send(error(400, "Parent doesn't exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
     }
-    const deletedStudent = await diActivateStudentByIdService({
-      id: studentId
-    });
+    
+    await updateStudentService({_id:studentId}, {isActive:false});
 
-    const siblings = await getStudentService({parent:parentId, isActive:true});
+    const siblings = await getStudentService({parent:student["parent"], isActive:true});
     if (siblings?.length === 0) {
-      const deletedParent = await diActivateParentByIdService({ id: parentId });
+      await updateParentService({_id:student["parent"]}, {isActive:false});
     }
-    return res.send(success(200, "Student deleted successfully"));
+    return res.status(StatusCodes.OK).send(success(200, "Student deleted successfully"));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+export async function getSectionStudentController(req, res){
+  try {
+    const{section, limit, page} = req.body;
+    const students = await getStudentsService({section},{}, limit, page);
+    return res.status(StatusCodes.OK).send(success(200, {students}));
+    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
 
 export async function getStudentListOfSectionController(req, res) {
   try {
