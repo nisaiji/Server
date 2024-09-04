@@ -23,7 +23,9 @@ export async function getAttendancesService(paramObj){
 export async function updateAttendanceService(data) {
   try {
    const{id, fieldsToBeUpdated} = data;
-   const attendance = await attendanceModel.findByIdAndUpdate(id, fieldsToBeUpdated).lean();
+   console.log(data)
+   const attendance = await attendanceModel.findByIdAndUpdate(id, fieldsToBeUpdated);
+  console.log({attendance})
     return attendance;
   } catch (error) {
     throw error;

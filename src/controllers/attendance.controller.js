@@ -157,7 +157,7 @@ export async function updateAttendanceController(req,res){
     
     const absentLength = absent?.length;
     for(let i=0;i<absentLength; i++){
-      const id = present[i]["_id"];
+      const id = absent[i]["_id"];
       const fieldsToBeUpdated = {teacherAttendance:"absent"}
       await updateAttendanceService({id, fieldsToBeUpdated});
     }

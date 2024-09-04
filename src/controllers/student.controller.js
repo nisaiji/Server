@@ -2,10 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import { getAdminService } from "../services/admin.services.js";
 import {  getAttendanceService } from "../services/attendance.service.js";
 import { getClassService } from "../services/class.sevices.js";
-import {checkParentExist,diActivateParentByIdService,findParentById,getParentService,registerParent,updateInfoParent,updateParentInfo, updateParentService} from "../services/parent.services.js";
+import {checkParentExist,diActivateParentByIdService,findParentById,getParentService,registerParent,registerParentService,updateInfoParent,updateParentInfo, updateParentService} from "../services/parent.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import {
-    findSectionById, getSectionService
+    findSectionById, getSectionService, updateSectionService
 } from "../services/section.services.js";
 import {
   checkPhoneAlreadyExists,
@@ -32,7 +32,6 @@ import { error, success } from "../utills/responseWrapper.js";
 export async function registerStudentController(req, res) {
   try {
     const {firstname, lastname, gender, parentName, phone, sectionId, classId } = req.body;
-    const teacherId = req.teacherId;
     const adminId = req.adminId;
 
     const [section, classInfo] = await Promise.all([getSectionService({_id:sectionId}), getClassService({_id:classId})]);
@@ -43,15 +42,14 @@ export async function registerStudentController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
     }
 
- 
     const parentNames = parentName.split(" ");
     const password = parentNames[0] + "@" + phone;
     const hashedPassword = await hashPasswordService(password);
     let parent = await getParentService({ phone });
+    
     if (!parent) {
-      parent = await registerParent({ fullname: parentName, phone, password: hashedPassword, admin: adminId });
+      parent = await registerParentService({ fullname: parentName, phone, password: hashedPassword, admin: adminId });
     }
-   
 
     let student = await getStudentService({ firstname, parent: parent["_id"] });
     if (student) {
@@ -59,53 +57,23 @@ export async function registerStudentController(req, res) {
     }
     const studentObj = {firstname, lastname, gender, parent:parent["_id"], section:sectionId, classId, admin:adminId};
     student = await registerStudentService(studentObj);
- 
+
+    await updateSectionService({_id:sectionId}, {studentCount:section["studentCount"]+1});
     return res.status(StatusCodes.OK).send(success(201, "Student created successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
-export async function adminRegisterStudentController(req, res) {
-  try {
-    const {firstname, lastname, gender, parentName, phone, sectionId, classId } = req.body;
-    const adminId = req.adminId;
-
-    const [section, classInfo] = await Promise.all([getSectionService({_id:sectionId}), getClassService({_id:classId})]);
-    if(!section){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
-    }
-    if(!classInfo){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
-    }
-
- 
-    const parentNames = parentName.split(" ");
-    const password = parentNames[0] + "@" + phone;
-    const hashedPassword = await hashPasswordService(password);
-    let parent = await getParentService({ phone });
-    if (!parent) {
-      parent = await registerParent({ fullname: parentName, phone, password: hashedPassword, admin: adminId });
-    }
-   
-
-    let student = await getStudentService({ firstname, parent: parent["_id"] });
-    if (student) {
-      return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
-    }
-    const studentObj = {firstname, lastname, gender, parent:parent["_id"], section:sectionId, classId, admin:adminId};
-    student = await registerStudentService(studentObj);
- 
-    return res.status(StatusCodes.OK).send(success(201, "Student created successfully!"));
-  } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-  }
-}
 
 export async function deleteStudentController(req, res) {
   try {
     const studentId = req.params.studentId;
-    const[student, parent] = await Promise.all([getStudentService({ _id: studentId, isActive:true }), getParentService({_id:student["parent"], isActive:true})])
+    const[student, parent, section] = await Promise.all([
+      getStudentService({ _id: studentId, isActive:true }), 
+      getParentService({_id:student["parent"], isActive:true}),
+      getSectionService({_id:student["section"]})
+    ]);
     if (!student) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student doesn't exists"));
     }
@@ -113,12 +81,16 @@ export async function deleteStudentController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
     }
     
-    await updateStudentService({_id:studentId}, {isActive:false});
+    await Promise.all([
+      updateStudentService({_id:studentId}, {isActive:false}),
+      updateSectionService({_id:section["_id"]},{studentCount:section["studentCount"]-1})
+    ])
 
     const siblings = await getStudentService({parent:student["parent"], isActive:true});
     if (siblings?.length === 0) {
       await updateParentService({_id:student["parent"]}, {isActive:false});
     }
+
     return res.status(StatusCodes.OK).send(success(200, "Student deleted successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

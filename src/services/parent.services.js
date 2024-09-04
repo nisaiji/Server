@@ -5,7 +5,7 @@ import studentModel from "../models/student.model.js";
 
 export async function getParentService(filter, projection={} ){
   try {
-    const parent = await parentModel.find(paramObj).select(projection);
+    const parent = await parentModel.find(filter).select(projection);
     return parent;
   } catch (error) {
     throw error;

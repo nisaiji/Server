@@ -1,5 +1,5 @@
 import express from "express";
-import { adminRegisterStudentController, deleteStudentController, getAllStudentListForAdminController, getAllStudentOfSectionController, getAllStudentOfSectionForAdminController, getStudentListOfSectionController,
+import {  deleteStudentController, getAllStudentListForAdminController, getAllStudentOfSectionController, getAllStudentOfSectionForAdminController, 
   parentUpdateStudentController, registerStudentController, searchStudentForAdminController, searchStudentOfSectionController, studentParentUpdateStudentController, updateStudentController, uploadStudentPhotoController } from "../controllers/student.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
@@ -9,7 +9,7 @@ import {deleteStudentValidation, registerStudentValidation, studentParentUpdateS
 const studentRouter = express.Router();
 
 studentRouter.post("/teacher", teacherAuthenticate, registerStudentValidation, registerStudentController );
-studentRouter.post("/admin", adminAuthenticate, registerStudentValidation, adminRegisterStudentController );
+studentRouter.post("/admin", adminAuthenticate, registerStudentValidation, registerStudentController );
 
 studentRouter.delete("/teacher/:studentId", teacherAuthenticate, deleteStudentValidation, deleteStudentController );
 studentRouter.delete("/admin/:studentId", adminAuthenticate, deleteStudentValidation, deleteStudentController );
