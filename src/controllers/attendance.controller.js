@@ -125,8 +125,8 @@ export async function getMisMatchAttendanceController(req,res){
     const sectionId = req.sectionId;
     let date = new Date();
     const{startTime, endTime} = getStartAndEndTimeService(date, date);
+    const day = getDayNameService(date.getDay());
     date = date.getTime();
-    const day = getDayNameService([date.getDay()]);
     if (day === "Sunday") {
       return res.status(StatusCodes.CONFLICT).send(error(400, "Today is sunday"));
     }
