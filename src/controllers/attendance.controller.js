@@ -258,10 +258,10 @@ export async function attendanceStatusOfStudentController(req, res) {
 
 export async function attendanceCountOfStudentController(req, res){
   try { 
-    let{studentId, startDate, endDate} = req.body;
+    let{studentId, startTime, endTime} = req.body;
     startDate = new Date(startDate);
     endDate = new Date(endDate);
-    const{startTime, endTime} = getStartAndEndTimeService(startDate, endDate);    
+    // const{startTime, endTime} = getStartAndEndTimeService(startDate, endDate);    
 
     const student = await getStudentService({_id:studentId});
     if(!student){
