@@ -5,7 +5,7 @@ import studentModel from "../models/student.model.js";
 
 export async function getParentService(filter, projection={} ){
   try {
-    const parent = await parentModel.find(filter).select(projection);
+    const parent = await parentModel.findOne(filter).select(projection);
     return parent;
   } catch (error) {
     throw error;
@@ -14,6 +14,7 @@ export async function getParentService(filter, projection={} ){
 
 export async function registerParentService( data ){
   try {
+    console.log({data})
     const parent = await parentModel.create(data);
     return parent;
   } catch (error) {

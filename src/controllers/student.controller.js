@@ -46,7 +46,7 @@ export async function registerStudentController(req, res) {
     const password = parentNames[0] + "@" + phone;
     const hashedPassword = await hashPasswordService(password);
     let parent = await getParentService({ phone });
-    
+    console.log({parent})
     if (!parent) {
       parent = await registerParentService({ fullname: parentName, phone, password: hashedPassword, admin: adminId });
     }
