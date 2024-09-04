@@ -24,7 +24,8 @@ import {
   updateStudentInfo,
   uploadStudentPhoto,
   registerStudentService,
-  updateStudentService
+  updateStudentService,
+  getStudentsService
 } from "../services/student.service.js";
 import { getTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
@@ -69,14 +70,16 @@ export async function registerStudentController(req, res) {
 export async function deleteStudentController(req, res) {
   try {
     const studentId = req.params.studentId;
-    const[student, parent, section] = await Promise.all([
-      getStudentService({ _id: studentId, isActive:true }), 
-      getParentService({_id:student["parent"], isActive:true}),
-      getSectionService({_id:student["section"]})
-    ]);
+    const student = await getStudentService({ _id: studentId, isActive:true });
     if (!student) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student doesn't exists"));
     }
+  
+    const[ parent, section] = await Promise.all([
+      getParentService({_id:student["parent"], isActive:true}),
+      getSectionService({_id:student["section"]})
+    ]);
+
     if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
     }
@@ -86,7 +89,7 @@ export async function deleteStudentController(req, res) {
       updateSectionService({_id:section["_id"]},{studentCount:section["studentCount"]-1})
     ])
 
-    const siblings = await getStudentService({parent:student["parent"], isActive:true});
+    const siblings = await getStudentsService({parent:student["parent"], isActive:true});
     if (siblings?.length === 0) {
       await updateParentService({_id:student["parent"]}, {isActive:false});
     }
