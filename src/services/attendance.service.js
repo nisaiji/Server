@@ -43,9 +43,10 @@ export async function createAttendanceService(data) {
 
 export async function getMisMatchAttendanceService(data) {
   try {
-    const{ section, startOfDay,endOfDay } = data;
+    const{ section, startTime,endTime } = data;
+    console.log(data)
     const attendance = await attendanceModel.find({section, 
-       date: { $gte: startOfDay, $lte: endOfDay },
+       date: { $gte: startTime, $lte: endTime },
        $or: [
         { teacherAttendance: "absent", parentAttendance: "present" },
         { teacherAttendance: "present", parentAttendance: "absent" }

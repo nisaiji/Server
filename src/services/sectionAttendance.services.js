@@ -20,7 +20,7 @@ export async function getSectionAttendancesService(paramObj){
 
 export async function getSectionAttendanceStatusService(paramObj) {
   try {
-    const attendance = await sectionAttendanceModel.find(paramObj).select({status:0,_id:0,section:0,teacher:0});
+    const attendance = await sectionAttendanceModel.find(paramObj).select({status:0,_id:0,section:0,teacher:0}).sort({ date: 1 });;
     return attendance;
   } catch (error) {
     throw error;

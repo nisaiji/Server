@@ -155,7 +155,7 @@ export async function getAllNonSectionTeacherController(req, res) {
   
   try {
     const adminId = req.adminId;
-    const teachers = await getTeachersService({admin:adminId,section:null});
+    const teachers = await getTeachersService({admin:adminId,section:null, isActive:true});
     return res.send(success(200, teachers));
   } catch (err) {
     return res.send(error(500, err.message));
