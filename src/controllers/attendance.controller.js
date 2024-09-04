@@ -189,7 +189,7 @@ export async function checkAttendaceMarkedController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
 
-    const sectionAttendance = await getSectionAttendanceService({section:sectionId, startTime, endTime});
+    const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime, $lte:endTime}});
 
     if (sectionAttendance) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Attendance already marked"));
