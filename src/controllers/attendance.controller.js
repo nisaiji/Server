@@ -7,7 +7,7 @@ import { getSectionByIdService } from "../services/section.services.js";
 import { getTeacherService } from "../services/teacher.services.js";
 import { getDayNameService, getStartAndEndTimeService } from "../services/celender.service.js";
 import { getHolidayEventService } from "../services/holidayEvent.service.js";
- 
+
 export async function attendanceByTeacherController(req, res) { 
   try {
     const {sectionId, present, absent} = req.body;
@@ -255,17 +255,14 @@ export async function attendanceStatusOfStudentController(req, res) {
 
 export async function attendanceCountOfStudentController(req, res){
   try { 
-    let{studentId, startTime, endTime} = req.body;
-    // startDate = new Date(startDate);
-    // endDate = new Date(endDate);
-    // const{startTime, endTime} = getStartAndEndTimeService(startDate, endDate);    
+    let{studentId, startTime, endTime} = req.body; 
 
     const student = await getStudentService({_id:studentId});
     if(!student){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
-    const studentAttendance = await getAttendancesService({student:studentId, data:{$gte: startTime, $lte:endTime}});
+    const studentAttendance = await getAttendancesService({student:studentId, date:{$gte: startTime, $lte:endTime}});
     const sectionAttendance = await getSectionAttendancesService({section:student["section"], date:{$gte:startTime, $lte:endTime}});
 
     const studentAttendanceCount = studentAttendance.length;
