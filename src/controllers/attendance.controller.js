@@ -240,11 +240,8 @@ export async function attendanceStatusOfSectionController(req, res) {
 export async function attendanceStatusOfStudentController(req, res) {
   try {
     const studentId = req.params.studentId;
-    let {startDate, endDate} = req.body;
-    startDate = new Date(startDate);
-    endDate = new Date(endDate);
-    const {startTime, endTime} = getStartAndEndTimeService(startDate, endDate);
-    
+    let {startTime, endTime} = req.body;
+
     const student = await getStudentService({_id:studentId, isActive:true});
     if(!student){
       return res.error(StatusCodes.NOT_FOUND).send(error(404,"Student not found"));

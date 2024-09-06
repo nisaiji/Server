@@ -44,7 +44,6 @@ const teacherSchema = mongoose.Schema({
   },
   phone: {
     type: String,
-    unique:true,
     required: true
   },
   address:{
@@ -63,6 +62,8 @@ const teacherSchema = mongoose.Schema({
     ref: "admin"
   }
 });
+
+teacherSchema.index({ phone: 1, isActive: 1 }, { unique: true });
 
 const teacherModel = mongoose.model("teacher", teacherSchema);
 

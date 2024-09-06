@@ -124,11 +124,7 @@ export async function deleteTeacherController(req, res) {
     if (teacher["section"]) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Teacher is assigned to section. Can't delete teacher"));
     }
-    teacher["isActive"] = false;
-    await teacher.save();
-    if (!teacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
-    }
+    await updateTeacherService({_id:teacher["_id"]}, {isActive:false})
     return res.status(StatusCodes.OK).send(success(200, "Teacher deleted successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
