@@ -1,7 +1,7 @@
-import { findParentById } from "../../services/parent.services.js";
 import { error } from "../../utills/responseWrapper.js";
 import Jwt from "jsonwebtoken";
 import { config } from "../../config/config.js";
+import { getParentService } from "../../services/parent.services.js";
 
 export async function parentAuthenticate(req, res, next) {
   try {
@@ -11,7 +11,8 @@ export async function parentAuthenticate(req, res, next) {
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
-    const parent = await findParentById({id:decoded.parentId});
+    const _id = decoded.parentId;
+    const parent = await getParentService({_id});
     if (!parent) {
       return res.send(error(404, "Parent doesn't exists"));
     }

@@ -24,9 +24,9 @@ export async function registerStudentService( data ){
   }
 }
  
-export async function getStudentsService(paramObj){
+export async function getStudentsService(paramObj, projection={}){
   try {
-    const students = await studentModel.find(paramObj);
+    const students = await studentModel.find(paramObj).select(projection);
     return students;
   } catch (error) {
     throw error;    

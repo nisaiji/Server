@@ -36,19 +36,16 @@ export async function createHolidayEventController(req, res) {
 
 export async function getHolidayEventController(req, res) {
   try {
-    let { startDate, endDate } = req.body;
-    startDate = new Date(startDate);
-    endDate = new Date(endDate);
-    const{startTime, endTime} = getStartAndEndTimeService(startDate, endDate);
+    let { startTime, endTime } = req.body;
     const adminId = req.adminId;
 
-    const eventList = await getHolidayEventsService({
+    const holidayEvents = await getHolidayEventsService({
       admin: adminId,
       date: { $gte: startTime, $lte: endTime }
     });
-    return res.send(success(200, eventList));
+    return res.status(StatusCodes.OK).send(success(200, holidayEvents));
   } catch (err) {
-    return res.send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -88,23 +85,4 @@ export async function deleteHolidayEventController(req, res) {
   }
 }
 
-
-//-------------------------------------------------------------
-export async function getHolidayEventControllerOLD(req, res) {
-  try {
-    const { month, year } = req.body;
-    const startTime = new Date(year, month, 1).getTime();
-    const endTime = new Date(year, month + 1, 0).getTime();
-    const adminId = req.adminId;
-    const admin = await getAdminService({ _id: adminId, isActive: true });
-
-    const eventList = await getHolidayEventsService({
-      admin: adminId,
-      date: { $gte: startTime, $lte: endTime }
-    });
-    return res.send(success(200, eventList));
-  } catch (err) {
-    return res.send(error(500, err.message));
-  }
-}
 

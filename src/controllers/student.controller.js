@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { getAdminService } from "../services/admin.services.js";
 import {  getAttendanceService } from "../services/attendance.service.js";
 import { getClassService } from "../services/class.sevices.js";
-import {checkParentExist,diActivateParentByIdService,findParentById,getParentService,registerParent,registerParentService,updateInfoParent,updateParentInfo, updateParentService} from "../services/parent.services.js";
+import {getParentService,registerParentService, updateParentService} from "../services/parent.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import {
     findSectionById, getSectionService, updateSectionService
@@ -271,11 +271,10 @@ export async function updateStudentController(req, res) {
     if (updatedStudent instanceof Error) {
       return res.send(error(400, "Can't update student Info"));
     }
-    const updatedParent = await updateInfoParent({
-      parentId,
-      fullname: parentName,
-      phone
-    });
+    const updatedParent = await updateParentService(
+      {_id:parentId},
+      {fullname: parentName, phone}
+    );
 
     if (updatedParent instanceof Error) {
       return res.send(error(400, "Can't update parent Info"));
@@ -358,17 +357,18 @@ export async function studentParentUpdateStudentController(req, res) {
       return res.send(error(400, "Student can't updated"));
     }
 
-    const updatedParent = await updateParentInfo({
-      id: student["parent"],
-      fullname: parentFullname,
-      gender: parentGender,
-      age: parentAge,
-      email: parentEmail,
-      phone: parentPhone,
-      qualification: parentQualification,
-      occupation: parentOccupation,
-      address: parentAddress
-    });
+    const updatedParent = await updateParentService(
+      {_id: student["parent"] },
+      { fullname: parentFullname,
+        gender: parentGender,
+        age: parentAge,
+        email: parentEmail,
+        phone: parentPhone,
+        qualification: parentQualification,
+        occupation: parentOccupation,
+        address: parentAddress
+      }
+    );
     if (updatedParent instanceof Error) {
       return res.send(error(400, "Teacher can't updated"));
     }

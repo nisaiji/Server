@@ -56,5 +56,14 @@ const parentProfileInfoUpdateSchema = Joi.object({
 
 });
 
+const parentPasswordChangeSchema = Joi.object({
+  oldPassword: Joi.string().required().messages({
+    "any.required":"oldPassword is required"
+  }),
+  newPassword: Joi.string().required().messages({
+    "any.required":"newPassword is required"
+  }),
+})
 
-export { parentLoginSchema, parentAuthUpdateSchema, parentProfileUpdateSchema, parentProfileInfoUpdateSchema };
+
+export { parentLoginSchema, parentAuthUpdateSchema, parentProfileUpdateSchema, parentProfileInfoUpdateSchema, parentPasswordChangeSchema };

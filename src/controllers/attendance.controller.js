@@ -92,25 +92,32 @@ export async function attendanceByParentController(req, res) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Parent is not authorized to mark attendance."));
     }
     
-    const day = getDayNameService([date.getDay()]);
+    const day = getDayNameService(date.getDay());
     date = date.getTime();
+    
     if (day === "Sunday"){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Today is sunday"));
     }
 
-    const holidayEvent = await getHolidayEventService({date: {$gte:startTime,$lte:endTime}, admin:adminId, holiday: true});
+    const [attendanceMarkedByTeacher, attendanceMarkedByParent, holidayEvent] = await Promise.all([
+      getAttendanceService({student:studentId, date:{$gte:startTime,$lte:endTime}, teacherAttendance:{$ne:""}}),
+      getAttendanceService({student:studentId, date: {$gte:startTime,$lte:endTime},parentAttendance:{$ne:""}}),
+      getHolidayEventService({date: {$gte:startTime,$lte:endTime}, admin:adminId, holiday: true})
+    ]) ;
+
     if (holidayEvent) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
-    const attendanceMarkedByTeacher = await  getAttendanceService({student:studentId, date:{$gte:startTime,$lte:endTime}});
+
     if(attendanceMarkedByTeacher){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Parent can't mark attendance,teacher already marked."));
     }
-    const attendanceMarkedByParent = await getAttendanceService({student:studentId, date: {$gte:startTime,$lte:endTime},parentAttendance:{$ne:""}});
+
     if(attendanceMarkedByParent){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Attendance already marked by parent"));
     }
-    const markAttendance = await createAttendanceService({student:studentId,date:currDate,day,parentAttendance:attendance});
+
+    const markAttendance = await createAttendanceService({student:studentId,date,day,parentAttendance:attendance});
     if(markAttendance instanceof Error){
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(400,"Parent is unable to mark attendance"));
     }

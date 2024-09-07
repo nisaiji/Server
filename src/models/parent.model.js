@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const parentSchema = mongoose.Schema({
   username:{
-    type: String
+    type: String,
   },
   fullname: {
     type: String
@@ -32,7 +32,6 @@ const parentSchema = mongoose.Schema({
   },
   phone:{
     type: String,
-    unique: true,
     required: true
   },
   email: {
@@ -47,6 +46,9 @@ const parentSchema = mongoose.Schema({
     ref: "admin"
   }
 });
+parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });
+parentSchema.index({ username: 1, isActive: 1 }, { unique: true });
+parentSchema.index({ email: 1, isActive: 1 }, { unique: true });
 
 const parentModel = mongoose.model("parent", parentSchema);
 
