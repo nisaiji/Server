@@ -60,15 +60,14 @@ const teacherUpdateSchema = Joi.object({
   email: Joi.string().email({minDomainSegments: 2 }).optional().messages({
       "string.email": "Invalid email format.",
       }),
-  dob:Joi.string().required().messages({
-      "any.required":"DOB is required."
-  }),
+  dob:Joi.string().optional(),
+  
   bloodGroup:Joi.string().optional(),
 
   gender:Joi.string().optional(),
 
   university:Joi.string().optional(),
-  
+
   degree:Joi.string().optional()
 });
 
