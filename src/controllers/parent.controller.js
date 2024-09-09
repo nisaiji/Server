@@ -72,7 +72,7 @@ export async function updateParentController(req, res){
     if(!parent){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
-    return res.status(StatusCodes.OK).send(error(200, "User updated successfully"));
+    return res.status(StatusCodes.OK).send(success(200, "User updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));   
   }
