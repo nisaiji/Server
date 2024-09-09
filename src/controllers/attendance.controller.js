@@ -219,7 +219,7 @@ export async function checkParentAttendaceMarkedController(req, res) {
     if (holidayEvent) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
-    const attendance = await getAttendanceService({student:studentId, startTime, endTime, parentAttendance:{$ne:""}});
+    const attendance = await getAttendanceService({student:studentId, date:{$gte:startTime, $lte:endTime}, parentAttendance:{$ne:""}});
     const parentAttendance = attendance?attendance["parentAttendance"]:null;
     const teacherAttendance = attendance?attendance["teacherAttendance"]:null;
 

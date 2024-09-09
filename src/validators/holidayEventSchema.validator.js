@@ -18,10 +18,10 @@ const createHolidayEventSchema = Joi.object({
 });
 
 const getHolidayEventSchema = Joi.object({
-  startDate: Joi.date().required().messages({
+  startTime: Joi.date().required().messages({
     "any.required":"Start Date is required!"
   }),
-  endDate: Joi.date().required().messages({
+  endTime: Joi.date().required().messages({
     "any.required":"End Date is required!"
   })
 });
