@@ -104,7 +104,7 @@ export async function passwordChangeController(req, res) {
 export async function getChildrenParentController(req, res) {
   try {
     const id = req.parentId;
-    const children = await getStudentsService({ parent: id, isActive:true }, {admin:0, classId:0, isActive:0, parent:0});
+    const children = await getStudentsService({ parent: id, isActive:true }, {admin:0, isActive:0, parent:0}, [{ path: 'classId', select: 'name' }, { path: 'section', select: 'name' }]);
     return res.status(StatusCodes.OK).send(success(200, children));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
