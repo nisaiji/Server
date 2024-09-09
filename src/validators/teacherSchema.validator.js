@@ -53,25 +53,23 @@ const teacherUpdateSchema = Joi.object({
       "string.max":"lastname can be atmost 15 chars long.",
       "any.required": "lastname is required"}),
   phone: Joi.string().pattern(/^[1-5][0-9]{9}$/).length(10).required().messages({
-        "string.pattern.base": "Invalid phone number format.",
-        "string.length": "Phone number must be 10 characters.",
-        "any.required": "Phone number is required."
+      "string.pattern.base": "Invalid phone number format.",
+      "string.length": "Phone number must be 10 characters.",
+      "any.required": "Phone number is required."
+      }),
+  email: Joi.string().email({minDomainSegments: 2 }).optional().messages({
+      "string.email": "Invalid email format.",
       }),
   dob:Joi.string().required().messages({
-    "any.required":"DOB is required."
+      "any.required":"DOB is required."
   }),
-  bloodGroup:Joi.string().required().messages({
-    "any.required":"blood group is required."
-  }),
-  gender:Joi.string().required().messages({
-    "any.required":"gender is required."
-  }),
-  university:Joi.string().required().messages({
-    "any.required":"university is required."
-  }),
-  degree:Joi.string().required().messages({
-    "any.required":"degree is required."
-  }),
+  bloodGroup:Joi.string().optional(),
+
+  gender:Joi.string().optional(),
+
+  university:Joi.string().optional(),
+  
+  degree:Joi.string().optional()
 });
 
 const teacherPhotoUpdateSchema = Joi.object({
