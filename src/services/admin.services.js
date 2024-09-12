@@ -12,7 +12,9 @@ export async function getAdminService(paramObj){
 
 export async function registerAdminService(data) {
   try {
-    await adminModel.create(data);
+    console.log({data})
+    const admin = await adminModel.create(data);
+    console.log({admin})
   } catch (error) {
     throw error;
   }
