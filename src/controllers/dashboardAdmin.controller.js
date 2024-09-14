@@ -44,6 +44,9 @@ export async function attendanceStatusOfSectionController(req, res) {
     const sectionId = req.sectionId;
     const {startTime, endTime} = req.body;
     const section = await getSectionService({_id: sectionId});
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+    }
     const totalStudent = section["studentCount"];
     const sectionAttendance = await getSectionAttendanceStatusService({date:{$gte: startTime, $lte: endTime}, section:sectionId});
     return res.status(StatusCodes.OK).send(success(200, {section:sectionId, totalStudent, sectionAttendance}));

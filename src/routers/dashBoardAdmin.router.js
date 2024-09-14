@@ -8,6 +8,6 @@ const adminDashboardRouter = express.Router();
 adminDashboardRouter.post("/present-students", adminAuthenticate, presentStudentsOfSchoolValidation, getPresentStudentsController);
 adminDashboardRouter.get("/parent-count", adminAuthenticate, getParentCountController);
 adminDashboardRouter.get("/teacher-count", adminAuthenticate, getTeacherCountController);
-adminDashboardRouter.get("/attendance-status/:sectionId",adminAuthenticate, attendancesStatusValidation ,attendanceStatusOfSectionController);
+adminDashboardRouter.post("/attendance-status/:sectionId",adminAuthenticate, attendancesStatusValidation ,attendanceStatusOfSectionController);
 
 export default adminDashboardRouter;
