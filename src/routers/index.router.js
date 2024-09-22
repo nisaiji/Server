@@ -11,6 +11,7 @@ import adminDashboardRouter from "./dashBoardAdmin.router.js";
 import parentDashboardRouter from "./dashBoardParent.router.js";
 import teacherDashboardRouter from "./dashBoardTeacher.router.js";
 import eventRouter from "./event.router.js";
+import superAdminRouter from "./superAdmin.router.js";
 const router = express();
 
 router.use("/admin", adminRouter);
@@ -25,5 +26,6 @@ router.use("/holiday-event", holidayEventRouter);
 router.use("/admin-dashboard",adminDashboardRouter);
 router.use("/parent-dashboard",parentDashboardRouter);
 router.use("/teacher-dashboard",teacherDashboardRouter);
+router.use('/superAdmin', superAdminRouter);
 
 export default router;
