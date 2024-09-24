@@ -26,6 +26,6 @@ router.use("/holiday-event", holidayEventRouter);
 router.use("/admin-dashboard",adminDashboardRouter);
 router.use("/parent-dashboard",parentDashboardRouter);
 router.use("/teacher-dashboard",teacherDashboardRouter);
-router.use('/superAdmin', superAdminRouter);
+router.use('/super-admin', superAdminRouter);
 
 export default router;
