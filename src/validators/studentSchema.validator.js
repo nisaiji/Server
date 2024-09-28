@@ -16,14 +16,64 @@ const registerStudentSchema = Joi.object({
     "string.length": "Phone number must be 10 chars.",
     "any.required": "Phone number is required.",
   }),
-  sectionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({"string.pattern.base": "Invalid section ID.", "any.required": "section ID is required.",}),
-  classId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({"string.pattern.base": "Invalid class ID.","any.required": "class ID is required.",}),
+  sectionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+    "string.pattern.base": "Invalid section ID.", 
+    "any.required": "section ID is required."
+  }),
 });
 
 const deleteStudentSchema = Joi.object({
   studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
       "string.pattern.base": "Invalid student ID.",
       "any.required": "Student ID is required.",
+    }),
+});
+
+const getStudentsSchema = Joi.object({
+    admin: Joi.string().optional().messages({
+        'string.base': 'Admin must be a string.',
+    }),
+
+    classId: Joi.string().optional().messages({
+        'string.base': 'Class ID must be a string.',
+    }),
+
+    section: Joi.string().optional().messages({
+        'string.base': 'Section must be a string.',
+    }),
+
+    parent: Joi.string().optional().messages({
+        'string.base': 'Parent must be a string.',
+    }),
+
+    student: Joi.string().optional().messages({
+        'string.base': 'Student must be a string.',
+    }),
+
+    firstname: Joi.string().optional().messages({
+        'string.base': 'First name must be a string.',
+    }),
+
+    lastname: Joi.string().optional().messages({
+        'string.base': 'Last name must be a string.',
+    }),
+
+    gender: Joi.string().valid('male', 'female', 'other').optional().messages({
+        'string.base': 'Gender must be a string.',
+        'any.only': 'Gender can be male, female, or other.',
+    }),
+
+    page: Joi.number().integer().min(1).default(1).optional().messages({
+        'number.base': 'Page must be a number.',
+        'number.integer': 'Page must be an integer.',
+        'number.min': 'Page must be at least 1.',
+    }),
+
+    limit: Joi.number().integer().min(1).max(100).default(10).optional().messages({
+        'number.base': 'Limit must be a number.',
+        'number.integer': 'Limit must be an integer.',
+        'number.min': 'Limit must be at least 1.',
+        'number.max': 'Limit must not exceed 100.',
     }),
 });
 
@@ -79,7 +129,7 @@ const updateStudentByParentSchema = Joi.object({
   }),
 })
 
-const studentParentUpdateStudentSchema = Joi.object({
+const updateStudentParentByAdminSchema = Joi.object({
   firstname:Joi.string().required().messages({
     "any.required":"first name is required"
   }),
@@ -125,10 +175,11 @@ const studentParentUpdateStudentSchema = Joi.object({
 })
 
 export {
+  getStudentsSchema,
   registerStudentSchema,
   deleteStudentSchema,
   updateStudentByTeacherSchema,
   updateStudentByAdminSchema,
   updateStudentByParentSchema,
-  studentParentUpdateStudentSchema
+  updateStudentParentByAdminSchema
 };

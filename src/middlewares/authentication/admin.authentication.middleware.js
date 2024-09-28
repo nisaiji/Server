@@ -17,6 +17,7 @@ export async function adminAuthenticate(req, res, next) {
       return res.send(error(404, "Admin not exists"));
     }
     req.adminId = _id;
+    req.role = "admin";
     next();
   } catch (err) {
     res.send(error(500, err.message));

@@ -24,6 +24,7 @@ export async function teacherAuthenticate(req, res, next) {
     req.teacherId = decoded.teacherId;
     req.sectionId = decoded?.sectionId;
     req.adminId = decoded.adminId;
+    req.role = "teacher";
     next();
   } catch (err) {
     res.send(error(500, err.message));

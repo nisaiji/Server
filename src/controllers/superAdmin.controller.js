@@ -104,6 +104,7 @@ export async function getAdminsController(req, res){
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skipNum = (pageNum-1)*limitNum;
+    
     const admins = await getAdminsService(filter, {username:1}, skipNum, limitNum);
     const totalAdmins = await getAdminCountService(filter);
     const totalPages = Math.ceil(totalAdmins / limitNum);

@@ -18,6 +18,7 @@ export async function parentAuthenticate(req, res, next) {
     }
     req.parentId = decoded.parentId;
     req.adminId = decoded.adminId;
+    req.role = "parent";
     next();
   } catch (err) {
     return res.send(error(500, err.message));
