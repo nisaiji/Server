@@ -48,7 +48,7 @@ const parentSchema = mongoose.Schema({
 });
 parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });
 parentSchema.index({ username: 1, isActive: 1 }, { unique: true, sparse:true });
-parentSchema.index({ email: 1, isActive: 1 }, { unique: true });
+parentSchema.index({ email: 1, isActive: 1 }, { unique: true, sparse:true });
 
 const parentModel = mongoose.model("parent", parentSchema);
 
