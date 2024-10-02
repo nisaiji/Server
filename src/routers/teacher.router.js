@@ -3,6 +3,7 @@ import {registerTeacherController,deleteTeacherController,  updateTeacherControl
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import {emailPhoneUpdateTeacherValidation, loginTeacherValidation, photoUpdateTeacherValidation, registerTeacherValidation, updateTeacherValidation, UsernamePasswordUpdateTeacherValidation} from "../middlewares/validation/teacher.validation.middleware.js";
+import { validateImageSizeMiddleware } from "../middlewares/teacher.middleware.js";
  
 const teacherRouter = express.Router();
 
@@ -16,7 +17,7 @@ teacherRouter.put("/auth-info-update", teacherAuthenticate, emailPhoneUpdateTeac
 teacherRouter.put("/", teacherAuthenticate, updateTeacherValidation, updateTeacherController); 
 teacherRouter.put("/admin/:teacherId", adminAuthenticate, updateTeacherValidation, updateTeacherController);
 teacherRouter.put("/password-change", teacherAuthenticate, changePasswordTeacherController);
-teacherRouter.put("/photo-upload", teacherAuthenticate, photoUpdateTeacherValidation, updateTeacherController);
+teacherRouter.put("/photo-upload", teacherAuthenticate,validateImageSizeMiddleware, photoUpdateTeacherValidation, updateTeacherController);
 teacherRouter.delete("/:teacherId",  deleteTeacherController);
 
 export default teacherRouter;   

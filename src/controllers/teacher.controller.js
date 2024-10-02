@@ -101,9 +101,7 @@ export async function updateTeacherController(req, res) {
     }
 
     const updatedTeacher = await updateTeacherService({_id:teacherId}, req.body);
-    if (updatedTeacher instanceof Error) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, "Details cann't be updated"));
-    }
+ 
     return res.status(StatusCodes.OK).send(success(200, "Teacher updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
