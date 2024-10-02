@@ -78,7 +78,7 @@ export async function deleteStudentController(req, res) {
 
 export async function getStudentsController(req, res){
   try {
-    let {admin, classId, section, parent, student, firstname, lastname, gender, page = 1, limit = 10 } = req.query;
+    let {admin, classId, section, parent, student, firstname, lastname, gender, include, page = 1, limit = 10 } = req.query;
 
     if(!admin && !classId && !section && !parent && !student && !firstname && !lastname && !gender){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
@@ -92,7 +92,11 @@ export async function getStudentsController(req, res){
       return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
     }
 
-    if(req.role==="teacher" && (admin || classId || req.sectionId!==section)){
+    if(req.role=="teacher" && !section){
+      section = req.sectionId;
+    }
+
+    if(req.role==="teacher" && (admin || classId ||(section && req.sectionId!==section))){
       return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
     }
     const filter = { isActive: true };
@@ -111,12 +115,26 @@ export async function getStudentsController(req, res){
     }
     if(gender){ filter.gender = gender; }
 
+    const populateOptions = [];
+    if (include) {
+      const includes = include.split(',');
+      if (includes.includes('parent')) {
+        populateOptions.push({ path: "parent", select: { username: 1, fullname: 1, age: 1, gender: 1, address:1, qualification:1, occupation:1, email:1, phone:1 } });
+      }
+      if (includes.includes('section')) {
+        populateOptions.push({ path: "section", select: { name: 1 } });
+      }
+      if (includes.includes('class')) {
+        populateOptions.push({ path: "classId", select: { name: 1 } });
+      }
+    }
+
   
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skipNum = (pageNum-1)*limitNum;
 
-    const students = await getstudentsService(filter, {firstname:1}, skipNum, limitNum);
+    const students = await getstudentsService(filter, {firstname:1}, skipNum, limitNum, {}, populateOptions);
     const totalStudents = await getStudentCountService(filter);
     const totalPages = Math.ceil(totalStudents / limitNum);
 

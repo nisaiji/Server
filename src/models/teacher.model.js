@@ -63,9 +63,7 @@ const teacherSchema = mongoose.Schema({
   }
 });
 
-teacherSchema.index({ phone: 1, isActive: 1 }, { unique: true });
-teacherSchema.index({ email: 1, isActive: 1 }, { unique: true, sparse:true });
-teacherSchema.index({ username: 1, isActive: 1 }, { unique: true, sparse:true });
+// teacherSchema.index({ phone: 1, isActive: 1 }, { unique: true });
 
 const teacherModel = mongoose.model("teacher", teacherSchema);
 

@@ -49,14 +49,14 @@ export async function updateStudentService(filter, update){
   }
 }
 
-export async function getstudentsService(filter, sortingLogic, skipNumber, limitNumber,  projection={}) {
+export async function getstudentsService(filter, sortingLogic, skipNumber, limitNumber,  projection={}, populateOptions=[]) {
   try {
-    const students = await studentModel.find(filter).limit(limitNumber).skip(skipNumber).select(projection).populate({path:"parent", select:{fullName:1, email:1, phone:1 }});
+    const students = await studentModel.find(filter).limit(limitNumber).skip(skipNumber).select(projection).populate(populateOptions);
     return students;
   } catch (error) {
     throw error;
   }
-}
+} 
 
 export async function getStudentCountService(filter){
   try {

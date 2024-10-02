@@ -69,6 +69,10 @@ const getStudentsSchema = Joi.object({
         'number.min': 'Page must be at least 1.',
     }),
 
+    include: Joi.string().optional().messages({
+        'number.base': 'Include must be string.',
+    }),
+
     limit: Joi.number().integer().min(1).max(100).default(10).optional().messages({
         'number.base': 'Limit must be a number.',
         'number.integer': 'Limit must be an integer.',

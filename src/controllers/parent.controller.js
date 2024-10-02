@@ -57,15 +57,35 @@ export async function updateParentController(req, res){
     const id = req.parentId;
     const{username, fullname, age, gender, address, qualification, occupation, phone, email, password} = req.body;
     const fieldsToBeUpdated = {};
-    if(username){ fieldsToBeUpdated["username"] = username; }
+
+    if(username){
+      const parent = await getParentService({ username, isActive: true, _id: { $ne: id } });
+      if(parent){
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists"));
+      }
+      fieldsToBeUpdated["username"] = username;
+     }
+     if(phone){ 
+      const parent = await getParentService({ phone, isActive: true, _id: { $ne: id } });
+      if(parent){
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already exists"));
+      }
+      fieldsToBeUpdated["phone"] = phone; 
+    }
+     if(email){ 
+      const parent = await getParentService({ email, isActive: true, _id: { $ne: id } });
+      if(parent){
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Email already exists"));
+      }
+      fieldsToBeUpdated["email"] = email;
+    }
+
     if(fullname){ fieldsToBeUpdated["fullname"] = fullname; }
     if(age){ fieldsToBeUpdated["age"] = age; }
     if(gender){ fieldsToBeUpdated["gender"] = gender; }
     if(address){ fieldsToBeUpdated["address"] = address; }
     if(qualification){ fieldsToBeUpdated["qualification"] = qualification; }
     if(occupation){ fieldsToBeUpdated["occupation"] = occupation; }
-    if(phone){ fieldsToBeUpdated["phone"] = phone; }
-    if(email){ fieldsToBeUpdated["email"] = email; }
     if(password){ fieldsToBeUpdated["password"] = await hashPasswordService(password); }
 
     const parent = await updateParentService({_id:id}, fieldsToBeUpdated);
