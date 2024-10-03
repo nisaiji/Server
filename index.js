@@ -29,6 +29,7 @@ app.use((err, req, res, next)=>{
   return res.status(500).send({error: err.message});
 });
 
+
 app.listen(PORT, () => {
   console.log(`server is running at ${PORT}`);
   connectDB();
