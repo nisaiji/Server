@@ -96,6 +96,11 @@ export async function getStudentsController(req, res){
       section = req.sectionId;
     }
 
+    if(req.role=="parent" && !parent){
+      parent = req.parentId;
+    }
+
+
     if(req.role==="teacher" && (admin || classId ||(section && req.sectionId!==section))){
       return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
     }

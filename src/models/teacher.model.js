@@ -63,7 +63,6 @@ const teacherSchema = mongoose.Schema({
   }
 });
 
-// teacherSchema.index({ phone: 1, isActive: 1 }, { unique: true });
 
 const teacherModel = mongoose.model("teacher", teacherSchema);
 
