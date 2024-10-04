@@ -73,7 +73,8 @@ const teacherUpdateSchema = Joi.object({
 
 const teacherPhotoUpdateSchema = Joi.object({
   photo: Joi.string().required().messages({ 
-      "any.required": "Photo is required"}),
+      "any.required": "Photo is required"
+    }),
 });
 
 export {

@@ -178,6 +178,11 @@ const updateStudentParentByAdminSchema = Joi.object({
   }),
 })
 
+const uploadStudentPhotoSchema = Joi.object({
+  photo: Joi.string().required().messages({ 
+    "any.required": "Photo is required"}),
+})
+
 export {
   getStudentsSchema,
   registerStudentSchema,
@@ -185,5 +190,6 @@ export {
   updateStudentByTeacherSchema,
   updateStudentByAdminSchema,
   updateStudentByParentSchema,
-  updateStudentParentByAdminSchema
+  updateStudentParentByAdminSchema,
+  uploadStudentPhotoSchema
 };
