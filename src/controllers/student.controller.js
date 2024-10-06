@@ -1,3 +1,4 @@
+import studentModel from "../models/student.model.js";
 import { StatusCodes } from "http-status-codes";
 import { getAttendanceService } from "../services/attendance.service.js";
 import { getClassService } from "../services/class.sevices.js";
@@ -6,6 +7,7 @@ import { hashPasswordService } from "../services/password.service.js";
 import { findSectionById, getSectionService, updateSectionService } from "../services/section.services.js";
 import { getStudentService, registerStudentService, updateStudentService, getStudentsService, getstudentsService, getStudentCountService } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
+import { convertToMongoId } from "../services/mongoose.services.js";
 
 export async function registerStudentController(req, res) {
   try {
@@ -200,3 +202,219 @@ export async function updateStudentController(req, res){
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+
+export async function getStudentsWithAttendanceController(req, res){
+    try {
+
+        let {admin, classId, section, parent, student, firstname, lastname, gender, startTime, endTime, include, page = 1, limit = 10 } = req.query;
+
+        if(!admin && !classId && !section && !parent && !student && !firstname && !lastname && !gender){
+          return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
+        }
+        
+        if( admin && req.adminId!==admin ){
+          return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+        }
+    
+        if(req.role==="parent" && !parent && parent!==req.parentId){
+          return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+        }
+    
+        if(req.role=="teacher" && !section){
+          section = req.sectionId;
+        }
+    
+        if(req.role=="admin" && !admin){
+          admin = req.adminId;
+        }
+    
+        if(req.role=="parent" && !parent){
+          parent = req.parentId;
+        }
+    
+        if(req.role==="teacher" && (admin || classId ||(section && req.sectionId!==section))){
+          return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+        }
+        const filter = { isActive: true };
+        if(admin){ filter.admin = convertToMongoId(admin); }
+        if(classId){ filter.classId = convertToMongoId(classId); }
+        if(section){ filter.section = convertToMongoId(section); }
+        if(parent){ filter.parent = convertToMongoId(parent); }
+        if(student){ filter._id = convertToMongoId(student); }
+        if(firstname){ 
+          const regexFirstname = new RegExp(firstname, 'i'); 
+          filter.firstname = { $regex: regexFirstname }; 
+        }
+        if(lastname){ 
+          const regexLastname = new RegExp(firstname, 'i'); 
+          filter.lastname = { $regex: regexLastname }; 
+        }
+        if(gender){ filter.gender = gender; }
+    
+        console.log({filter})
+
+        const pipeline = [
+            {
+                $match: filter
+            }
+        ];
+
+        if (include) {
+          const includes = include.split(',');
+
+          if (includes.includes('attendance')) {
+            pipeline.push({
+              $lookup: {
+                  from: 'attendances',
+                  let: { studentId: '$_id' },
+                  pipeline: [
+                      {
+                          $match: {
+                              $expr: {
+                                  $and: [
+                                      { $eq: ['$student', '$$studentId'] },
+                                  ]
+                              }
+                          }
+                      },
+                      {
+                        $project:{
+                          date:1,
+                          day:1,
+                          parentAttendance:1,
+                          teacherAttendance:1
+                        }
+                      },
+
+                  ],
+                  as: 'attendance'
+              }
+          })
+          }
+          if (includes.includes('parent')) {
+            pipeline.push({
+              $lookup: {
+                from: 'parents',
+                localField: 'parent',
+                foreignField: '_id',
+                as:'parentDetails',
+                pipeline: [
+                  {
+                    $project:{
+                      password:0,
+                      isActive:0,
+                      isLoginAlready:0,
+                      admin:0
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$parentDetails',
+                preserveNullAndEmptyArrays: true
+              }
+            });
+          }
+          if (includes.includes('section')) {
+            pipeline.push({
+              $lookup: {
+                from: 'sections',
+                localField: 'section',
+                foreignField: '_id',
+                as:'sectionDetails',
+                pipeline: [
+                  {
+                    $project:{
+                      name:1,
+                      studentCount:1
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$sectionDetails',
+                preserveNullAndEmptyArrays: true
+              }
+            });
+          }
+          if (includes.includes('class')) {
+            pipeline.push({
+              $lookup: {
+                from: 'classes',
+                localField: 'classId',
+                foreignField: '_id',
+                as:'classDetails',
+                pipeline: [
+                  {
+                    $project:{
+                      name:1,
+                      sectionCount:{$size:'$section'}
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$classDetails',
+                preserveNullAndEmptyArrays: true
+              }
+            });
+          }
+          if (includes.includes('admin')) {
+            pipeline.push({
+              $lookup: {
+                from: 'admins',
+                localField: 'admin',
+                foreignField: '_id',
+                as:'adminDetails',
+                pipeline: [
+                  {
+                    $project:{
+                      schoolName:1,
+                      affiliationNo:1,
+                      schoolBoard:1,
+                      schoolNumber:1,
+                      phone:1,
+                      email:1,
+                      address:1,
+                      city:1,
+                      state:1
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$adminDetails',
+                preserveNullAndEmptyArrays: true
+              }
+            })
+          }
+        }
+
+        pipeline.push({
+          $project:{
+            isActive:0,
+            admin:0,
+            parent:0,
+            section:0,
+            classId:0
+          }
+        });
+
+        const students = await studentModel.aggregate(pipeline).exec();
+
+        res.status(200).json(students);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred while fetching students and attendance.' });
+    }
+};
+
