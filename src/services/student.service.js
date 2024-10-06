@@ -1,4 +1,3 @@
-import attendanceModel from "../models/attendance.model.js";
 import studentModel from "../models/student.model.js";
 
 
@@ -58,6 +57,15 @@ export async function getstudentsService(filter, sortingLogic, skipNumber, limit
   }
 } 
 
+export async function getStudentsPipelineService(pipeline){
+  try {
+    const students = await studentModel.aggregate(pipeline).exec();
+    return students;
+  } catch (error) {
+    throw error;    
+  }
+}
+
 export async function getStudentCountService(filter){
   try {
     const students = await studentModel.countDocuments(filter);
@@ -66,37 +74,3 @@ export async function getStudentCountService(filter){
     throw error;  
   }
   }
-
-// export async function searchStudentByName(data){
-//   try {
-//     const {name,sectionId} = data;
-//     const regex = new RegExp(name, 'i'); 
-//     const students = await studentModel.find({firstname: { $regex: regex },section:sectionId,isActive:true}).populate({path:"parent",select:"phone"}).populate({path:"section",select:{name:1}}).populate({path:"classId",select:{name:1}});    
-//     return students;
-//   } catch (error) {
-//     throw error;    
-//   }
-// }
-
-// export async function getStudentMonthlyAttendanceCount({studentId , regex}){
-//   try {
-//     const attendace = await attendanceModel.find({student:studentId,date:regex,teacherAttendance:"present"});
-//     return attendace;
-//   } catch (error) {
-//     throw error;    
-//   }
-// }
-
-// export async function searchStudentByNameForAdmin(data) {
-//   try {
-//     const { name, adminId } = data;
-//     const regex = new RegExp(name, "i");
-//     const students = await studentModel
-//       .find({ firstname: { $regex: regex }, admin: adminId, isActive:true })
-//       .populate("parent").populate({path:"section",select:{name:1}}).populate({path:"classId",select:{name:1}});
-//     return students;
-//   } catch (error) {
-//     throw error;
-//   }
-// }
-

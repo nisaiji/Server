@@ -1,5 +1,5 @@
 import express from "express";
-import {  deleteStudentController, getStudentsController, getStudentsWithAttendanceController, registerStudentController, updateStudentController } from "../controllers/student.controller.js";
+import {  deleteStudentController, getStudentsController, registerStudentController, updateStudentController } from "../controllers/student.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
@@ -17,8 +17,6 @@ studentRouter.delete("/admin/:studentId", adminAuthenticate, deleteStudentValida
 studentRouter.get("/teacher", teacherAuthenticate, getStudentValidation, getStudentsController );
 studentRouter.get("/admin", adminAuthenticate, getStudentValidation, getStudentsController );
 studentRouter.get("/parent", adminAuthenticate, getStudentValidation, getStudentsController );
-
-studentRouter.get("/attendance", teacherAuthenticate, getStudentsWithAttendanceController);
 
 studentRouter.put("/teacher/:studentId", teacherAuthenticate, updateStudentByTeacherValidation, updateStudentController );
 studentRouter.put("/admin/:studentId", adminAuthenticate, updateStudentByAdminValidation, updateStudentController );

@@ -22,9 +22,9 @@ export async function attendanceByTeacherController(req, res) {
     
     const day = getDayNameService(date.getDay());
     date = date.getTime();
-    if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
-    }
+    // if (day === "Sunday") {
+    //   return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
+    // }
 
     const holiday = await getHolidayEventService({date:{$gte:startTime,$lte:endTime}, admin:adminId, holiday:true});
     if (holiday) {

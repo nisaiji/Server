@@ -5,7 +5,7 @@ import { getClassService } from "../services/class.sevices.js";
 import { getParentService,registerParentService, updateParentService } from "../services/parent.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import { findSectionById, getSectionService, updateSectionService } from "../services/section.services.js";
-import { getStudentService, registerStudentService, updateStudentService, getStudentsService, getstudentsService, getStudentCountService } from "../services/student.service.js";
+import { getStudentService, registerStudentService, updateStudentService, getStudentsService, getstudentsService, getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 
@@ -78,85 +78,6 @@ export async function deleteStudentController(req, res) {
   }
 }
 
-export async function getStudentsController(req, res){
-  try {
-    let {admin, classId, section, parent, student, firstname, lastname, gender, include, page = 1, limit = 10 } = req.query;
-
-    if(!admin && !classId && !section && !parent && !student && !firstname && !lastname && !gender){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
-    }
-    
-    if( admin && req.adminId!==admin ){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
-    }
-
-    if(req.role==="parent" && !parent && parent!==req.parentId){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
-    }
-
-    if(req.role=="teacher" && !section){
-      section = req.sectionId;
-    }
-
-    if(req.role=="parent" && !parent){
-      parent = req.parentId;
-    }
-
-
-    if(req.role==="teacher" && (admin || classId ||(section && req.sectionId!==section))){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
-    }
-    const filter = { isActive: true };
-    if(admin){ filter.admin = admin; }
-    if(classId){ filter.classId = classId; }
-    if(section){ filter.section = section; }
-    if(parent){ filter.parent = parent; }
-    if(student){ filter.student = student; }
-    if(firstname){ 
-      const regexFirstname = new RegExp(firstname, 'i'); 
-      filter.firstname = { $regex: regexFirstname }; 
-    }
-    if(lastname){ 
-      const regexLastname = new RegExp(firstname, 'i'); 
-      filter.lastname = { $regex: regexLastname }; 
-    }
-    if(gender){ filter.gender = gender; }
-
-    const populateOptions = [];
-    if (include) {
-      const includes = include.split(',');
-      if (includes.includes('parent')) {
-        populateOptions.push({ path: "parent", select: { username: 1, fullname: 1, age: 1, gender: 1, address:1, qualification:1, occupation:1, email:1, phone:1 } });
-      }
-      if (includes.includes('section')) {
-        populateOptions.push({ path: "section", select: { name: 1 } });
-      }
-      if (includes.includes('class')) {
-        populateOptions.push({ path: "classId", select: { name: 1 } });
-      }
-    }
-
-  
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
-    const skipNum = (pageNum-1)*limitNum;
-
-    const students = await getstudentsService(filter, {firstname:1}, skipNum, limitNum, {}, populateOptions);
-    const totalStudents = await getStudentCountService(filter);
-    const totalPages = Math.ceil(totalStudents / limitNum);
-
-    return res.status(StatusCodes.OK).send(success(200, {
-      students,
-      currentPage: pageNum,
-      totalPages,
-      totalStudents,
-      pageSize: limitNum
-    }));
-  } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-  }
-}
-
 export async function updateStudentController(req, res){
   try {
     const studentId = req.params.studentId;
@@ -203,10 +124,8 @@ export async function updateStudentController(req, res){
   }
 }
 
-
-export async function getStudentsWithAttendanceController(req, res){
+export async function getStudentsController(req, res){
     try {
-
         let {admin, classId, section, parent, student, firstname, lastname, gender, startTime, endTime, include, page = 1, limit = 10 } = req.query;
 
         if(!admin && !classId && !section && !parent && !student && !firstname && !lastname && !gender){
@@ -220,7 +139,7 @@ export async function getStudentsWithAttendanceController(req, res){
         if(req.role==="parent" && !parent && parent!==req.parentId){
           return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
         }
-    
+        
         if(req.role=="teacher" && !section){
           section = req.sectionId;
         }
@@ -252,28 +171,47 @@ export async function getStudentsWithAttendanceController(req, res){
         }
         if(gender){ filter.gender = gender; }
     
-        console.log({filter})
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skipNum = (pageNum-1)*limitNum;
 
         const pipeline = [
             {
                 $match: filter
+            },
+            {
+              $sort:{firstname:1},
+            },
+            {
+              $skip:skipNum
+            },
+            {
+              $limit: limitNum
             }
         ];
 
         if (include) {
           const includes = include.split(',');
-
-          if (includes.includes('attendance')) {
+          if(includes.includes('attendance') && (!startTime || !endTime)){
+            return res.status(StatusCodes.BAD_REQUEST).send(error(400, "StartTime and endTime is required."));
+          }
+          if(includes.includes('attendance')) {
             pipeline.push({
               $lookup: {
                   from: 'attendances',
-                  let: { studentId: '$_id' },
+                  let: { 
+                    studentId: '$_id',
+                    startTime: { $toLong: startTime },
+                    endTime: { $toLong: endTime}
+                   },
                   pipeline: [
                       {
                           $match: {
                               $expr: {
                                   $and: [
                                       { $eq: ['$student', '$$studentId'] },
+                                      {$gte: ['$date', '$$startTime']},
+                                      {$lte: ['$date', '$$endTime']}
                                   ]
                               }
                           }
@@ -409,12 +347,20 @@ export async function getStudentsWithAttendanceController(req, res){
           }
         });
 
-        const students = await studentModel.aggregate(pipeline).exec();
-
-        res.status(200).json(students);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'An error occurred while fetching students and attendance.' });
+        const students = await getStudentsPipelineService(pipeline);
+        console.log({students})
+        const totalStudents = await getStudentCountService(filter);
+        const totalPages = Math.ceil(totalStudents / limitNum);
+    
+        return res.status(StatusCodes.OK).send(success(200, {
+          students,
+          currentPage: pageNum,
+          totalPages,
+          totalStudents,
+          pageSize: limitNum
+        }));
+    } catch (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
     }
 };
 
