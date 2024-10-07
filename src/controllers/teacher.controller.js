@@ -76,6 +76,8 @@ export async function getAllTeacherOfAdminController(req, res) {
 export async function updateTeacherController(req, res) {
   try {
     const teacherId = req.teacherId?req.teacherId:req.params.teacherId;
+    const {username, firstname, lastname, dob, bloodGroup, email, gender, university, degree, password, phone, address, photo, method } = req.body;
+
     if(!isValidMongoId(teacherId)){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Invalid teacher Id"));
     }
@@ -83,24 +85,49 @@ export async function updateTeacherController(req, res) {
     if (!teacher) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher doesn't exists"));
     }
-    if(req.body["email"]){
-      const teacher = await getTeacherService({_id:{$ne:teacherId}, email:req.body["email"], isActive:true});
+
+    const fieldsToBeUpdated = {};
+    if(email){
+      const teacher = await getTeacherService({_id:{$ne:teacherId}, email, isActive:true});
       if(teacher){
         return res.status(StatusCodes.CONFLICT).send(error(409,"Email already registered"));
       }
+      fieldsToBeUpdated.email = email;
     }
-    if(req.body["phone"]){
-      const teacher = await getTeacherService({_id:{$ne:teacherId}, phone:req.body["phone"], isActive:true});
+
+    if(username){
+      const teacher = await getTeacherService({_id:{$ne:teacherId}, username, isActive:true});
+      if(teacher){
+        return res.status(StatusCodes.CONFLICT).send(error(409,"Username already registered"));
+      }
+      fieldsToBeUpdated.username = username;
+    }
+
+    if(phone){
+      const teacher = await getTeacherService({_id:{$ne:teacherId}, phone, isActive:true});
       if(teacher){
         return res.status(StatusCodes.CONFLICT).send(error(409,"Phone already registered"));
       }
-    }
-    if(req.body["password"]){
-      const hashedPassword = await hashPasswordService(req.body["password"]);
-      req.body["password"] = hashedPassword;
+      fieldsToBeUpdated.phone = phone;
     }
 
-    const updatedTeacher = await updateTeacherService({_id:teacherId}, req.body);
+    if(req.body["password"]){
+      const hashedPassword = await hashPasswordService(req.body["password"]);
+      fieldsToBeUpdated.password = hashedPassword;
+    }
+
+    if(firstname){ fieldsToBeUpdated.firstname = firstname; }
+    if(lastname){ fieldsToBeUpdated.lastname = lastname; }
+    if(dob){ fieldsToBeUpdated.dob = dob; }
+    if(bloodGroup){ fieldsToBeUpdated.bloodGroup = bloodGroup; }
+    if(gender){ fieldsToBeUpdated.gender = gender; }
+    if(university){ fieldsToBeUpdated.university = university; }
+    if(degree){ fieldsToBeUpdated.degree = degree; }
+    if(address){ fieldsToBeUpdated.address = address; }
+    if(photo || method=="DELETE"){ fieldsToBeUpdated.photo =(method=="DELETE")? "": photo; }
+
+
+    await updateTeacherService({_id:teacherId}, fieldsToBeUpdated);
  
     return res.status(StatusCodes.OK).send(success(200, "Teacher updated successfully"));
   } catch (err) {

@@ -47,11 +47,13 @@ const teacherUpdateSchema = Joi.object({
   firstname: Joi.string().min(2).max(15).required().messages({ 
       "string.min":"firstname should be atleast 2 chars long",
       "string.max":"firstname can be atmost 15 chars long.",
-      "any.required": "firstname is required"}),
+      "any.required": "firstname is required"
+    }),
   lastname: Joi.string().min(2).max(15).required().messages({ 
       "string.min":"lastname should be atleast 2 chars long",
       "string.max":"lastname can be atmost 15 chars long.",
-      "any.required": "lastname is required"}),
+      "any.required": "lastname is required"
+    }),
   phone: Joi.string().pattern(/^[1-5][0-9]{9}$/).length(10).required().messages({
       "string.pattern.base": "Invalid phone number format.",
       "string.length": "Phone number must be 10 characters.",
@@ -68,13 +70,19 @@ const teacherUpdateSchema = Joi.object({
 
   university:Joi.string().optional(),
 
-  degree:Joi.string().optional()
+  degree:Joi.string().optional(),
+
+
 });
 
 const teacherPhotoUpdateSchema = Joi.object({
-  photo: Joi.string().required().messages({ 
-      "any.required": "Photo is required"
-    }),
+  photo: Joi.string().optional(),
+  method: Joi.string().valid('POST', 'DELETE').required().messages({
+    'any.required': 'method is required.',
+    'string.empty': 'method can not be an empty string.',
+    'string.base': 'method must be a string.',
+    'any.only': 'method must be either "POST" or "DELETE".'
+    })
 });
 
 export {

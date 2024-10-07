@@ -98,7 +98,7 @@ export async function updateStudentController(req, res){
     if(req.body["gender"]){ studentUpdate.gender = req.body["gender"]; }
     if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
     if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
-    if(req.body["photo"]){ studentUpdate.photo = req.body["photo"]; }
+    if(req.body["photo"] || req.body["method"]=="DELETE"){ studentUpdate.photo = (req.body["method"]=="DELETE")? "": req.body["photo"]; }
     if(req.body["address"]){ studentUpdate.photo = req.body["address"]; }
 
     if(req.body["parentPhone"]){ 

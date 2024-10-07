@@ -17,7 +17,7 @@ teacherRouter.put("/auth-info-update", teacherAuthenticate, emailPhoneUpdateTeac
 teacherRouter.put("/", teacherAuthenticate, updateTeacherValidation, updateTeacherController); 
 teacherRouter.put("/admin/:teacherId", adminAuthenticate, updateTeacherValidation, updateTeacherController);
 teacherRouter.put("/password-change", teacherAuthenticate, changePasswordTeacherController);
-teacherRouter.put("/photo-upload", teacherAuthenticate,validateImageSizeMiddleware, photoUpdateTeacherValidation, updateTeacherController);
+teacherRouter.put("/photo-upload", teacherAuthenticate, validateImageSizeMiddleware, photoUpdateTeacherValidation, updateTeacherController);
 teacherRouter.delete("/:teacherId",  deleteTeacherController);
 
 export default teacherRouter;   

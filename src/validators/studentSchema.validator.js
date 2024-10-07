@@ -99,6 +99,9 @@ const updateStudentByTeacherSchema = Joi.object({
     "string.length": "Phone number must be 10 chars.",
     "any.required": "Phone number is required.",
   }),
+  photo: Joi.string().required().messages({ 
+    "any.required": "Photo is required"
+  }),
 });
 
 const updateStudentByAdminSchema = Joi.object({
@@ -179,8 +182,13 @@ const updateStudentParentByAdminSchema = Joi.object({
 })
 
 const uploadStudentPhotoSchema = Joi.object({
-  photo: Joi.string().required().messages({ 
-    "any.required": "Photo is required"}),
+  photo: Joi.string().optional(),
+  method: Joi.string().valid('POST', 'DELETE').required().messages({
+    'any.required': 'method is required.',
+    'string.empty': 'method can not be an empty string.',
+    'string.base': 'method must be a string.',
+    'any.only': 'method must be either "POST" or "DELETE".'
+  })
 })
 
 export {

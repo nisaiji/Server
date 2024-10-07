@@ -45,4 +45,4 @@ const updateSuperAdminSchema = Joi.object({
   }),
 });
 
-export {registerSuperAdminSchema, loginSuperAdminSchema, updateSuperAdminSchema}
+export { registerSuperAdminSchema, loginSuperAdminSchema, updateSuperAdminSchema }
