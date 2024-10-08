@@ -155,7 +155,7 @@ const updateStudentParentByAdminSchema = Joi.object({
   bloodGroup:Joi.string().required().messages({
     "any.required":"blood group is required"
   }),
-  parentFullname: Joi.string().required().messages({
+  parentName: Joi.string().required().messages({
     "any.required": "parent name is required.",
   }),
   parentGender: Joi.string().required().messages({
@@ -167,7 +167,7 @@ const updateStudentParentByAdminSchema = Joi.object({
   parentEmail: Joi.string().required().messages({
     "any.required": "parent email is required.",
   }),
-  parentPhone: Joi.string().required().messages({
+  phone: Joi.string().required().messages({
     "any.required": "parent phone number is required.",
   }),
   parentQualification: Joi.string().required().messages({

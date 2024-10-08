@@ -18,6 +18,6 @@ teacherRouter.put("/", teacherAuthenticate, updateTeacherValidation, updateTeach
 teacherRouter.put("/admin/:teacherId", adminAuthenticate, updateTeacherValidation, updateTeacherController);
 teacherRouter.put("/password-change", teacherAuthenticate, changePasswordTeacherController);
 teacherRouter.put("/photo-upload", teacherAuthenticate, validateImageSizeMiddleware, photoUpdateTeacherValidation, updateTeacherController);
-teacherRouter.delete("/:teacherId",  deleteTeacherController);
+teacherRouter.delete("/:teacherId", adminAuthenticate,  deleteTeacherController);
 
 export default teacherRouter;   

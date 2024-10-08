@@ -233,7 +233,7 @@ paths:
                   type: string
                 address:
                   type: string
-                parentFullname:
+                parentName:
                   type: string
                 parentGender:
                   type: string
@@ -241,7 +241,7 @@ paths:
                   type: number
                 parentEmail:
                   type: string
-                parentPhone:
+                phone:
                   type: string
       responses:
         200:

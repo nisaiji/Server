@@ -124,7 +124,7 @@ export async function updateTeacherController(req, res) {
     if(university){ fieldsToBeUpdated.university = university; }
     if(degree){ fieldsToBeUpdated.degree = degree; }
     if(address){ fieldsToBeUpdated.address = address; }
-    if(photo || method=="DELETE"){ fieldsToBeUpdated.photo =(method=="DELETE")? "": photo; }
+    if(photo || method==="DELETE"){ fieldsToBeUpdated.photo =(method==="DELETE")? "": photo; }
 
 
     await updateTeacherService({_id:teacherId}, fieldsToBeUpdated);
@@ -173,7 +173,6 @@ export async function getTeacherController(req, res) {
 }
 
 export async function getAllNonSectionTeacherController(req, res) {
-  
   try {
     const adminId = req.adminId;
     const teachers = await getTeachersService({admin:adminId,section:null, isActive:true});

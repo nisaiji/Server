@@ -98,17 +98,17 @@ export async function updateStudentController(req, res){
     if(req.body["gender"]){ studentUpdate.gender = req.body["gender"]; }
     if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
     if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
-    if(req.body["photo"] || req.body["method"]=="DELETE"){ studentUpdate.photo = (req.body["method"]=="DELETE")? "": req.body["photo"]; }
+    if(req.body["photo"] || req.body["method"]==="DELETE"){ studentUpdate.photo = (req.body["method"]==="DELETE")? "": req.body["photo"]; }
     if(req.body["address"]){ studentUpdate.photo = req.body["address"]; }
 
-    if(req.body["parentPhone"]){ 
-      const parent = await getParentService({ phone:req.body["parentPhone"], isActive:true, _id: { $ne: parent["_id"] } });
+    if(req.body["phone"]){ 
+      const parent = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
       if(parent){
         return res.status(StatusCodes.CONFLICT).send(error(409, "phone number already registered"));
       }
-      parentUpdate.phone = req.body["parentPhone"];
+      parentUpdate.phone = req.body["phone"];
     }
-    if(req.body["parentFullname"]){ parentUpdate.fullname = req.body["parentFullname"]; }
+    if(req.body["parentName"]){ parentUpdate.fullname = req.body["parentName"]; }
     if(req.body["parentGender"]){ parentUpdate.gender = req.body["parentGender"]; }
     if(req.body["parentAge"]){ parentUpdate.age = req.body["parentAge"]; }
     if(req.body["parentEmail"]){ parentUpdate.email = req.body["parentEmail"]; }
