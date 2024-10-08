@@ -155,9 +155,8 @@ const updateStudentParentByAdminSchema = Joi.object({
   parentName: Joi.string().required().messages({
     "any.required": "parent name is required.",
   }),
-  parentGender: Joi.string().required().messages({
-    "any.required": "parent gender is required.",
-  }),
+  parentGender: Joi.string().optional(),
+  
   parentAge: Joi.number().optional(),
 
   parentEmail: Joi.string().optional(),
