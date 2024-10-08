@@ -146,39 +146,30 @@ const updateStudentParentByAdminSchema = Joi.object({
   gender:Joi.string().required().messages({
     "any.required":"gender is required"
   }),
-  dob:Joi.string().required().messages({
-    "any.required":"DOB is required"
-  }),
-  address:Joi.string().required().messages({
-    "any.required":"address is required"
-  }),
-  bloodGroup:Joi.string().required().messages({
-    "any.required":"blood group is required"
-  }),
+  dob:Joi.string().optional(),
+
+  address:Joi.string().optional(),
+
+  bloodGroup:Joi.string().optional(),
+
   parentName: Joi.string().required().messages({
     "any.required": "parent name is required.",
   }),
   parentGender: Joi.string().required().messages({
     "any.required": "parent gender is required.",
   }),
-  parentAge: Joi.number().required().messages({
-    "any.required": "parent age is required.",
-  }),
-  parentEmail: Joi.string().required().messages({
-    "any.required": "parent email is required.",
-  }),
+  parentAge: Joi.number().optional(),
+
+  parentEmail: Joi.string().optional(),
+
   phone: Joi.string().required().messages({
     "any.required": "parent phone number is required.",
   }),
-  parentQualification: Joi.string().required().messages({
-    "any.required": "parent qualification is required.",
-  }),
-  parentOccupation: Joi.string().required().messages({
-    "any.required": "parent occupation is required.",
-  }),
-  parentAddress: Joi.string().required().messages({
-    "any.required": "parent address is required.",
-  }),
+  parentQualification: Joi.string().optional(),
+
+  parentOccupation: Joi.string().optional(),
+
+  parentAddress: Joi.string().optional()
 })
 
 const uploadStudentPhotoSchema = Joi.object({

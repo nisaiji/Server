@@ -102,8 +102,8 @@ export async function updateStudentController(req, res){
     if(req.body["address"]){ studentUpdate.photo = req.body["address"]; }
 
     if(req.body["phone"]){ 
-      const parent = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
-      if(parent){
+      const parentWithPhone = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
+      if(parentWithPhone){
         return res.status(StatusCodes.CONFLICT).send(error(409, "phone number already registered"));
       }
       parentUpdate.phone = req.body["phone"];
