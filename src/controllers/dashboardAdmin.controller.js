@@ -41,7 +41,7 @@ export async function getTeacherCountController(req,res){
 
 export async function attendanceStatusOfSectionController(req, res) {
   try {
-    const sectionId = req.sectionId;
+    const sectionId = req.params.sectionId;
     const {startTime, endTime} = req.body;
     const section = await getSectionService({_id: sectionId});
     if(!section){

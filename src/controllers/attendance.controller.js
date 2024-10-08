@@ -129,7 +129,7 @@ export async function attendanceByParentController(req, res) {
 
 export async function getMisMatchAttendanceController(req,res){
   try {
-    const sectionId = req.params.sectionId;
+    const sectionId = req.sectionId;
     let date = new Date();
     const{startTime, endTime} = getStartAndEndTimeService(date, date);
     const day = getDayNameService(date.getDay());
