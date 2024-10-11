@@ -98,8 +98,14 @@ export async function updateStudentController(req, res){
     if(req.body["gender"]){ studentUpdate.gender = req.body["gender"]; }
     if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
     if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
-    if(req.body["photo"] || req.body["method"]==="DELETE"){ studentUpdate.photo = (req.body["method"]==="DELETE")? "": req.body["photo"]; }
-    if(req.body["address"]){ studentUpdate.photo = req.body["address"]; }
+    if(req.body["photo"]){ studentUpdate.photo = req.body["photo"]; }
+    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
+    if(req.body["city"]){ studentUpdate.city = req.body["city"]; }
+    if(req.body["district"]){ studentUpdate.district = req.body["district"]; }
+    if(req.body["state"]){ studentUpdate.state = req.body["state"]; }
+    if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
+    if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
+    
 
     if(req.body["phone"]){ 
       const parentWithPhone = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
@@ -115,6 +121,12 @@ export async function updateStudentController(req, res){
     if(req.body["parentQualification"]){ parentUpdate.qualification = req.body["parentQualification"]; }
     if(req.body["parentOccupation"]){ parentUpdate.occupation = req.body["parentOccupation"]; }
     if(req.body["parentAddress"]){ parentUpdate.address = req.body["parentAddress"]; }
+    if(req.body["parentCity"]){ parentUpdate.city = req.body["parentCity"]; }
+    if(req.body["parentDistrict"]){ parentUpdate.district = req.body["parentDistrict"]; }
+    if(req.body["parentState"]){ parentUpdate.state = req.body["parentState"]; }
+    if(req.body["parentCountry"]){ parentUpdate.country = req.body["parentCountry"]; }
+    if(req.body["parentPincode"]){ parentUpdate.pincode = req.body["parentPincode"]; }
+    
 
     await Promise.all([ updateStudentService({ _id:studentId }, studentUpdate), updateParentService({ _id: student["parent"] }, parentUpdate) ]);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    

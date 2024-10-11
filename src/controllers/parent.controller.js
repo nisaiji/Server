@@ -55,7 +55,7 @@ export async function getParentController(req, res) {
 export async function updateParentController(req, res){
   try {
     const id = req.parentId;
-    const{username, fullname, age, gender, address, qualification, occupation, phone, email, password} = req.body;
+    const{username, fullname, age, gender, address, city, district, state, country, pincode, qualification, occupation, phone, email, password} = req.body;
     const fieldsToBeUpdated = {};
 
     if(username){
@@ -84,6 +84,11 @@ export async function updateParentController(req, res){
     if(age){ fieldsToBeUpdated["age"] = age; }
     if(gender){ fieldsToBeUpdated["gender"] = gender; }
     if(address){ fieldsToBeUpdated["address"] = address; }
+    if(city){ fieldsToBeUpdated["city"] = city; }
+    if(district){ fieldsToBeUpdated["district"] = district; }
+    if(state){ fieldsToBeUpdated["state"] = state; }
+    if(country){ fieldsToBeUpdated["country"] = country; }
+    if(pincode){ fieldsToBeUpdated["pincode"] = pincode; }
     if(qualification){ fieldsToBeUpdated["qualification"] = qualification; }
     if(occupation){ fieldsToBeUpdated["occupation"] = occupation; }
     if(password){ fieldsToBeUpdated["password"] = await hashPasswordService(password); }

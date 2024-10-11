@@ -29,9 +29,47 @@ const registerAdminSchema = Joi.object({
     "string.pattern": "Password should contains alpha-numberic special symbols",
     "any.required": "Password is required!"
     }),
-  address: Joi.string().required().messages({
-    "string.required": "Address is required!"
+
+  country: Joi.string().min(2).max(100).required().messages({
+    'string.base': 'Country should be a string',
+    'string.min': 'Country must be at least 2 characters long',
+    'string.max': 'Country must be less than 100 characters long',
+    'any.required': 'Country is required'
+  }),
+
+  state: Joi.string().min(2).max(100).required().messages({
+    'string.base': 'State should be a string',
+    'string.min': 'State must be at least 2 characters long',
+    'string.max': 'State must be less than 100 characters long',
+    'any.required': 'State is required'
+  }),
+
+  district: Joi.string().min(2).max(100).optional().messages({
+    'string.base': 'District should be a string',
+    'string.min': 'District must be at least 2 characters long',
+    'string.max': 'District must be less than 100 characters long'
+  }),
+
+  city: Joi.string().min(2).max(100).required().messages({
+    'string.base': 'City should be a string',
+    'string.min': 'City must be at least 2 characters long',
+    'string.max': 'City must be less than 100 characters long',
+    'any.required': 'City is required'
+  }),
+
+  address: Joi.string().min(5).max(250).required().messages({
+    'string.base': 'Address should be a string',
+    'string.min': 'Address must be at least 5 characters long',
+    'string.max': 'Address must be less than 250 characters long',
+    'any.required': 'Address is required'
+  }),
+
+  pincode: Joi.string().pattern(/^\d{6}$/).required().messages({
+    'string.base': 'Pincode should be a string',
+    'string.pattern.base': 'Pincode must be a 6-digit number',
+    'any.required': 'Pincode is required'
   })
+
 });
 
 const loginAdminSchema = Joi.object({
@@ -71,19 +109,52 @@ const updateAdminProfileSchema = Joi.object({
     "string.min": "School number should be atleast 5 chars long",
     "string.max": "School number length must be smaller than 50 chars",
   }),
-  address: Joi.string().required().messages({
-    "string.required": "Address is required!"
-  }),
-  city: Joi.string().required().messages({
-    "string.required": "City is required!"
-  }),
-  state: Joi.string().required().messages({
-    "string.required": "State is required!"
-  }),
+
   email: Joi.string().email({minDomainSegments: 2}).required().messages({
     "string.email": "Invalid Email Id",
     "any.required": "Email is required!"
     }),
+
+  country: Joi.string().min(2).max(100).required().messages({
+    'string.base': 'Country should be a string',
+    'string.min': 'Country must be at least 2 characters long',
+    'string.max': 'Country must be less than 100 characters long',
+    'any.required': 'Country is required'
+  }),
+  
+  state: Joi.string().min(2).max(100).required().messages({
+    'string.base': 'State should be a string',
+    'string.min': 'State must be at least 2 characters long',
+    'string.max': 'State must be less than 100 characters long',
+    'any.required': 'State is required'
+  }),
+  
+  district: Joi.string().min(2).max(100).optional().messages({
+    'string.base': 'District should be a string',
+    'string.min': 'District must be at least 2 characters long',
+    'string.max': 'District must be less than 100 characters long'
+  }),
+  
+  city: Joi.string().min(2).max(100).required().messages({
+    'string.base': 'City should be a string',
+    'string.min': 'City must be at least 2 characters long',
+    'string.max': 'City must be less than 100 characters long',
+    'any.required': 'City is required'
+  }),
+  
+  address: Joi.string().min(5).max(250).required().messages({
+    'string.base': 'Address should be a string',
+    'string.min': 'Address must be at least 5 characters long',
+    'string.max': 'Address must be less than 250 characters long',
+    'any.required': 'Address is required'
+  }),
+  
+  pincode: Joi.string().pattern(/^\d{6}$/).required().messages({
+    'string.base': 'Pincode should be a string',
+    'string.pattern.base': 'Pincode must be a 6-digit number',
+    'any.required': 'Pincode is required'
+  })
+
 });
 
 const updateAdminSocialProfileSchema = Joi.object({

@@ -1,9 +1,9 @@
 import adminModel from "../models/admin.model.js";
 
 
-export async function getAdminService(paramObj){
+export async function getAdminService(filter){
   try {
-    const admin = await adminModel.findOne(paramObj).lean();
+    const admin = await adminModel.findOne(filter).lean();
     return admin;
   } catch (error) {
     throw error;    
@@ -38,10 +38,9 @@ export async function registerAdminService(data) {
   }
 }
 
-export async function updateAdminByIdService(data){
+export async function updateAdminService(filter, update){
   try {
-    const{id, fieldsToBeUpdated} = data;
-    const admin = await adminModel.findByIdAndUpdate(id, fieldsToBeUpdated).lean();
+    const admin = await adminModel.updateOne(filter, update);
     return admin;
   } catch (error) {
     throw error;    

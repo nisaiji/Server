@@ -20,6 +20,21 @@ const parentSchema = mongoose.Schema({
   address:{
     type:String
   },
+  city:{
+    type:String
+  },
+  district:{
+    type:String
+  },
+  state:{
+    type:String
+  },
+  country:{
+    type:String
+  },
+  pincode:{
+    type:String
+  },
   qualification:{
     type:String
   },

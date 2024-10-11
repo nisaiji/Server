@@ -1,7 +1,7 @@
 import { getAccessTokenService } from "../services/JWTToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import bcrypt from "bcrypt";
-import {getAdminService, registerAdminService, updateAdminByIdService } from "../services/admin.services.js";
+import {getAdminService, registerAdminService,  updateAdminService } from "../services/admin.services.js";
 import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
 
@@ -61,17 +61,17 @@ export async function loginAdminController(req, res) {
 
 export async function updateAdminController(req, res) {
   try {
-    const{schoolName,principal,schoolBoard, schoolNumber, affiliationNo, address,city,state, email, phone, username, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
+    const{schoolName,principal,schoolBoard, schoolNumber, affiliationNo, address,city,state,country, district, pincode, email, phone, username, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
     const fieldsToBeUpdated = {};
     const adminId = req.adminId;
-    const duplicateAdmin = await getAdminService({$or: [{username}, {email}, {phone}], _id:{$ne:adminId}});
-    if(duplicateAdmin && duplicateAdmin["username"]==username){
+    const admin = await getAdminService({$or: [{username}, {email}, {phone}], _id:{$ne:adminId}});
+    if(admin && admin["username"]==username){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists."));
     }
-    if(duplicateAdmin && duplicateAdmin["email"]==email){
+    if(admin && admin["email"]==email){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Email already exists."));
     }
-    if(duplicateAdmin && duplicateAdmin["phone"]==phone){
+    if(admin && admin["phone"]==phone){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already exists."));
     }
 
@@ -82,7 +82,10 @@ export async function updateAdminController(req, res) {
     if(affiliationNo){ fieldsToBeUpdated["affiliationNo"] = affiliationNo; }
     if(address){ fieldsToBeUpdated["address"] = address; }
     if(city){ fieldsToBeUpdated["city"] = city; }
+    if(district){ fieldsToBeUpdated["district"] = district; }
     if(state){ fieldsToBeUpdated["state"] = state; }
+    if(country){ fieldsToBeUpdated["country"] = country; }
+    if(pincode){ fieldsToBeUpdated["pincode"] = pincode; }
     if(email){ fieldsToBeUpdated["email"] = email; }
     if(phone){ fieldsToBeUpdated["phone"] = phone; }
     if(username){ fieldsToBeUpdated["username"] = username; }
@@ -94,7 +97,7 @@ export async function updateAdminController(req, res) {
     if(whatsapp){ fieldsToBeUpdated["whatsapp"] = whatsapp; }
     if(youtube){ fieldsToBeUpdated["youtube"] = youtube; }
 
-    await updateAdminByIdService({id:adminId, fieldsToBeUpdated});
+    await updateAdminService({_id:adminId}, fieldsToBeUpdated);
 
     return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"));
   } catch (err) {

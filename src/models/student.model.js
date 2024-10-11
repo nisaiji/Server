@@ -32,6 +32,21 @@ const studentSchema = mongoose.Schema({
   address:{
     type: String
   },
+  city:{
+    type:String
+  },
+  district:{
+    type:String
+  },
+  state:{
+    type:String
+  },
+  country:{
+    type:String
+  },
+  pincode:{
+    type:String
+  },
   parent: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "parent",

@@ -49,7 +49,16 @@ const adminSchema = mongoose.Schema({
   city:{
     type:String
   },
+  district:{
+    type:String
+  },
   state:{
+    type:String
+  },
+  country:{
+    type:String
+  },
+  pincode:{
     type:String
   },
   website:{
