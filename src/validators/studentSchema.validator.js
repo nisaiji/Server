@@ -69,6 +69,14 @@ const getStudentsSchema = Joi.object({
         'number.min': 'Page must be at least 1.',
     }),
 
+    startTime: Joi.number().integer().optional().messages({
+      'number.integer': 'StartTime must be an integer.',
+    }),
+
+    endTime: Joi.number().integer().optional().messages({
+      'number.integer': 'EndTime must be an integer.',
+    }),
+
     include: Joi.string().optional().messages({
         'number.base': 'Include must be string.',
     }),
