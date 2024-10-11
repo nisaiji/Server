@@ -76,7 +76,7 @@ export async function getAllTeacherOfAdminController(req, res) {
 export async function updateTeacherController(req, res) {
   try {
     const teacherId = req.teacherId?req.teacherId:req.params.teacherId;
-    const {username, firstname, lastname, dob, bloodGroup, email, gender, university, degree, password, phone, address, photo, method } = req.body;
+    const {username, firstname, lastname, dob, bloodGroup, email, gender, university, degree, password, phone, address, city, state, country, district, pincode, photo, method } = req.body;
 
     if(!isValidMongoId(teacherId)){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Invalid teacher Id"));
@@ -123,7 +123,12 @@ export async function updateTeacherController(req, res) {
     if(gender){ fieldsToBeUpdated.gender = gender; }
     if(university){ fieldsToBeUpdated.university = university; }
     if(degree){ fieldsToBeUpdated.degree = degree; }
-    if(address){ fieldsToBeUpdated.address = address; }
+    if(address){ fieldsToBeUpdated["address"] = address; }
+    if(city){ fieldsToBeUpdated["city"] = city; }
+    if(district){ fieldsToBeUpdated["district"] = district; }
+    if(state){ fieldsToBeUpdated["state"] = state; }
+    if(country){ fieldsToBeUpdated["country"] = country; }
+    if(pincode){ fieldsToBeUpdated["pincode"] = pincode; }
     if(photo || method==="DELETE"){ fieldsToBeUpdated.photo =(method==="DELETE")? "": photo; }
 
 
