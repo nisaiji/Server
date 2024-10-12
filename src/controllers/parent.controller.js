@@ -6,8 +6,6 @@ import { StatusCodes } from "http-status-codes";
 import { getStudentsService } from "../services/student.service.js";
 
 
-
-
 export async function loginParentController(req, res) {
   try {
     const { user, password } = req.body;
@@ -27,7 +25,13 @@ export async function loginParentController(req, res) {
       parentId: parent["_id"],
       phone: parent["phone"],
       adminId: parent["admin"],
-      email
+      email,
+      country: parent["country"]? parent["country"]: "",
+      state: parent["state"]? parent["state"]: "",
+      city: parent["city"]? parent["city"]:"",
+      district: parent["district"]? parent["district"]:"",
+      address: parent["address"]? parent["address"]:"",
+      pincode: parent["pincode"]? parent["pincode"]: ""
     });
     const isLoginAlready = parent["isLoginAlready"];
     if(!isLoginAlready){
