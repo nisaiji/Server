@@ -52,7 +52,6 @@ export async function deleteSectionService(paramObj){
 export async function updateSectionService(filter, update){
   try {
     const section = await sectionModel.findOneAndUpdate(filter, update);
-    console.log({section})
     return section;
   } catch (error) {
     throw error;    

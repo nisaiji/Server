@@ -360,7 +360,6 @@ export async function getStudentsController(req, res){
         });
 
         const students = await getStudentsPipelineService(pipeline);
-        console.log({students})
         const totalStudents = await getStudentCountService(filter);
         const totalPages = Math.ceil(totalStudents / limitNum);
     

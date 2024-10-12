@@ -20,9 +20,7 @@ export async function registerSuperAdminService(data) {
 
 export async function updateSuperAdminService(filter, update) {
   try {
-    console.log({filter, update});
     const superAdmin = await superAdminModel.updateOne(filter, update);
-    console.log({superAdmin});
     return superAdmin;
   } catch (error) {
     throw error;

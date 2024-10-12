@@ -30,9 +30,8 @@ try {
 
 export async function registerAdminService(data) {
   try {
-    console.log({data})
     const admin = await adminModel.create(data);
-    console.log({admin})
+    return admin;
   } catch (error) {
     throw error;
   }

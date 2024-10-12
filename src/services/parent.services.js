@@ -14,7 +14,6 @@ export async function getParentService(filter, projection={} ){
 
 export async function registerParentService( data ){
   try {
-    console.log({data})
     const parent = await parentModel.create(data);
     return parent;
   } catch (error) {

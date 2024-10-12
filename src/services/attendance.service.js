@@ -23,9 +23,7 @@ export async function getAttendancesService(paramObj){
 export async function updateAttendanceService(data) {
   try {
    const{id, fieldsToBeUpdated} = data;
-   console.log(data)
    const attendance = await attendanceModel.findByIdAndUpdate(id, fieldsToBeUpdated);
-  console.log({attendance})
     return attendance;
   } catch (error) {
     throw error;
@@ -44,7 +42,6 @@ export async function createAttendanceService(data) {
 export async function getMisMatchAttendanceService(data) {
   try {
     const{ section, startTime,endTime } = data;
-    console.log(data)
     const attendance = await attendanceModel.find({section, 
        date: { $gte: startTime, $lte: endTime },
        $or: [

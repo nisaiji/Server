@@ -53,7 +53,6 @@ export async function loginSuperAdminController(req, res) {
 export async function updateSuperAdminController(req, res) {
   try {
     const superAdminId = req.superAdminId;
-    console.log({superAdminId})
     const superAdmin = await getSuperAdminService({_id: superAdminId});
     if (!superAdmin) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "User not exists"));

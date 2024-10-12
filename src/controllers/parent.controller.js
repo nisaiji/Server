@@ -26,12 +26,8 @@ export async function loginParentController(req, res) {
       phone: parent["phone"],
       adminId: parent["admin"],
       email,
-      country: parent["country"]? parent["country"]: "",
-      state: parent["state"]? parent["state"]: "",
-      city: parent["city"]? parent["city"]:"",
-      district: parent["district"]? parent["district"]:"",
       address: parent["address"]? parent["address"]:"",
-      pincode: parent["pincode"]? parent["pincode"]: ""
+      username: parent["username"]? parent["username"]: ""
     });
     const isLoginAlready = parent["isLoginAlready"];
     if(!isLoginAlready){
