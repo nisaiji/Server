@@ -136,12 +136,21 @@ const updateStudentByParentSchema = Joi.object({
   bloodGroup: Joi.string().required().messages({
     "any.required": "Blood Group is required.",
   }),
-  dob: Joi.string().required().messages({
-    "any.required": "date of birth is required.",
-  }),
+
   address: Joi.string().required().messages({
     "any.required": "Address is required.",
   }),
+
+ dob: Joi.string().required().pattern(/^(00|[0-2][0-9]|(3[0-1]))\/(0[0-9]|1[0-2])\/\d{4}$/).custom((value, helpers) => {
+    const [day, month, year] = value.split('/').map(Number);
+
+    if (month === 2 && day > 29){ return helpers.message('February cannot have more than 29 days.'); }
+    if ([4, 6, 9, 11].includes(month) && day > 30){ return helpers.message(`Month ${month} cannot have more than 30 days.`); }
+    if(String(day)==='0'|| String(month)==='0'){return helpers.message('invalid day or month')};
+    return value; 
+    }).messages({
+      "any.required":"DOB is required."
+    })
 })
 
 const updateStudentParentByAdminSchema = Joi.object({
