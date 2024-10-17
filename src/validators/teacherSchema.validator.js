@@ -72,6 +72,8 @@ const teacherUpdateSchema = Joi.object({
 
   degree:Joi.string().optional(),
 
+  address: Joi.string().optional()
+
 
 });
 
