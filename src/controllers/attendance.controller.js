@@ -269,8 +269,10 @@ export async function attendanceCountOfStudentController(req, res){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
-    const studentAttendance = await getAttendancesService({student:studentId, teacherAttendance:"present", date:{$gte: startTime, $lte:endTime}});
-    const sectionAttendance = await getSectionAttendancesService({section:student["section"], date:{$gte:startTime, $lte:endTime}});
+    const [studentAttendance, sectionAttendance] = await Promise.all([
+      getAttendancesService({student:studentId, teacherAttendance:"present", date:{$gte: startTime, $lte:endTime}}),
+      getSectionAttendancesService({section:student["section"], date:{$gte:startTime, $lte:endTime}})
+    ]);
 
     const studentAttendanceCount = studentAttendance.length;
     const sectionAttendanceCount = sectionAttendance.length;

@@ -5,7 +5,7 @@ const MONGO_URL = config.dbURL;
 
 export default async function connectDB(){
     try {
-        await mongoose.connect(MONGO_URL);
+        await mongoose.connect(MONGO_URL, {serverSelectionTimeoutMS:30000});
         console.log("DB connected!");
     } catch (err) {
        console.log('error in db connection!');
