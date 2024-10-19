@@ -52,7 +52,7 @@ export async function loginTeacherController(req, res) {
       classId: Class["_id"],
       sectionName: section["name"],
       className: Class["name"],
-      email: teacherEmail
+      email: teacherEmail,
     });
     const isLoginAlready = teacher["isLoginAlready"];
     teacher["isLoginAlready"] = true;

@@ -99,7 +99,7 @@ export async function updateStudentController(req, res){
     if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
     if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
     if(req.body["photo"] || req.body["method"]==="DELETE"){ studentUpdate.photo = (req.body["method"]==="DELETE")? "": req.body["photo"]; }
-    if(req.body["address"]){ studentUpdate.photo = req.body["address"]; }
+    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
 
     if(req.body["phone"]){ 
       const parentWithPhone = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
@@ -116,7 +116,10 @@ export async function updateStudentController(req, res){
     if(req.body["parentOccupation"]){ parentUpdate.occupation = req.body["parentOccupation"]; }
     if(req.body["parentAddress"]){ parentUpdate.address = req.body["parentAddress"]; }
 
-    await Promise.all([ updateStudentService({ _id:studentId }, studentUpdate), updateParentService({ _id: student["parent"] }, parentUpdate) ]);
+    await Promise.all([ 
+      updateStudentService({ _id:studentId }, studentUpdate), 
+      updateParentService({ _id: student["parent"] }, parentUpdate) 
+    ]);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
     
   } catch (err) {
