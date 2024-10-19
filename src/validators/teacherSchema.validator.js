@@ -62,7 +62,17 @@ const teacherUpdateSchema = Joi.object({
   email: Joi.string().email({minDomainSegments: 2 }).optional().messages({
       "string.email": "Invalid email format.",
       }),
-  dob:Joi.string().optional(),
+
+  dob: Joi.string().optional().pattern(/^(00|[0-2][0-9]|(3[0-1]))\/(0[0-9]|1[0-2])\/\d{4}$/).messages({
+      "string.pattern.base": "Invalid date format, use DD/MM/YYYY.",
+      }).custom((value, helpers) => {
+        const [day, month, year] = value.split('/').map(Number);
+        if (month === 2 && day > 29){ return helpers.message('February cannot have more than 29 days.'); }
+        if ([4, 6, 9, 11].includes(month) && day > 30){ return helpers.message(`Month ${month} cannot have more than 30 days.`); }
+        if(String(day)==='0'|| String(month)==='0'){return helpers.message('invalid day or month')};
+    
+        return value; 
+      }),
   
   bloodGroup:Joi.string().optional(),
 
