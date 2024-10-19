@@ -141,16 +141,17 @@ const updateStudentByParentSchema = Joi.object({
     "any.required": "Address is required.",
   }),
 
- dob: Joi.string().required().pattern(/^(00|[0-2][0-9]|(3[0-1]))\/(0[0-9]|1[0-2])\/\d{4}$/).custom((value, helpers) => {
+ dob: Joi.string().required().pattern(/^(00|[0-2][0-9]|(3[0-1]))\/(0[0-9]|1[0-2])\/\d{4}$/).messages({
+    "string.pattern.base": "Invalid date format, use DD/MM/YYYY.",
+    "any.required":"DOB is required.",
+  }).custom((value, helpers) => {
     const [day, month, year] = value.split('/').map(Number);
-
     if (month === 2 && day > 29){ return helpers.message('February cannot have more than 29 days.'); }
     if ([4, 6, 9, 11].includes(month) && day > 30){ return helpers.message(`Month ${month} cannot have more than 30 days.`); }
     if(String(day)==='0'|| String(month)==='0'){return helpers.message('invalid day or month')};
+
     return value; 
-    }).messages({
-      "any.required":"DOB is required."
-    })
+  })
 })
 
 const updateStudentParentByAdminSchema = Joi.object({
@@ -163,7 +164,17 @@ const updateStudentParentByAdminSchema = Joi.object({
   gender:Joi.string().required().messages({
     "any.required":"gender is required"
   }),
-  dob:Joi.string().optional(),
+  
+  dob: Joi.string().optional().pattern(/^(00|[0-2][0-9]|(3[0-1]))\/(0[0-9]|1[0-2])\/\d{4}$/).messages({
+    "string.pattern.base": "Invalid date format, use DD/MM/YYYY.",
+  }).custom((value, helpers) => {
+    const [day, month, year] = value.split('/').map(Number);
+    if (month === 2 && day > 29){ return helpers.message('February cannot have more than 29 days.'); }
+    if ([4, 6, 9, 11].includes(month) && day > 30){ return helpers.message(`Month ${month} cannot have more than 30 days.`); }
+    if(String(day)==='0'|| String(month)==='0'){return helpers.message('invalid day or month')};
+
+    return value; 
+  }),
 
   address:Joi.string().optional(),
 
