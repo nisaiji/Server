@@ -30,3 +30,12 @@ export async function updateParentService(filter, update){
   }
 }
 
+
+export async function getParentCountService(filter){
+  try {
+    const parents = await parentModel.countDocuments(filter);
+    return parents;
+  } catch (error) {
+    throw error;  
+  }
+  }

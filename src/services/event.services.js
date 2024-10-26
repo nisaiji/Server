@@ -1,19 +1,28 @@
-export async function parentForgetPasswordEventRegisterService(data){
+import eventModel from "../models/event.model.js";
+
+export async function registerEventService(paramObj){
   try {
-    const {eventType,sender,receiver,title,description,date} = data;
-    const event = await eventModel.create(data);
+    const event = await eventModel.create(paramObj);
     return event;
   } catch (error) {
-    throw error;
+    throw error;    
   }
 }
 
-export async function teacherForgetPasswordEventRegisterService(data){
+export async function getEventsPipelineService(pipeline){
   try {
-    const {eventType,sender,receiver,title,description,date} = data;
-    const event = await eventModel.create(data);
-    return event;
+    const events = await eventModel.aggregate(pipeline).exec();
+    return events;
   } catch (error) {
-    throw error;
+    throw error;    
+  }
+}
+
+export async function getEventsCountService(filter){
+  try {
+    const events = await eventModel.countDocuments(filter);
+    return events;
+  } catch (error) {
+    throw error;  
   }
 }

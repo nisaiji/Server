@@ -4,6 +4,8 @@ import { getParentsCountOfSchoolService, getStudentsCountOfSchoolService, getTea
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionAttendanceStatusService } from "../services/sectionAttendance.services.js";
+import { getStudentCountService } from "../services/student.service.js";
+import { getParentCountService } from "../services/parent.services.js";
 
 export async function getPresentStudentsController(req,res){
   try {
@@ -11,7 +13,7 @@ export async function getPresentStudentsController(req,res){
     const {startTime, endTime} = req.body;
     const [presentAttendances, totalCount] = await Promise.all([
       getAttendancesService({admin:adminId, date:{$gte:startTime, $lte:endTime}, teacherAttendance:"present"}),
-      getStudentsCountOfSchoolService(adminId)
+      getStudentCountService({admin:adminId, isActive:true})
     ]);
     return res.status(StatusCodes.OK).send(success(200,{presentCount:presentAttendances.length, totalCount}));    
   } catch (err) {
@@ -22,7 +24,7 @@ export async function getPresentStudentsController(req,res){
 export async function getParentCountController(req,res){
   try {
     const adminId = req.adminId;
-    const parentCount = await getParentsCountOfSchoolService(adminId);
+    const parentCount = await getParentCountService(adminId);
     return res.status(StatusCodes.OK).send(success(200,{parentCount}));    
   } catch(err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));  

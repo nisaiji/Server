@@ -1,46 +1,63 @@
 import mongoose from "mongoose";
 
 const eventSchema = mongoose.Schema({
-  eventType:{
+  type:{
     type: String,
     enum: ["forgetPassword"],
   },
+
+  title:{
+    type:String,
+  },
+
+  description:{
+    type:String,
+  },
+
   sender: {
     id: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       required: true
     },
     model:{
       type:String,
       required:true,
-      enum: ["Admin","Teacher","Parent"]
+      enum: ["admin","teacher","parent", "superAdmin"]
     }
   },
+
   receiver:{
     id:{
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       required:true
     },
     model:{
       type:String,
       required:true,
-      enum:["Admin","Teacher","Parent"]
+      enum:["admin","teacher","parent", "superAdmin"]
     }
   },
-  title:{
+
+  status:{
     type:String,
+    enum:["accept", "reject", "pending", "notSet"],
+    default: "notSet"
   },
-  description:{
-    type:String,
+
+  date: {
+    type: Number,
+    required: true
   },
-  date:{
-    type:Number
-  },
+  
   isRead:{
     type: Boolean,
     default: false
-  }  
-});
+  },
+},
+{
+  timestamps:true
+}
+);
 
 const eventModel = mongoose.model("event", eventSchema);
 
