@@ -1,42 +1,38 @@
-import { getReceiver, getUser } from "../helper/event.helper.js";
+import { getReceiver, getUser } from "../helpers/event.helper.js";
 import { StatusCodes } from "http-status-codes";
-import {getEventsCountService, getEventsPipelineService, registerEventService } from "../services/event.services.js";
+import {getEventsCountService, getEventService, getEventsPipelineService, registerEventService, updateEventService } from "../services/event.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
+import  otpGenerator  from "otp-generator"
 
 
 export async function registerEventController(req, res){
   try {
     const {
       type,
-      sender: { id: senderId, model: senderModel },
-      receiver: { id: receiverId, model: receiverModel },
+      sender: { phone: senderPhone, model: senderModel },
       title,
       description
     } = req.body;
     let date = new Date();
     date = date.getTime();
-    console.log({senderId, receiverModel})
 
-    const[sender, receiver] = await Promise.all([
-      await getUser(senderModel, senderId),
-      await getUser(receiverModel, receiverId)
-    ]);
-
+    const sender = await getUser(senderModel, {phone: senderPhone, isActive: true});
     
     if(!sender){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Sender not found"));
     }
+    const receiver = await getUser("admin", {_id:sender["admin"], isActive: true});
     if(!receiver){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Receiver not found"));
     }
 
-    const eventObj = {type, title, description, sender:{ id: senderId, model:senderModel }, receiver:{id: receiverId, model: receiverModel}, date, status:"pending"}
+    const eventObj = {type, title, description, sender:{ id: sender["_id"], model:senderModel }, receiver:{id: receiver["_id"], model: "admin"}, date, status:"pending"}
     await registerEventService(eventObj) 
     return res.status(StatusCodes.OK).send(success(200, "Event created successfully"));
     
   } catch (err) {
-    return res.send(error(500,err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
 }
 
@@ -101,7 +97,36 @@ export async function getEventsController(req,res){
       pageSize: limitNum
     }));
   } catch (err) {
-    return res.send(error(500,err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
 }
 
+export async function updateEventByAdminController(req, res){
+  try {
+    const{ eventId, status } = req.body;
+    const[ receiverModel, receiverId ] = getReceiver(req);
+    const event = await getEventService({_id: eventId});
+
+    if(!event){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Event not found."));
+    }
+
+    console.log(event)
+    if(event.receiver.id.toString()!==receiverId.toString()){
+      return res.status(StatusCodes.UNAUTHORIZED).send(401, "Unauthorized to update event.");
+    }
+
+    const fieldsToBeUpdated = {};
+    if(status==="accept"){
+      fieldsToBeUpdated.otp = otpGenerator.generate(5, {lowerCaseAlphabets:false, upperCaseAlphabets:false, specialChars: false}); 
+      fieldsToBeUpdated.status = status;
+    }
+    else{
+      fieldsToBeUpdated.status = status;
+    }
+    await updateEventService({ _id: eventId }, fieldsToBeUpdated)
+    return res.status(StatusCodes.OK).send(success(200, "Event updated successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
+  }
+}

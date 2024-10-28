@@ -7,8 +7,9 @@ const registerEventSchema = Joi.object({
   }),
 
   sender: Joi.object({
-    id: Joi.string().required().messages({
-      'any.required': 'Id is required.'
+    phone: Joi.string().pattern(/^[1-5][0-9]{9}$/).length(10).messages({
+      "string.pattern.base": "Phone number must have 10-digit number starting with 1-5.",
+      "string.length": "Phone number must be exactly 10 characters long."
     }),
     model: Joi.string().valid('parent','teacher', 'admin').required().messages({
       'any.required': 'Model is required.',
@@ -18,17 +19,6 @@ const registerEventSchema = Joi.object({
     'any.required': 'Sender information is required.'
   }),
 
-  receiver: Joi.object({
-    id: Joi.string().required().messages({
-      'any.required': 'Id is required.'
-    }),
-    model: Joi.string().valid('parent','teacher', 'admin').required().messages({
-      'any.required': 'Model is required',
-      'string.valid': 'Model can be parent, teacher, admin'
-    })
-  }).required().messages({
-    'any.required': 'Receiver is required.'
-  }),
   title: Joi.string().optional(),
   description: Joi.string().optional(),
 });

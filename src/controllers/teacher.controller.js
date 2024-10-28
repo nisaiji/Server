@@ -209,3 +209,4 @@ export async function changePasswordTeacherController(req, res) {
     return res.status(StatusCodes.OK).send(error(500, err.message));
   }
 }
+

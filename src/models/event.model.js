@@ -40,13 +40,18 @@ const eventSchema = mongoose.Schema({
 
   status:{
     type:String,
-    enum:["accept", "reject", "pending", "notSet"],
+    enum:["accept", "reject", "pending", "expired", "complete", "notSet"],
     default: "notSet"
   },
 
   date: {
     type: Number,
     required: true
+  },
+
+  otp: {
+    type: Number,
+    maxLength: 5
   },
   
   isRead:{

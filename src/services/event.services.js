@@ -9,12 +9,30 @@ export async function registerEventService(paramObj){
   }
 }
 
+export async function getEventService(paramObj, projection={}){
+  try {
+    const event = await eventModel.findOne(paramObj).select(projection);
+    return event; 
+  }catch (error) {
+    throw error;    
+  }
+}
+
 export async function getEventsPipelineService(pipeline){
   try {
     const events = await eventModel.aggregate(pipeline).exec();
     return events;
   } catch (error) {
     throw error;    
+  }
+}
+
+export async function updateEventService(filter, update) {
+  try {
+    const event = await eventModel.updateOne(filter, update);
+    return event;
+  } catch (error) {
+    throw error;
   }
 }
 
