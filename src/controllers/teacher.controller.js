@@ -5,7 +5,8 @@ import { getAccessTokenService } from "../services/JWTToken.service.js";
 import { getSectionByTeacherId } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";
 import { StatusCodes } from "http-status-codes";
-import { isValidMongoId } from "../services/mongoose.services.js";
+import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
+import { getEventService, updateEventService } from "../services/event.services.js";
 
 export async function registerTeacherController(req, res) {
   try {
@@ -206,7 +207,44 @@ export async function changePasswordTeacherController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.OK).send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
+export async function forgetPasswordTeacherController(req, res) {
+  try {
+    const { otp, phone } = req.body;
+    const teacher = await getTeacherService({phone})
+    if(!teacher){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"))
+    }
+    const event = await getEventService({"sender.model": "teacher", "sender.id":teacher["_id"],status:"accept" })
+    if(!event){
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Forget password request not raised"))
+    }
+    if(otp!==event["otp"]){
+      return res.status(StatusCodes.BAD_GATEWAY).send(error(502, "OTP not matched"));
+    }
+
+    return res.status(StatusCodes.OK).send(success(200, {id: teacher["id"]}));    
+    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function forgetPasswordUpdateTeacherController(req, res){
+  try {
+    const{ id, password } = req.body;
+    const teacher = await getTeacherService({_id:id, isActive:true})
+    if(!teacher){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
+    }
+    const hashedPassword = await hashPasswordService(password)
+    await updateTeacherService({_id: id, isActive:true}, {password:hashedPassword})
+    const event =  await updateEventService({"sender.id": convertToMongoId(id), status :{$ne: "complete"}}, {status: "complete"});
+    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully")) 
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
