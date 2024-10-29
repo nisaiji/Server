@@ -33,7 +33,7 @@ export async function registerEventController(req, res){
 
     const eventObj = {type, title, description, sender:{ id: sender["_id"], model:senderModel }, receiver:{id: receiver["_id"], model: "admin"}, date, status:"pending"}
     await registerEventService(eventObj) 
-    return res.status(StatusCodes.OK).send(success(200, "Event created successfully"));
+    return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
     
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
