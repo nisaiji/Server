@@ -67,28 +67,95 @@ export async function getEventsController(req,res){
     }
 
     const pipeline = [
-      {
-        $match: filter
-      },
-      {
-        $sort: {date: 1}
-      },
-      {
-        $skip: skipNum
-      },
-      {
-        $limit: limitNum
-      },
-      {
-        $project: {
-          isRead: 0,
-          __v: 0,
-          createdAt: 0,
-          updatedAt: 0,
+      { $match: filter },
+      { $sort: { date: 1 } },
+      { $skip: skipNum },
+      { $limit: limitNum },
+    ];
+    
+    // Lookup for teachers
+    pipeline.push({
+      $lookup: {
+        from: 'teachers',
+        localField: 'sender.id',
+        foreignField: '_id',
+        as: 'teacher',
+        pipeline: [
+          { $project: { password: 0, isActive: 0, isLoginAlready: 0, admin: 0 } }
+        ]
+      }
+    });
+    
+    // Unwind teacherInfo
+    pipeline.push({
+      $unwind: {
+        path: '$teacher',
+        preserveNullAndEmptyArrays: true
+      }
+    });
+    
+    // Lookup for sections
+    pipeline.push({
+      $lookup: {
+        from: 'sections',
+        localField: 'teacher.section',
+        foreignField: '_id',
+        as: 'section',
+        pipeline: [
+          { $project: { name: 1, classId: 1 } }
+        ]
+      }
+    });
+    
+    // Unwind sectionDetails
+    pipeline.push({
+      $unwind: {
+        path: '$section',
+        preserveNullAndEmptyArrays: true
+      }
+    });
+    
+    // Lookup for classes
+    pipeline.push({
+      $lookup: {
+        from: 'class',
+        localField: 'section.classId',
+        foreignField: '_id',
+        as: 'class',
+        pipeline: [
+          { $project: { name: 1 } }
+        ]
+      }
+    });
+    
+    // Unwind classDetails
+    pipeline.push({
+      $unwind: {
+        path: '$class',
+        preserveNullAndEmptyArrays: true
+      }
+    });
+    
+    // Final projection
+    pipeline.push({
+      $project: {
+        _id: 1,
+        type: 1,
+        title: 1,
+        status: 1,
+        date: 1,
+        otp: 1,
+        teacher: {
+          _id: "$teacher._id",
+          firstname: "$teacher.firstname",
+          lastname: "$teacher.lastname",
+          forgetPasswordCount: "$teacher.forgetPasswordCount",
+          section: "$section.name",
+          class: "$class.name"
         }
       }
-    ];
-
+    });
+    
     const events = await getEventsPipelineService(pipeline);
     const totalEvents = await getEventsCountService(filter);
     const totalPages = Math.ceil(totalEvents / limitNum);

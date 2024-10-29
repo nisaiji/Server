@@ -23,4 +23,4 @@ teacherRouter.put("/address", teacherAuthenticate, updateAddressValidation, upda
 teacherRouter.put("/photo-upload", teacherAuthenticate, validateImageSizeMiddleware, photoUpdateTeacherValidation, updateTeacherController);
 teacherRouter.delete("/:teacherId", adminAuthenticate,  deleteTeacherController);
 
-export default teacherRouter;   
+export default teacherRouter;

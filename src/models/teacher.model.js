@@ -67,6 +67,10 @@ const teacherSchema = mongoose.Schema({
   photo:{
     type: String,
   },
+  forgetPasswordCount:{
+    type:Number,
+    default:0
+  },
   section:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "section",
