@@ -22,6 +22,10 @@ export async function registerEventController(req, res){
     if(!sender){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Sender not found"));
     }
+
+    if(senderModel==="teacher" && !sender.section){
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(409, "Teacher in not authorized for forget password."))
+    }
     const event = await getEventService({"sender.id":sender["_id"], "status":{$in:["pending", "accept"]}});
     if(event && event.status==="accept"){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Request approved, please change the password."));
