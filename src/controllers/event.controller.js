@@ -125,7 +125,7 @@ export async function getEventsController(req,res){
     // Lookup for classes
     pipeline.push({
       $lookup: {
-        from: 'class',
+        from: 'classes',
         localField: 'section.classId',
         foreignField: '_id',
         as: 'class',
