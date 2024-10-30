@@ -241,7 +241,7 @@ export async function forgetPasswordUpdateTeacherController(req, res){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
     const hashedPassword = await hashPasswordService(password)
-    await updateTeacherService({_id: id, isActive:true}, {password:hashedPassword, forgetPasswordCount:forgetPasswordCount+1})
+    await updateTeacherService({_id: id, isActive:true}, {password:hashedPassword, forgetPasswordCount: teacher.forgetPasswordCount+1})
     const event =  await updateEventService({"sender.id": convertToMongoId(id), status :{$ne: "complete"}}, {status: "complete"});
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully")) 
   } catch (err) {

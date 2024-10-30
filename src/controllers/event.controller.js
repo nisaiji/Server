@@ -22,9 +22,12 @@ export async function registerEventController(req, res){
     if(!sender){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Sender not found"));
     }
-    const event = await getEventService({"sender.id":sender["_id"]});
-    if(event){
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Already raised forget password request."));
+    const event = await getEventService({"sender.id":sender["_id"], "status":{$in:["pending", "accept"]}});
+    if(event && event.status==="accept"){
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Request approved, please change the password."));
+    }
+    if(event&& event.status==="pending"){
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Request is being processed under admin."));
     }
     const receiver = await getUser("admin", {_id:sender["admin"], isActive: true});
     if(!receiver){
