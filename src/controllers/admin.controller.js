@@ -1,4 +1,4 @@
-import { getAccessTokenService } from "../services/JWTToken.service.js";
+import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import {getAdminService, registerAdminService,  updateAdminService } from "../services/admin.services.js";
 import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
@@ -52,9 +52,28 @@ export async function loginAdminController(req, res) {
       adminId: admin["_id"],
       phone: admin["phone"]
     });
-    return res.status(StatusCodes.OK).send(success(200, { accessToken, username: admin.username }));
+
+    const refreshToken = getRefreshTokenService({
+      role: "admin",
+      username: admin["username"],
+      schoolName: admin["schoolName"],
+      email: admin["email"],
+      adminId: admin["_id"],
+      phone: admin["phone"]  
+    })
+    return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, username: admin.username }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function refreshAccessTokenController(req, res) {
+  try {
+    const data = req.data;
+    const accessToken = getAccessTokenService(data);
+    return res.status(StatusCodes.OK).send(success(200, { accessToken }));
+  } catch (err) {
+    res.send(error(500, err.message));
   }
 }
 

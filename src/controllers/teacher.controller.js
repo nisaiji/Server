@@ -1,7 +1,7 @@
 import {getTeacherService, registerTeacherService, getAllTeacherOfAdminService, updateTeacherService, getTeachersService } from "../services/teacher.services.js";
 import {matchPasswordService,hashPasswordService} from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
-import { getAccessTokenService } from "../services/JWTToken.service.js";
+import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
 import { getSectionByTeacherId } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";
 import { StatusCodes } from "http-status-codes";
@@ -56,12 +56,35 @@ export async function loginTeacherController(req, res) {
       pincode: teacher["pincode"]? teacher["pincode"]:"",
       username: teacher["username"]? teacher["username"]:""
     });
+    const refreshToken = getRefreshTokenService({
+      role: "teacher",
+      teacherId: teacher["_id"],
+      adminId: teacher["admin"],
+      phone: teacher["phone"],
+      sectionId: section["_id"],
+      classId: Class["_id"],
+      sectionName: section["name"],
+      className: Class["name"],
+      email: teacher["email"]? teacher["email"]: "",
+      pincode: teacher["pincode"]? teacher["pincode"]:"",
+      username: teacher["username"]? teacher["username"]:""
+    });
     const isLoginAlready = teacher["isLoginAlready"];
     teacher["isLoginAlready"] = true;
     await teacher.save();
-    return res.status(StatusCodes.OK).send(success(200, {accessToken,firstname: teacher["firstname"],isLoginAlready}));
+    return res.status(StatusCodes.OK).send(success(200, {accessToken, refreshToken, firstname: teacher["firstname"],isLoginAlready}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function refreshAccessTokenController(req, res) {
+  try {
+    const data = req.data;
+    const accessToken = getAccessTokenService(data);
+    return res.status(StatusCodes.OK).send(success(200, { accessToken }));
+  } catch (err) {
+    res.send(error(500, err.message));
   }
 }
 
