@@ -241,7 +241,7 @@ export async function forgetPasswordTeacherController(req, res) {
     if(!teacher){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"))
     }
-    const event = await getEventService({"sender.model": "teacher", "sender.id":teacher["_id"],status:{"accept"} })
+    const event = await getEventService({"sender.model": "teacher", "sender.id":teacher["_id"],status:"accept" })
     if(!event){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Forget password request not raised"))
     }
