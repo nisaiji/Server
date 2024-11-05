@@ -241,7 +241,7 @@ export async function forgetPasswordTeacherController(req, res) {
     if(!teacher){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"))
     }
-    const event = await getEventService({"sender.model": "teacher", "sender.id":teacher["_id"],status:"accept" })
+    const event = await getEventService({"sender.model": "teacher", "sender.id":teacher["_id"],status:{"accept"} })
     if(!event){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Forget password request not raised"))
     }
@@ -265,7 +265,7 @@ export async function forgetPasswordUpdateTeacherController(req, res){
     }
     const hashedPassword = await hashPasswordService(password)
     await updateTeacherService({_id: id, isActive:true}, {password:hashedPassword, forgetPasswordCount: teacher.forgetPasswordCount+1})
-    const event =  await updateEventService({"sender.id": convertToMongoId(id), status :{$ne: "complete"}}, {status: "complete"});
+    const event =  await updateEventService({"sender.id": convertToMongoId(id), status :"accept"}, {status: "complete"});
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully")) 
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
