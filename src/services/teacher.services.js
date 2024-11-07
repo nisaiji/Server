@@ -36,12 +36,20 @@ export async function getAllTeacherOfAdminService(admin) {
   }
 }
 
-
 export async function updateTeacherService(filter, update){
   try {
       const teacher = await teacherModel.updateOne(filter, update);
       return teacher;
   } catch (error) {
     throw error;
+  }
+}
+
+export async function getTeacherCountService(filter){
+  try {
+    const parents = await teacherModel.countDocuments(filter);
+    return parents;
+  } catch (error) {
+    throw error;  
   }
 }

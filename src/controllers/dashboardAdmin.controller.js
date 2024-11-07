@@ -1,11 +1,11 @@
 import { getSectionService } from "../services/section.services.js";
 import { getAttendancesService } from "../services/attendance.service.js";
-import { getParentsCountOfSchoolService, getStudentsCountOfSchoolService, getTeachersCountOfSchoolService } from "../services/dashboardAdmin.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionAttendanceStatusService } from "../services/sectionAttendance.services.js";
 import { getStudentCountService } from "../services/student.service.js";
 import { getParentCountService } from "../services/parent.services.js";
+import { getTeacherCountService } from "../services/teacher.services.js";
 
 export async function getPresentStudentsController(req,res){
   try {
@@ -24,7 +24,7 @@ export async function getPresentStudentsController(req,res){
 export async function getParentCountController(req,res){
   try {
     const adminId = req.adminId;
-    const parentCount = await getParentCountService(adminId);
+    const parentCount = await getParentCountService({admin: adminId});
     return res.status(StatusCodes.OK).send(success(200,{parentCount}));    
   } catch(err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));  
@@ -34,7 +34,7 @@ export async function getParentCountController(req,res){
 export async function getTeacherCountController(req,res){
   try {
     const adminId = req.adminId;
-    const teacherCount = await getTeachersCountOfSchoolService(adminId);
+    const teacherCount = await getTeacherCountService({ admin: adminId });
     return res.status(StatusCodes.OK).send(success(200,{teacherCount}));    
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));  
