@@ -138,7 +138,7 @@ export async function updateStudentController(req, res){
 
 export async function getStudentsController(req, res){
     try {
-        let {admin, classId, section, parent, student, firstname, lastname, gender, startTime, endTime, include, page = 1, limit = 10 } = req.query;
+        let {admin, classId, section, parent, student, firstname, lastname, gender, startTime, endTime, include, page = 1, limit } = req.query;
 
         if(!admin && !classId && !section && !parent && !student && !firstname && !lastname && !gender){
           return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
@@ -196,11 +196,16 @@ export async function getStudentsController(req, res){
             },
             {
               $skip:skipNum
-            },
+            }
+        ];
+
+        if(limit){
+          pipeline.push(
             {
               $limit: limitNum
             }
-        ];
+          );
+        }
 
         if (include) {
           const includes = include.split(',');
