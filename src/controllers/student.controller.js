@@ -183,9 +183,6 @@ export async function getStudentsController(req, res){
         }
         if(gender){ filter.gender = gender; }
     
-        const pageNum = parseInt(page);
-        const limitNum = parseInt(limit);
-        const skipNum = (pageNum-1)*limitNum;
 
         const pipeline = [
             {
@@ -193,14 +190,18 @@ export async function getStudentsController(req, res){
             },
             {
               $sort:{firstname:1},
-            },
-            {
-              $skip:skipNum
             }
         ];
 
         if(limit){
+          const pageNum = parseInt(page);
+          const limitNum = parseInt(limit);
+          const skipNum = (pageNum-1)*limitNum;
+          
           pipeline.push(
+            {
+              $skip:skipNum
+            },
             {
               $limit: limitNum
             }
