@@ -60,6 +60,9 @@ export async function deleteSectionController(req, res) {
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
+    if(section["studentCount"] > 0){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "section contains students"));
+    }
     const[sectionInfo, classInfo, teacher] = await Promise.all([
       deleteSectionService({ _id:sectionId }), 
       updateClassService({_id:section["classId"]}, {$pull:{section:sectionId}}),
