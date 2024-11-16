@@ -1,12 +1,24 @@
 import express from "express";
-import {  deleteStudentController, getStudentsController, registerStudentController, updateStudentController } from "../controllers/student.controller.js";
+import {  deleteStudentController, getExcelDataStudentController, getStudentsController, registerStudentController, updateStudentController } from "../controllers/student.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
 import {deleteStudentValidation, getStudentValidation, registerStudentValidation, updateStudentByAdminValidation, updateStudentByParentValidation, updateStudentByTeacherValidation, updateStudentParentByAdminValidation, uploadStudentPhotoValidation } from "../middlewares/validation/student.validation.middleware.js";
 import { validateImageSizeMiddleware } from "../middlewares/teacher.middleware.js";
+import multer from "multer";
 
 const studentRouter = express.Router();
+
+
+const uploadImage=multer({storage:multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null,'./upload');
+    },
+    filename:function(req,file,cb){
+        cb(null,Date.now()+"_"+file.originalname);
+    }
+})});
+studentRouter.post('/ulpadFile/',uploadImage.single('excelFile'),getExcelDataStudentController);
 
 studentRouter.post("/teacher", teacherAuthenticate, registerStudentValidation, registerStudentController );
 studentRouter.post("/admin", adminAuthenticate, registerStudentValidation, registerStudentController );

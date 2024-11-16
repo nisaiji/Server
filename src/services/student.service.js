@@ -74,3 +74,18 @@ export async function getStudentCountService(filter){
     throw error;  
   }
   }
+
+
+  export async function insertExcelDataService(data)
+  {
+    
+    try 
+    {
+          const excelData=await studentModel.insertMany(data)          
+          return excelData;
+    } 
+    catch (error) 
+    {
+      throw error;
+    }
+  }

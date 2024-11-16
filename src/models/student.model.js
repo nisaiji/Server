@@ -50,22 +50,22 @@ const studentSchema = mongoose.Schema({
   parent: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "parent",
-    required: true
+    default: "64b8f3d9f58b7e2f8f2c5d1a"
   },
   section: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "section",
-    required: true
+    default: "64b8f3d9f58b7e2f8f2c5d1b"
   },
   classId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "class",
-    required: true
+    default: "64b8f3d9f58b7e2f8f2c5d1b"
   },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin",
-    required: true
+    default: "64b8f3d9f58b7e2f8f2c5d1b"
   }
 });
 

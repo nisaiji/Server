@@ -3,7 +3,6 @@ import { error, success } from "../utills/responseWrapper.js";
 import {getAdminService, registerAdminService,  updateAdminService } from "../services/admin.services.js";
 import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
-
 export async function registerAdminController(req, res) {
   try {
     const {affiliationNo, email, phone, username, password } = req.body;
@@ -134,3 +133,5 @@ export async function getAdminController(req, res) {
       .send(error(500, err.message));
   }
 }
+
+
