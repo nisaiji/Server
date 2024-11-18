@@ -49,23 +49,19 @@ const studentSchema = mongoose.Schema({
   },
   parent: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "parent",
-    default: "64b8f3d9f58b7e2f8f2c5d1a"
+    ref: "parent"
   },
   section: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "section",
-    default: "64b8f3d9f58b7e2f8f2c5d1b"
+    ref: "section"
   },
   classId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "class",
-    default: "64b8f3d9f58b7e2f8f2c5d1b"
+    ref: "class"
   },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "admin",
-    default: "64b8f3d9f58b7e2f8f2c5d1b"
+    ref: "admin"
   }
 });
 

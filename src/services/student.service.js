@@ -18,6 +18,16 @@ export async function registerStudentService( data ){
     throw error;
   }
 }
+
+export async function registerStudentsService(data)  {
+  try{
+
+    const students = await studentModel.insertMany(data)          
+    return students;
+  } catch (error){
+    throw error;
+  }
+}
  
 export async function getStudentsService(paramObj, projection={}, populateObj=""){
   try {
@@ -73,19 +83,4 @@ export async function getStudentCountService(filter){
   } catch (error) {
     throw error;  
   }
-  }
-
-
-  export async function insertExcelDataService(data)
-  {
-    
-    try 
-    {
-          const excelData=await studentModel.insertMany(data)          
-          return excelData;
-    } 
-    catch (error) 
-    {
-      throw error;
-    }
-  }
+}
