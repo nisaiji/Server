@@ -12,6 +12,6 @@ adminRouter.get("/refresh", refreshTokenAuthenticate, refreshAccessTokenControll
 adminRouter.put("/", adminAuthenticate, adminProfileUpdateValidation, updateAdminController);
 adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation, updateAdminController);
 adminRouter.get("/", adminAuthenticate, getAdminController);
-adminRouter.get("/students-excelsheet",  getStudentDemoExcelSheetController)
+adminRouter.get("/students-excelsheet", adminAuthenticate, getStudentDemoExcelSheetController)
 
 export default adminRouter;
