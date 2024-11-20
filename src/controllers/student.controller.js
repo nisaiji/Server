@@ -388,7 +388,7 @@ export async function registerStudentsFromExcelController(req, res){
     const {sectionId, classId} = req.body;
     const adminId = req.adminId;
 
-    const[section, classInfo] =await Promise.all([
+    const[section, classInfo] = await Promise.all([
       getSectionService({ _id: sectionId }),
       getClassService({ _id: classId })
     ])
@@ -403,10 +403,10 @@ export async function registerStudentsFromExcelController(req, res){
       return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Invalid class, section ids"));
     }
 
-    const workbook = xlsx.readFile(file.path); 
-    const sheetName = workbook.SheetNames[0];
-    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, adminId);
+    const workbook = xlsx.readFile(file.path)
+    const sheetName = workbook.SheetNames[0]
+    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
+    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, adminId)
     await fs.unlink(file.path)
     return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`))
   } catch(err){

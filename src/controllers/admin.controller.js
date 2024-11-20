@@ -3,6 +3,9 @@ import { error, success } from "../utills/responseWrapper.js";
 import {getAdminService, registerAdminService,  updateAdminService } from "../services/admin.services.js";
 import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
+import { constructStudentXlsxTemplate } from "../helpers/admin.helper.js";
+
+
 export async function registerAdminController(req, res) {
   try {
     const {affiliationNo, email, phone, username, password } = req.body;
@@ -134,4 +137,16 @@ export async function getAdminController(req, res) {
   }
 }
 
+export async function getStudentDemoExcelSheetController(req, res){
+  try {
+    const workbook = constructStudentXlsxTemplate();
+    console.log({workbook})
+    res.setHeader("Content-Type","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", "attachment; filename=" + "student-template.xlsx")
+    await workbook.xlsx.write(res)
+    res.status(StatusCodes.OK).end()
 
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
