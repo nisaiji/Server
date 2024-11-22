@@ -9,10 +9,11 @@ const teacherRouter = express.Router();
 
 teacherRouter.post("/", adminAuthenticate, registerTeacherValidation,  registerTeacherController);
 teacherRouter.post("/login", loginTeacherValidation, loginTeacherController);
+teacherRouter.get("/", teacherAuthenticate, getTeacherController);
+teacherRouter.get("/:teacherId", adminAuthenticate, getTeacherController);
 teacherRouter.get("/refresh", refreshTokenAuthenticate, refreshAccessTokenController);
 teacherRouter.get("/all", adminAuthenticate, getAllTeacherOfAdminController);
 teacherRouter.get("/unassigned", adminAuthenticate, getAllNonSectionTeacherController);
-teacherRouter.get("/:teacherId", adminAuthenticate, getTeacherController);
 teacherRouter.put("/auth", teacherAuthenticate, UsernamePasswordUpdateTeacherValidation, updateTeacherController); 
 teacherRouter.put("/auth-info-update", teacherAuthenticate, emailPhoneUpdateTeacherValidation, updateTeacherController); 
 teacherRouter.put("/", teacherAuthenticate, updateTeacherValidation, updateTeacherController); 

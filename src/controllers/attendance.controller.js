@@ -190,9 +190,14 @@ export async function checkAttendaceMarkedController(req, res) {
     const date = new Date();
     const {startTime, endTime} = getStartAndEndTimeService(date, date);
 
+    const day = getDayNameService(date.getDay());
+    date = date.getTime();
+    if (day === "Sunday") {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
+    }
 
-    const holidayEvent = await getHolidayEventService({admin:adminId,startTime,endTime });
-    if (holidayEvent) {
+    const holiday = await getHolidayEventService({date:{$gte:startTime,$lte:endTime}, admin:adminId, holiday:true});
+    if (holiday) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
 
