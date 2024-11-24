@@ -1,5 +1,5 @@
 import { error } from "../../utills/responseWrapper.js";
-import Jwt from "jsonwebtoken";
+import Jwt, { decode } from "jsonwebtoken";
 import { config } from "../../config/config.js";
 import { getTeacherService } from "../../services/teacher.services.js";
 import { getSectionByIdService } from "../../services/section.services.js";
@@ -24,10 +24,15 @@ export async function teacherAuthenticate(req, res, next) {
     if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher's section not exists"));
     }
-    req.teacherId = decoded.teacherId;
+    if(decoded.role==='teacher'){
+      req.teacherId = decoded.teacherId;
+    }
+    else{
+      req.guestTeacherId = decoded.guestTeacherId;   
+    }
     req.sectionId = decoded?.sectionId;
     req.adminId = decoded.adminId;
-    req.role = "teacher";
+    req.role = decoded.role;
     next();
   } catch (err) {
     res.send(error(500, err.message));
