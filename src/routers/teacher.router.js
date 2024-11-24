@@ -1,5 +1,5 @@
 import express from "express";
-import {registerTeacherController,deleteTeacherController,  updateTeacherController, changePasswordTeacherController, loginTeacherController, getAllTeacherOfAdminController, getTeacherController, getAllNonSectionTeacherController, forgetPasswordTeacherController, forgetPasswordUpdateTeacherController, refreshAccessTokenController } from "../controllers/teacher.controller.js";
+import {registerTeacherController, deleteTeacherController,  updateTeacherController, changePasswordTeacherController, loginTeacherController, getAllTeacherOfAdminController, getTeacherController, getAllNonSectionTeacherController, forgetPasswordTeacherController, forgetPasswordUpdateTeacherController, refreshAccessTokenController } from "../controllers/teacher.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { refreshTokenAuthenticate, teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import {emailPhoneUpdateTeacherValidation, loginTeacherValidation, photoUpdateTeacherValidation, registerTeacherValidation, updateAddressValidation, updateTeacherValidation, UsernamePasswordUpdateTeacherValidation} from "../middlewares/validation/teacher.validation.middleware.js";

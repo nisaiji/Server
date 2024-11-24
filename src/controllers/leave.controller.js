@@ -1,7 +1,10 @@
-import { getLeaveRequestsCountService, getLeaveRequestsPipelineService, registerLeaveRequestService } from "../services/leave.service.js";
+import { getLeaveRequestsCountService, getLeaveRequestService, getLeaveRequestsPipelineService, registerLeaveRequestService, updateLeaveRequestService } from "../services/leave.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
+import { registerGuestTeacherService } from "../services/guestTeacher.service.js";
+import { hashPasswordService } from "../services/password.service.js";
+import { getSectionService, updateSectionService } from "../services/section.services.js";
 
 export async function registerLeaveRequestController(req, res){
   try {
@@ -209,5 +212,31 @@ export async function getLeaveRequestsController(req, res){
 
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function updateTeacherLeavRequestController(req, res){
+  try {
+    const { leaveRequestId, status, username, password, tagline }  = req.body;
+    const adminId = req.adminId;
+    const leaveRequest = await getLeaveRequestService({_id: leaveRequestId, status: 'pending' })
+    if(!leaveRequest){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
+    }
+    const section = await getSectionService({teacher: leaveRequest.sender.id})
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+    }
+    if(status==='accept'){
+      const hashedPassword = await hashPasswordService(password)
+      const guestTeacherObj = { username, password: hashedPassword, tagline, endTime: leaveRequest["endTime"], admin: adminId, section: section["_id"]}
+      const guestTeacher = await registerGuestTeacherService(guestTeacherObj);
+      await updateSectionService({_id: section["_id"]}, {guestTeacher: guestTeacher["_id"]})
+    }
+    
+    await updateLeaveRequestService({_id: leaveRequestId}, {status})
+    return res.status(StatusCodes.OK).send(success(200, "Leave Request updated successfully"))
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
 }

@@ -25,6 +25,48 @@ const registerLeaveSchema = Joi.object({
 
 });
 
+const updateTeacherLeaveSchema = Joi.object({
+  leaveRequestId: Joi.string().required().messages({
+    'string.base': 'Leave Request ID must be a string.',
+    'any.required': 'Leave Request ID is required.',
+  }),
+  status: Joi.string().valid('accept', 'reject').required().messages({
+    'string.base': 'Status must be a string',
+    'any.only': 'Status must be either \'accept\', or \'reject\'',
+    'any.required': 'Status is a mandatory field',
+  }),
+  username: Joi.when('status', {
+    is: 'accept',
+    then: Joi.string().required().messages({
+      'string.base': 'Username must be a string',
+      'any.required': 'Username is required',
+    }),
+    otherwise: Joi.forbidden().messages({
+      'any.unknown': "Username is forbidden"
+    }),
+  }),
+  password: Joi.when('status', {
+    is: 'accept',
+    then: Joi.string().required().messages({
+      'string.base': 'Password must be a string',
+      'any.required': 'Password is required',
+    }),
+    otherwise: Joi.forbidden().messages({
+      'any.unknown': "Password is forbidden"
+    }),
+  }),
+  tagline: Joi.when('status', {
+    is: 'accept',
+    then: Joi.string().required().messages({
+      'string.base': 'Tagline must be a string',
+      'any.required': 'Tagline is required',
+    }),
+    otherwise: Joi.forbidden().messages({
+      'any.unknown': "Tagline is forbidden"
+    }),
+  })
+})
+
 
 // sender: Joi.object({
 //   id: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
@@ -53,4 +95,4 @@ const registerLeaveSchema = Joi.object({
 // }),
 
 
-export { registerLeaveSchema }
+export { registerLeaveSchema, updateTeacherLeaveSchema }

@@ -13,9 +13,9 @@ export async function teacherAuthenticate(req, res, next) {
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
-    if(decoded['role']!=='teacher'){
-      return res.send(error(409,"Invalid teacher token"))
-    }
+    // if(decoded['role']!=='teacher'){
+    //   return res.send(error(409,"Invalid teacher token"))
+    // }
     const teacher = await getTeacherService({_id:decoded.teacherId, isActive:true});
     if (!teacher) {
       return res.send(error(404, "Teacher doesn't exists"));

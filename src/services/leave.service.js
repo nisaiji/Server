@@ -9,6 +9,15 @@ export async function getLeaveRequestsPipelineService(pipeline){
   }
 }
 
+export async function getLeaveRequestService(filter, projection={}) {
+  try {
+    const leaveRequest = await leaveRequestModel.findOne(filter).select(projection);
+    return leaveRequest;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function registerLeaveRequestService(paramObj){
   try {
     const event = await leaveRequestModel.create(paramObj);
