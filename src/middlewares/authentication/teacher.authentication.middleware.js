@@ -2,8 +2,9 @@ import { error } from "../../utills/responseWrapper.js";
 import Jwt, { decode } from "jsonwebtoken";
 import { config } from "../../config/config.js";
 import { getTeacherService } from "../../services/teacher.services.js";
-import { getSectionByIdService } from "../../services/section.services.js";
+import { getSectionByIdService, getSectionService } from "../../services/section.services.js";
 import { StatusCodes } from "http-status-codes";
+import { getGuestTeacherService } from "../../services/guestTeacher.service.js";
 
 export async function teacherAuthenticate(req, res, next) {
   try { 
@@ -13,23 +14,23 @@ export async function teacherAuthenticate(req, res, next) {
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
-    // if(decoded['role']!=='teacher'){
-    //   return res.send(error(409,"Invalid teacher token"))
-    // }
-    const teacher = await getTeacherService({_id:decoded.teacherId, isActive:true});
+    let teacher;
+    if(decoded['role']==='teacher'){
+      teacher = await getTeacherService({_id:decoded.teacherId, isActive:true});
+    }
+    if(decoded['role']==='guestTeacher'){
+      teacher = await getGuestTeacherService({_id:decoded.teacherId });
+    }
     if (!teacher) {
       return res.send(error(404, "Teacher doesn't exists"));
     }
-    const section = await getSectionByIdService(teacher["section"])
+    console.log({teacher})
+    const section = await getSectionService({_id : teacher['section']})
     if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher's section not exists"));
     }
-    if(decoded.role==='teacher'){
-      req.teacherId = decoded.teacherId;
-    }
-    else{
-      req.guestTeacherId = decoded.guestTeacherId;   
-    }
+
+    req.teacherId = decoded?.teacherId;
     req.sectionId = decoded?.sectionId;
     req.adminId = decoded.adminId;
     req.role = decoded.role;

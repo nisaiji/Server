@@ -2,11 +2,12 @@ import {getTeacherService, registerTeacherService, getAllTeacherOfAdminService, 
 import {matchPasswordService,hashPasswordService} from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
-import { getSectionByTeacherId } from "../services/section.services.js";
+import { getSectionByTeacherId, getSectionService } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";
 import { StatusCodes } from "http-status-codes";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getEventService, updateEventService } from "../services/event.services.js";
+import { getGuestTeacherService } from "../services/guestTeacher.service.js";
 
 export async function registerTeacherController(req, res) {
   try {
@@ -29,50 +30,62 @@ export async function registerTeacherController(req, res) {
 
 export async function loginTeacherController(req, res) {
   try {
-    const { user, password } = req.body;
-    const teacher = await getTeacherService({$or: [{ username: user }, { phone: user }, { email: user }],isActive:true});
-    if (!teacher) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized email user"));
+    const { user, password, platform } = req.body;
+    const [teacher, guestTeacher] = await Promise.all([
+      getTeacherService({$or: [{ username: user }, { phone: user }, { email: user }],isActive:true}),
+      getGuestTeacherService({username: user})
+    ]);
+
+    const currentTeacher = teacher ? teacher : guestTeacher;
+
+    if (!currentTeacher) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
     }
-    const matchPassword = await matchPasswordService({enteredPassword:password,storedPassword:teacher["password"]});
+    const matchPassword = await matchPasswordService({enteredPassword:password,storedPassword: currentTeacher["password"]});
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized  user"));
     }
-    const section = await getSectionByTeacherId(teacher["_id"]);
+    if(guestTeacher && platform ==="web"){
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Guest teacher does not support on web"));
+    }
+    const section = await getSectionService({_id : currentTeacher["section"]});
     if (!section) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
     }
     const Class = await getClassService({ _id:section["classId"] });
     const accessToken = getAccessTokenService({
-      role: "teacher",
-      teacherId: teacher["_id"],
-      adminId: teacher["admin"],
-      phone: teacher["phone"],
+      role: teacher?"teacher":"guestTeacher",
+      teacherId: currentTeacher["_id"],
+      adminId: currentTeacher["admin"],
       sectionId: section["_id"],
       classId: Class["_id"],
       sectionName: section["name"],
       className: Class["name"],
-      email: teacher["email"]? teacher["email"]: "",
-      pincode: teacher["pincode"]? teacher["pincode"]:"",
-      username: teacher["username"]? teacher["username"]:""
+      phone: currentTeacher["phone"]? currentTeacher["phone"]:"",
+      email: currentTeacher["email"]? currentTeacher["email"]: "",
+      pincode: currentTeacher["pincode"]? currentTeacher["pincode"]:"",
+      username: currentTeacher["username"]? currentTeacher["username"]:""
     });
     const refreshToken = getRefreshTokenService({
-      role: "teacher",
-      teacherId: teacher["_id"],
-      adminId: teacher["admin"],
-      phone: teacher["phone"],
+      role: teacher?"teacher":"guestTeacher",
+      teacherId: currentTeacher["_id"],
+      adminId: currentTeacher["admin"],
       sectionId: section["_id"],
       classId: Class["_id"],
       sectionName: section["name"],
       className: Class["name"],
-      email: teacher["email"]? teacher["email"]: "",
-      pincode: teacher["pincode"]? teacher["pincode"]:"",
-      username: teacher["username"]? teacher["username"]:""
+      phone: currentTeacher["phone"]? currentTeacher["phone"]: "",
+      email: currentTeacher["email"]? currentTeacher["email"]: "",
+      pincode: currentTeacher["pincode"]? currentTeacher["pincode"]:"",
+      username: currentTeacher["username"]? currentTeacher["username"]:""
     });
-    const isLoginAlready = teacher["isLoginAlready"];
-    teacher["isLoginAlready"] = true;
-    await teacher.save();
-    return res.status(StatusCodes.OK).send(success(200, {accessToken, refreshToken, firstname: teacher["firstname"],isLoginAlready}));
+    let isLoginAlready = true;
+    if(teacher){
+      isLoginAlready = teacher["isLoginAlready"];
+      teacher["isLoginAlready"] = true;
+      await teacher.save();
+    }
+    return res.status(StatusCodes.OK).send(success(200, {accessToken, refreshToken, firstname: teacher?teacher["firstname"]:"",isLoginAlready}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

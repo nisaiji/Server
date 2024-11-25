@@ -16,10 +16,14 @@ const teacherRegisterSchema = Joi.object({
 
 const teacherLoginSchema = Joi.object({
   user: Joi.string().required().messages({
-    "any.required": "Phone number is required." 
+    "any.required": "user is required." 
   }),
   password: Joi.string().required().messages({ 
     "any.required": "Password is required."
+  }),
+  platform: Joi.string().required().valid("app", "web").messages({ 
+    "any.required": "Platform is required.",
+    'any.only': 'Only supports for \'app\', \'web\' '
   })
 });
 
