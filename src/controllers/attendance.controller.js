@@ -1,16 +1,18 @@
 import { createSectionAttendanceService, getSectionAttendanceService, getSectionAttendancesService, getSectionAttendanceStatusService } from "../services/sectionAttendance.services.js";
-import {createAttendanceService,getAttendanceService, getAttendancesService, updateAttendanceService, getMisMatchAttendanceService} from "../services/attendance.service.js";
-import {getStudentService} from "../services/student.service.js";
+import {createAttendanceService,getAttendanceService, getAttendancesService, updateAttendanceService, getMisMatchAttendanceService, getAttendancePipelineService} from "../services/attendance.service.js";
+import {getStudentService, getStudentsPipelineService} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionByIdService, getSectionService } from "../services/section.services.js";
 import { getTeacherService } from "../services/teacher.services.js";
 import { getDayNameService, getStartAndEndTimeService } from "../services/celender.service.js";
-import { getHolidayEventService } from "../services/holidayEvent.service.js";
+import { getHolidayService } from "../services/holiday.service.js";
+import { convertToMongoId } from "../services/mongoose.services.js";
+import { format } from "morgan";
 
 export async function attendanceByTeacherController(req, res) { 
   try {
-    const {sectionId, present, absent} = req.body;
+    const { sectionId, present, absent } = req.body;
     const teacherId = req.teacherId;
     const adminId = req.adminId;
     const section = await getSectionService({ _id: sectionId })
@@ -34,39 +36,39 @@ export async function attendanceByTeacherController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
     }
 
-    const holiday = await getHolidayEventService({date:{$gte:startTime,$lte:endTime}, admin:adminId, holiday:true});
+    const holiday = await getHolidayService({date:{$gte:startTime,$lte:endTime}, admin:adminId });
     if (holiday) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
     const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}})
-    if(sectionAttendance){
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Attendance already marked"));
-    }
+    // if(sectionAttendance){
+    //   return res.status(StatusCodes.CONFLICT).send(error(409, "Attendance already marked"));
+    // }
 
     present.map(async (student) => {
-      const paramObj = {"student":student["_id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
+      const paramObj = {"student":student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
       const parentMarkedAttendance = await getAttendanceService(paramObj);
 
       if(parentMarkedAttendance){
-        const id = parentMarkedAttendance["_id"];
-        const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, teacher:teacherId, admin:adminId};
+        const id = parentMarkedAttendance["id"];
+        const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
         await updateAttendanceService({id, fieldsToBeUpdated});
       }else{
-        const attendanceObj = {date, day, student:student["_id"], teacherAttendance:"present", section:sectionId, teacher:teacherId, admin:adminId};
+        const attendanceObj = {date, day, student:student["id"], teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
         await createAttendanceService(attendanceObj);
       }
     });
 
     absent.map(async (student) => {
-      const paramObj = {student:student["_id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
+      const paramObj = {student:student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
       const parentMarkedAttendance = await getAttendanceService(paramObj);
 
       if(parentMarkedAttendance){
-        const id = parentMarkedAttendance["_id"];
-        const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, teacher:teacherId, admin:adminId};
+        const id = parentMarkedAttendance["id"];
+        const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
         await updateAttendanceService({id, fieldsToBeUpdated});
       }else{
-        const attendanceObj = {date, day, student:student["_id"], teacherAttendance:"absent", section:sectionId, teacher:teacherId, admin:adminId};
+        const attendanceObj = {date, day, student:student["id"], teacherAttendance:"absent", section:sectionId, classId:section['classId'], admin:adminId};
         await createAttendanceService(attendanceObj);
       }
     });
@@ -107,13 +109,13 @@ export async function attendanceByParentController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Today is sunday"));
     }
 
-    const [attendanceMarkedByTeacher, attendanceMarkedByParent, holidayEvent] = await Promise.all([
+    const [attendanceMarkedByTeacher, attendanceMarkedByParent, holiday] = await Promise.all([
       getAttendanceService({student:studentId, date:{$gte:startTime,$lte:endTime}, teacherAttendance:{$ne:""}}),
       getAttendanceService({student:studentId, date: {$gte:startTime,$lte:endTime},parentAttendance:{$ne:""}}),
-      getHolidayEventService({date: {$gte:startTime,$lte:endTime}, admin:adminId, holiday: true})
+      getHolidayService({date: {$gte:startTime,$lte:endTime}, admin:adminId })
     ]) ;
 
-    if (holidayEvent) {
+    if (holiday) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
 
@@ -198,7 +200,7 @@ export async function checkAttendaceMarkedController(req, res) {
     const date = new Date();
     const {startTime, endTime} = getStartAndEndTimeService(date, date);
 
-    const holiday = await getHolidayEventService({date:{$gte:startTime,$lte:endTime}, admin:adminId, holiday:true});
+    const holiday = await getHolidayService({date:{$gte:startTime,$lte:endTime}, admin:adminId });
     if (holiday) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
@@ -227,8 +229,8 @@ export async function checkParentAttendaceMarkedController(req, res) {
     const date = new Date();
     const{startTime, endTime} = getStartAndEndTimeService(date, date);
  
-    const holidayEvent = await getHolidayEventService({ admin:adminId,date:{$gte:startTime, $lte:endTime}});
-    if (holidayEvent) {
+    const holiday = await getHolidayService({ admin:adminId,date:{$gte:startTime, $lte:endTime}});
+    if (holiday) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
 
@@ -280,7 +282,7 @@ export async function attendanceStatusOfStudentController(req, res) {
 
 export async function attendanceCountOfStudentController(req, res){
   try { 
-    let{studentId, startTime, endTime} = req.body; 
+    let{ studentId, startTime, endTime } = req.body; 
 
     const student = await getStudentService({_id:studentId});
     if(!student){
@@ -297,6 +299,115 @@ export async function attendanceCountOfStudentController(req, res){
   
     return res.status(StatusCodes.OK).send(success(200,{studentAttendanceCount, sectionAttendanceCount}));
   } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+
+export async function getAttendancesController(req, res){
+  try {
+    const { startTime, endTime, student, section, classId, admin } = req.query;
+    console.log({query: req.query})
+    const filter = {}
+    const attendanceFilter = {}
+    if(student){ filter['student'] = convertToMongoId(student) }
+    if(section) { filter['section'] = convertToMongoId(section) }
+    if(classId){ filter['classId'] = convertToMongoId(classId) }
+    if(admin){ filter['admin'] = convertToMongoId(admin) }
+    if(startTime && endTime){
+      attendanceFilter['date'] = { $gte: Number(startTime), $lte: Number(endTime) }
+    }
+
+    const pipeline = [
+      {
+        $match: filter,
+      },
+      {
+        $lookup: {
+          from: 'sections',
+          localField: 'section',
+          foreignField: '_id',
+          as: 'section',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: '$section',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'classes',
+          localField: 'classId',
+          foreignField: '_id',
+          as: 'class',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: '$class',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'attendances',
+          localField: '_id',
+          foreignField: 'student',
+          as: 'attendances',
+          pipeline: [
+            {
+              $match: attendanceFilter,
+            },
+            {
+              $project: {
+                date: {
+                  $dateToString: {
+                    format: "%Y-%m-%d",
+                    date: {$toDate: '$date'},
+                    timezone: 'Asia/Kolkata'
+                  }
+                },
+                day: 1,
+                parentAttendance: 1,
+                teacherAttendance: 1
+              }
+            }
+          ],
+        },
+      },
+      {
+        $project: {
+          firstname: 1,
+          lastname: 1,
+          gender: 1,
+          sectionName: '$section.name',
+          className: '$class.name',
+          attendances: 1,
+        },
+      },
+    ];
+    const attendances = await getStudentsPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, {
+      attendances
+    }));
+    
+  } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

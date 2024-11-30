@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
  
-const holidayEventSchema =new mongoose.Schema({
+const holidaySchema =new mongoose.Schema({
     date:{
         type:Number,
         required:true,
@@ -13,18 +13,8 @@ const holidayEventSchema =new mongoose.Schema({
         type:String,
         required:true
     },
-    isActive:{
-        type:String,
-        default:true
-    },
     description:{
         type:String,
-    },
-    holiday:{
-        type:Boolean,
-    },
-    event:{
-        type:Boolean,
     },
     admin:{
         type: mongoose.Schema.Types.ObjectId,
@@ -35,5 +25,5 @@ const holidayEventSchema =new mongoose.Schema({
     timestamps:true
 });
 
-const holidayEventModel = mongoose.model("holiday",holidayEventSchema);
-export default holidayEventModel;
+const holidayModel = mongoose.model("holiday", holidaySchema);
+export default holidayModel;

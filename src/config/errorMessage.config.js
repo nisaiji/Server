@@ -69,7 +69,7 @@ export const  errors = {
     notFound:"parent doesn't exists",
     UpdateError:"parent can't updated",
   },
-  holidayEvent:{
+  holiday:{
     duplicateEvent:"holiday event already exists",
     RegisterError:"holiday event cann't be created",
     successfullRegister:"holiday event has been created sucessfully",

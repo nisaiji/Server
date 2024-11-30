@@ -24,7 +24,7 @@ export async function getPresentStudentsController(req,res){
 export async function getParentCountController(req,res){
   try {
     const adminId = req.adminId;
-    const parentCount = await getParentCountService({admin: adminId});
+    const parentCount = await getParentCountService({admin: adminId, isActive: true});
     return res.status(StatusCodes.OK).send(success(200,{parentCount}));    
   } catch(err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));  

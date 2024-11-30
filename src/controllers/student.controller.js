@@ -146,9 +146,9 @@ export async function getStudentsController(req, res){
           return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
         }
         
-        if( admin && req.adminId!==admin ){
-          return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
-        }
+        // if( admin && req.adminId!==admin ){
+        //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+        // }
     
         if(req.role==="parent" && !parent && parent!==req.parentId){
           return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));

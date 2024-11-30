@@ -74,4 +74,33 @@ const attendanceCountSchema = Joi.object({
   }),
 })
 
-export{ attendanceByTeacherSchema, attendanceByParentSchema, updateAttendanceSchema, attendanceStatusSchema, attendanceCountSchema};
+const getAttendanceSchema = Joi.object({
+  startTime: Joi.number().required().messages({
+      'number.base': 'Start time must be a valid date.',
+      'any.required': 'StartTime is required'
+    }),
+  endTime: Joi.number().required().messages({
+      'number.base': 'End time must be a valid date.',
+      'any.required': 'EndTime is required'
+    }),
+  student: Joi.string().regex(/^[a-fA-F0-9]{24}$/).optional().messages({
+      'string.base': 'Student ID must be a valid string.',
+      'string.pattern.base': 'Student id must be a valid  id.',
+    }),
+  section: Joi.string().regex(/^[a-fA-F0-9]{24}$/).optional().messages({
+      'string.base': 'Section ID must be a valid string.',
+      'string.pattern.base': 'Section id must be a valid  id.',
+    }),
+  classId: Joi.string().regex(/^[a-fA-F0-9]{24}$/).optional().messages({
+      'string.base': 'Class ID must be a valid string.',
+      'string.pattern.base': 'Class id must be a valid  id.',
+    }),
+  admin: Joi.string().regex(/^[a-fA-F0-9]{24}$/).optional().messages({
+      'string.base': 'Admin ID must be a valid string.',
+      'string.pattern.base': 'Admin id must be a valid  id.',
+    }),
+})
+
+
+
+export{ attendanceByTeacherSchema, getAttendanceSchema, attendanceByParentSchema, updateAttendanceSchema, attendanceStatusSchema, attendanceCountSchema};

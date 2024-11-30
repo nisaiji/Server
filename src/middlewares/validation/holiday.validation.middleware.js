@@ -1,10 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import { error } from "../../utills/responseWrapper.js";
-import { createHolidayEventSchema, getHolidayEventSchema, updateHolidayEventSchema } from "../../validators/holidayEventSchema.validator.js";
+import { createHolidaySchema, getHolidaySchema, updateHolidaySchema } from "../../validators/holidaySchema.validator.js";
 
-export async function createHolidayEventValidation(req,res,next){
+export async function createHolidayValidation(req,res,next){
     try {
-        const{error:schemaError} = createHolidayEventSchema.validate(req.body);
+        const{error:schemaError} = createHolidaySchema.validate(req.body);
         if(schemaError){
             return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
         }
@@ -14,9 +14,9 @@ export async function createHolidayEventValidation(req,res,next){
     }
 }
 
-export async function getHolidayEventValidation(req,res,next){
+export async function getHolidayValidation(req,res,next){
     try {
-        const{error:schemaError} = getHolidayEventSchema.validate(req.body);
+        const{error:schemaError} = getHolidaySchema.validate(req.body);
         if(schemaError){
             return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
         }
@@ -26,9 +26,9 @@ export async function getHolidayEventValidation(req,res,next){
     }
 }
 
-export async function updateHolidayEventValidation(req,res,next){
+export async function updateHolidayValidation(req,res,next){
     try {
-        const{error:schemaError} = updateHolidayEventSchema.validate(req.body);
+        const{ error:schemaError } = updateHolidaySchema.validate(req.body);
         if(schemaError){
             return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
         }

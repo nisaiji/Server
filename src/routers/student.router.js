@@ -17,7 +17,7 @@ studentRouter.post('/excel', adminAuthenticate, upload, registerStudentsFromExce
 studentRouter.delete("/teacher/:studentId", teacherAuthenticate, deleteStudentValidation, deleteStudentController );
 studentRouter.delete("/admin/:studentId", adminAuthenticate, deleteStudentValidation, deleteStudentController );
 
-studentRouter.get("/teacher", teacherAuthenticate, getStudentValidation, getStudentsController );
+studentRouter.get("/teacher", getStudentValidation, getStudentsController );
 studentRouter.get("/admin", adminAuthenticate, getStudentValidation, getStudentsController );
 studentRouter.get("/parent", adminAuthenticate, getStudentValidation, getStudentsController );
 

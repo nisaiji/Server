@@ -1,4 +1,4 @@
-import { getHolidayEventController } from "../controllers/holidayEvent.controller.js";
+import { getHolidaysController } from "../controllers/holiday.controller.js";
 import express from "express";
 import { getChildrenParentController, getParentController,loginParentController,passwordChangeController, updateParentController} from "../controllers/parent.controller.js";
 import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
@@ -14,7 +14,7 @@ parentRouter.put("/address", parentAuthenticate, AddressUpdateParentValidation, 
 parentRouter.put("/password-change", parentAuthenticate, passwordChangeParentValidation, passwordChangeController)
 parentRouter.get("/get-info", parentAuthenticate, getParentController);
 parentRouter.get("/children", parentAuthenticate, getChildrenParentController);
-parentRouter.post("/holiday-events", parentAuthenticate, getHolidayEventController);
+parentRouter.post("/holiday-events", parentAuthenticate, getHolidaysController);
 
 
 export default parentRouter;

@@ -1,29 +1,39 @@
 import attendanceModel from "../models/attendance.model.js";
-import holidayEventModel from "../models/holidayEvent.model.js";
- 
 
-export async function getAttendanceService(paramObj){
+export async function getAttendanceService(filter) {
   try {
-    const attendance = await attendanceModel.findOne(paramObj).lean();
+    const attendance = await attendanceModel.findOne(filter).lean();
     return attendance;
   } catch (error) {
     throw error;
   }
 }
 
-export async function getAttendancesService(paramObj){
+export async function getAttendancesService(filter) {
   try {
-    const attendance = await attendanceModel.find(paramObj).lean();
+    const attendance = await attendanceModel.find(filter).lean();
     return attendance;
   } catch (error) {
     throw error;
+  }
+}
+
+export async function getAttendancePipelineService(pipeline){
+  try {
+    const attendances = await attendanceModel.aggregate(pipeline).exec();
+    return attendances;
+  } catch (error) {
+    throw error;    
   }
 }
 
 export async function updateAttendanceService(data) {
   try {
-   const{id, fieldsToBeUpdated} = data;
-   const attendance = await attendanceModel.findByIdAndUpdate(id, fieldsToBeUpdated);
+    const { id, fieldsToBeUpdated } = data;
+    const attendance = await attendanceModel.findByIdAndUpdate(
+      id,
+      fieldsToBeUpdated
+    );
     return attendance;
   } catch (error) {
     throw error;
@@ -41,15 +51,18 @@ export async function createAttendanceService(data) {
 
 export async function getMisMatchAttendanceService(data) {
   try {
-    const{ section, startTime,endTime } = data;
-    const attendance = await attendanceModel.find({section, 
-       date: { $gte: startTime, $lte: endTime },
-       $or: [
-        { teacherAttendance: "absent", parentAttendance: "present" },
-        { teacherAttendance: "present", parentAttendance: "absent" }
-      ]
-    }).populate("student");
-    
+    const { section, startTime, endTime } = data;
+    const attendance = await attendanceModel
+      .find({
+        section,
+        date: { $gte: startTime, $lte: endTime },
+        $or: [
+          { teacherAttendance: "absent", parentAttendance: "present" },
+          { teacherAttendance: "present", parentAttendance: "absent" }
+        ]
+      })
+      .populate("student");
+
     return attendance;
   } catch (error) {
     throw error;
