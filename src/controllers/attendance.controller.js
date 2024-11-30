@@ -8,7 +8,6 @@ import { getTeacherService } from "../services/teacher.services.js";
 import { getDayNameService, getStartAndEndTimeService } from "../services/celender.service.js";
 import { getHolidayService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
-import { format } from "morgan";
 
 export async function attendanceByTeacherController(req, res) { 
   try {
@@ -197,7 +196,7 @@ export async function checkAttendaceMarkedController(req, res) {
     if(!sectionId){
       return res.status(StatusCodes.BAD_GATEWAY).send(error(502, "Section id is required."));
     }
-    const date = new Date();
+    let date = new Date();
     const {startTime, endTime} = getStartAndEndTimeService(date, date);
 
     const holiday = await getHolidayService({date:{$gte:startTime,$lte:endTime}, admin:adminId });
