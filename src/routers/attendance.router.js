@@ -3,7 +3,7 @@ import { teacherAuthenticate } from "../middlewares/authentication/teacher.authe
 import { checkAttendaceMarkedController, getMisMatchAttendanceController, checkParentAttendaceMarkedController, updateAttendanceController, attendanceStatusOfSectionController, attendanceCountOfStudentController, attendanceByTeacherController, attendanceByParentController, attendanceStatusOfStudentController, getAttendancesController } from "../controllers/attendance.controller.js";
 import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
 import { attendanceByParentValidation, attendanceByTeacherValidation, attendanceCountValidation, attendanceStatusValidation, getAttendanceValidation, updateAttendanceValidation } from "../middlewares/validation/attendance.validation.middleware.js";
-import { adminAuthenticate } from "@src/middlewares/authentication/admin.authentication.middleware.js";
+import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
  
 const attendanceRouter = express.Router();  
 
