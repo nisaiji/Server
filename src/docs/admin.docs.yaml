@@ -166,7 +166,7 @@ paths:
                         type: string
                         format: password
                         example: "password123"
-                     country:
+                      country:
                         type: string
                         example: "India"
                       state:
@@ -424,8 +424,6 @@ paths:
       - "Admin"
     summary: "Refresh Admin Token"
     description: "This API allows the admin to refresh their token."
-    requestBody:
-      required: true
     responses:
       '200':
         description: "Admin token refreshed successfully."

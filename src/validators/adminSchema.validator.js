@@ -16,7 +16,7 @@ const registerAdminSchema = Joi.object({
     "string.max": "Affiliation no. length must be smaller than 50 chars",
     "any.required": "Affiliation no. is required"
   }),
-  phone: Joi.string().pattern(/^[1-5][0-9]{9}$/).message("invalid phone number").length(10).required().messages({
+  phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).message("invalid phone number").length(10).required().messages({
     "string.pattern": "invalid phone numberrr",
     "string.length": "Phone no. length should have 10 digits",
     "any.required": "Phone no is required!"
@@ -158,7 +158,7 @@ const updateAdminProfileSchema = Joi.object({
 });
 
 const updateAdminSocialProfileSchema = Joi.object({
-  phone: Joi.string().pattern(/^[1-5][0-9]{9}$/).message("invalid phone number").length(10).required().messages({
+  phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).message("invalid phone number").length(10).required().messages({
     "string.pattern": "invalid phone numberrr",
     "string.length": "Phone no. length should have 10 digits",
     "any.required": "Phone no is required!"

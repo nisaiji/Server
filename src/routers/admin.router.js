@@ -14,4 +14,4 @@ adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation
 adminRouter.get("/", adminAuthenticate, getAdminController);
 adminRouter.get("/students-excelsheet", adminAuthenticate, getStudentDemoExcelSheetController)
 
-export default adminRouter;
+export default adminRouter;  

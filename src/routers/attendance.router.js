@@ -10,7 +10,7 @@ const attendanceRouter = express.Router();
 attendanceRouter.post("/teacher", teacherAuthenticate, attendanceByTeacherValidation, attendanceByTeacherController);
 attendanceRouter.post("/parent", parentAuthenticate, attendanceByParentValidation, attendanceByParentController);
 attendanceRouter.put("/teacher", teacherAuthenticate, updateAttendanceValidation, updateAttendanceController);
-attendanceRouter.get("/", getAttendanceValidation, adminAuthenticate, getAttendancesController);
+attendanceRouter.get("/", getAttendancesController);
 attendanceRouter.get("/mismatch", teacherAuthenticate, getMisMatchAttendanceController);
 attendanceRouter.get("/teacher/is-marked", teacherAuthenticate, checkAttendaceMarkedController);
 attendanceRouter.get("/parent/is-marked/:studentId", parentAuthenticate, checkParentAttendaceMarkedController);
