@@ -7,11 +7,11 @@ import router from "./src/routers/index.router.js";
 import { config } from "./src/config/config.js";
 import cookieParser from "cookie-parser";
 import swaggerDocs from "./swagger.js";
-import 'module-alias/register.js'
+import  {cronManager}  from "./src/crons/index.cron.js";
 const PORT = config.port || 4000;
 
 const app = express();
-app.use(express.json({limit:"5mb"}));
+app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 app.use(morgan("common"));
 app.use(
@@ -21,16 +21,15 @@ app.use(
   })
 );
 
-
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use("/", router);
-app.use((err, req, res, next)=>{
-  return res.status(500).send({error: err.message});
+app.use((err, req, res, next) => {
+  return res.status(500).send({ error: err.message });
 });
-
 
 app.listen(PORT, () => {
   console.log(`server is running at ${PORT}`);
   connectDB();
+  cronManager();
 });

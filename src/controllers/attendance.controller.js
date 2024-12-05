@@ -306,7 +306,6 @@ export async function attendanceCountOfStudentController(req, res){
 export async function getAttendancesController(req, res){
   try {
     const { startTime, endTime, student, section, classId, admin } = req.query;
-    console.log({query: req.query})
     const filter = {}
     const attendanceFilter = {}
     if(student){ filter['student'] = convertToMongoId(student) }

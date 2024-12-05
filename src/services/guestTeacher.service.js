@@ -18,6 +18,15 @@ export async function getGuestTeacherService(filter, projection = {}) {
   }
 }
 
+export async function getGuestTeachersService(filter, projection = {}) {
+  try {
+    const teachers = await guestTeacherModel.find(filter).select(projection);
+    return teachers;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function getGuestTeachersPipelineServie(pipeline) {
   try {
     const teachers = await guestTeacherModel.aggregate(pipeline);

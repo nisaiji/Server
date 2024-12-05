@@ -140,7 +140,6 @@ export async function getAdminController(req, res) {
 export async function getStudentDemoExcelSheetController(req, res){
   try {
     const workbook = constructStudentXlsxTemplate();
-    console.log({workbook})
     res.setHeader("Content-Type","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.setHeader("Content-Disposition", "attachment; filename=" + "student-template.xlsx")
     await workbook.xlsx.write(res)

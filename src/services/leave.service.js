@@ -18,6 +18,15 @@ export async function getLeaveRequestService(filter, projection={}) {
   }
 }
 
+export async function getLeaveRequestsService(filter, projection={}) {
+  try {
+    const leaveRequests = await leaveRequestModel.find(filter).select(projection);
+    return leaveRequests;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function registerLeaveRequestService(paramObj){
   try {
     const event = await leaveRequestModel.create(paramObj);

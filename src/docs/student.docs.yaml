@@ -49,6 +49,25 @@ paths:
           description: "Forbidden"
         500:
           description: "Internal Server Error"
+  
+    get:
+      security:
+        - Authorization: []    
+      tags:
+        - "Student"
+      summary: "Get a list of students in a section by class teacher"
+      description: "This API allows a class teacher to retrieve a list of students in a specific section."
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "List of students successfully retrieved"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
 
   /student/excel:
    post:
@@ -146,7 +165,6 @@ paths:
                 message:
                   type: string
                   example: "An unexpected error occurred. Please try again later."
-
 
   /student/admin:
    post:
@@ -523,60 +541,6 @@ paths:
       responses:
         200:
           description: "Student and parent details successfully updated"
-        422:
-          description: "Unprocessable Entity"
-        403:
-          description: "Forbidden"
-        500:
-          description: "Internal Server Error"
-
-  /student/teacher-section/{sectionId}: 
-    get:
-      security:
-        - Authorization: []    
-      tags:
-        - "Student"
-      summary: "Get a list of students in a section by class teacher"
-      description: "This API allows a class teacher to retrieve a list of students in a specific section."
-      produces:
-        - "application/json"
-      parameters:
-        - in: path
-          name: sectionId
-          required: true
-          description: "ID of the section"
-          schema:
-            type: string
-      responses:
-        200:
-          description: "List of students successfully retrieved"
-        422:
-          description: "Unprocessable Entity"
-        403:
-          description: "Forbidden"
-        500:
-          description: "Internal Server Error"
-
-  /student/admin-section/{sectionId}: 
-    get:
-      security:
-        - Authorization: []    
-      tags:
-        - "Student"
-      summary: "Get a list of students in a section by admin"
-      description: "This API allows an admin to retrieve a list of students in a specific section."
-      produces:
-        - "application/json"
-      parameters:   
-        - in: path
-          name: sectionId
-          required: true
-          description: "ID of the section"
-          schema:
-            type: string
-      responses:
-        200:
-          description: "List of students successfully retrieved"
         422:
           description: "Unprocessable Entity"
         403:

@@ -53,6 +53,10 @@ const eventSchema = mongoose.Schema({
     type: Number,
     maxLength: 5
   },
+
+  expiredIn: {
+    type: Number
+  },
   
   isRead:{
     type: Boolean,
@@ -67,3 +71,4 @@ const eventSchema = mongoose.Schema({
 const eventModel = mongoose.model("event", eventSchema);
 
 export default eventModel;
+

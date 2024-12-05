@@ -1,8 +1,9 @@
 import Joi from "joi";
 
 const registerLeaveSchema = Joi.object({
-  reason: Joi.string().required().messages({
+  reason: Joi.string().valid('forgetPassword', 'deviceChange', 'technical', 'other').required().messages({
     'any.required': 'Reason is required.',
+    'any.only': 'valid reasons: forgetPassword, deviceChange, technical, other'
   }),
 
   description: Joi.string().required().messages({

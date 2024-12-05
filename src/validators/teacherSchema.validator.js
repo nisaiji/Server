@@ -28,7 +28,15 @@ const teacherLoginSchema = Joi.object({
   platform: Joi.string().required().valid("app", "web").messages({
     "any.required": "Platform is required.",
     "any.only": "Only supports for 'app', 'web' "
-  })
+  }),
+  deviceId: Joi.string()
+    .when("platform", {
+      is: "app",
+      then: Joi.required().messages({
+        "any.required": "Device ID is required when platform is 'app'."
+      }),
+      otherwise: Joi.forbidden()
+    })
 });
 
 const teacherUsernamePasswordUpdateSchema = Joi.object({

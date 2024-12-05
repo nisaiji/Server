@@ -8,13 +8,7 @@ import { getSectionService, updateSectionService } from "../services/section.ser
 
 export async function registerLeaveRequestController(req, res){
   try {
-    const {
-      reason,
-      description,
-      startTime,
-      endTime
-    } = req.body;
-
+    const { reason, description, startTime, endTime } = req.body;
     const senderId = req.teacherId;
     const receiverId = req.adminId;
 

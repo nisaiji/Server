@@ -1,5 +1,5 @@
 import { error } from "../../utills/responseWrapper.js";
-import Jwt, { decode } from "jsonwebtoken";
+import Jwt from "jsonwebtoken";
 import { config } from "../../config/config.js";
 import { getTeacherService } from "../../services/teacher.services.js";
 import { getSectionByIdService, getSectionService } from "../../services/section.services.js";
@@ -24,11 +24,12 @@ export async function teacherAuthenticate(req, res, next) {
     if (!teacher) {
       return res.send(error(404, "Teacher doesn't exists"));
     }
-    console.log({teacher})
     const section = await getSectionService({_id : teacher['section']})
     if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher's section not exists"));
     }
+
+    
 
     req.teacherId = decoded?.teacherId;
     req.sectionId = decoded?.sectionId;

@@ -15,6 +15,9 @@ const teacherSchema = mongoose.Schema({
     type:Boolean,
     default:false
   },
+  deviceId: {
+    type: String
+  },
   dob: {
     type: String
   },

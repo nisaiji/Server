@@ -10,4 +10,4 @@ classRouter.delete("/:classId",adminAuthenticate, deleteClassController);
 classRouter.get("/all",adminAuthenticate,getClassListController);
 classRouter.get("/:classId",adminAuthenticate,getClassController);
 
-export default classRouter; 
+export default classRouter;
