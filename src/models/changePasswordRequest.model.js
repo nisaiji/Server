@@ -1,13 +1,9 @@
 import mongoose from "mongoose";
 
-const eventSchema = mongoose.Schema({
-  type:{
+const changePasswordRequestSchema = mongoose.Schema({
+  reason:{
     type: String,
-    enum: ["forgetPassword"],
-  },
-
-  title:{
-    type:String,
+    enum: ["forgetPassword", "changeDevice"],
   },
 
   description:{
@@ -22,7 +18,7 @@ const eventSchema = mongoose.Schema({
     model:{
       type:String,
       required:true,
-      enum: ["admin","teacher","parent", "superAdmin"]
+      enum: ["teacher","parent", "admin"]
     }
   },
 
@@ -34,14 +30,14 @@ const eventSchema = mongoose.Schema({
     model:{
       type:String,
       required:true,
-      enum:["admin","teacher","parent", "superAdmin"]
+      enum:["admin", "superAdmin"]
     }
   },
 
   status:{
     type:String,
-    enum:["accept", "reject", "pending", "expired", "complete", "notSet"],
-    default: "notSet"
+    enum:["accept", "reject", "pending", "expired", "complete"],
+    default: "pending"
   },
 
   date: {
@@ -68,7 +64,7 @@ const eventSchema = mongoose.Schema({
 }
 );
 
-const eventModel = mongoose.model("event", eventSchema);
+const changePasswordRequestModel = mongoose.model("changePasswordRequest", changePasswordRequestSchema);
 
-export default eventModel;
+export default changePasswordRequestModel;
 

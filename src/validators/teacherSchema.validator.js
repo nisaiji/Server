@@ -33,7 +33,7 @@ const teacherLoginSchema = Joi.object({
     .when("platform", {
       is: "app",
       then: Joi.required().messages({
-        "any.required": "Device ID is required when platform is 'app'."
+        "any.required": "Device ID is required."
       }),
       otherwise: Joi.forbidden()
     })

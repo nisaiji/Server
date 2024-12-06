@@ -1,38 +1,27 @@
 import Joi from "joi";
 
-const registerEventSchema = Joi.object({
-  type: Joi.string().valid("forgetPassword").required().messages({
-    "any.required": "Type is required.",
-    "string.valid": "Type must be forgetPassword."
+const registerChangePasswordRequestSchema = Joi.object({
+  reason: Joi.string().valid("forgetPassword", "changeDevice").required().messages({
+    "any.required": "Type is required",
+    "string.valid": "Invalid reason"
   }),
-
+  description: Joi.string().optional(),
   sender: Joi.object({
-    phone: Joi.string()
-      .pattern(/^[6-9][0-9]{9}$/)
-      .length(10)
-      .messages({
+    phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).length(10).messages({
         "string.pattern.base":
-          "Phone number must have 10-digit number starting with 1-5.",
+        "Phone number must have 10-digit number starting with 1-5.",
         "string.length": "Phone number must be exactly 10 characters long."
       }),
-    model: Joi.string()
-      .valid("parent", "teacher", "admin")
-      .required()
-      .messages({
+    model: Joi.string().valid("parent", "teacher", "admin").required().messages({
         "any.required": "Model is required.",
         "string.valid": "Model can be parent, teacher"
       })
-  })
-    .required()
-    .messages({
-      "any.required": "Sender information is required."
-    }),
-
-  title: Joi.string().optional(),
-  description: Joi.string().optional()
+  }).required().messages({
+      "any.required": "Sender information is required"
+    })
 });
 
-const getEventsForAdminSchema = Joi.object({
+const getChangePasswordRequestsForAdminSchema = Joi.object({
   model: Joi.string().required().messages({
     "any.required": "Model is required.",
     "string.base": "Model must be a string."
@@ -56,4 +45,5 @@ const getEventsForAdminSchema = Joi.object({
   limit: Joi.number().integer().min(1).default(10)
 });
 
-export { registerEventSchema, getEventsForAdminSchema };
+export { registerChangePasswordRequestSchema, getChangePasswordRequestsForAdminSchema };
+// 1733509800000
