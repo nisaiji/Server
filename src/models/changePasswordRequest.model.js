@@ -40,24 +40,14 @@ const changePasswordRequestSchema = mongoose.Schema({
     default: "pending"
   },
 
-  date: {
-    type: Number,
-    required: true
-  },
-
   otp: {
     type: Number,
     maxLength: 5
   },
 
-  expiredIn: {
+  expiredAt: {
     type: Number
-  },
-  
-  isRead:{
-    type: Boolean,
-    default: false
-  },
+  }  
 },
 {
   timestamps:true
@@ -67,4 +57,3 @@ const changePasswordRequestSchema = mongoose.Schema({
 const changePasswordRequestModel = mongoose.model("changePasswordRequest", changePasswordRequestSchema);
 
 export default changePasswordRequestModel;
-

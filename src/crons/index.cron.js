@@ -1,5 +1,5 @@
-import invalidateGuestTeacherCron from "./deleteGuestTeacher.cron.js";
+import invalidationCronJob from "./invalidate.cron.js";
 
 export function cronManager() {
-  invalidateGuestTeacherCron.start();
+  invalidationCronJob.start();
 }

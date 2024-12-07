@@ -15,22 +15,16 @@ export async function registerTeacherController(req, res) {
     const { firstname, phone } = req.body;
     const teacher = await getTeacherService({ phone, isActive: true });
     if (teacher) {
-      return res
-        .status(StatusCodes.CONFLICT)
-        .send(error(409, "Phone number already registered"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
     }
     const password = firstname + "@" + phone;
     const hashedPassword = await hashPasswordService(password);
     req.body["password"] = hashedPassword;
     req.body["admin"] = adminId;
-    const newTeacher = await registerTeacherService(req.body);
-    return res
-      .status(StatusCodes.CREATED)
-      .send(success(201, "Teacher registered successfully"));
+    await registerTeacherService(req.body);
+    return res.status(StatusCodes.CREATED).send(success(201, "Teacher registered successfully"));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -118,9 +112,7 @@ export async function getAllTeacherOfAdminController(req, res) {
     const teachers = await getAllTeacherOfAdminService(adminId);
     return res.status(StatusCodes.OK).send(success(200, teachers));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -150,56 +142,34 @@ export async function updateTeacherController(req, res) {
     } = req.body;
 
     if (!isValidMongoId(teacherId)) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "Invalid teacher Id"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid teacher Id"));
     }
     const teacher = await getTeacherService({ _id: teacherId, isActive: true });
     if (!teacher) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "Teacher doesn't exists"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher doesn't exists"));
     }
 
     const fieldsToBeUpdated = {};
     if (email) {
-      const teacher = await getTeacherService({
-        _id: { $ne: teacherId },
-        email,
-        isActive: true
-      });
+      const teacher = await getTeacherService({_id: { $ne: teacherId }, email, isActive: true });
       if (teacher) {
-        return res
-          .status(StatusCodes.CONFLICT)
-          .send(error(409, "Email already registered"));
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Email already registered"));
       }
       fieldsToBeUpdated.email = email;
     }
 
     if (username) {
-      const teacher = await getTeacherService({
-        _id: { $ne: teacherId },
-        username,
-        isActive: true
-      });
+      const teacher = await getTeacherService({_id: { $ne: teacherId }, username, isActive: true });
       if (teacher) {
-        return res
-          .status(StatusCodes.CONFLICT)
-          .send(error(409, "Username already registered"));
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Username already registered"));
       }
       fieldsToBeUpdated.username = username;
     }
 
     if (phone) {
-      const teacher = await getTeacherService({
-        _id: { $ne: teacherId },
-        phone,
-        isActive: true
-      });
+      const teacher = await getTeacherService({_id: { $ne: teacherId }, phone, isActive: true });
       if (teacher) {
-        return res
-          .status(StatusCodes.CONFLICT)
-          .send(error(409, "Phone already registered"));
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already registered"));
       }
       fieldsToBeUpdated.phone = phone;
     }
@@ -254,13 +224,9 @@ export async function updateTeacherController(req, res) {
 
     await updateTeacherService({ _id: teacherId }, fieldsToBeUpdated);
 
-    return res
-      .status(StatusCodes.OK)
-      .send(success(200, "Teacher updated successfully"));
+    return res.status(StatusCodes.OK).send(success(200, "Teacher updated successfully"));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -268,32 +234,20 @@ export async function deleteTeacherController(req, res) {
   try {
     const teacherId = req.params.teacherId;
     if (!isValidMongoId(teacherId)) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "Invalid Teacher Id"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Teacher Id"));
     }
 
     const teacher = await getTeacherService({ _id: teacherId, isActive: true });
     if (!teacher) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Teacher not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
     if (teacher["section"]) {
-      return res
-        .status(StatusCodes.CONFLICT)
-        .send(
-          error(409, "Teacher is assigned to section. Can't delete teacher")
-        );
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Teacher is assigned to section. Can't delete teacher"));
     }
     await updateTeacherService({ _id: teacher["_id"] }, { isActive: false });
-    return res
-      .status(StatusCodes.OK)
-      .send(success(200, "Teacher deleted successfully"));
+    return res.status(StatusCodes.OK).send(success(200, "Teacher deleted successfully"));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -301,32 +255,22 @@ export async function getTeacherController(req, res) {
   try {
     const id = req.params.teacherId ? req.params.teacherId : req.teacherId;
     if (!isValidMongoId(id)) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "Invalid teacher Id"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid teacher Id"));
     }
     const teacher = await getTeacherService({ _id: id, isActive: true });
     if (!teacher) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(success(404, "Teacher not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Teacher not found"));
     }
     return res.status(StatusCodes.OK).send(success(200, teacher));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 export async function getAllNonSectionTeacherController(req, res) {
   try {
     const adminId = req.adminId;
-    const teachers = await getTeachersService({
-      admin: adminId,
-      section: null,
-      isActive: true
-    });
+    const teachers = await getTeachersService({ admin: adminId, section: null, isActive: true });
     return res.send(success(200, teachers));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -339,93 +283,18 @@ export async function changePasswordTeacherController(req, res) {
     const teacherId = req.teacherId;
     const teacher = await getTeacherService({ _id: teacherId, isActive: true });
     if (!teacher) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .send(error(401, "Unauthorized user"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
-    const isMatched = await matchPasswordService({
-      enteredPassword: oldPassword,
-      storedPassword: teacher["password"]
-    });
+    const isMatched = await matchPasswordService({ enteredPassword: oldPassword, storedPassword: teacher["password"] });
     if (!isMatched) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .send(error(404, "Wrong password"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Wrong password"));
     }
     const hashedPassword = await hashPasswordService(newPassword);
     teacher["password"] = hashedPassword;
     await teacher.save();
 
-    return res
-      .status(StatusCodes.OK)
-      .send(success(200, "Password updated successfully"));
+    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
-  }
-}
-
-export async function forgetPasswordTeacherController(req, res) {
-  try {
-    const { otp, phone } = req.body;
-    const teacher = await getTeacherService({ phone });
-    if (!teacher) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Teacher not found"));
-    }
-    const event = await getChangePasswordRequestService({
-      "sender.model": "teacher",
-      "sender.id": teacher["_id"],
-      status: "accept"
-    });
-    if (!event) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .send(error(401, "Forget password request not raised"));
-    }
-    if (otp !== event["otp"]) {
-      return res
-        .status(StatusCodes.BAD_GATEWAY)
-        .send(error(502, "OTP not matched"));
-    }
-
-    return res.status(StatusCodes.OK).send(success(200, { id: teacher["id"] }));
-  } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
-  }
-}
-
-export async function forgetPasswordUpdateTeacherController(req, res) {
-  try {
-    const { id, password } = req.body;
-    const teacher = await getTeacherService({ _id: id, isActive: true });
-    if (!teacher) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Teacher not found"));
-    }
-    const hashedPassword = await hashPasswordService(password);
-    await updateTeacherService(
-      { _id: id, isActive: true },
-      {
-        password: hashedPassword,
-        forgetPasswordCount: teacher.forgetPasswordCount + 1
-      }
-    );
-    const event = await updateChangePasswordRequestService(
-      { "sender.id": convertToMongoId(id), status: "accept" },
-      { status: "complete" }
-    );
-    return res
-      .status(StatusCodes.OK)
-      .send(success(200, "Password updated successfully"));
-  } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

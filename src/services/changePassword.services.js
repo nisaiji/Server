@@ -2,8 +2,8 @@ import changePasswordRequestModel from "../models/changePasswordRequest.model.js
 
 export async function registerChangePasswordRequestService(paramObj){
   try {
-    const event = await changePasswordRequestModel.create(paramObj);
-    return event;
+    const request = await changePasswordRequestModel.create(paramObj);
+    return request;
   } catch (error) {
     throw error;    
   }
@@ -11,8 +11,17 @@ export async function registerChangePasswordRequestService(paramObj){
 
 export async function getChangePasswordRequestService(paramObj, projection={}){
   try {
-    const event = await changePasswordRequestModel.findOne(paramObj).select(projection);
-    return event; 
+    const request = await changePasswordRequestModel.findOne(paramObj).select(projection);
+    return request; 
+  }catch (error) {
+    throw error;    
+  }
+}
+
+export async function getChangePasswordRequestsService(paramObj, projection={}){
+  try {
+    const requests = await changePasswordRequestModel.find(paramObj).select(projection);
+    return requests; 
   }catch (error) {
     throw error;    
   }
@@ -20,8 +29,8 @@ export async function getChangePasswordRequestService(paramObj, projection={}){
 
 export async function getChangePasswordRequestsPipelineService(pipeline){
   try {
-    const events = await changePasswordRequestModel.aggregate(pipeline).exec();
-    return events;
+    const requests = await changePasswordRequestModel.aggregate(pipeline).exec();
+    return requests;
   } catch (error) {
     throw error;    
   }
@@ -29,8 +38,17 @@ export async function getChangePasswordRequestsPipelineService(pipeline){
 
 export async function updateChangePasswordRequestService(filter, update) {
   try {
-    const event = await changePasswordRequestModel.updateOne(filter, update);
-    return event;
+    const request = await changePasswordRequestModel.updateOne(filter, update);
+    return request;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateChangePasswordRequestsService(filter, update) {
+  try {
+    const request = await changePasswordRequestModel.updateMany(filter, update);
+    return request;
   } catch (error) {
     throw error;
   }
@@ -38,8 +56,8 @@ export async function updateChangePasswordRequestService(filter, update) {
 
 export async function getChangePasswordRequestCountService(filter){
   try {
-    const events = await changePasswordRequestModel.countDocuments(filter);
-    return events;
+    const requestCount = await changePasswordRequestModel.countDocuments(filter);
+    return requestCount;
   } catch (error) {
     throw error;  
   }
