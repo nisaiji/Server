@@ -151,7 +151,7 @@ export async function getChangePasswordRequestsController(req, res) {
     pipeline.push({
       $project: {
         _id: 1,
-        type: 1,
+        reason: 1,
         title: 1,
         status: 1,
         date: 1,
@@ -169,7 +169,7 @@ export async function getChangePasswordRequestsController(req, res) {
 
     const requests = await getChangePasswordRequestsPipelineService(pipeline);
     const totalRequests = await getChangePasswordRequestCountService(filter);
-    const totalPages = Math.ceil(totalEvents / limitNum);
+    const totalPages = Math.ceil(totalRequests / limitNum);
 
     return res.status(StatusCodes.OK).send(
       success(200, {

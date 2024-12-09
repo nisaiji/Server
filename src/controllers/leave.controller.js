@@ -137,6 +137,20 @@ export async function getLeaveRequestsController(req, res){
               }
             },
             {
+              $lookup: {
+                from: 'guestteachers',
+                localField: '_id',
+                foreignField: 'leaveRequest',
+                as: 'guestTeacher'
+              }
+            },
+            {
+              $unwind: {
+                path: '$guestTeacher',
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
               $project: {
                 _id: 1,
                 reason: 1,
@@ -151,6 +165,11 @@ export async function getLeaveRequestsController(req, res){
                   lastname: "$teacher.lastname",
                   section: "$section.name",
                   class: "$class.name"
+                },
+                guestTeacher: {
+                  _id: '$guestTeacher._id',
+                  username: '$guestTeacher.username',
+                  tagline: '$guestTeacher.tagline'
                 }
               }
             },
@@ -223,7 +242,7 @@ export async function updateTeacherLeavRequestController(req, res){
     }
     if(status==='accept'){
       const hashedPassword = await hashPasswordService(password)
-      const guestTeacherObj = { username, password: hashedPassword, tagline, endTime: leaveRequest["endTime"], admin: adminId, section: section["_id"]}
+      const guestTeacherObj = { username, password: hashedPassword, tagline, endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}
       const guestTeacher = await registerGuestTeacherService(guestTeacherObj);
       await updateSectionService({_id: section["_id"]}, {guestTeacher: guestTeacher["_id"]})
     }

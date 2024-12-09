@@ -55,8 +55,8 @@ const registerStudentFromExcelSchema = Joi.object({
   }),
   phone: Joi.number()
     .integer()
-    .min(1000000000)
-    .max(5999999999)
+    .min(6000000000)
+    .max(9999999999)
     .required()
     .messages({
       "number.base": "Phone number must be a valid number.",

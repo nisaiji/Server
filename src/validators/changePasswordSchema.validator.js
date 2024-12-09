@@ -31,12 +31,24 @@ const getChangePasswordRequestsForAdminSchema = Joi.object({
     "string.valid": "Invalid reason"
   }),
   status: Joi.string().required().messages({
-    "any.required": "Type is required.",
-    "string.base": "Type must be a string."
+    "any.required": "Status is required",
+    "string.base": "Status must be a string"
   }),
   include: Joi.string().optional(),
   page: Joi.number().integer().min(1).default(1),
   limit: Joi.number().integer().min(1).default(10)
+});
+
+const updateChangePasswordRequestByAdminSchema = Joi.object({
+  eventId: Joi.string().required().messages({
+    "any.required": "Model is required.",
+    "string.base": "Model must be a string."
+  }),
+  status: Joi.string().valid('accept', 'reject').required().messages({
+    "any.required": "Status is required",
+    "string.base": "Status must be a string",
+    "string.valid": 'Invalid status'
+  }),
 });
 
 const verifyTeacherChangePasswordSchema = Joi.object({
@@ -70,4 +82,4 @@ const changePasswordByVerifiedTeacherSchema = Joi.object({
 });
 
 
-export { registerChangePasswordRequestSchema, getChangePasswordRequestsForAdminSchema, verifyTeacherChangePasswordSchema, changePasswordByVerifiedTeacherSchema };
+export { registerChangePasswordRequestSchema, getChangePasswordRequestsForAdminSchema, updateChangePasswordRequestByAdminSchema, verifyTeacherChangePasswordSchema, changePasswordByVerifiedTeacherSchema };

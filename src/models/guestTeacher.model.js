@@ -24,7 +24,12 @@ const guestTeacherSchema = mongoose.Schema({
     type: Number,
     required: true
   },
-  section:{
+  leaveRequest: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "leaveRequest",
+    required: true
+  },
+  section: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "section",
     required: true

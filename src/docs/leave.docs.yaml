@@ -1,0 +1,240 @@
+paths:
+  /leave/admin:
+    get:
+      security:
+        - Authorization: []
+      summary: "Get Leave Requests for Admin"
+      description: "Retrieve leave requests for an admin with filtering, sorting, and pagination."
+      tags:
+        - "Leave"
+      parameters:
+        - name: senderId
+          in: query
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F]{24}$"
+          description: "Sender ID (Teacher or Student) in MongoDB ObjectId format."
+        - name: model
+          in: query
+          schema:
+            type: string
+          description: "Filter requests by sender model (e.g., 'teacher' or 'student')."
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: "Filter requests by status (e.g., 'pending', 'accept', 'reject')."
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: "Pagination: Page number."
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+          description: "Pagination: Number of results per page."
+      responses:
+        200:
+          description: "Leave requests retrieved successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leaveRequests:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          example: "64b5f4c37cd1123456789012"
+                          description: "Leave request ID."
+                        reason:
+                          type: string
+                          example: "Sick Leave"
+                        description:
+                          type: string
+                          example: "Feeling unwell and need to rest."
+                        status:
+                          type: string
+                          example: "pending"
+                        startTime:
+                          type: integer
+                          example: 1700000000
+                        endTime:
+                          type: integer
+                          example: 1700003600
+                        teacher:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            firstname:
+                              type: string
+                            lastname:
+                              type: string
+                            section:
+                              type: string
+                            class:
+                              type: string
+                  currentPage:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 3
+                  totalLeaveRequests:
+                    type: integer
+                    example: 25
+                  pageSize:
+                    type: integer
+                    example: 10
+
+    put:
+      security:
+        - Authorization: []
+      summary: "Update Teacher Leave Request"
+      description: "Allows an admin to update a leave request with status and optional guest teacher details."
+      tags:
+        - "Leave"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                leaveRequestId:
+                  type: string
+                  example: "64b5f4c37cd1123456789012"
+                  description: "ID of the leave request."
+                status:
+                  type: string
+                  enum: ["accept", "reject"]
+                  example: "accept"
+                  description: "Updated status of the leave request."
+                username:
+                  type: string
+                  example: "guest_teacher1"
+                  description: "Guest teacher's username (required if status is 'accept')."
+                password:
+                  type: string
+                  example: "securepassword"
+                  description: "Guest teacher's password (required if status is 'accept')."
+                tagline:
+                  type: string
+                  example: "Substitute Teacher"
+                  description: "Tagline for the guest teacher (required if status is 'accept')."
+              required:
+                - leaveRequestId
+                - status
+      responses:
+        200:
+          description: "Leave request updated successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Leave request updated successfully."
+        404:
+          description: "Not Found: Leave request or section not found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Leave Request not found."
+
+  /leave/teacher:
+    post:
+      security:
+        - Authorization: []
+      summary: "Register Leave Request"
+      description: "Allows a teacher to register a leave request."
+      tags:
+        - "Leave"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  example: "Personal Work"
+                  description: "Reason for the leave request."
+                description:
+                  type: string
+                  example: "Need to attend a family function."
+                  description: "Detailed description of the leave."
+                startTime:
+                  type: integer
+                  example: 1700000000
+                  description: "Leave start time in UNIX timestamp."
+                endTime:
+                  type: integer
+                  example: 1700003600
+                  description: "Leave end time in UNIX timestamp."
+              required:
+                - reason
+                - description
+                - startTime
+                - endTime
+      responses:
+        200:
+          description: "Leave request registered successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Request sent successfully."
+        409:
+          description: "Conflict: Overlapping leave requests found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "Already applied for leave from 1700000000 to 1700003600."
+

@@ -25,6 +25,34 @@ const registerLeaveSchema = Joi.object({
 
 });
 
+const getLeaveRequestsForAdminSchema = Joi.object({
+  senderId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional().messages({
+    "string.pattern.base": "Invalid student ID.",
+    "any.required": "Student ID is required."
+  }),
+
+  model: Joi.optional().optional().messages({
+    "string.base": "Model must be a string."
+  }),
+
+  status: Joi.string().optional().messages({
+    "string.base": "Status must be a string"
+  }),
+
+  page: Joi.number().integer().min(1).optional().messages({
+    'number.base': 'Page must be number',
+    'number.integer': 'Page must be integer',
+    'number.min': 'Page must be atleast 1'
+  }),
+
+  limit: Joi.number().integer().min(1).optional().messages({
+    'number.base': 'Limit must be number',
+    'number.integer': 'Limit must be integer',
+    'number.min': 'Limit must be atleast 1',
+  }),
+
+});
+
 const updateTeacherLeaveSchema = Joi.object({
   leaveRequestId: Joi.string().required().messages({
     'string.base': 'Leave Request ID must be a string.',
@@ -68,31 +96,4 @@ const updateTeacherLeaveSchema = Joi.object({
 })
 
 
-// sender: Joi.object({
-//   id: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
-//     "string.pattern.base": "Invalid sender Id.", 
-//     "any.required": "sender id is required."
-//   }),
-//   model: Joi.string().valid('parent','teacher').required().messages({
-//     'any.required': 'Model is required.',
-//     'string.valid': 'Model can be parent, teacher.'
-//   })
-// }).required().messages({
-//   'any.required': 'Sender information is required.'
-// }),
-
-// receiver: Joi.object({
-//   id: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
-//     "string.pattern.base": "Invalid receiver Id.", 
-//     "any.required": "Receiver id is required."
-//   }),
-//   model: Joi.string().valid('teacher','admin').required().messages({
-//     'any.required': 'Model is required.',
-//     'string.valid': 'Model can be admin, teacher.'
-//   })
-// }).required().messages({
-//   'any.required': 'Sender information is required.'
-// }),
-
-
-export { registerLeaveSchema, updateTeacherLeaveSchema }
+export { registerLeaveSchema, updateTeacherLeaveSchema, getLeaveRequestsForAdminSchema }
