@@ -9,6 +9,10 @@ const sectionSchema = mongoose.Schema({
     type: Number,
     default: 0
   },
+  startTime: {
+    type: Number,
+    required: true
+  },
   classId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "class"

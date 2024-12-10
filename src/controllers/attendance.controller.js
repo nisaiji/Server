@@ -40,9 +40,9 @@ export async function attendanceByTeacherController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }
     const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}})
-    // if(sectionAttendance){
-    //   return res.status(StatusCodes.CONFLICT).send(error(409, "Attendance already marked"));
-    // }
+    if(sectionAttendance){
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Attendance already marked"));
+    }
 
     present.map(async (student) => {
       const paramObj = {"student":student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
@@ -51,7 +51,7 @@ export async function attendanceByTeacherController(req, res) {
       if(parentMarkedAttendance){
         const id = parentMarkedAttendance["id"];
         const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
-        await updateAttendanceService({id, fieldsToBeUpdated});
+        await updateAttendanceService({_id: id}, fieldsToBeUpdated);
       }else{
         const attendanceObj = {date, day, student:student["id"], teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
         await createAttendanceService(attendanceObj);
@@ -65,7 +65,7 @@ export async function attendanceByTeacherController(req, res) {
       if(parentMarkedAttendance){
         const id = parentMarkedAttendance["id"];
         const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
-        await updateAttendanceService({id, fieldsToBeUpdated});
+        await updateAttendanceService({_id: id}, fieldsToBeUpdated);
       }else{
         const attendanceObj = {date, day, student:student["id"], teacherAttendance:"absent", section:sectionId, classId:section['classId'], admin:adminId};
         await createAttendanceService(attendanceObj);
@@ -136,6 +136,56 @@ export async function attendanceByParentController(req, res) {
   }
 }
 
+export async function bulkAttendanceMarkController(req, res) {
+  try {
+    const sectionId = req.params.sectionId;
+    const {studentsAttendances, startTime, endTime} = req.body;
+    const adminId = req.adminId;
+    const teacherId = req.teacherId;
+
+    const section = await getSectionService({ _id: sectionId })
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"))
+    }
+    if(startTime<section['startTime']){
+      return res.status(StatusCodes.BAD_GATEWAY).send(error(401, "Invalid Attendance Dates"))
+    }
+
+    if(section["guestTeacher"] && section["guestTeacher"].toString()!==teacherId){
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
+    }
+
+    for (const studentId in studentsAttendances) {      
+      for (const studentAttendance of studentsAttendances[studentId]) {
+        let date = studentAttendance['date'];
+        let [day, month, year] = date.split("-");
+        date = new Date(year, month - 1, day);
+        const dayName = getDayNameService(date.getDay());
+        const { startTime, endTime } = getStartAndEndTimeService(date, date);
+        const holiday = await getHolidayService({ date: { $gte: startTime, $lte: endTime }, admin: adminId });
+    
+        if (dayName === 'Sunday' || holiday) {
+          continue;
+        }
+
+        date = date.getTime(); 
+        const existingAttendance = await getAttendanceService({ student: studentId, date: { $gte: startTime, $lte: endTime } });
+    
+        if (existingAttendance) {
+          await updateAttendanceService({ _id: existingAttendance["_id"] }, { teacherAttendance: studentAttendance['attendance'] });
+        } else {
+          const attendanceObj = { date, day:dayName, student: studentId, teacherAttendance: studentAttendance['attendance'], section: sectionId, classId: section['classId'], admin: adminId };
+          await createAttendanceService(attendanceObj);
+        }
+      }
+    }
+
+    return res.status(StatusCodes.OK).send(success(200, "Attendance marked successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
+  }
+}
+
 export async function getMisMatchAttendanceController(req,res){
   try {
     const sectionId = req.sectionId;
@@ -168,14 +218,14 @@ export async function updateAttendanceController(req,res){
     for(let i=0;i<presentLength; i++){
       const id = present[i]["_id"];
       const fieldsToBeUpdated = {teacherAttendance:"present"}
-      await updateAttendanceService({id, fieldsToBeUpdated});
+      await updateAttendanceService({_id: id}, fieldsToBeUpdated);
     }
     
     const absentLength = absent?.length;
     for(let i=0;i<absentLength; i++){
       const id = absent[i]["_id"];
       const fieldsToBeUpdated = {teacherAttendance:"absent"}
-      await updateAttendanceService({id, fieldsToBeUpdated});
+      await updateAttendanceService({_id: id}, fieldsToBeUpdated);
     }
 
 
@@ -301,7 +351,6 @@ export async function attendanceCountOfStudentController(req, res){
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
-
 
 export async function getAttendancesController(req, res){
   try {

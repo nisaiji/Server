@@ -1,6 +1,6 @@
 import express from "express";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
-import { checkAttendaceMarkedController, getMisMatchAttendanceController, checkParentAttendaceMarkedController, updateAttendanceController, attendanceStatusOfSectionController, attendanceCountOfStudentController, attendanceByTeacherController, attendanceByParentController, attendanceStatusOfStudentController, getAttendancesController } from "../controllers/attendance.controller.js";
+import { checkAttendaceMarkedController, getMisMatchAttendanceController, checkParentAttendaceMarkedController, updateAttendanceController, attendanceStatusOfSectionController, attendanceCountOfStudentController, attendanceByTeacherController, attendanceByParentController, attendanceStatusOfStudentController, getAttendancesController, bulkAttendanceMarkController } from "../controllers/attendance.controller.js";
 import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
 import { attendanceByParentValidation, attendanceByTeacherValidation, attendanceCountValidation, attendanceStatusValidation, getAttendanceValidation, updateAttendanceValidation } from "../middlewares/validation/attendance.validation.middleware.js";
 import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
@@ -10,6 +10,7 @@ const attendanceRouter = express.Router();
 attendanceRouter.post("/teacher", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), attendanceByTeacherValidation, attendanceByTeacherController);
 attendanceRouter.post("/parent", parentAuthenticate, attendanceByParentValidation, attendanceByParentController);
 attendanceRouter.put("/teacher", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), updateAttendanceValidation, updateAttendanceController);
+attendanceRouter.post("/teacher/bulk-mark/:sectionId", bulkAttendanceMarkController)
 attendanceRouter.get("/", getAttendancesController);
 attendanceRouter.get("/mismatch", teacherAuthenticate, authorizeTeacherRoles('teacher'), getMisMatchAttendanceController);
 attendanceRouter.get("/teacher/is-marked", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), checkAttendaceMarkedController);

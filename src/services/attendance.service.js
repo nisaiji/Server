@@ -27,13 +27,9 @@ export async function getAttendancePipelineService(pipeline){
   }
 }
 
-export async function updateAttendanceService(data) {
+export async function updateAttendanceService(filter, update) {
   try {
-    const { id, fieldsToBeUpdated } = data;
-    const attendance = await attendanceModel.findByIdAndUpdate(
-      id,
-      fieldsToBeUpdated
-    );
+    const attendance = await attendanceModel.findByIdAndUpdate(filter, update);
     return attendance;
   } catch (error) {
     throw error;

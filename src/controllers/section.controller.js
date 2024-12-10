@@ -1,16 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import { getClassService, updateClassService } from "../services/class.sevices.js";
-import {deleteSection,
-  
-  deleteSectionService,
-  
-  getAllSection,getClassSections, getSectionService, registerSectionService, updateSectionService} from "../services/section.services.js";
+import { deleteSectionService, getAllSection,getClassSections, getSectionService, registerSectionService, updateSectionService} from "../services/section.services.js";
 import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerSectionController(req, res) {
   try {
-    const { name, teacherId, classId } = req.body;
+    const { name, startTime, teacherId, classId } = req.body;
     const adminId = req.adminId;
     const classInfo = await getClassService({ _id:classId });
     if (!classInfo) {
@@ -20,7 +16,7 @@ export async function registerSectionController(req, res) {
     if (section) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Section already exists"));
     }
-    section = await registerSectionService({name, teacher:teacherId, classId, admin:adminId});
+    section = await registerSectionService({name, startTime, teacher:teacherId, classId, admin:adminId});
     const teacher = await getTeacherService({_id:teacherId, isActive:true});
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
@@ -29,7 +25,6 @@ export async function registerSectionController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher already assigned to section"));
     }
     teacher.section = section["_id"];
-    teacher.isClassTeacher = true;
     await teacher.save();
     classInfo["section"]?.push(section["_id"]);
     await classInfo.save();
@@ -42,7 +37,10 @@ export async function registerSectionController(req, res) {
 export async function getSectionController(req,res){
   try {
     const _id = req.params.sectionId;
-    const[section, teacher] = await Promise.all([ getSectionService({ _id }), getTeacherService({ section:_id }, { firstname:1, lastname:1 }) ]);
+    const[section, teacher] = await Promise.all([ 
+      getSectionService({ _id }), 
+      getTeacherService({ section:_id }, { firstname:1, lastname:1 }) 
+    ]);
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(400,"Section not found."));
     }
