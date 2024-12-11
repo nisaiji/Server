@@ -47,7 +47,7 @@ export async function updateClassService(filter, update){
 
 export async function customGetClassWithSectionTeacherService(paramObj){
   try {
-    const classInfo = await classModel.find(paramObj).populate({path: 'section', select:{"name":1,"studentCount":1}, populate: {path: 'teacher', select: 'firstname lastname' }}).lean();    ;
+    const classInfo = await classModel.find(paramObj).populate({path: 'section', select:{"name":1,"studentCount":1, "startTime":1}, populate: {path: 'teacher', select: 'firstname lastname' }}).lean();    ;
     return classInfo;
   } catch (error) {
     throw error;    

@@ -19,7 +19,7 @@ export async function attendanceByTeacherController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"))
     }
 
-    if(section["guestTeacher"] && section["guestTeacher"].toString()!==teacherId){
+    if(section["guestTeacher"] && section["guestTeacher"]?.toString()!==teacherId){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
     }
     let date = new Date();
@@ -244,7 +244,14 @@ export async function checkAttendaceMarkedController(req, res) {
     const adminId = req.adminId;
     const sectionId = (req.sectionId)?(req.sectionId):(req.params.sectionId);
     if(!sectionId){
-      return res.status(StatusCodes.BAD_GATEWAY).send(error(502, "Section id is required."));
+      return res.status(StatusCodes.BAD_GATEWAY).send(error(502, "Section id is required"));
+    }
+    const section = await getSectionService({_id: sectionId});
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(502, "Section not found"));
+    }
+    if(section['guestTeacher'] && req.role==='teacher'){
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Teacher is not authorized for attendance"))
     }
     let date = new Date();
     const {startTime, endTime} = getStartAndEndTimeService(date, date);
