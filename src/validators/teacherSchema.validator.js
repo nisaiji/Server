@@ -52,15 +52,11 @@ const teacherEmailPhoneUpdateSchema = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).optional().messages({
     "string.email": "Invalid email format."
   }),
-  phone: Joi.string()
-    .pattern(/^[6-9][0-9]{9}$/)
-    .length(10)
-    .required()
-    .messages({
+  phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).length(10).optional().messages({
       "string.pattern.base": "Invalid phone number format.",
       "string.length": "Phone number must be 10 characters.",
-      "any.required": "Phone number is required."
-    })
+    }),
+  username: Joi.string().optional()
 });
 
 const teacherUpdateSchema = Joi.object({

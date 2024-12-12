@@ -139,7 +139,7 @@ export async function attendanceByParentController(req, res) {
 export async function bulkAttendanceMarkController(req, res) {
   try {
     const sectionId = req.params.sectionId;
-    const {studentsAttendances, startTime, endTime} = req.body;
+    const { studentsAttendances, startTime, endTime } = req.body;
     const adminId = req.adminId;
     const teacherId = req.teacherId;
 
