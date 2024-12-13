@@ -1,4 +1,4 @@
-import { createSectionAttendanceService, getSectionAttendanceService, getSectionAttendancesService, getSectionAttendanceStatusService } from "../services/sectionAttendance.services.js";
+import { createSectionAttendanceService, getSectionAttendanceService, getSectionAttendancesService, getSectionAttendanceStatusService, updateSectionAttendanceService } from "../services/sectionAttendance.services.js";
 import {createAttendanceService,getAttendanceService, getAttendancesService, updateAttendanceService, getMisMatchAttendanceService, getAttendancePipelineService} from "../services/attendance.service.js";
 import {getStudentService, getStudentsPipelineService} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
@@ -139,7 +139,7 @@ export async function attendanceByParentController(req, res) {
 export async function bulkAttendanceMarkController(req, res) {
   try {
     const sectionId = req.params.sectionId;
-    const { studentsAttendances, startTime, endTime } = req.body;
+    const { studentsAttendances } = req.body;
     const adminId = req.adminId;
     const teacherId = req.teacherId;
 
@@ -147,41 +147,53 @@ export async function bulkAttendanceMarkController(req, res) {
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"))
     }
-    if(startTime<section['startTime']){
-      return res.status(StatusCodes.BAD_GATEWAY).send(error(401, "Invalid Attendance Dates"))
-    }
 
     if(section["guestTeacher"] && section["guestTeacher"].toString()!==teacherId){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
     }
 
-    for (const studentId in studentsAttendances) {      
-      for (const studentAttendance of studentsAttendances[studentId]) {
-        let date = studentAttendance['date'];
-        let [day, month, year] = date.split("-");
-        date = new Date(year, month - 1, day);
-        const dayName = getDayNameService(date.getDay());
-        const { startTime, endTime } = getStartAndEndTimeService(date, date);
-        const holiday = await getHolidayService({ date: { $gte: startTime, $lte: endTime }, admin: adminId });
-    
-        if (dayName === 'Sunday' || holiday) {
-          continue;
-        }
+    for (let attendanceTimestamp in studentsAttendances) {
+      attendanceTimestamp = parseInt(attendanceTimestamp)
+      if(attendanceTimestamp < section['startTime']){
+        continue;
+        // return res.status(StatusCodes.BAD_GATEWAY).send(error(401, "Invalid Attendance Dates"))
+      }
+      let presentCount = 0;
+      let absentCount = 0; 
+      const formattedDate = new Date(attendanceTimestamp);
+      const dayName = getDayNameService(formattedDate.getDay());
+      const { startTime, endTime } = getStartAndEndTimeService(formattedDate, formattedDate);
+      const sectionAttendance = await getSectionAttendanceService({section: sectionId, date : {$gte: startTime, $lte: endTime}});
+      const holiday = await getHolidayService({ date: { $gte: startTime, $lte: endTime }, admin: adminId });
+      if (dayName === 'Sunday' || holiday) {
+        continue;
+      }
 
-        date = date.getTime(); 
-        const existingAttendance = await getAttendanceService({ student: studentId, date: { $gte: startTime, $lte: endTime } });
-    
+      for (const studentAttendance of studentsAttendances[attendanceTimestamp]) {
+        const existingAttendance = await getAttendanceService({ student: studentAttendance['student'], date: { $gte: startTime, $lte: endTime } });
         if (existingAttendance) {
           await updateAttendanceService({ _id: existingAttendance["_id"] }, { teacherAttendance: studentAttendance['attendance'] });
         } else {
-          const attendanceObj = { date, day:dayName, student: studentId, teacherAttendance: studentAttendance['attendance'], section: sectionId, classId: section['classId'], admin: adminId };
+          const attendanceObj = { date:attendanceTimestamp, day:dayName, student: studentAttendance['student'], teacherAttendance: studentAttendance['attendance'], section: sectionId, classId: section['classId'], admin: adminId };
           await createAttendanceService(attendanceObj);
         }
+
+        if(studentAttendance['attendance']==='present'){
+          presentCount+=1;
+        } else {
+          absentCount+=1;
+        }
+      }
+      if(sectionAttendance){
+        await updateSectionAttendanceService({_id: sectionAttendance['_id']}, {presentCount, absentCount, teacher: teacherId})
+      } else {
+        await createSectionAttendanceService({section: sectionId, presentCount, absentCount, date: attendanceTimestamp, teacher:teacherId, status:'completed'})
       }
     }
 
     return res.status(StatusCodes.OK).send(success(200, "Attendance marked successfully"));
   } catch (err) {
+    console.log(err)
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
 }

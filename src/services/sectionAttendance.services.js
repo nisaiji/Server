@@ -27,58 +27,18 @@ export async function getSectionAttendanceStatusService(filter) {
   }
 }
 
-export async function createSectionAttendanceService(data){
+export async function createSectionAttendanceService(paramObj){
   try {
-    const {date, section, teacher, presentCount, absentCount, status} = data;
-    const sectionAttendance = await new sectionAttendanceModel();
-    if(date){
-      sectionAttendance["date"] = date;
-    }
-    if(section){
-      sectionAttendance["section"] = section; 
-    }
-    if(teacher){
-      sectionAttendance["teacher"] = teacher;
-    }
-    if(status){
-      sectionAttendance["status"] = status;
-    }
-    if(presentCount){
-      sectionAttendance["presentCount"] = presentCount;
-    }
-    if(absentCount){
-      sectionAttendance["absentCount"] = absentCount;
-    }
-    await sectionAttendance.save();
+    const sectionAttendance = await sectionAttendanceModel.create(paramObj)
     return sectionAttendance;
   } catch (error){
     throw error;    
   }
 }
 
-export async function updateSectionAttendanceService(data){
+export async function updateSectionAttendanceService(filter, update){
   try {
-    const {date, section, teacher, presentCount, absentCount, status} = data;
-    const sectionAttendance = await sectionAttendanceModel.findById(id);
-    if(date){
-      sectionAttendance["date"] = date;
-    }
-    if(section){
-      sectionAttendance["section"] = section;
-    }
-    if(teacher){
-      sectionAttendance["teacher"] = teacher;
-    }
-    if(status){
-      sectionAttendance["status"] = status;
-    }
-    if(presentCount){
-      sectionAttendance["presentCount"] = presentCount;
-    }
-    if(absentCount){
-      sectionAttendance["absentCount"] = absentCount;
-    }
-    await sectionAttendance.save();
+    const sectionAttendance = await sectionAttendanceModel.findOneAndUpdate(filter, update);;
     return sectionAttendance;
   } catch (error){
     throw error;    
