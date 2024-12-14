@@ -3,7 +3,7 @@ import studentModel from "../models/student.model.js";
 
 export async function getStudentService(paramObj, projection={}){
   try {
-    const student = await studentModel.findOne(paramObj).select(projection);
+    const student = await studentModel.findOne(paramObj);//.select(projection);
     return student; 
   }catch (error) {
     throw error;    

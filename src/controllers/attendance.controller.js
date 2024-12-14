@@ -156,7 +156,6 @@ export async function bulkAttendanceMarkController(req, res) {
       attendanceTimestamp = parseInt(attendanceTimestamp)
       if(attendanceTimestamp < section['startTime']){
         continue;
-        // return res.status(StatusCodes.BAD_GATEWAY).send(error(401, "Invalid Attendance Dates"))
       }
       let presentCount = 0;
       let absentCount = 0; 
@@ -170,6 +169,9 @@ export async function bulkAttendanceMarkController(req, res) {
       }
 
       for (const studentAttendance of studentsAttendances[attendanceTimestamp]) {
+        if(!['present', 'absent'].includes(studentAttendance['attendance'])){
+          continue;
+        }
         const existingAttendance = await getAttendanceService({ student: studentAttendance['student'], date: { $gte: startTime, $lte: endTime } });
         if (existingAttendance) {
           await updateAttendanceService({ _id: existingAttendance["_id"] }, { teacherAttendance: studentAttendance['attendance'] });
@@ -185,9 +187,9 @@ export async function bulkAttendanceMarkController(req, res) {
         }
       }
       if(sectionAttendance){
-        await updateSectionAttendanceService({_id: sectionAttendance['_id']}, {presentCount, absentCount, teacher: teacherId})
+        await updateSectionAttendanceService({_id: sectionAttendance['_id']}, {presentCount, absentCount, teacher: teacherId?teacherId:adminId})
       } else {
-        await createSectionAttendanceService({section: sectionId, presentCount, absentCount, date: attendanceTimestamp, teacher:teacherId, status:'completed'})
+        await createSectionAttendanceService({section: sectionId, presentCount, absentCount, date: attendanceTimestamp, teacher:teacherId?teacherId:adminId, status:'completed'})
       }
     }
 
