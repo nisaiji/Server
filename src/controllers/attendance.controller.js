@@ -164,7 +164,7 @@ export async function bulkAttendanceMarkController(req, res) {
       const { startTime, endTime } = getStartAndEndTimeService(formattedDate, formattedDate);
       const sectionAttendance = await getSectionAttendanceService({section: sectionId, date : {$gte: startTime, $lte: endTime}});
       const holiday = await getHolidayService({ date: { $gte: startTime, $lte: endTime }, admin: adminId });
-      if (dayName === 'Sunday' || holiday) {
+      if (dayName === 'Sunday' || holiday || attendanceTimestamp > new Date().getTime()) {
         continue;
       }
 
