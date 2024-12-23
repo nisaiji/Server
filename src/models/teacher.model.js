@@ -74,6 +74,10 @@ const teacherSchema = mongoose.Schema({
     type:Number,
     default:0
   },
+  leaveRequestCount: {
+    type: Number,
+    default: 0
+  },
   section:{
     type: mongoose.Schema.Types.ObjectId,
     ref: "section",

@@ -28,7 +28,7 @@ export async function getChangePasswordRequestsForAdminValidation(req, res, next
 
 export async function updateChangePasswordRequestByAdminValidation(req, res, next){
   try {
-    const { error: schemaError } = updateChangePasswordRequestByAdminSchema.validate(req.query);
+    const { error: schemaError } = updateChangePasswordRequestByAdminSchema.validate(req.body);
     if(schemaError){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }

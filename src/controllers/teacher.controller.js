@@ -8,6 +8,7 @@ import { getClassService } from "../services/class.sevices.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getChangePasswordRequestService, updateChangePasswordRequestService } from "../services/changePassword.services.js";
 import { getGuestTeacherService } from "../services/guestTeacher.service.js";
+import { getAdminService } from "../services/admin.services.js";
 
 export async function registerTeacherController(req, res) {
   try {
@@ -41,10 +42,13 @@ export async function loginTeacherController(req, res) {
     if (!currentTeacher) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
     }
+    if (teacher && !deviceId) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Device Id is required"));
+    }
     const matchPassword = await matchPasswordService({ enteredPassword: password, storedPassword: currentTeacher["password"] });
-    // if (!matchPassword) {
-    //   return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized  user"));
-    // }
+    if (!matchPassword) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized  user"));
+    }
     if (guestTeacher && platform === "web") {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Guest teacher does not support on web"));
     }
@@ -53,10 +57,11 @@ export async function loginTeacherController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
     }
 
-    if(platform=='app' && currentTeacher['isLoginAlready'] && currentTeacher['deviceId']!==deviceId){
+    if(platform=='app' && teacher && teacher['isLoginAlready'] && teacher['deviceId']!==deviceId){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Access denied due to device mismatch"))
     }
     const Class = await getClassService({ _id: section["classId"] });
+    const admin = await getAdminService({_id: teacher['admin']});
     const accessToken = getAccessTokenService({
       role: teacher ? "teacher" : "guestTeacher",
       teacherId: currentTeacher["_id"],
@@ -65,10 +70,12 @@ export async function loginTeacherController(req, res) {
       classId: Class["_id"],
       sectionName: section["name"],
       className: Class["name"],
+      schoolName: admin['schoolName'],
+      tagline: guestTeacher ? guestTeacher['tagline'] :"",
       phone: currentTeacher["phone"] ? currentTeacher["phone"] : "",
       email: currentTeacher["email"] ? currentTeacher["email"] : "",
       pincode: currentTeacher["pincode"] ? currentTeacher["pincode"] : "",
-      username: currentTeacher["username"] ? currentTeacher["username"] : ""
+      username: currentTeacher["username"] ? currentTeacher["username"] : "",
     });
     const refreshToken = getRefreshTokenService({
       role: teacher ? "teacher" : "guestTeacher",

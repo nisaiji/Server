@@ -1,5 +1,5 @@
 import { updateSectionService } from '../../services/section.services.js';
-import { deleteGuestTeacherService, getGuestTeachersService } from '../../services/guestTeacher.service.js';
+import { deleteGuestTeacherService, getGuestTeachersService, updateGuestTeacherService } from '../../services/guestTeacher.service.js';
 import { getLeaveRequestsService, updateLeaveRequestService } from '../../services/leave.service.js';
 
 
@@ -7,7 +7,7 @@ const invalidateGuestTeacherJob =  async() => {
   try {
   let date = new Date()
   date = date.getTime()
-  console.log("invalidate guest teachers")
+  console.log("invalidate guest teachers ",date)
 
   const leaveRequests = await getLeaveRequestsService({endTime : {$lte: date}, status: 'accept'});
   const expiredGuestTeachers = await getGuestTeachersService({endTime: {$lte: date}});
@@ -18,8 +18,9 @@ const invalidateGuestTeacherJob =  async() => {
 
   for (const guestTeacher of expiredGuestTeachers) {
     await Promise.all([
-       deleteGuestTeacherService({_id: guestTeacher['_id']}),
-       updateSectionService({_id: guestTeacher['section']}, {guestTeacher: null})
+      //  deleteGuestTeacherService({_id: guestTeacher['_id']}),
+      updateGuestTeacherService({ _id: guestTeacher["_id"] }, { isActive: false }),
+      updateSectionService({_id: guestTeacher['section']}, {guestTeacher: null})
     ])
   }
 } catch (error) {

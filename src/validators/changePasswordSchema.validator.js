@@ -1,7 +1,7 @@
 import Joi from "joi";
 
 const registerChangePasswordRequestSchema = Joi.object({
-  reason: Joi.string().valid("forgetPassword", "changeDevice").required().messages({
+  reason: Joi.string().valid("forgetPassword", "changeDevice", "technical", "other").required().messages({
     "any.required": "reason is required",
     "string.valid": "Invalid reason"
   }),
@@ -41,8 +41,8 @@ const getChangePasswordRequestsForAdminSchema = Joi.object({
 
 const updateChangePasswordRequestByAdminSchema = Joi.object({
   eventId: Joi.string().required().messages({
-    "any.required": "Model is required.",
-    "string.base": "Model must be a string."
+    "any.required": "Request Id is required.",
+    "string.base": "Request Id must be a string."
   }),
   status: Joi.string().valid('accept', 'reject').required().messages({
     "any.required": "Status is required",

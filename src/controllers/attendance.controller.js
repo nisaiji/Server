@@ -148,9 +148,9 @@ export async function bulkAttendanceMarkController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"))
     }
 
-    if(section["guestTeacher"] && section["guestTeacher"].toString()!==teacherId){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
-    }
+    // if(section["guestTeacher"] && section["guestTeacher"].toString()!==teacherId){
+    //   return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
+    // }
 
     for (let attendanceTimestamp in studentsAttendances) {
       attendanceTimestamp = parseInt(attendanceTimestamp)
@@ -185,6 +185,9 @@ export async function bulkAttendanceMarkController(req, res) {
         } else {
           absentCount+=1;
         }
+      }
+      if(presentCount===0 && absentCount===0){
+        continue;
       }
       if(sectionAttendance){
         await updateSectionAttendanceService({_id: sectionAttendance['_id']}, {presentCount, absentCount, teacher: teacherId?teacherId:adminId})
@@ -376,7 +379,7 @@ export async function attendanceCountOfStudentController(req, res){
 export async function getAttendancesController(req, res){
   try {
     const { startTime, endTime, student, section, classId, admin } = req.query;
-    const filter = {}
+    const filter = {isActive: true}
     const attendanceFilter = {}
     if(student){ filter['student'] = convertToMongoId(student) }
     if(section) { filter['section'] = convertToMongoId(section) }

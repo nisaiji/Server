@@ -5,18 +5,23 @@ const guestTeacherSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  deviceId: {
-    type: String
-  },
   isLoginAlready:{
     type:Boolean,
     default:false
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   },
   tagline: {
     type: String,
     required: true
   },
   password: {
+    type: String,
+    required: true
+  },
+  secretKey: {
     type: String,
     required: true
   },

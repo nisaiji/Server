@@ -2,9 +2,10 @@ import { getLeaveRequestsCountService, getLeaveRequestService, getLeaveRequestsP
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
-import { registerGuestTeacherService } from "../services/guestTeacher.service.js";
+import { getGuestTeacherService, registerGuestTeacherService } from "../services/guestTeacher.service.js";
 import { hashPasswordService } from "../services/password.service.js";
 import { getSectionService, updateSectionService } from "../services/section.services.js";
+import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 
 export async function registerLeaveRequestController(req, res){
   try {
@@ -169,7 +170,8 @@ export async function getLeaveRequestsController(req, res){
                 guestTeacher: {
                   _id: '$guestTeacher._id',
                   username: '$guestTeacher.username',
-                  tagline: '$guestTeacher.tagline'
+                  tagline: '$guestTeacher.tagline',
+                  secretKey: '$guestTeacher.secretKey'
                 }
               }
             },
@@ -242,8 +244,17 @@ export async function updateTeacherLeavRequestController(req, res){
     }
     if(status==='accept'){
       const hashedPassword = await hashPasswordService(password)
-      const guestTeacherObj = { username, password: hashedPassword, tagline, endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}
+      const [existingTeacher, existingGuestTeacher] = await Promise.all([
+        getTeacherService({ username, isActive: true }),
+        getGuestTeacherService({ username, isActive: true })      
+      ])
+      if(existingTeacher || existingGuestTeacher){
+        return res.status(StatusCodes.CONFLICT).send(success(409, "Username already exists"));
+      }
+      const teacher = await getTeacherService({_id: leaveRequest.sender.id})
+      const guestTeacherObj = { username, password: hashedPassword, secretKey: password, tagline, endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}
       const guestTeacher = await registerGuestTeacherService(guestTeacherObj);
+      await updateTeacherService({_id: teacher['_id']}, {leaveRequestCount: teacher['leaveRequestCount']+1 })
       await updateSectionService({_id: section["_id"]}, {guestTeacher: guestTeacher["_id"]})
     }
     

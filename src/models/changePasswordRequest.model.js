@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const changePasswordRequestSchema = mongoose.Schema({
   reason:{
     type: String,
-    enum: ["forgetPassword", "changeDevice"],
+    enum: ["forgetPassword", "changeDevice", "technical", "other"],
   },
 
   description:{

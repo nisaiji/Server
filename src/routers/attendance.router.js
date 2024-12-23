@@ -11,7 +11,7 @@ const attendanceRouter = express.Router();
 attendanceRouter.post("/teacher", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), attendanceByTeacherValidation, attendanceByTeacherController);
 attendanceRouter.post("/parent", parentAuthenticate, attendanceByParentValidation, attendanceByParentController);
 attendanceRouter.put("/teacher", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), updateAttendanceValidation, updateAttendanceController);
-attendanceRouter.post("/teacher/bulk-mark/:sectionId", bulkAttendanceMarkController)
+attendanceRouter.post("/teacher/bulk-mark/:sectionId", adminAuthenticate, bulkAttendanceMarkController)
 attendanceRouter.get("/", adminAuthenticate ,getAttendancesController);
 attendanceRouter.get("/mismatch", teacherAuthenticate, authorizeTeacherRoles('teacher'), getMisMatchAttendanceController);
 attendanceRouter.get("/teacher/is-marked", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), checkAttendaceMarkedController);
