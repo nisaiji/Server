@@ -18,6 +18,15 @@ export async function getSectionAttendancesService(paramObj){
   }
 }
 
+export async function getSectionAttendancesPipelineService(pipeline){
+  try {
+    const attendances = await sectionAttendanceModel.aggregate(pipeline).exec();
+    return attendances;
+  } catch (error) {
+    throw error;    
+  }
+}
+
 export async function getSectionAttendanceStatusService(filter) {
   try {
     const attendance = await sectionAttendanceModel.find(filter).select({status:0,_id:0,section:0,teacher:0}).sort({ date: 1 });;

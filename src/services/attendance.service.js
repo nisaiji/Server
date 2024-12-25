@@ -18,6 +18,15 @@ export async function getAttendancesService(filter) {
   }
 }
 
+export async function getAttendanceCountService(filter) {
+  try {
+    const count = await attendanceModel.countDocuments(filter);
+    return count;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function getAttendancePipelineService(pipeline){
   try {
     const attendances = await attendanceModel.aggregate(pipeline).exec();
