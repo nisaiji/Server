@@ -61,7 +61,7 @@ export async function loginTeacherController(req, res) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Access denied due to device mismatch"))
     }
     const Class = await getClassService({ _id: section["classId"] });
-    const admin = await getAdminService({_id: teacher['admin']});
+    const admin = await getAdminService({_id: currentTeacher['admin']});
     const accessToken = getAccessTokenService({
       role: teacher ? "teacher" : "guestTeacher",
       teacherId: currentTeacher["_id"],
