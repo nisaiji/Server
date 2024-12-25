@@ -93,16 +93,21 @@ export async function attendanceStatusController(req, res) {
       {
         $group: {
           _id: "$formattedDate",
-          totalPresent: { $sum: "$presentCount" },
-          totalAbsent: { $sum: "$absentCount" },
+          presentCount : { $sum: "$presentCount" },
+          absentCount : { $sum: "$absentCount" },
+        },
+      },
+      {
+        $addFields: {
+          timestamp: { $toLong: { $toDate: "$_id" }}
         },
       },
       {
         $project: {
           _id: 0,
-          date: "$_id",
-          totalPresent: 1,
-          totalAbsent: 1,
+          date: "$timestamp",
+          presentCount: 1,
+          absentCount: 1,
         }
       },
       {
