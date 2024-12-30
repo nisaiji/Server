@@ -1,7 +1,5 @@
 import express from "express";
 
-
-
 import { getAdminsController, getSuperAdminController, loginSuperAdminController, registerSuperAdminController, updateSuperAdminController } from "../controllers/superAdmin.controller.js";
 import { loginSuperAdminValidation, registerSuperAdminValidation, updateSuperAdminValidation } from "../middlewares/validation/superAdminValidation.js";
 import { superAdminAuthenticate } from "../middlewares/authentication/superAdmin.authentication.middleware.js";

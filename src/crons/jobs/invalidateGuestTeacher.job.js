@@ -18,7 +18,6 @@ const invalidateGuestTeacherJob =  async() => {
 
   for (const guestTeacher of expiredGuestTeachers) {
     await Promise.all([
-      //  deleteGuestTeacherService({_id: guestTeacher['_id']}),
       updateGuestTeacherService({ _id: guestTeacher["_id"] }, { isActive: false }),
       updateSectionService({_id: guestTeacher['section']}, {guestTeacher: null})
     ])

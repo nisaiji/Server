@@ -1,0 +1,408 @@
+paths:
+  /super-admin/register:
+    post:
+      tags:
+        - Super-Admin
+      summary: Register a Super Admin
+      description: Registers a single super admin.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "super@123"
+                  description: Username for the super admin.
+                email:
+                  type: string
+                  example: "super@gmail.com"
+                  description: Email for the super admin.
+                password:
+                  type: string
+                  example: "super@123"
+                  description: Password for the super admin.
+      responses:
+        '201':
+          description: Super admin registered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: "User registered successfully."
+        '400':
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Validation error: missing or invalid fields."
+        '409':
+          description: Conflict error, super admin already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "Super Admin already exists!"
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+
+  /super-admin/login:
+    post:
+      tags:
+        - Super-Admin
+      summary: Login a Super Admin
+      description: Logs in a super admin.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "super@gmail.com"
+                  description: Email of the super admin.
+                password:
+                  type: string
+                  example: "super@123"
+                  description: Password of the super admin.
+      responses:
+        '200':
+          description: Successful login.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5..."
+                      username:
+                        type: string
+                        example: "super@123"
+        '401':
+          description: Unauthorized user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: "Unauthorized user."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+
+  /super-admin/update:
+    put:
+      security:
+        - Authorization: []  
+      tags:
+        - Super-Admin
+      summary: Update Super Admin Profile
+      description: Updates the profile of a super admin.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "updated_super"
+                  description: New username.
+                email:
+                  type: string
+                  example: "updated@gmail.com"
+                  description: New email.
+                password:
+                  type: string
+                  example: "updated@123"
+                  description: New password.
+      responses:
+        '200':
+          description: Successfully updated the profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "User updated successfully."
+        '409':
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "User not exists."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+
+  /super-admin/profile:
+    get:
+      security:
+        - Authorization: []
+      tags:
+        - Super-Admin
+      summary: Get Super Admin Profile
+      description: Retrieves the profile of the logged-in super admin.
+      responses:
+        '200':
+          description: Successfully retrieved profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: "super@gmail.com"
+                      username:
+                        type: string
+                        example: "super@123"
+        '404':
+          description: Super admin not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: "Super Admin not found."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+
+  /super-admin/admins:
+    get:
+      security:
+        - Authorization: []  
+      tags:
+        - Super-Admin
+      summary: Get Admins List
+      description: Retrieves a list of admins based on query filters.
+      parameters:
+        - in: query
+          name: nation
+          schema:
+            type: string
+          description: Filter by nation.
+        - in: query
+          name: state
+          schema:
+            type: string
+          description: Filter by state.
+        - in: query
+          name: district
+          schema:
+            type: string
+          description: Filter by district.
+        - in: query
+          name: city
+          schema:
+            type: string
+          description: Filter by city.
+        - in: query
+          name: username
+          schema:
+            type: string
+          description: Filter by username (case insensitive).
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Pagination page number.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Number of records per page.
+      responses:
+        '200':
+          description: Successfully retrieved admins list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      admins:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: "admin@123"
+                      currentPage:
+                        type: integer
+                        example: 1
+                      totalPages:
+                        type: integer
+                        example: 5
+                      totalAdmins:
+                        type: integer
+                        example: 50
+                      pageSize:
+                        type: integer
+                        example: 10
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+
