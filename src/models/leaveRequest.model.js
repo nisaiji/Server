@@ -40,7 +40,7 @@ const leaveRequestSchema = mongoose.Schema({
 
   status:{
     type:String,
-    enum:["accept", "reject", "pending", "complete"],
+    enum:["accept", "reject", "pending", "complete", "expired"],
     default: "pending"
   },
 

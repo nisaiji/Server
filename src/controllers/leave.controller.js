@@ -6,6 +6,7 @@ import { getGuestTeacherService, registerGuestTeacherService } from "../services
 import { hashPasswordService } from "../services/password.service.js";
 import { getSectionService, updateSectionService } from "../services/section.services.js";
 import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
+import { getFormattedDateService } from "../services/celender.service.js";
 
 export async function registerLeaveRequestController(req, res){
   try {
@@ -26,7 +27,9 @@ export async function registerLeaveRequestController(req, res){
 
   const leaveRequests = await getLeaveRequestsPipelineService(pipeline);
   if(leaveRequests.length > 0){
-    return res.status(StatusCodes.CONFLICT).send(error(409, `Already applied for leave from ${leaveRequests[0].startTime} to ${leaveRequests[0].endTime}.`))
+    const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
+    const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime))
+    return res.status(StatusCodes.CONFLICT).send(error(409, `Already applied for leave from ${startDate} to ${endDate}.`))
   }
 
   const leaveRequestObj = {
@@ -252,7 +255,7 @@ export async function updateTeacherLeavRequestController(req, res){
         return res.status(StatusCodes.CONFLICT).send(success(409, "Username already exists"));
       }
       const teacher = await getTeacherService({_id: leaveRequest.sender.id})
-      const guestTeacherObj = { username, password: hashedPassword, secretKey: password, tagline, endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}
+      const guestTeacherObj = { username, password: hashedPassword, secretKey: password, tagline, startTime: leaveRequest['startTime'], endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}
       const guestTeacher = await registerGuestTeacherService(guestTeacherObj);
       await updateTeacherService({_id: teacher['_id']}, {leaveRequestCount: teacher['leaveRequestCount']+1 })
       await updateSectionService({_id: section["_id"]}, {guestTeacher: guestTeacher["_id"]})

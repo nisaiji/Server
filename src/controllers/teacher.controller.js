@@ -42,7 +42,7 @@ export async function loginTeacherController(req, res) {
     if (!currentTeacher) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
     }
-    if (teacher && !deviceId) {
+    if (teacher && platform==='app' && !deviceId) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Device Id is required"));
     }
     const matchPassword = await matchPasswordService({ enteredPassword: password, storedPassword: currentTeacher["password"] });

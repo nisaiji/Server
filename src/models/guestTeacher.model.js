@@ -11,7 +11,7 @@ const guestTeacherSchema = mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true
+    default: false
   },
   tagline: {
     type: String,
@@ -23,6 +23,10 @@ const guestTeacherSchema = mongoose.Schema({
   },
   secretKey: {
     type: String,
+    required: true
+  },
+  startTime: {
+    type: Number,
     required: true
   },
   endTime: {
