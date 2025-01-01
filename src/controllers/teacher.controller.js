@@ -46,9 +46,9 @@ export async function loginTeacherController(req, res) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Device Id is required"));
     }
     const matchPassword = await matchPasswordService({ enteredPassword: password, storedPassword: currentTeacher["password"] });
-    // if (!matchPassword) {
-    //   return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized  user"));
-    // }
+    if (!matchPassword) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized  user"));
+    }
     if (guestTeacher && platform === "web") {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Guest teacher does not support on web"));
     }
