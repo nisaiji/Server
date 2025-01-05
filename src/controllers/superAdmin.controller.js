@@ -4,7 +4,7 @@ import { matchPasswordService, hashPasswordService } from "../services/password.
 import { StatusCodes } from "http-status-codes";
 import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
 import { error, success } from "../utills/responseWrapper.js";
-import { getAdminCountService, getAdminsService } from "../services/admin.services.js";
+import { getAdminCountService, getAdminService, getAdminsService } from "../services/admin.services.js";
 
 
 export async function registerSuperAdminController(req, res) {
@@ -119,5 +119,21 @@ export async function getAdminsController(req, res){
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
     
+  }
+}
+
+export async function updateAdminController(req, res){
+  try {
+    const adminId = req.params.adminId;
+    const admin = await getAdminService({_id: adminId})
+    const { active } = req.body;
+    if(!admin){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"))
+    }
+    await updateAdminService({ _id: admin["_id"] }, {isActive: active})
+    return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"))
+    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

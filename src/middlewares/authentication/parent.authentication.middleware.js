@@ -1,7 +1,8 @@
 import { error } from "../../utills/responseWrapper.js";
-import Jwt from "jsonwebtoken";
+import Jwt, { decode } from "jsonwebtoken";
 import { config } from "../../config/config.js";
 import { getParentService } from "../../services/parent.services.js";
+import { StatusCodes } from "http-status-codes";
 
 export async function parentAuthenticate(req, res, next) {
   try {
@@ -17,7 +18,15 @@ export async function parentAuthenticate(req, res, next) {
     const _id = decoded.parentId;
     const parent = await getParentService({_id});
     if (!parent) {
-      return res.send(error(404, "Parent doesn't exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
+    }
+    const adminId = decoded.adminId;
+    const admin = await getAdminService({_id:adminId});
+    if (!admin){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not exists"));
+    }
+    if(admin && !admin['isActive']){
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
     }
     req.parentId = decoded.parentId;
     req.adminId = decoded.adminId;

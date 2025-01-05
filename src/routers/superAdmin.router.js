@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getAdminsController, getSuperAdminController, loginSuperAdminController, registerSuperAdminController, updateSuperAdminController } from "../controllers/superAdmin.controller.js";
+import { getAdminsController, getSuperAdminController, loginSuperAdminController, registerSuperAdminController, updateAdminController, updateSuperAdminController } from "../controllers/superAdmin.controller.js";
 import { loginSuperAdminValidation, registerSuperAdminValidation, updateSuperAdminValidation } from "../middlewares/validation/superAdminValidation.js";
 import { superAdminAuthenticate } from "../middlewares/authentication/superAdmin.authentication.middleware.js";
 
@@ -11,4 +11,5 @@ superAdminRouter.post("/login", loginSuperAdminValidation, loginSuperAdminContro
 superAdminRouter.put("/update", superAdminAuthenticate, updateSuperAdminValidation, updateSuperAdminController);
 superAdminRouter.get("/profile", superAdminAuthenticate, getSuperAdminController);
 superAdminRouter.get("/admins", superAdminAuthenticate, getAdminsController);
+superAdminRouter.put("/admins/:adminId", superAdminAuthenticate, updateAdminController )
 export default superAdminRouter;

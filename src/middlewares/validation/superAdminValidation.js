@@ -3,6 +3,7 @@ import {
   registerSuperAdminSchema,
   loginSuperAdminSchema,
   updateSuperAdminSchema,
+  updateAdminSchema,
 } 
 from "../../validators/superAdminSchema.validator.js";
 
@@ -33,6 +34,18 @@ export async function loginSuperAdminValidation(req, res, next) {
 export async function updateSuperAdminValidation(req, res, next) {
   try {
     const { error: schemaError } = updateSuperAdminSchema.validate(req.body);
+    if (schemaError) {
+      return res.status(400).send(error(400, schemaError.details[0].message));
+    }
+    next();
+  } catch (err) {
+    return res.status(500).send(error(500, err.message));
+  }
+}
+
+export async function updateAdminValidation(req, res, next) {
+  try {
+    const { error: schemaError } = updateAdminSchema.validate(req.body);
     if (schemaError) {
       return res.status(400).send(error(400, schemaError.details[0].message));
     }

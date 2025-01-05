@@ -1,5 +1,5 @@
 import { error } from "../../utills/responseWrapper.js";
-import Jwt from "jsonwebtoken";
+import Jwt, { decode } from "jsonwebtoken";
 import { config } from "../../config/config.js";
 import { getTeacherService } from "../../services/teacher.services.js";
 import { getSectionByIdService, getSectionService } from "../../services/section.services.js";
@@ -22,14 +22,20 @@ export async function teacherAuthenticate(req, res, next) {
       teacher = await getGuestTeacherService({_id:decoded.teacherId });
     }
     if (!teacher) {
-      return res.send(error(404, "Teacher doesn't exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher doesn't exists"));
+    }
+    const adminId = decode.adminId;
+    const admin = await getAdminService({_id:adminId});
+    if (!admin){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not exists"));
+    }
+    if(admin && !admin['isActive']){
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
     }
     const section = await getSectionService({_id : teacher['section']})
     if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher's section not exists"));
     }
-
-    
 
     req.teacherId = decoded?.teacherId;
     req.sectionId = decoded?.sectionId;

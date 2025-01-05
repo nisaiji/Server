@@ -9,7 +9,7 @@ import { constructStudentXlsxTemplate } from "../helpers/admin.helper.js";
 export async function registerAdminController(req, res) {
   try {
     const {affiliationNo, email, phone, username, password } = req.body;
-    const admin = await getAdminService({$or:[{username}, {email}, {affiliationNo}, {phone}],isActive:true});
+    const admin = await getAdminService({$or:[{username}, {email}, {affiliationNo}, {phone}]});
     if (admin && admin?.username === username) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Admin name already exist"));
     }
@@ -36,9 +36,12 @@ export async function loginAdminController(req, res) {
   try {
     const { email, password } = req.body;
   
-    const admin = await getAdminService({ email, isActive:true });
+    const admin = await getAdminService({ email });
     if (!admin) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
+    }
+    if(!admin['isActive']){
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
     }
     const storedPassword = admin.password;
     const enteredPassword = password;

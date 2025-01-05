@@ -2,6 +2,7 @@ import { error } from "../../utills/responseWrapper.js";
 import Jwt from "jsonwebtoken";
 import { config } from "../../config/config.js";
 import { getAdminService } from "../../services/admin.services.js";
+import { StatusCodes } from "http-status-codes";
 
 export async function adminAuthenticate(req, res, next) {
   try {
@@ -15,9 +16,13 @@ export async function adminAuthenticate(req, res, next) {
     //   return res.send(error(409,"Invalid admin token"))
     // }
     const _id = decoded.adminId;
-    const admin = await getAdminService({_id, isActive:true});
+    const admin = await getAdminService({_id});
     if (!admin){
       return res.send(error(404, "Admin not exists"));
+    }
+
+    if(admin && !admin['isActive']){
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
     }
     req.adminId = _id;
     req.role = "admin";
