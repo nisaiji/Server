@@ -5,6 +5,7 @@ import { getTeacherService } from "../../services/teacher.services.js";
 import { getSectionByIdService, getSectionService } from "../../services/section.services.js";
 import { StatusCodes } from "http-status-codes";
 import { getGuestTeacherService } from "../../services/guestTeacher.service.js";
+import { getAdminService } from "../../services/admin.services.js";
 
 export async function teacherAuthenticate(req, res, next) {
   try { 
@@ -24,7 +25,7 @@ export async function teacherAuthenticate(req, res, next) {
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher doesn't exists"));
     }
-    const adminId = decode.adminId;
+    const adminId = decoded.adminId;
     const admin = await getAdminService({_id:adminId});
     if (!admin){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not exists"));

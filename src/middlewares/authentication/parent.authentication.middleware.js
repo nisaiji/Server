@@ -3,6 +3,7 @@ import Jwt, { decode } from "jsonwebtoken";
 import { config } from "../../config/config.js";
 import { getParentService } from "../../services/parent.services.js";
 import { StatusCodes } from "http-status-codes";
+import { getAdminService } from "../../services/admin.services.js";
 
 export async function parentAuthenticate(req, res, next) {
   try {

@@ -26,6 +26,9 @@ export function getFormattedDateService(date){
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
 
-  const formattedDate = `${day}-${month}-${year} ${hours}:${minutes}`;
+  const formattedDate = `${day}-${month}-${year}`;
   return formattedDate;
 }
+
+// 1736274600000
+// 1736447399999

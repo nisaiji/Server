@@ -258,7 +258,6 @@ export async function updateTeacherLeavRequestController(req, res){
       const guestTeacherObj = { username, password: hashedPassword, secretKey: password, tagline, startTime: leaveRequest['startTime'], endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}
       const guestTeacher = await registerGuestTeacherService(guestTeacherObj);
       await updateTeacherService({_id: teacher['_id']}, {leaveRequestCount: teacher['leaveRequestCount']+1 })
-      await updateSectionService({_id: section["_id"]}, {guestTeacher: guestTeacher["_id"]})
     }
     
     await updateLeaveRequestService({_id: leaveRequestId}, {status})

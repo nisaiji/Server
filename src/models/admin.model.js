@@ -30,7 +30,7 @@ const adminSchema = mongoose.Schema({
   },
   isActive:{
     type:Boolean,
-    default:true
+    default: false
   },
   email: {
     type: String,

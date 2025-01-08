@@ -11,7 +11,7 @@ export async function getClassService(paramObj){
 
 export async function getClassWithSectionsService(paramObj){
   try {
-    const classes = await classModel.find(paramObj).populate({ path: "section", select: "_id name" }).select("_id name");
+    const classes = await classModel.find(paramObj).populate({ path: "section", select: "_id name startTime" }).select("_id name startTime");
     return classes;
   } catch (error) {
     throw error;    

@@ -4,7 +4,7 @@ import { matchPasswordService, hashPasswordService } from "../services/password.
 import { StatusCodes } from "http-status-codes";
 import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
 import { error, success } from "../utills/responseWrapper.js";
-import { getAdminCountService, getAdminService, getAdminsService } from "../services/admin.services.js";
+import { getAdminCountService, getAdminService, getAdminsService, updateAdminService } from "../services/admin.services.js";
 
 
 export async function registerSuperAdminController(req, res) {
