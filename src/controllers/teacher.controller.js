@@ -42,6 +42,14 @@ export async function loginTeacherController(req, res) {
     if (!currentTeacher) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
     }
+    const admin = await getAdminService({_id: currentTeacher['admin']});
+    if (!admin){
+      return res.send(error(404, "Admin not exists"));
+    }
+
+    if(admin && !admin['isActive']){
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
+    }
     if (teacher && platform==='app' && !deviceId) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Device Id is required"));
     }
@@ -61,7 +69,7 @@ export async function loginTeacherController(req, res) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Access denied due to device mismatch"))
     }
     const Class = await getClassService({ _id: section["classId"] });
-    const admin = await getAdminService({_id: currentTeacher['admin']});
+
     const accessToken = getAccessTokenService({
       role: teacher ? "teacher" : "guestTeacher",
       teacherId: currentTeacher["_id"],
