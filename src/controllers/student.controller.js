@@ -29,7 +29,7 @@ export async function registerStudentController(req, res) {
     const hashedPassword = await hashPasswordService(password);
     let parent = await getParentService({ phone, isActive:true });
     if (!parent) {
-      parent = await registerParentService({ fullname: parentName, phone, password: hashedPassword, admin: adminId });
+      parent = await registerParentService({ fullname: parentName, phone, password: hashedPassword });
     }
 
     let student = await getStudentService({ firstname, parent: parent["_id"] });

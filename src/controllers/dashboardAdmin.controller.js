@@ -3,7 +3,7 @@ import { getAttendanceCountService } from "../services/attendance.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionAttendanceStatusService, getSectionAttendancesPipelineService } from "../services/sectionAttendance.services.js";
-import { getStudentCountService } from "../services/student.service.js";
+import { getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
 import { getParentCountService } from "../services/parent.services.js";
 import { getTeacherCountService } from "../services/teacher.services.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
@@ -26,7 +26,19 @@ export async function getPresentStudentsController(req,res){
 export async function getParentCountController(req,res){
   try {
     const adminId = req.adminId;
-    const parentCount = await getParentCountService({admin: adminId, isActive: true});
+    const pipeline = [
+      {
+        $match: { admin: convertToMongoId(adminId) }
+      },
+      {
+        $group: { _id: "$parent" }
+      },
+      {
+        $count: "totalParent"
+      }
+    ]
+    const studentObj = await getStudentsPipelineService(pipeline);
+    const parentCount = studentObj.length > 0 ? studentObj[0].totalParent : 0;
     return res.status(StatusCodes.OK).send(success(200,{parentCount}));    
   } catch(err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));  

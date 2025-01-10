@@ -21,16 +21,16 @@ export async function parentAuthenticate(req, res, next) {
     if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
     }
-    const adminId = decoded.adminId;
-    const admin = await getAdminService({_id:adminId});
-    if (!admin){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not exists"));
-    }
-    if(admin && !admin['isActive']){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
-    }
+    // const adminId = decoded.adminId;
+    // const admin = await getAdminService({_id:adminId});
+    // if (!admin){
+    //   return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not exists"));
+    // }
+    // if(admin && !admin['isActive']){
+    //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
+    // }
     req.parentId = decoded.parentId;
-    req.adminId = decoded.adminId;
+    // req.adminId = decoded.adminId;
     req.role = "parent";
     next();
   } catch (err) {

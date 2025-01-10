@@ -85,7 +85,6 @@ export async function attendanceByParentController(req, res) {
   try {
     const { studentId, attendance} = req.body;
     const parentId = req.parentId;
-    const adminId = req.adminId;
     let date = new Date();
     const{startTime, endTime} = getStartAndEndTimeService(date, date);    
     
@@ -111,7 +110,7 @@ export async function attendanceByParentController(req, res) {
     const [attendanceMarkedByTeacher, attendanceMarkedByParent, holiday] = await Promise.all([
       getAttendanceService({student:studentId, date:{$gte:startTime,$lte:endTime}, teacherAttendance:{$ne:""}}),
       getAttendanceService({student:studentId, date: {$gte:startTime,$lte:endTime},parentAttendance:{$ne:""}}),
-      getHolidayService({date: {$gte:startTime,$lte:endTime}, admin:adminId })
+      getHolidayService({date: {$gte:startTime,$lte:endTime}, admin:student['admin'] })
     ]) ;
 
     if (holiday) {
@@ -298,11 +297,15 @@ export async function checkParentAttendaceMarkedController(req, res) {
   try {
     const studentId = req.params.studentId;
     const parentId = req.parentId;
-    const adminId = req.adminId;
     const date = new Date();
     const{startTime, endTime} = getStartAndEndTimeService(date, date);
+
+    const student = await getStudentService({parent: parentId, isActive:true});
+    if(!student){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "student not found"));
+    }
  
-    const holiday = await getHolidayService({ admin:adminId,date:{$gte:startTime, $lte:endTime}});
+    const holiday = await getHolidayService({ admin:student['admin'],date:{$gte:startTime, $lte:endTime}});
     if (holiday) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
     }

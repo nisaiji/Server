@@ -55,10 +55,6 @@ const parentSchema = mongoose.Schema({
   },
   password: {
     type: String
-  },
-  admin: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "admin"
   }
 });
 parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });

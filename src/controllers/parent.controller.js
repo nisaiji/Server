@@ -24,7 +24,6 @@ export async function loginParentController(req, res) {
       role: "parent",
       parentId: parent["_id"],
       phone: parent["phone"],
-      adminId: parent["admin"],
       email,
       address: parent["address"]? parent["address"]:"",
       username: parent["username"]? parent["username"]: ""
