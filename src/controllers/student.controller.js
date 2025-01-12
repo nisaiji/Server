@@ -145,27 +145,27 @@ export async function getStudentsController(req, res){
         if(!admin && !classId && !section && !parent && !student && !firstname && !lastname && !gender){
           return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
         }
-        
-        // if( admin && req.adminId!==admin ){
-        //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
-        // }
-    
+
+        if( admin && req.adminId!==admin ){
+          return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+        }
+
         if(req.role==="parent" && !parent && parent!==req.parentId){
           return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
         }
-        
+
         if(req.role=="teacher" && !section){
           section = req.sectionId;
         }
-    
+
         if(req.role=="admin" && !admin){
           admin = req.adminId;
         }
-    
+
         if(req.role=="parent" && !parent){
           parent = req.parentId;
         }
-    
+
         if(req.role==="teacher" && (admin || classId ||(section && req.sectionId!==section))){
           return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
         }
@@ -184,7 +184,7 @@ export async function getStudentsController(req, res){
           filter.lastname = { $regex: regexLastname }; 
         }
         if(gender){ filter.gender = gender; }
-    
+
         const pageNum = parseInt(page);
         const limitNum = limit? parseInt(limit):"no limit";
         const skipNum = (pageNum-1)*limitNum;
@@ -354,6 +354,94 @@ export async function getStudentsController(req, res){
               }
             })
           }
+          if (includes.includes('percentageAttendance')) {
+            const currentDate = new Date().getTime();
+
+            pipeline.push({
+              $lookup: {
+                from: 'sections',
+                localField: 'section',
+                foreignField: '_id',
+                as:'sectionInfo',
+                pipeline: [
+                  {
+                    $project:{
+                      startTime:1
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$sectionInfo',
+                preserveNullAndEmptyArrays: true
+              }
+            });
+        
+            pipeline.push({
+                $lookup: {
+                    from: 'attendances',
+                    let: { 
+                      studentId: '$_id', 
+                      startTime: '$sectionInfo.startTime', 
+                      currentTime: currentDate 
+                  },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$student', '$$studentId'] },
+                                        { $gte: ['$date', '$$startTime'] },
+                                        { $lte: ['$date', '$$currentTime'] }
+                                    ]
+                                },
+                                teacherAttendance: { $in: ['present', 'absent'] }
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                totalDays: { $sum: 1 },
+                                presentDays: {
+                                    $sum: {
+                                        $cond: [{ $eq: ['$teacherAttendance', 'present'] }, 1, 0]
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    as: 'attendanceStats'
+                }
+            });
+            
+            pipeline.push({
+                $addFields: {
+                    attendancePercentage: {
+                        $cond: [
+                            { $gt: [{ $arrayElemAt: ['$attendanceStats.totalDays', 0] }, 0] },
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            { $arrayElemAt: ['$attendanceStats.presentDays', 0] },
+                                            { $arrayElemAt: ['$attendanceStats.totalDays', 0] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+                            0
+                        ]
+                    }
+                }
+            });
+            
+            pipeline.push({
+                $unset: ['attendanceStats', 'sectionInfo']
+            });
+          }
         }
 
         pipeline.push({
@@ -369,7 +457,7 @@ export async function getStudentsController(req, res){
         const students = await getStudentsPipelineService(pipeline);
         const totalStudents = await getStudentCountService(filter);
         const totalPages = Math.ceil(totalStudents / limitNum);
-    
+
         return res.status(StatusCodes.OK).send(success(200, {
           students,
           currentPage: pageNum,

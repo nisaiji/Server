@@ -24,7 +24,6 @@ paths:
                 - parentName
                 - phone
                 - sectionId
-                - classId
               properties:
                 firstname:
                   type: string
@@ -37,8 +36,6 @@ paths:
                 phone:
                   type: string
                 sectionId:
-                  type: string
-                classId:
                   type: string
       responses:
         200:
