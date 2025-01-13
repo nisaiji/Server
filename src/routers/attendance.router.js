@@ -5,8 +5,8 @@ import { parentAuthenticate } from "../middlewares/authentication/parent.authent
 import { attendanceByParentValidation, attendanceByTeacherValidation, attendanceCountValidation, attendanceStatusValidation, getAttendanceValidation, updateAttendanceValidation } from "../middlewares/validation/attendance.validation.middleware.js";
 import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
- 
-const attendanceRouter = express.Router();  
+
+const attendanceRouter = express.Router();
 
 attendanceRouter.post("/teacher", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), attendanceByTeacherValidation, attendanceByTeacherController);
 attendanceRouter.post("/parent", parentAuthenticate, attendanceByParentValidation, attendanceByParentController);

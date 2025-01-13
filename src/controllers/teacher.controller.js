@@ -75,6 +75,7 @@ export async function loginTeacherController(req, res) {
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
       sectionId: section["_id"],
+      sectionStart: section['startTime'],
       classId: Class["_id"],
       sectionName: section["name"],
       className: Class["name"],
