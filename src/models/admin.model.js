@@ -61,6 +61,10 @@ const adminSchema = mongoose.Schema({
   pincode:{
     type:String
   },
+  disableCount: {
+    type: Number,
+    default: 0
+  },
   website:{
     type:String
   },

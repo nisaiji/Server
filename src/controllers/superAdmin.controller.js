@@ -130,7 +130,11 @@ export async function updateAdminController(req, res){
     if(!admin){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"))
     }
-    await updateAdminService({ _id: admin["_id"] }, {isActive: active})
+    let disableCount = admin['disableCount'];
+    if(active===false){
+      disableCount += 1;
+    }
+    await updateAdminService({ _id: admin["_id"] }, {isActive: active, disableCount})
     return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"))
     
   } catch (err) {

@@ -141,15 +141,26 @@ export async function bulkAttendanceMarkController(req, res) {
     const { studentsAttendances } = req.body;
     const adminId = req.adminId;
     const teacherId = req.teacherId;
+    const role = req.role;
 
     const section = await getSectionService({ _id: sectionId })
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"))
     }
 
-    // if(section["guestTeacher"] && section["guestTeacher"].toString()!==teacherId){
-    //   return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
-    // }
+    if(role==='guestTeacher'){
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
+    }
+
+    if(role==='teacher' && teacherId){
+      const teacher = await getTeacherService({_id: teacherId})
+      if(!teacher){
+        return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher not exists"));
+      }
+      if(sectionId.toString()!==teacher['section'].toString()){
+        return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"));
+      }
+    }
 
     for (let attendanceTimestamp in studentsAttendances) {
       attendanceTimestamp = parseInt(attendanceTimestamp)
