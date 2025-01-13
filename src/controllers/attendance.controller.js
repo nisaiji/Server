@@ -392,9 +392,18 @@ export async function attendanceCountOfStudentController(req, res){
 
 export async function getAttendancesController(req, res){
   try {
-    const { startTime, endTime, student, section, classId, admin } = req.query;
+    let { startTime, endTime, student, section, classId, admin } = req.query;
     const filter = {isActive: true}
     const attendanceFilter = {}
+    const role = req.role;
+    if(role === 'guestTeacher'){
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Guest teacher not authorized"));
+    }
+    if(role ==='teacher'){
+      classId = null;
+      admin = null;
+      section = req.sectionId;
+    }
     if(student){ filter['student'] = convertToMongoId(student) }
     if(section) { filter['section'] = convertToMongoId(section) }
     if(classId){ filter['classId'] = convertToMongoId(classId) }

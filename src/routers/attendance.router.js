@@ -13,7 +13,8 @@ attendanceRouter.post("/parent", parentAuthenticate, attendanceByParentValidatio
 attendanceRouter.put("/teacher", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), updateAttendanceValidation, updateAttendanceController);
 attendanceRouter.post("/teacher/bulk-mark/:sectionId", teacherAuthenticate, bulkAttendanceMarkController)
 attendanceRouter.post("/admin/bulk-mark/:sectionId", adminAuthenticate, bulkAttendanceMarkController)
-attendanceRouter.get("/", adminAuthenticate, getAttendancesController);
+attendanceRouter.get("/admin", adminAuthenticate, getAttendancesController);
+attendanceRouter.get("/teacher", teacherAuthenticate, getAttendancesController);
 attendanceRouter.get("/mismatch", teacherAuthenticate, authorizeTeacherRoles('teacher'), getMisMatchAttendanceController);
 attendanceRouter.get("/teacher/is-marked", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), checkAttendaceMarkedController);
 attendanceRouter.get("/parent/is-marked/:studentId", parentAuthenticate, checkParentAttendaceMarkedController);
