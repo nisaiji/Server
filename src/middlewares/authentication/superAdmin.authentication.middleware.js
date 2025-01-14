@@ -18,9 +18,10 @@ export async function superAdminAuthenticate(req, res, next) {
     const _id = decoded.id;
     const superAdmin = await getSuperAdminService({_id});
     if (!superAdmin){
-      return res.send(error(404, "Admin not exists"));
+      return res.send(error(404, "Super Admin not exists"));
     }
     req.superAdminId = _id;
+    req.role = "superAdmin";
     next();
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

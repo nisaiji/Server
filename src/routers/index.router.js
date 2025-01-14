@@ -14,6 +14,8 @@ import changePasswordRouter from "./changePassword.router.js";
 import superAdminRouter from "./superAdmin.router.js";
 import leaveRouter from "./leave.router.js";
 import guestTeacherRouter from './guestTeacher.router.js'
+import customerSupportRouter from "./customerSupport.router.js";
+
 const router = express();
 
 router.use("/admin", adminRouter);
@@ -31,5 +33,6 @@ router.use("/parent-dashboard",parentDashboardRouter);
 router.use("/teacher-dashboard",teacherDashboardRouter);
 router.use('/super-admin', superAdminRouter);
 router.use('/guest-teacher', guestTeacherRouter)
+router.use('/customer-support', customerSupportRouter)
 
 export default router;
