@@ -19,9 +19,21 @@ export async function registerAdminController(req, res) {
     }
     const hashedPassword = await hashPasswordService(password);
     req.body["password"] = hashedPassword;
-    await registerAdminService(req.body);
+    const registerdAdmin = await registerAdminService(req.body);
+    const accessToken = await getAccessTokenService({
+      role: 'admin',
+      schoolNumber: registerdAdmin['schoolName'],
+      email: registerdAdmin['email'],
+      phone: registerdAdmin['phone']
+    });
+    const refreshToken = await getRefreshTokenService({
+      role: 'admin',
+      schoolNumber: registerdAdmin['schoolName'],
+      email: registerdAdmin['email'],
+      phone: registerdAdmin['phone']
+    });
    
-    return res.status(StatusCodes.CREATED).send(success(201, "Admin registered successfully"));
+    return res.status(StatusCodes.CREATED).send(success(201, {accessToken, refreshToken, msg: "Admin registered successfully"}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -60,7 +72,7 @@ export async function loginAdminController(req, res) {
       email: admin["email"],
       adminId: admin["_id"],
       phone: admin["phone"]  
-    })
+    });
     return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, username: admin.username }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

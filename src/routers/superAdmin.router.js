@@ -10,7 +10,7 @@ superAdminRouter.post("/register", registerSuperAdminValidation, registerSuperAd
 superAdminRouter.post("/login", loginSuperAdminValidation, loginSuperAdminController);
 superAdminRouter.put("/update", superAdminAuthenticate, updateSuperAdminValidation, updateSuperAdminController);
 superAdminRouter.get("/profile", superAdminAuthenticate, getSuperAdminController);
-superAdminRouter.get("/admins", superAdminAuthenticate, getAdminsController);
+superAdminRouter.get("/admins", getAdminsController);
 superAdminRouter.get("/customer-queries", superAdminAuthenticate, getCustomerQueriesController);
 superAdminRouter.put("/admins/:adminId", updateAdminController )
 
