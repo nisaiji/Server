@@ -61,7 +61,7 @@ const adminSchema = mongoose.Schema({
   pincode:{
     type:String
   },
-  disableCount: {
+  statusChangeCount: {
     type: Number,
     default: 0
   },

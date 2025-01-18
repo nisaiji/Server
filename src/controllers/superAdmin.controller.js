@@ -6,7 +6,6 @@ import { getSuperAdminService, registerSuperAdminService, updateSuperAdminServic
 import { error, success } from "../utills/responseWrapper.js";
 import { getAdminCountService, getAdminService, getAdminsService, updateAdminService } from "../services/admin.services.js";
 
-
 export async function registerSuperAdminController(req, res) {
   try {
     const { username, email, password } = req.body;
@@ -130,11 +129,9 @@ export async function updateAdminController(req, res){
     if(!admin){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"))
     }
-    let disableCount = admin['disableCount'];
-    if(active===false){
-      disableCount += 1;
-    }
-    await updateAdminService({ _id: admin["_id"] }, {isActive: active, disableCount})
+    let statusChangeCount = admin['statusChangeCount'];
+    statusChangeCount += 1;
+    await updateAdminService({ _id: admin["_id"] }, {isActive: active, statusChangeCount})
     return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"))
     
   } catch (err) {

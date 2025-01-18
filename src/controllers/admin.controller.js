@@ -5,20 +5,15 @@ import { hashPasswordService, matchPasswordService } from "../services/password.
 import { StatusCodes } from "http-status-codes";
 import { constructStudentXlsxTemplate } from "../helpers/admin.helper.js";
 
-
 export async function registerAdminController(req, res) {
   try {
-    const {affiliationNo, email, phone, username, password } = req.body;
-    const admin = await getAdminService({$or:[{username}, {email}, {affiliationNo}, {phone}]});
-    if (admin && admin?.username === username) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Admin name already exist"));
-    }
+    const {schoolName, email, phone, password } = req.body;
+    const admin = await getAdminService({$or:[{email}, {phone}]});
+
     if (admin && admin?.email === email) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Email already exist"));
     }
-    if (admin && admin?.affiliationNo === affiliationNo) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Affiliation no already exist"));
-    }
+
     if (admin && admin?.phone === phone) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already exist"));
     }
@@ -84,10 +79,10 @@ export async function refreshAccessTokenController(req, res) {
 
 export async function updateAdminController(req, res) {
   try {
-    const{schoolName,principal,schoolBoard, schoolNumber, affiliationNo, address,city,state,country, district, pincode, email, phone, username, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
+    const{schoolName, principal, schoolBoard, schoolNumber, affiliationNo, address,city,state,country, district, pincode, email, phone, username, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
     const fieldsToBeUpdated = {};
     const adminId = req.adminId;
-    const admin = await getAdminService({$or: [{username}, {email}, {phone}], _id:{$ne:adminId}});
+    const admin = await getAdminService({$or: [{username}, {email}, {phone}, {affiliationNo}], _id:{$ne:adminId}});
     if(admin && admin["username"]==username){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists."));
     }
@@ -96,6 +91,9 @@ export async function updateAdminController(req, res) {
     }
     if(admin && admin["phone"]==phone){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already exists."));
+    }
+    if(affiliationNo && admin["affiliationNo"]==affiliationNo){
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Affiliation No already exists."));
     }
 
     if(schoolName){ fieldsToBeUpdated["schoolName"] = schoolName; }
@@ -153,4 +151,3 @@ export async function getStudentDemoExcelSheetController(req, res){
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
- 

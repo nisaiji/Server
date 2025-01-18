@@ -1,20 +1,10 @@
 import Joi from "joi";
 
 const registerAdminSchema = Joi.object({
-  username: Joi.string().min(5).max(15).required().messages({
-    "string.min": "username should be atleast 5 chars long",
-    "string.max": "username length must be smaller than 15 chars",
-    "any.required": "username is required"
-  }),
   schoolName: Joi.string().min(8).max(500).required().messages({
     "string.min": "school name should be atleast 8 chars long",
     "string.max": "school name length must be smaller than 500 chars",
     "any.required": "School name is required"
-  }),
-  affiliationNo: Joi.string().min(5).max(50).required().messages({
-    "string.min": "Affiliation no. should be atleast 5 chars long",
-    "string.max": "Affiliation no. length must be smaller than 50 chars",
-    "any.required": "Affiliation no. is required"
   }),
   phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).message("invalid phone number").length(10).required().messages({
     "string.pattern": "invalid phone numberrr",
@@ -29,7 +19,9 @@ const registerAdminSchema = Joi.object({
     "string.pattern": "Password should contains alpha-numberic special symbols",
     "any.required": "Password is required!"
     }),
+});
 
+const adminAddressSchema = Joi.object({
   country: Joi.string().min(2).max(100).required().messages({
     'string.base': 'Country should be a string',
     'string.min': 'Country must be at least 2 characters long',
@@ -44,10 +36,11 @@ const registerAdminSchema = Joi.object({
     'any.required': 'State is required'
   }),
 
-  district: Joi.string().min(2).max(100).optional().messages({
+  district: Joi.string().min(2).max(100).required().messages({
     'string.base': 'District should be a string',
     'string.min': 'District must be at least 2 characters long',
-    'string.max': 'District must be less than 100 characters long'
+    'string.max': 'District must be less than 100 characters long',
+    'any.required': 'District is required'
   }),
 
   city: Joi.string().min(2).max(100).required().messages({
@@ -69,7 +62,20 @@ const registerAdminSchema = Joi.object({
     'string.pattern.base': 'Pincode must be a 6-digit number',
     'any.required': 'Pincode is required'
   })
+});
 
+const adminDetailsSchema = Joi.object({
+  username: Joi.string().min(5).max(15).required().messages({
+    "string.min": "username should be atleast 5 chars long",
+    "string.max": "username length must be smaller than 15 chars",
+    "any.required": "username is required"
+  }),
+
+  affiliationNo: Joi.string().min(5).max(50).required().messages({
+    "string.min": "Affiliation no. should be atleast 5 chars long",
+    "string.max": "Affiliation no. length must be smaller than 50 chars",
+    "any.required": "Affiliation no. is required"
+  }),
 });
 
 const loginAdminSchema = Joi.object({
@@ -172,4 +178,4 @@ const updateAdminSocialProfileSchema = Joi.object({
   youtube: Joi.string()
 });
 
-export {registerAdminSchema, loginAdminSchema, updateAdminProfileSchema, updateAdminSocialProfileSchema};
+export {registerAdminSchema, adminAddressSchema, adminDetailsSchema, loginAdminSchema, updateAdminProfileSchema, updateAdminSocialProfileSchema};
