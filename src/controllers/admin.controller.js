@@ -96,17 +96,24 @@ export async function updateAdminController(req, res) {
     const{schoolName, principal, schoolBoard, schoolNumber, affiliationNo, address,city,state,country, district, pincode, email, phone, username, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
     const fieldsToBeUpdated = {};
     const adminId = req.adminId;
-    const admin = await getAdminService({$or: [{username}, {email}, {phone}, {affiliationNo}], _id:{$ne:adminId}});
-    if(admin && admin["username"]==username){
+    const condition = [];
+    if(username){ condition.push({ username })};
+    if(email){ condition.push({ email })};
+    if(phone){ condition.push({ phone })};
+    if(affiliationNo){ condition.push({ affiliationNo })};
+
+    const admin = await getAdminService({$or: condition, _id:{$ne:adminId}});
+
+    if(admin && username && admin["username"] && admin["username"]==username){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists."));
     }
-    if(admin && admin["email"]==email){
+    if(admin && email && admin["email"]==email){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Email already exists."));
     }
-    if(admin && admin["phone"]==phone){
+    if(admin && phone && admin["phone"]==phone){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already exists."));
     }
-    if(affiliationNo && admin["affiliationNo"]==affiliationNo){
+    if(admin && affiliationNo && admin["affiliationNo"] && admin["affiliationNo"]==affiliationNo){
       return res.status(StatusCodes.CONFLICT).send(error(409, "Affiliation No already exists."));
     }
 

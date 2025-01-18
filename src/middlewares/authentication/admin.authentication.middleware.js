@@ -8,7 +8,7 @@ export async function adminAuthenticate(req, res, next) {
   try {
     const token = req.header("Authorization");
     if (!token){
-      return res.send(error(404, "Authorization token is required"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Authorization token is required"));
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
@@ -56,4 +56,24 @@ export async function refreshTokenAuthenticate(req, res, next) {
   }
 }
 
+export async function deactivatedAdminAuthenticate(req, res, next) {
+  try {
+    const token = req.header("Authorization");
+    if (!token){
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Authorization token is required"));
+    }
+    const parsedToken = token.split(" ")[1];
+    const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
+    const _id = decoded.adminId;
+    const admin = await getAdminService({_id});
+    if (!admin){
+      return res.send(error(404, "Admin not exists"));
+    }
 
+    req.adminId = _id;
+    req.role = "admin";
+    next();
+  } catch (err) {
+    res.send(error(500, err.message));
+  }
+}
