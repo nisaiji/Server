@@ -142,9 +142,13 @@ export async function updateAdminController(req, res){
     if(!admin){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"))
     }
+    console.log({active, status: admin['isActive']});
+    if(active.toString() === admin['isActive'].toString()){
+      return res.status(StatusCodes.BAD_REQUEST).send(success(400, `Admin already ${active ? "activated" : "deactivated"}`));
+    }
     let statusChangeCount = admin['statusChangeCount'];
     statusChangeCount += 1;
-    await updateAdminService({ _id: admin["_id"] }, {isActive: active, statusChangeCount})
+    await updateAdminService({ _id: admin["_id"] }, {isActive: active, statusChangeCount, $push: {statusChangeLog: {status: active ? "activated": "deactivated"}}})
     return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"))
     
   } catch (err) {

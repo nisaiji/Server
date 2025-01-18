@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
+import statusChangeLogSchema from "./schema/statusChangeLog.schema.js";
  
 const adminSchema = mongoose.Schema({
   username: {
     type: String,
     unique: true,
-    required: true
   },
   schoolName: {
     type: String,
@@ -12,7 +12,6 @@ const adminSchema = mongoose.Schema({
   },
   affiliationNo: {
     type: String,
-    required: true,
     unique: true
   },
   principal:{
@@ -44,7 +43,6 @@ const adminSchema = mongoose.Schema({
   },
   address: {
     type: String,
-    required: true
   },
   city:{
     type:String
@@ -65,6 +63,8 @@ const adminSchema = mongoose.Schema({
     type: Number,
     default: 0
   },
+  statusChangeLog: [statusChangeLogSchema],
+
   website:{
     type:String
   },
