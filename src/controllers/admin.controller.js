@@ -19,18 +19,20 @@ export async function registerAdminController(req, res) {
     }
     const hashedPassword = await hashPasswordService(password);
     req.body["password"] = hashedPassword;
-    const registerdAdmin = await registerAdminService(req.body);
+    const registeredAdmin = await registerAdminService(req.body);
     const accessToken = await getAccessTokenService({
       role: 'admin',
-      schoolNumber: registerdAdmin['schoolName'],
-      email: registerdAdmin['email'],
-      phone: registerdAdmin['phone']
+      adminId: registeredAdmin['_id'],
+      schoolNumber: registeredAdmin['schoolName'],
+      email: registeredAdmin['email'],
+      phone: registeredAdmin['phone']
     });
     const refreshToken = await getRefreshTokenService({
       role: 'admin',
-      schoolNumber: registerdAdmin['schoolName'],
-      email: registerdAdmin['email'],
-      phone: registerdAdmin['phone']
+      _id: registeredAdmin['_id'],
+      schoolNumber: registeredAdmin['schoolName'],
+      email: registeredAdmin['email'],
+      phone: registeredAdmin['phone']
     });
    
     return res.status(StatusCodes.CREATED).send(success(201, {accessToken, refreshToken, msg: "Admin registered successfully"}));
