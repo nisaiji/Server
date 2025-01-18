@@ -119,6 +119,7 @@ export async function updateAdminController(req, res) {
     if(twitter){ fieldsToBeUpdated["twitter"] = twitter; }
     if(whatsapp){ fieldsToBeUpdated["whatsapp"] = whatsapp; }
     if(youtube){ fieldsToBeUpdated["youtube"] = youtube; }
+    if(linkedin){ fieldsToBeUpdated["linkedin"] = linkedin; }
 
     await updateAdminService({_id:adminId}, fieldsToBeUpdated);
 
@@ -152,3 +153,4 @@ export async function getStudentDemoExcelSheetController(req, res){
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+ 

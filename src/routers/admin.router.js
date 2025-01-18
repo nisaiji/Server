@@ -4,8 +4,6 @@ import { adminAuthenticate, refreshTokenAuthenticate } from "../middlewares/auth
 import {adminLoginValidation, adminProfileUpdateValidation,adminRegisterValidation, adminSocialProfileUpdateValidation } from "../middlewares/validation/admin.validation.middleware.js"; 
 const adminRouter = express.Router();
 
-
-
 adminRouter.post("/", adminRegisterValidation, registerAdminController);
 adminRouter.post("/login", adminLoginValidation, loginAdminController);
 adminRouter.get("/refresh", refreshTokenAuthenticate, refreshAccessTokenController);
@@ -14,4 +12,4 @@ adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation
 adminRouter.get("/", adminAuthenticate, getAdminController);
 adminRouter.get("/students-excelsheet", adminAuthenticate, getStudentDemoExcelSheetController)
 
-export default adminRouter;  
+export default adminRouter;
