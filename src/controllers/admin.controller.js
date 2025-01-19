@@ -151,7 +151,7 @@ export async function updateAdminController(req, res) {
 export async function getAdminController(req, res) {
   try {
     const adminId = req.adminId;
-    const admin = await getAdminService({_id:adminId, isActive:true});
+    const admin = await getAdminService({_id:adminId });
     return res.status(StatusCodes.OK).send(success(200, admin));
   } catch (err) {
     return res
