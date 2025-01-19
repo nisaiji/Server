@@ -4,7 +4,6 @@ import statusChangeLogSchema from "./schema/statusChangeLog.schema.js";
 const adminSchema = mongoose.Schema({
   username: {
     type: String,
-    unique: true,
   },
   schoolName: {
     type: String,

@@ -11,7 +11,7 @@ adminRouter.put("/address", deactivatedAdminAuthenticate, adminAddressValidation
 adminRouter.put("/details", deactivatedAdminAuthenticate, adminDetailsValidation, updateAdminController);
 adminRouter.put("/", adminAuthenticate, adminProfileUpdateValidation, updateAdminController);
 adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation, updateAdminController);
-adminRouter.get("/", adminAuthenticate, getAdminController);
+adminRouter.get("/", deactivatedAdminAuthenticate, getAdminController);
 adminRouter.get("/students-excelsheet", adminAuthenticate, getStudentDemoExcelSheetController)
 
 export default adminRouter;
