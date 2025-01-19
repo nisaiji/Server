@@ -5,7 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { getAdminCountService, getAdminService, getAdminsService, updateAdminService } from "../services/admin.services.js";
-import { getCustomerSupportQueryService } from "../services/customerSupport.services.js";
+import { getCustomerSupportQueriesService } from "../services/customerSupport.services.js";
 
 export async function registerSuperAdminController(req, res) {
   try {
@@ -124,7 +124,7 @@ export async function getAdminsController(req, res){
 
 export async function getCustomerQueriesController(req, res){
   try {
-    const queries = await getCustomerSupportQueryService({});
+    const queries = await getCustomerSupportQueriesService({});
 
     return res.status(StatusCodes.OK).send(success(200,{ queries }));
 
