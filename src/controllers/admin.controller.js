@@ -67,7 +67,8 @@ export async function loginAdminController(req, res) {
       email: admin["email"],
       adminId: admin["_id"],
       phone: admin["phone"],
-      active: admin["isActive"]
+      active: admin["isActive"],
+      pincode: admin['pincode'] ? admin['pincode'] : ''
     });
 
     const refreshToken = getRefreshTokenService({
@@ -77,7 +78,8 @@ export async function loginAdminController(req, res) {
       email: admin["email"],
       adminId: admin["_id"],
       phone: admin["phone"],
-      active: admin["isActive"]
+      active: admin["isActive"],
+      pincode: admin['pincode'] ? admin['pincode'] : ''
     });
     return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, username: admin.username }));
   } catch (err) {
