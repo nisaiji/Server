@@ -55,9 +55,9 @@ export async function loginAdminController(req, res) {
     const storedPassword = admin.password;
     const enteredPassword = password;
     const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
-    // if (!matchPassword) {
-    //   return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
-    // }
+    if (!matchPassword) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
+    }
     const accessToken = getAccessTokenService({
       role: "admin",
       username: admin["username"],
@@ -93,7 +93,7 @@ export async function refreshAccessTokenController(req, res) {
 
 export async function updateAdminController(req, res) {
   try {
-    const{schoolName, principal, schoolBoard, schoolNumber, affiliationNo, address,city,state,country, district, pincode, email, phone, username, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
+    const{schoolName, principal, schoolBoard, schoolNumber, affiliationNo, address,city,state,country, district, pincode, email, phone, username, photo, method, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
     const fieldsToBeUpdated = {};
     const adminId = req.adminId;
     const condition = [];
@@ -139,6 +139,9 @@ export async function updateAdminController(req, res) {
     if(whatsapp){ fieldsToBeUpdated["whatsapp"] = whatsapp; }
     if(youtube){ fieldsToBeUpdated["youtube"] = youtube; }
     if(linkedin){ fieldsToBeUpdated["linkedin"] = linkedin; }
+    if (photo || method === "DELETE") {
+      fieldsToBeUpdated.photo = method === "DELETE" ? "" : photo;
+    }
 
     await updateAdminService({_id:adminId}, fieldsToBeUpdated);
 

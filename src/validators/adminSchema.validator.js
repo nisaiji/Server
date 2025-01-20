@@ -178,4 +178,14 @@ const updateAdminSocialProfileSchema = Joi.object({
   youtube: Joi.string()
 });
 
-export {registerAdminSchema, adminAddressSchema, adminDetailsSchema, loginAdminSchema, updateAdminProfileSchema, updateAdminSocialProfileSchema};
+const adminPhotoUpdateSchema = Joi.object({
+  photo: Joi.string().optional(),
+  method: Joi.string().valid("POST", "DELETE").required().messages({
+    "any.required": "method is required.",
+    "string.empty": "method can not be an empty string.",
+    "string.base": "method must be a string.",
+    "any.only": 'method must be either "POST" or "DELETE".'
+  })
+});
+
+export {registerAdminSchema, adminAddressSchema, adminDetailsSchema, loginAdminSchema, updateAdminProfileSchema, updateAdminSocialProfileSchema, adminPhotoUpdateSchema};

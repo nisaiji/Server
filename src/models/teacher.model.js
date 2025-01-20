@@ -68,7 +68,7 @@ const teacherSchema = mongoose.Schema({
     type:String
   }, 
   photo:{
-    type: String,
+    type: String
   },
   forgetPasswordCount:{
     type:Number,
@@ -87,7 +87,11 @@ const teacherSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"
   }
-});
+},
+{
+  timestamps:true
+}
+);
 
 
 const teacherModel = mongoose.model("teacher", teacherSchema);

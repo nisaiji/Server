@@ -208,7 +208,6 @@ export async function bulkAttendanceMarkController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, "Attendance marked successfully"));
   } catch (err) {
-    console.log(err)
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
 }

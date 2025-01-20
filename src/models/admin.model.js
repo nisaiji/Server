@@ -55,6 +55,9 @@ const adminSchema = mongoose.Schema({
   country:{
     type:String
   },
+  photo: {
+    type: String
+  },
   pincode:{
     type:String
   },
@@ -85,7 +88,11 @@ const adminSchema = mongoose.Schema({
   youtube:{
     type:String
   }
-});
+},
+{
+  timestamps:true
+}
+);
 
 const adminModel = mongoose.model("admin", adminSchema);
 export default adminModel;

@@ -63,7 +63,11 @@ const studentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"
   }
-});
+},
+{
+  timestamps:true
+}
+);
 
 const studentModel = mongoose.model("student", studentSchema);
 export default studentModel;
