@@ -62,7 +62,7 @@ export async function loginAdminController(req, res) {
     }
     const accessToken = getAccessTokenService({
       role: "admin",
-      username: admin["username"],
+      username: admin["username"] ? admin['username'] : '',
       schoolName: admin["schoolName"],
       email: admin["email"],
       adminId: admin["_id"],
@@ -73,7 +73,7 @@ export async function loginAdminController(req, res) {
 
     const refreshToken = getRefreshTokenService({
       role: "admin",
-      username: admin["username"],
+      username: admin["username"] ? admin['username'] : '',
       schoolName: admin["schoolName"],
       email: admin["email"],
       adminId: admin["_id"],
