@@ -25,14 +25,16 @@ export async function registerAdminController(req, res) {
       adminId: registeredAdmin['_id'],
       schoolNumber: registeredAdmin['schoolName'],
       email: registeredAdmin['email'],
-      phone: registeredAdmin['phone']
+      phone: registeredAdmin['phone'],
+      active: registeredAdmin["isActive"]
     });
     const refreshToken = await getRefreshTokenService({
       role: 'admin',
       _id: registeredAdmin['_id'],
       schoolNumber: registeredAdmin['schoolName'],
       email: registeredAdmin['email'],
-      phone: registeredAdmin['phone']
+      phone: registeredAdmin['phone'],
+      active: registeredAdmin["isActive"]
     });
    
     return res.status(StatusCodes.CREATED).send(success(201, {accessToken, refreshToken, msg: "Admin registered successfully"}));
@@ -49,9 +51,9 @@ export async function loginAdminController(req, res) {
     if (!admin) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
-    if(!admin['isActive']){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
-    }
+    // if(!admin['isActive']){
+    //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
+    // }
     const storedPassword = admin.password;
     const enteredPassword = password;
     const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
@@ -64,7 +66,8 @@ export async function loginAdminController(req, res) {
       schoolName: admin["schoolName"],
       email: admin["email"],
       adminId: admin["_id"],
-      phone: admin["phone"]
+      phone: admin["phone"],
+      active: admin["isActive"]
     });
 
     const refreshToken = getRefreshTokenService({
@@ -73,7 +76,8 @@ export async function loginAdminController(req, res) {
       schoolName: admin["schoolName"],
       email: admin["email"],
       adminId: admin["_id"],
-      phone: admin["phone"]  
+      phone: admin["phone"],
+      active: admin["isActive"]
     });
     return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, username: admin.username }));
   } catch (err) {
