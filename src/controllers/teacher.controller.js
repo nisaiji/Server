@@ -273,11 +273,13 @@ export async function getTeacherController(req, res) {
     if (!isValidMongoId(id)) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid teacher Id"));
     }
-    const teacher = await getTeacherService({ _id: id, isActive: true });
+    const teacher = await getTeacherService({ _id: id, isActive: true }, {password:0});
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "Teacher not found"));
     }
-    return res.status(StatusCodes.OK).send(success(200, teacher));
+    const section = await getSectionService({_id: teacher["section"]}, {_id:0, teacher:0});
+    const combinedData = { ...teacher._doc, ...section._doc };
+    return res.status(StatusCodes.OK).send(success(200, combinedData));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

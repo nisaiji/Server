@@ -4,9 +4,9 @@ import studentModel from "../models/student.model.js";
 import teacherModel from "../models/teacher.model.js";
 
 
-export async function getSectionService(paramObj){
+export async function getSectionService(paramObj, projection){
   try {
-    const section = await sectionModel.findOne(paramObj);
+    const section = await sectionModel.findOne(paramObj).select(projection);
     return section;
   } catch (error) {
     throw error;    

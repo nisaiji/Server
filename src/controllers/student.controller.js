@@ -9,6 +9,8 @@ import { convertToMongoId } from "../services/mongoose.services.js";
 import xlsx from 'xlsx'
 import fs from 'fs/promises'
 import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
+import { getHolidayCountService } from "../services/holiday.service.js";
+import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
 
 export async function registerStudentController(req, res) {
   try {
@@ -356,29 +358,13 @@ export async function getStudentsController(req, res){
           }
           if (includes.includes('percentageAttendance')) {
             const currentDate = new Date().getTime();
+            const sectionInfo = await getSectionService({_id: section});
+            const startDate = sectionInfo["startTime"];
+            const holidaysCount = await getHolidayCountService({admin: sectionInfo['admin'], date:{ $gte:startDate,$lte:currentDate }});
+            const sundayCount =  calculateSundays(startDate, currentDate);
+            const dayscount =  calculateDaysBetweenDates(startDate, currentDate);
+            const attendancableDays = dayscount - holidaysCount - sundayCount;
 
-            pipeline.push({
-              $lookup: {
-                from: 'sections',
-                localField: 'section',
-                foreignField: '_id',
-                as:'sectionInfo',
-                pipeline: [
-                  {
-                    $project:{
-                      startTime:1
-                    }
-                  }
-                ]
-              }
-            });
-            pipeline.push({
-              $unwind: {
-                path: '$sectionInfo',
-                preserveNullAndEmptyArrays: true
-              }
-            });
-        
             pipeline.push({
                 $lookup: {
                     from: 'attendances',
@@ -415,7 +401,7 @@ export async function getStudentsController(req, res){
                     as: 'attendanceStats'
                 }
             });
-            
+
             pipeline.push({
                 $addFields: {
                     attendancePercentage: {
@@ -437,7 +423,7 @@ export async function getStudentsController(req, res){
                     }
                 }
             });
-            
+
             pipeline.push({
                 $unset: ['attendanceStats', 'sectionInfo']
             });

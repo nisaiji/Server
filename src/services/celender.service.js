@@ -30,5 +30,25 @@ export function getFormattedDateService(date){
   return formattedDate;
 }
 
-// 1736274600000
-// 1736447399999
+export function calculateSundays(startTime, endTime) {
+  const startDate = new Date(startTime);
+  const endDate = new Date(endTime);
+
+  let totalSundays = 0;
+  let currentDate = startDate;
+
+  while (currentDate <= endDate) {
+      if (currentDate.getDay() === 0) {
+          totalSundays++;
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return totalSundays;
+}
+
+export function calculateDaysBetweenDates(startTime, endTime) {
+  const millisecondsPerDay = 1000 * 60 * 60 * 24;
+  const differenceInMilliseconds = endTime - startTime;
+  return Math.floor(differenceInMilliseconds / millisecondsPerDay);
+}

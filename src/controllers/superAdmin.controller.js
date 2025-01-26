@@ -91,7 +91,7 @@ export async function getSuperAdminController(req, res) {
 
 export async function getAdminsController(req, res){
   try {
-    const{ nation, state, district, city, username, page = 1, limit = 10 } = req.query;
+    const{ nation, state, district, city, username, page = 1, limit = 1000 } = req.query;
 
     const filter = {};
     if (nation){ filter.nation = nation; }

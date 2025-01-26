@@ -10,8 +10,7 @@ const adminSchema = mongoose.Schema({
     required: true
   },
   affiliationNo: {
-    type: String,
-    unique: true
+    type: String
   },
   principal:{
     type: String,

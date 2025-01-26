@@ -44,3 +44,13 @@ export async function deleteHolidayService(paramObj) {
     throw error;
   }
 }
+
+
+export async function getHolidayCountService(filter){
+  try {
+    const count = await holidayModel.countDocuments(filter);
+    return count;
+  } catch (error) {
+    throw error;  
+  }
+}
