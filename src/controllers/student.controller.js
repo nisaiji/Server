@@ -406,13 +406,13 @@ export async function getStudentsController(req, res){
                 $addFields: {
                     attendancePercentage: {
                         $cond: [
-                            { $gt: [{ $arrayElemAt: ['$attendanceStats.totalDays', 0] }, 0] },
+                            { $gt: [attendancableDays, 0] },
                             {
                                 $multiply: [
                                     {
                                         $divide: [
                                             { $arrayElemAt: ['$attendanceStats.presentDays', 0] },
-                                            { $arrayElemAt: ['$attendanceStats.totalDays', 0] }
+                                            attendancableDays
                                         ]
                                     },
                                     100

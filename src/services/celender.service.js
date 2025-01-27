@@ -48,7 +48,10 @@ export function calculateSundays(startTime, endTime) {
 }
 
 export function calculateDaysBetweenDates(startTime, endTime) {
+  const startOfDay = new Date(new Date(startTime).setUTCHours(0, 0, 0, 0));
+  const endOfDay = new Date(new Date(endTime).setUTCHours(0, 0, 0, 0));
+  
   const millisecondsPerDay = 1000 * 60 * 60 * 24;
-  const differenceInMilliseconds = endTime - startTime;
+  const differenceInMilliseconds = endOfDay - startOfDay;
   return Math.floor(differenceInMilliseconds / millisecondsPerDay);
 }
