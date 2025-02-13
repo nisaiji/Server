@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "nodemon index.js",
-    "build": "babel index.js -d dist"
+    "build": "babel index.js -d dist",
+     "test": "jest"
   },
   "_moduleAliases": {
     "@src": "src"
