@@ -29,7 +29,7 @@ export async function registerLeaveRequestController(req, res){
   if(leaveRequests.length > 0){
     const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
     const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime))
-    return res.status(StatusCodes.CONFLICT).send(error(409, `Already applied for leave from ${startDate} to ${endDate}.`))
+    return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already applied from ${startDate} to ${endDate}.`))
   }
 
   const leaveRequestObj = {
@@ -262,7 +262,7 @@ export async function updateTeacherLeavRequestController(req, res){
     
     await updateLeaveRequestService({_id: leaveRequestId}, {status})
     return res.status(StatusCodes.OK).send(success(200, "Leave Request updated successfully"))
-  } catch (error) {
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
 }

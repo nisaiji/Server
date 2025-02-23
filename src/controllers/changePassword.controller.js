@@ -20,7 +20,11 @@ export async function registerChangePasswordRequestController(req, res) {
     const sender = await getUser(senderModel, { phone: senderPhone, isActive: true });
 
     if (!sender) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Sender not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+    }
+
+    if(sender && !sender['isActive']){
+      return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }
 
     if (senderModel === "teacher" && !sender.section) {
@@ -228,8 +232,13 @@ export async function verifyTeacherForgetPasswordController(req, res) {
     const { otp, phone, deviceId } = req.body;
     const teacher = await getTeacherService({ phone });
     if (!teacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
+
+    if(teacher && !teacher['isActive']){
+      return res.status(StatusCodes.GONE).send(error(410, "User not found"));
+    }
+
     const request = await getChangePasswordRequestService({
       "sender.model": "teacher",
       "sender.id": teacher["_id"],
@@ -263,6 +272,10 @@ export async function changePasswordByVerifiedTeacherController(req, res) {
 
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
+    }
+
+    if(teacher && !teacher['isActive']){
+      return res.status(StatusCodes.GONE).send(error(410, "Teacher not found"));
     }
 
     if(teacher['deviceId']!==deviceId){

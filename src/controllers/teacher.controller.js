@@ -40,7 +40,7 @@ export async function loginTeacherController(req, res) {
     const currentTeacher = teacher ? teacher : guestTeacher;
 
     if (!currentTeacher) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "User not found"));
     }
     const admin = await getAdminService({_id: currentTeacher['admin']});
     if (!admin){
@@ -55,7 +55,7 @@ export async function loginTeacherController(req, res) {
     }
     const matchPassword = await matchPasswordService({ enteredPassword: password, storedPassword: currentTeacher["password"] });
     if (!matchPassword) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized  user"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Invalid Password"));
     }
     if (guestTeacher && platform === "web") {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Guest teacher does not support on web"));

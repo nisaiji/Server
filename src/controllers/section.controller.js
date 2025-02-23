@@ -28,7 +28,7 @@ export async function registerSectionController(req, res) {
     await teacher.save();
     classInfo["section"]?.push(section["_id"]);
     await classInfo.save();
-    return res.status(StatusCodes.OK).send(success(201, "Section created successfully!"));
+    return res.status(StatusCodes.OK).send(success(201, "Section created and Class Teacher assigned successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

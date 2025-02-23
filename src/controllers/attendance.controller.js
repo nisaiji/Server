@@ -357,7 +357,7 @@ export async function attendanceStatusOfStudentController(req, res) {
 
     const student = await getStudentService({_id:studentId, isActive:true});
     if(!student){
-      return res.error(StatusCodes.NOT_FOUND).send(error(404,"Student not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404,"Student not found"));
     }
     const attendance = await getAttendancesService({student:studentId, date:{$gte:startTime, $lte:endTime}});
     return res.status(StatusCodes.OK).send(success(200, {attendance}));

@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { deleteClassService,getClassWithSectionsService,getClassService, registerClassService, customGetClassWithSectionTeacherService,} from "../services/class.sevices.js";
+import { deleteClassService, getClassWithSectionsService,getClassService, registerClassService, customGetClassWithSectionTeacherService,} from "../services/class.sevices.js";
 import { checkClassExistById } from "../services/section.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -47,7 +47,6 @@ export async function getClassController(req, res){
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message))    
   }
 }
-
 
 export async function getClassListController(req, res) {
   try {
