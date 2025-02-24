@@ -25,6 +25,36 @@ const registerLeaveSchema = Joi.object({
 
 });
 
+const updateLeaveRequestSchema = Joi.object({
+  leaveRequestId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional().messages({
+    "string.pattern.base": "Invalid Leave Request ID.",
+    "any.required": "Leave Request ID is required."
+  }),
+
+  reason: Joi.string().required().messages({
+    'any.required': 'Reason is required'
+  }),
+
+  description: Joi.string().required().messages({
+    'any.required': 'Description is required.'
+  }),
+
+  startTime: Joi.number().integer().min(0).required().messages({
+    'number.base': 'Start time must be a number',
+    'number.integer': 'Start time must be an integer',
+    'number.min': 'Start time must be a positive number',
+    'any.required': 'Start time is required'
+  }),
+
+  endTime: Joi.number().integer().min(0).required().messages({
+    'number.base': 'End time must be a number',
+    'number.integer': 'End time must be an integer',
+    'number.min': 'End time must be a positive number',
+    'any.required': 'End time is required'
+  }),
+
+});
+
 const getLeaveRequestsForAdminSchema = Joi.object({
   senderId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional().messages({
     "string.pattern.base": "Invalid student ID.",
@@ -96,4 +126,4 @@ const updateTeacherLeaveSchema = Joi.object({
 })
 
 
-export { registerLeaveSchema, updateTeacherLeaveSchema, getLeaveRequestsForAdminSchema }
+export { registerLeaveSchema, updateTeacherLeaveSchema, updateLeaveRequestSchema, getLeaveRequestsForAdminSchema }

@@ -14,6 +14,10 @@ export async function registerLeaveRequestController(req, res){
     const senderId = req.teacherId;
     const receiverId = req.adminId;
 
+    if(startTime > endTime){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'StartTime must be smaller than EndTime'))
+    }
+
     const pipeline = [
       {
         $match: {
@@ -233,7 +237,7 @@ export async function getLeaveRequestsController(req, res){
   }
 }
 
-export async function updateTeacherLeavRequestController(req, res){
+export async function updateTeacherLeavRequestByAdminController(req, res){
   try {
     const { leaveRequestId, status, username, password, tagline }  = req.body;
     const adminId = req.adminId;
@@ -263,6 +267,47 @@ export async function updateTeacherLeavRequestController(req, res){
     await updateLeaveRequestService({_id: leaveRequestId}, {status})
     return res.status(StatusCodes.OK).send(success(200, "Leave Request updated successfully"))
   } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
+  }
+}
+
+export async function updateTeacherLeavRequestController(req ,res) {
+  try {
+    const { leaveRequestId, reason, description, startTime, endTime }  = req.body;
+    const teacherId = req.teacherId;
+    if(startTime > endTime){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'StartTime must be smaller than EndTime'))
+    }
+    const leaveRequest = await getLeaveRequestService({_id: leaveRequestId })
+    if(!leaveRequest){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
+    }
+    if(leaveRequest['status'] !=='pending') {
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Can't update leave request now"));
+    }
+    const pipeline = [
+      {
+        $match: {
+          'sender.id': convertToMongoId(teacherId),
+          status: 'pending',
+          startTime: {$lte: endTime},
+          endTime: {$gte: startTime},
+          _id: {$ne: convertToMongoId(leaveRequestId)}
+        }
+      }
+    ];
+
+    const leaveRequests = await getLeaveRequestsPipelineService(pipeline);
+    if(leaveRequests.length > 0){
+      const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
+      const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime))
+      return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already applied from ${startDate} to ${endDate}.`))
+    }
+
+    await updateLeaveRequestService({ _id: leaveRequestId }, {reason, description, startTime, endTime});
+    return res.status(StatusCodes.OK).send(success(200, "Leave Request updated successfully"));
+    
+  } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
 }

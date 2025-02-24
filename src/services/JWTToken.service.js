@@ -7,7 +7,7 @@ const refreshTokenSecretKey = config.refreshTokenSecretKey || "ThisIsASecretKeyF
 
 export  function getAccessTokenService(data){
     try {
-        const token = Jwt.sign(data, accessTokenSecretKey,{expiresIn:'4m'});
+        const token = Jwt.sign(data, accessTokenSecretKey,{expiresIn:'4d'});
         return token;
     } catch (error) {
         return error;

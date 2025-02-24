@@ -238,3 +238,76 @@ paths:
                     type: string
                     example: "Already applied for leave from 1700000000 to 1700003600."
 
+    put:
+      security:
+        - Authorization: []
+      summary: "Update Leave Request by Teacher"
+      description: "Allows a teacher to update their a leave request."
+      tags:
+        - "Leave"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                leaveRequestId:
+                  type: string
+                  example: "RequestID"
+                  description: "Leave request id"
+                reason:
+                  type: string
+                  example: "Personal Work"
+                  description: "Reason for the leave request."
+                description:
+                  type: string
+                  example: "Need to attend a family function."
+                  description: "Detailed description of the leave."
+                startTime:
+                  type: integer
+                  example: 1700000000
+                  description: "Leave start time in UNIX timestamp."
+                endTime:
+                  type: integer
+                  example: 1700003600
+                  description: "Leave end time in UNIX timestamp."
+              required:
+                - reason
+                - description
+                - startTime
+                - endTime
+      responses:
+        200:
+          description: "Leave request updated successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Request sent successfully."
+        409:
+          description: "Conflict: Overlapping leave requests found."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "Already applied for leave from 1700000000 to 1700003600."
+
