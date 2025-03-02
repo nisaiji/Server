@@ -32,7 +32,7 @@ export async function attendanceByTeacherController(req, res) {
     const day = getDayNameService(date.getDay());
     date = date.getTime();
     if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is Sunday"));
     }
 
     const holiday = await getHolidayService({date:{$gte:startTime,$lte:endTime}, admin:adminId });
@@ -104,7 +104,7 @@ export async function attendanceByParentController(req, res) {
     date = date.getTime();
     
     if (day === "Sunday"){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Today is sunday"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Today is Sunday"));
     }
 
     const [attendanceMarkedByTeacher, attendanceMarkedByParent, holiday] = await Promise.all([
@@ -220,7 +220,7 @@ export async function getMisMatchAttendanceController(req,res){
     const day = getDayNameService(date.getDay());
     date = date.getTime();
     if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(400, "Today is sunday"));
+      return res.status(StatusCodes.CONFLICT).send(error(400, "Today is Sunday"));
     }
  
     const attendances = await getMisMatchAttendanceService({section:sectionId,startTime,endTime});
@@ -289,7 +289,7 @@ export async function checkAttendaceMarkedController(req, res) {
     const day = getDayNameService(date.getDay());
     date = date.getTime();
     if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is Sunday"));
     }
 
     const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime, $lte:endTime}});
@@ -322,7 +322,7 @@ export async function checkParentAttendaceMarkedController(req, res) {
 
     const day = getDayNameService(date.getDay());
     if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is Sunday"));
     }
 
     const attendance = await getAttendanceService({student:studentId, date:{$gte:startTime, $lte:endTime}, parentAttendance:{$ne:""}});

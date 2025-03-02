@@ -74,7 +74,7 @@ describe("attendanceByTeacherController", () => {
     expect(jsonMock).toHaveBeenCalledWith({ message: "No student provided" });
   });
 
-  test("should return 409 if today is Sunday", async () => {
+  test("should return 409 if Today is Sunday", async () => {
     getSectionService.mockResolvedValue({ guestTeacher: req.teacherId });
     getDayNameService.mockReturnValue("Sunday");
     error.mockReturnValue({ message: "Today is Sunday" });
@@ -339,7 +339,7 @@ describe("getMisMatchAttendanceController", () => {
     });
   });
 
-  test("should return 400 error if today is Sunday", async () => {
+  test("should return 400 error if Today is Sunday", async () => {
     getDayNameService.mockReturnValue("Sunday");
 
     await getMisMatchAttendanceController(req, res);
@@ -347,7 +347,7 @@ describe("getMisMatchAttendanceController", () => {
     expect(statusMock).toHaveBeenCalledWith(StatusCodes.CONFLICT);
     expect(jsonMock).toHaveBeenCalledWith({
       code: 400,
-      message: "Today is sunday",
+      message: "Today is Sunday",
     });
   });
 
@@ -508,7 +508,7 @@ describe("checkAttendaceMarkedController", () => {
     });
   });
 
-  test("should return conflict if today is Sunday", async () => {
+  test("should return conflict if Today is Sunday", async () => {
     getSectionService.mockResolvedValue({ _id: "section123" });
     getDayNameService.mockReturnValue("Sunday");
     getHolidayService.mockResolvedValue(null);
@@ -517,7 +517,7 @@ describe("checkAttendaceMarkedController", () => {
 
     expect(jsonMock).toHaveBeenCalledWith({
       code: 409,
-      message: "Today is sunday",
+      message: "Today is Sunday",
     });
   });
 
