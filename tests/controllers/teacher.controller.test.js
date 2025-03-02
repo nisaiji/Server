@@ -131,7 +131,7 @@ describe("loginTeacherController", () => {
     await loginTeacherController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(StatusCodes.FORBIDDEN);
-    expect(res.send).toHaveBeenCalledWith(error(403, "Temporarily services are paused"));
+    expect(res.send).toHaveBeenCalledWith(error(403, "Services are temporarily paused. Please contact support."));
   });
 
   it("should return 404 if deviceId is missing for app login", async () => {

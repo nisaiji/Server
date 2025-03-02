@@ -22,7 +22,7 @@ export async function adminAuthenticate(req, res, next) {
     }
 
     if(admin && !admin['isActive']){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."))
     }
     req.adminId = _id;
     req.role = "admin";

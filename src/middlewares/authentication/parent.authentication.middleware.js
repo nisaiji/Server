@@ -27,7 +27,7 @@ export async function parentAuthenticate(req, res, next) {
     //   return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not exists"));
     // }
     // if(admin && !admin['isActive']){
-    //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
+    //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."))
     // }
     req.parentId = decoded.parentId;
     // req.adminId = decoded.adminId;

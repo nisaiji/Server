@@ -23,19 +23,19 @@ export async function teacherAuthenticate(req, res, next) {
       teacher = await getGuestTeacherService({_id:decoded.teacherId });
     }
     if (!teacher) {
-      return res.status(StatusCodes.GONE).send(error(410, "Teacher doesn't exists"));
+      return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }
     const adminId = decoded.adminId;
     const admin = await getAdminService({_id:adminId});
     if (!admin){
-      return res.status(StatusCodes.GONE).send(error(410, "Admin not exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
     if(admin && !admin['isActive']){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
+      return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact support."))
     }
     const section = await getSectionService({_id : teacher['section']})
     if (!section) {
-      return res.status(StatusCodes.GONE).send(error(410, "Teacher's section not exists"));
+      return res.status(StatusCodes.GONE).send(error(404, "Section not found"));
     }
 
     req.teacherId = decoded?.teacherId;
@@ -60,11 +60,11 @@ export async function refreshTokenAuthenticate(req, res, next) {
     delete decoded.exp;
     const teacher = await getTeacherService({_id:decoded.teacherId, isActive:true});
     if (!teacher) {
-      return res.status(StatusCodes.GONE).send(error(410, "Teacher doesn't exists"));
+      return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }
     const section = await getSectionByIdService(teacher["section"])
     if (!section) {
-      return res.status(StatusCodes.GONE).send(error(410, "Teacher's section not exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
     req.teacherId = decoded.teacherId;
     req.sectionId = decoded?.sectionId;

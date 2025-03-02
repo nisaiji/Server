@@ -23,12 +23,8 @@ export async function registerChangePasswordRequestController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
 
-    if(sender && !sender['isActive']){
-      return res.status(StatusCodes.GONE).send(error(410, "User not found"));
-    }
-
     if (senderModel === "teacher" && !sender.section) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(409, "Teacher in not authorized for forget password"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(409, "User in not authorized for forget password"));
     }
     const request = await getChangePasswordRequestService({ "sender.id": sender["_id"], status: { $in: ["pending", "accept"] } });
     if (request && request.status === "accept") {
@@ -39,7 +35,7 @@ export async function registerChangePasswordRequestController(req, res) {
     }
     const receiver = await getUser("admin", { _id: sender["admin"], isActive: true });
     if (!receiver) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Receiver not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
 
     const requestObj = {
@@ -63,7 +59,7 @@ export async function getChangePasswordRequestsController(req, res) {
     const [receiverModel, receiverId] = getReceiver(req);
 
     if (!receiverModel || !receiverId) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Receiver details required!"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "User details required!"));
     }
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -196,15 +192,11 @@ export async function updateChangePasswordRequestByAdminController(req, res) {
     const event = await getChangePasswordRequestService({ _id: eventId });
 
     if (!event) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Event not found."));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Event not found"));
     }
 
     if (event.receiver.id.toString() !== receiverId.toString()) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .send(401, "Unauthorized to update event.");
+      return res.status(StatusCodes.UNAUTHORIZED).send(401, "Unauthorized to update event.");
     }
 
     const fieldsToBeUpdated = {};
@@ -219,9 +211,7 @@ export async function updateChangePasswordRequestByAdminController(req, res) {
       fieldsToBeUpdated.status = status;
     }
     await updateChangePasswordRequestService({ _id: eventId }, fieldsToBeUpdated);
-    return res
-      .status(StatusCodes.OK)
-      .send(success(200, "Event updated successfully"));
+    return res.status(StatusCodes.OK).send(success(200, "Event updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -230,13 +220,9 @@ export async function updateChangePasswordRequestByAdminController(req, res) {
 export async function verifyTeacherForgetPasswordController(req, res) {
   try {
     const { otp, phone, deviceId } = req.body;
-    const teacher = await getTeacherService({ phone });
+    const teacher = await getTeacherService({ phone, isActive: true });
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
-    }
-
-    if(teacher && !teacher['isActive']){
-      return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }
 
     const request = await getChangePasswordRequestService({
@@ -245,14 +231,14 @@ export async function verifyTeacherForgetPasswordController(req, res) {
       status: "accept"
     });
     if (!request) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Forget password request not raised"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Please raise a password reset request first"));
     }
     if (otp !== request["otp"]) {
-      return res.status(StatusCodes.BAD_GATEWAY).send(error(502, "OTP not matched"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "OTP not matched"));
     }
 
     if(request['reason']!=='changeDevice' && deviceId!==teacher['deviceId']){
-      return res.status(StatusCodes.BAD_GATEWAY).send(error(502, "Access denied due to device mismatch"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Access denied due to device mismatch"));
     }
 
     if(request['reason']==='changeDevice'){
@@ -274,12 +260,8 @@ export async function changePasswordByVerifiedTeacherController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
 
-    if(teacher && !teacher['isActive']){
-      return res.status(StatusCodes.GONE).send(error(410, "Teacher not found"));
-    }
-
     if(teacher['deviceId']!==deviceId){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Access denied due to device mismatch"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Access denied due to device mismatch"));
     }
     const hashedPassword = await hashPasswordService(password);
     await updateTeacherService({ _id: id, isActive: true }, { password: hashedPassword, forgetPasswordCount: teacher.forgetPasswordCount + 1 });

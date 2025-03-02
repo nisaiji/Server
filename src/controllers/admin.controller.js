@@ -52,7 +52,7 @@ export async function loginAdminController(req, res) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
     // if(!admin['isActive']){
-    //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
+    //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."))
     // }
     const storedPassword = admin.password;
     const enteredPassword = password;

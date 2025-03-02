@@ -5,8 +5,7 @@ import { error, success } from "../utills/responseWrapper.js";
 import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
 import { getSectionService } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";
-import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
-import { getChangePasswordRequestService, updateChangePasswordRequestService } from "../services/changePassword.services.js";
+import { isValidMongoId } from "../services/mongoose.services.js";
 import { getGuestTeacherService } from "../services/guestTeacher.service.js";
 import { getAdminService } from "../services/admin.services.js";
 
@@ -40,25 +39,25 @@ export async function loginTeacherController(req, res) {
     const currentTeacher = teacher ? teacher : guestTeacher;
 
     if (!currentTeacher) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "User not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
     const admin = await getAdminService({_id: currentTeacher['admin']});
     if (!admin){
-      return res.send(error(404, "Admin not exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
 
     if(admin && !admin['isActive']){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Temporarily services are paused"))
+      return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact support."))
     }
     if (teacher && platform==='app' && !deviceId) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Device Id is required"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Device Id is required"));
     }
     const matchPassword = await matchPasswordService({ enteredPassword: password, storedPassword: currentTeacher["password"] });
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Invalid Password"));
     }
     if (guestTeacher && platform === "web") {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Guest teacher does not support on web"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Guest teacher does not support on web"));
     }
     const section = await getSectionService({ _id: currentTeacher["section"] });
     if (!section) {
@@ -118,7 +117,7 @@ export async function refreshAccessTokenController(req, res) {
     const accessToken = getAccessTokenService(data);
     return res.status(StatusCodes.OK).send(success(200, { accessToken }));
   } catch (err) {
-    res.send(error(500, err.message));
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -162,7 +161,7 @@ export async function updateTeacherController(req, res) {
     }
     const teacher = await getTeacherService({ _id: teacherId, isActive: true });
     if (!teacher) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher doesn't exists"));
+      return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }
 
     const fieldsToBeUpdated = {};
@@ -275,7 +274,7 @@ export async function getTeacherController(req, res) {
     }
     const teacher = await getTeacherService({ _id: id, isActive: true }, {password:0});
     if (!teacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Teacher not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(success(404, "User not found"));
     }
     const section = await getSectionService({_id: teacher["section"]}, {_id:0, teacher:0});
     const combinedData = { ...teacher._doc, ...section._doc };
@@ -301,11 +300,11 @@ export async function changePasswordTeacherController(req, res) {
     const teacherId = req.teacherId;
     const teacher = await getTeacherService({ _id: teacherId, isActive: true });
     if (!teacher) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
+      return res.status(StatusCodes.GONE).send(error(410, "Unauthorized user"));
     }
     const isMatched = await matchPasswordService({ enteredPassword: oldPassword, storedPassword: teacher["password"] });
     if (!isMatched) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Wrong password"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Wrong password"));
     }
     const hashedPassword = await hashPasswordService(newPassword);
     teacher["password"] = hashedPassword;
