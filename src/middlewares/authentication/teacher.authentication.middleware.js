@@ -35,7 +35,7 @@ export async function teacherAuthenticate(req, res, next) {
     }
     const section = await getSectionService({_id : teacher['section']})
     if (!section) {
-      return res.status(StatusCodes.GONE).send(error(404, "Section not found"));
+      return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
     }
 
     req.teacherId = decoded?.teacherId;

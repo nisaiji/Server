@@ -12,7 +12,7 @@ export async function registerSuperAdminController(req, res) {
     const { username, email, password } = req.body;
     let superAdmin = await getSuperAdminService({});
     if (superAdmin) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Super Admin already exists!"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Super Admin already exists"));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

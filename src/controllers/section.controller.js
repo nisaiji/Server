@@ -28,7 +28,7 @@ export async function registerSectionController(req, res) {
     await teacher.save();
     classInfo["section"]?.push(section["_id"]);
     await classInfo.save();
-    return res.status(StatusCodes.OK).send(success(201, "Section created and Class Teacher assigned successfully!"));
+    return res.status(StatusCodes.OK).send(success(201, "Section created and Class Teacher assigned successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -42,7 +42,7 @@ export async function getSectionController(req,res){
       getTeacherService({ section:_id }, { firstname:1, lastname:1 }) 
     ]);
     if(!section){
-      return res.status(StatusCodes.NOT_FOUND).send(error(400,"Section not found."));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404,"Section not found"));
     }
     return res.status(StatusCodes.OK).send(success(200,{section, teacher}));
   } catch (err) {
@@ -88,19 +88,18 @@ export async function replaceTeacherController(req, res) {
     const { sectionId, teacherId } = req.body;
     const section = await getSectionService({_id:sectionId});
     if(!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section doesn't exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
     const[prevTeacher, teacher] = await Promise.all([
       getTeacherService({_id:section["teacher"]}),
       getTeacherService({_id:teacherId})
     ])
     if(!teacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher doesn't exists"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
     if(teacher["section"]){
       return res.status(StatusCodes.BAD_REQUEST).send(error(409, "Teacher already occupied"));
     }
-    
 
     section["teacher"] = teacherId;
     teacher["section"] = sectionId;

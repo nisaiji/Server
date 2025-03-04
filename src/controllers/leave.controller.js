@@ -15,7 +15,7 @@ export async function registerLeaveRequestController(req, res){
     const receiverId = req.adminId;
 
     if(startTime > endTime){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'StartTime must be smaller than EndTime'))
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start Time must be less than End Time'))
     }
 
     const pipeline = [
@@ -276,7 +276,7 @@ export async function updateTeacherLeavRequestController(req ,res) {
     const { leaveRequestId, reason, description, startTime, endTime }  = req.body;
     const teacherId = req.teacherId;
     if(startTime > endTime){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'StartTime must be smaller than EndTime'))
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start time must be less than end time'))
     }
     const leaveRequest = await getLeaveRequestService({_id: leaveRequestId })
     if(!leaveRequest){
@@ -301,7 +301,7 @@ export async function updateTeacherLeavRequestController(req ,res) {
     if(leaveRequests.length > 0){
       const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
       const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime))
-      return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already applied from ${startDate} to ${endDate}.`))
+      return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already applied from ${startDate} to ${endDate}`))
     }
 
     await updateLeaveRequestService({ _id: leaveRequestId }, {reason, description, startTime, endTime});

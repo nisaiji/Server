@@ -12,6 +12,7 @@ import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
 import { getHolidayCountService } from "../services/holiday.service.js";
 import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
 
+
 export async function registerStudentController(req, res) {
   try {
     const { firstname, lastname, gender, parentName, phone, sectionId } = req.body;
@@ -42,7 +43,7 @@ export async function registerStudentController(req, res) {
     student = await registerStudentService(studentObj);
 
     await updateSectionService({_id:sectionId}, {studentCount:section["studentCount"]+1});
-    return res.status(StatusCodes.OK).send(success(201, "Student created successfully!"));
+    return res.status(StatusCodes.OK).send(success(201, "Student registered successfully!"));
   } catch (err) {
 
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -114,7 +115,7 @@ export async function updateStudentController(req, res){
     if(req.body["phone"]){ 
       const parentWithPhone = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
       if(parentWithPhone){
-        return res.status(StatusCodes.CONFLICT).send(error(409, "phone number already registered"));
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
       }
       parentUpdate.phone = req.body["phone"];
     }
@@ -214,7 +215,7 @@ export async function getStudentsController(req, res){
         if (include) {
           const includes = include.split(',');
           if(includes.includes('attendance') && (!startTime || !endTime)){
-            return res.status(StatusCodes.BAD_REQUEST).send(error(400, "StartTime and endTime is required."));
+            return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Start time and end time are required"));
           }
           if(includes.includes('attendance')) {
             pipeline.push({

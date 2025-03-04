@@ -31,7 +31,7 @@ export async function registerChangePasswordRequestController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Request approved, please change the password"));
     }
     if (request && request.status === "pending") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Request is being processed under admin"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Your password reset request is being processed by the admin"));
     }
     const receiver = await getUser("admin", { _id: sender["admin"], isActive: true });
     if (!receiver) {
