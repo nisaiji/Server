@@ -4,6 +4,7 @@ import {getAdminService, registerAdminService,  updateAdminService } from "../se
 import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
 import { constructStudentXlsxTemplate } from "../helpers/admin.helper.js";
+import { adminControllerResponse } from "../config/httpResponse.js";
 
 export async function registerAdminController(req, res) {
   try {
@@ -11,11 +12,11 @@ export async function registerAdminController(req, res) {
     const admin = await getAdminService({$or:[{email}, {phone}]});
 
     if (admin && admin?.email === email) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Email already exists"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.registerAdminController.emailExists));
     }
 
     if (admin && admin?.phone === phone) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already exists"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.registerAdminController.phoneExists));
     }
     const hashedPassword = await hashPasswordService(password);
     req.body["password"] = hashedPassword;
@@ -37,7 +38,7 @@ export async function registerAdminController(req, res) {
       active: registeredAdmin["isActive"]
     });
    
-    return res.status(StatusCodes.CREATED).send(success(201, {accessToken, refreshToken, msg: "Admin registered successfully"}));
+    return res.status(StatusCodes.CREATED).send(success(201, {accessToken, refreshToken, msg: adminControllerResponse.registerAdminController.adminResiteredSuccessfully}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -49,7 +50,7 @@ export async function loginAdminController(req, res) {
   
     const admin = await getAdminService({ email });
     if (!admin) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
     }
     // if(!admin['isActive']){
     //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."))
@@ -58,7 +59,7 @@ export async function loginAdminController(req, res) {
     const enteredPassword = password;
     const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
     if (!matchPassword) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
     }
     const accessToken = getAccessTokenService({
       role: "admin",
@@ -111,16 +112,16 @@ export async function updateAdminController(req, res) {
     const admin = await getAdminService({$or: [{username}, {email}, {phone}, {affiliationNo}], _id:{$ne:adminId}});
 
     if(admin && username && admin["username"] && admin["username"]==username){
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists."));
+      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.updateAdminController.usernameExists));
     }
     if(admin && email && admin["email"]==email){
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Email already exists."));
+      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.updateAdminController.emailExists));
     }
     if(admin && phone && admin["phone"]==phone){
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already exists."));
+      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.updateAdminController.phoneExists));
     }
     if(admin && affiliationNo && admin["affiliationNo"] && admin["affiliationNo"]==affiliationNo){
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Affiliation No already exists."));
+      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.updateAdminController.affiliationExists));
     }
 
     if(schoolName){ fieldsToBeUpdated["schoolName"] = schoolName; }
@@ -151,7 +152,7 @@ export async function updateAdminController(req, res) {
 
     await updateAdminService({_id:adminId}, fieldsToBeUpdated);
 
-    return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"));
+    return res.status(StatusCodes.OK).send(success(200, adminControllerResponse.updateAdminController.adminUpdatedSuccessfully));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

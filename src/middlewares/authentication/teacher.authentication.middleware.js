@@ -37,6 +37,9 @@ export async function teacherAuthenticate(req, res, next) {
     if (!section) {
       return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
     }
+    if (section['teacher'].toString()!==decoded?.teacherId) {
+      return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
+    }
 
     req.teacherId = decoded?.teacherId;
     req.sectionId = decoded?.sectionId;

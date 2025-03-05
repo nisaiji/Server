@@ -8,6 +8,7 @@ import { getTeacherService } from "../services/teacher.services.js";
 import { getDayNameService, getStartAndEndTimeService } from "../services/celender.service.js";
 import { getHolidayService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
+import { attendanceControllerResponse } from "../config/httpResponse.js";
 
 export async function attendanceByTeacherController(req, res) { 
   try {
@@ -16,32 +17,32 @@ export async function attendanceByTeacherController(req, res) {
     const adminId = req.adminId;
     const section = await getSectionService({ _id: sectionId })
     if(!section){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, attendanceControllerResponse.attendanceByTeacherController.sectionNotFound))
     }
 
     if(section["guestTeacher"] && section["guestTeacher"]?.toString()!==teacherId){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, attendanceControllerResponse.attendanceByTeacherController.teacherUnauthorized))
     }
     let date = new Date();
     const { startTime, endTime } = getStartAndEndTimeService(date, date);
 
     if(present.length==0 && absent.length==0){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400,"No student provided"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, attendanceControllerResponse.attendanceByTeacherController.noStudents));
     }
     
     const day = getDayNameService(date.getDay());
     date = date.getTime();
     if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is Sunday"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.todayIsSunday));
     }
 
     const holiday = await getHolidayService({date:{$gte:startTime,$lte:endTime}, admin:adminId });
     if (holiday) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.scheduledHoliday));
     }
     const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}})
     if(sectionAttendance){
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Attendance already marked"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.attendanceAlreadyMarked));
     }
 
     present.map(async (student) => {
@@ -75,7 +76,7 @@ export async function attendanceByTeacherController(req, res) {
     const presentCount = present?.length;
     const absentCount = absent?.length;
     await createSectionAttendanceService({date, section:sectionId, teacher:teacherId, presentCount, absentCount, status:"completed"});
-    return res.status(StatusCodes.OK).send(success(200, "Attendance marked successfully"));
+    return res.status(StatusCodes.OK).send(success(200, attendanceControllerResponse.attendanceByTeacherController.attendanceMarkedSuccessfully));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -89,22 +90,22 @@ export async function attendanceByParentController(req, res) {
     const{startTime, endTime} = getStartAndEndTimeService(date, date);    
     
     if(!(attendance==="present" || attendance==="absent")){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Invalid attendance value"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, attendanceControllerResponse.attendanceByParentController.invalidAttendanceValue));
     }
 
     const student = await getStudentService({_id:studentId, isActive:true});
     if(!student){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "student not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, attendanceControllerResponse.attendanceByParentController.studentNotFound));
     }
     if((student["parent"].toString())!==parentId){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Parent is not authorized to mark attendance."));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, attendanceControllerResponse.attendanceByParentController.unauthorizedParent));
     }
     
     const day = getDayNameService(date.getDay());
     date = date.getTime();
     
     if (day === "Sunday"){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Today is Sunday"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, attendanceControllerResponse.attendanceByParentController.todayIsSunday));
     }
 
     const [attendanceMarkedByTeacher, attendanceMarkedByParent, holiday] = await Promise.all([
@@ -114,22 +115,22 @@ export async function attendanceByParentController(req, res) {
     ]) ;
 
     if (holiday) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is scheduled as holiday!"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByParentController.scheduledHoliday));
     }
 
     if(attendanceMarkedByTeacher){
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Parent can't mark attendance,teacher already marked."));
+      return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByParentController.parentCantMarkAttendance));
     }
 
     if(attendanceMarkedByParent){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Attendance already marked by parent"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400,attendanceControllerResponse.attendanceByParentController.attendanceAlreadyMarkedByParent));
     }
 
     const markAttendance = await createAttendanceService({student:studentId,date,day,parentAttendance:attendance});
     if(markAttendance instanceof Error){
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(400,"Parent is unable to mark attendance"));
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(400, attendanceControllerResponse.attendanceByParentController.parentUnableToMarkAttendance));
     }
-    return res.status(StatusCodes.OK).send(success(200, "Attendance marked sucessfully"));
+    return res.status(StatusCodes.OK).send(success(200, attendanceControllerResponse.attendanceByParentController.attendanceMarkedSuccessfully));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
