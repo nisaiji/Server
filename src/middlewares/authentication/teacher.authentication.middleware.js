@@ -33,7 +33,7 @@ export async function teacherAuthenticate(req, res, next) {
     if(admin && !admin['isActive']){
       return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact support."))
     }
-    const section = await getSectionService({_id : teacher['section']})
+    const section = await getSectionService({_id : decoded?.sectionId})
     if (!section) {
       return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
     }
