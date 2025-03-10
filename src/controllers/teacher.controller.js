@@ -39,7 +39,7 @@ export async function loginTeacherController(req, res) {
     const currentTeacher = teacher ? teacher : guestTeacher;
 
     if (!currentTeacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid credentials. Please try again"));
     }
     const admin = await getAdminService({_id: currentTeacher['admin']});
     if (!admin){
@@ -54,7 +54,7 @@ export async function loginTeacherController(req, res) {
     }
     const matchPassword = await matchPasswordService({ enteredPassword: password, storedPassword: currentTeacher["password"] });
     if (!matchPassword) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Invalid Password"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Invalid credentials. Please try again"));
     }
     if (guestTeacher && platform === "web") {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Guest teacher does not support on web"));
@@ -257,7 +257,7 @@ export async function deleteTeacherController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
     if (teacher["section"]) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Teacher is assigned to section. Can't delete teacher"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Cannot delete the teacher as they are assigned to a section"));
     }
     await updateTeacherService({ _id: teacher["_id"] }, { isActive: false });
     return res.status(StatusCodes.OK).send(success(200, "Teacher deleted successfully"));
@@ -304,7 +304,7 @@ export async function changePasswordTeacherController(req, res) {
     }
     const isMatched = await matchPasswordService({ enteredPassword: oldPassword, storedPassword: teacher["password"] });
     if (!isMatched) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Wrong password"));
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Invalid Old Password"));
     }
     const hashedPassword = await hashPasswordService(newPassword);
     teacher["password"] = hashedPassword;

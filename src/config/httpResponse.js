@@ -6,7 +6,7 @@ const adminControllerResponse = {
     },
 
     loginController: {
-      unathorized: "Unathorized user"
+      unathorized: "Invalid credentials. Please try again"
     },
 
     updateAdminController: {

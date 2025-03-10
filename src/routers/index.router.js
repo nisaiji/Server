@@ -15,6 +15,7 @@ import superAdminRouter from "./superAdmin.router.js";
 import leaveRouter from "./leave.router.js";
 import guestTeacherRouter from './guestTeacher.router.js'
 import customerSupportRouter from "./customerSupport.router.js";
+import workDayRouter from "./workDay.router.js";
 
 const router = express();
 
@@ -34,5 +35,6 @@ router.use("/teacher-dashboard",teacherDashboardRouter);
 router.use('/super-admin', superAdminRouter);
 router.use('/guest-teacher', guestTeacherRouter)
 router.use('/customer-support', customerSupportRouter)
+router.use('/workdays', workDayRouter)
 
 export default router;
