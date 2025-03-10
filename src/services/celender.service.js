@@ -14,7 +14,6 @@ export function getStartAndEndTimeService(startDate, endDate){
   return {startTime, endTime};
 }
 
-
 export function getFormattedDateService(date){
   if(!(date instanceof Date)){
     return 'invalid date'
@@ -55,4 +54,32 @@ export function calculateDaysBetweenDates(startTime, endTime) {
 
   const differenceInDays = Math.floor((endOfDay - startOfDay) / millisecondsPerDay);
   return differenceInDays === 0 ? 1 : differenceInDays;
+}
+
+
+export const excelDateToJSDate = (date) => {
+return new Date(Math.round((date - 25569)*86400*1000));
+}
+
+export const jsDateToExcelDate = (date) => {
+let returnDateTime = 25569.0 + ((date.getTime()-(date.getTimezoneOffset() * 60 * 1000)) / (1000 * 60 * 60 * 24));
+return Math.floor(returnDateTime)
+}
+
+export const excelDateToStringDateFormat = (dateNumber, dateFormat) => {
+let jsDate = excelDateToJSDate(dateNumber);
+switch(dateFormat.toLowerCase()){
+    case 'yyyy-mm-dd':
+       return jsDate.getFullYear().toString()+"-"+("0"+(jsDate.getMonth()+1).toString()).slice(-2)+"-"+("0"+jsDate.getDate().toString()).slice(-2);
+    case 'yyyy/mm/dd':
+       return jsDate.getFullYear().toString()+"/"+("0"+(jsDate.getMonth()+1).toString()).slice(-2)+"/"+("0"+jsDate.getDate().toString()).slice(-2);
+    case 'mm-dd-yyyy':
+       return ("0"+(jsDate.getMonth()+1).toString()).slice(-2)+"-"+("0"+jsDate.getDate().toString()).slice(-2)+'-'+jsDate.getFullYear().toString();
+    case 'mm/dd/yyyy':
+       return ("0"+(jsDate.getMonth()+1).toString()).slice(-2)+"/"+("0"+jsDate.getDate().toString()).slice(-2)+'/'+jsDate.getFullYear().toString();
+    case 'dd-mm-yyyy':
+      return ("0"+jsDate.getDate().toString()).slice(-2)+'-'+("0"+(jsDate.getMonth()+1).toString()).slice(-2)+"-"+jsDate.getFullYear().toString();
+      default:
+       throw new Error("format not matching")
+}
 }

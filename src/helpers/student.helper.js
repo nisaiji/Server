@@ -3,10 +3,12 @@ import { getStudentService, registerStudentService } from "../services/student.s
 import { getParentService, registerParentService } from "../services/parent.services.js";
 import { registerStudentFromExcelSchema } from "../validators/studentSchema.validator.js";
 import { hashPasswordService } from "../services/password.service.js";
+import { excelDateToStringDateFormat } from "../services/celender.service.js";
 
 export async function registerStudentsFromExcelHelper(students, sectionId, classId, adminId){
   try {
      // validate each student from excel file
+     students.shift();
     for(const student of students){
     const studentValidation =  registerStudentFromExcelSchema.validate(student);
     if(studentValidation.error){
@@ -21,7 +23,26 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
     // insert each student from excel file
     let insertedStudentCount = 0;
     for(const student of students){
-      const { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode, parentName, phone, email, qualification, occupation } = student; 
+      const normalizedStudent = {
+        firstname: student['First Name'],
+        lastname: student['Last Name'],
+        gender: student['Gender'],
+        bloodGroup: student['Blood Group'],
+        dob: typeof student['DOB (dd-mm-yyyy)'] === "number" ? excelDateToStringDateFormat(student['DOB (dd-mm-yyyy)'], 'dd-mm-yyyy') : student['DOB (dd-mm-yyyy)'],
+        address: student['Address'],
+        city: student['City'],
+        district: student['District'],
+        state: student['State'],
+        country: student['Country'],
+        pincode: student['Pincode'],
+        parentName: student['Guardian Name'],
+        phone: student['Phone'],
+        email: student['Email'],
+        occupation: student['Occupation'],
+        qualification: student['Qualification']
+      };
+
+      const { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode, parentName, phone, email, qualification, occupation } = normalizedStudent;
       const parentObj = {fullname: parentName, phone, email,qualification, occupation}
       const studentObj = {firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode}
       let parent = await getParentService({ phone, isActive:true });
@@ -48,5 +69,3 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
     throw error;
   }
 }
-
-

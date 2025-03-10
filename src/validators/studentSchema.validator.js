@@ -32,41 +32,39 @@ const registerStudentSchema = Joi.object({
 });
 
 const registerStudentFromExcelSchema = Joi.object({
-  firstname: Joi.string().required().messages({
+  'First Name': Joi.string().required().messages({
     "any.required": "First name is required."
   }),
-  lastname: Joi.string().required().messages({
+  'Last Name': Joi.string().required().messages({
     "any.required": "Last name is required."
   }),
-  gender: Joi.string()
-    .required()
+  'Gender': Joi.string().required()
     .messages({ "any.required": "Gender is required." }),
-  bloodGroup: Joi.string().optional(),
-  dob: Joi.string().optional(),
-  address: Joi.string().optional(),
-  city: Joi.string().optional(),
-  district: Joi.string().optional(),
-  state: Joi.string().optional(),
-  country: Joi.string().optional(),
-  pincode: Joi.string().optional(),
+  'Blood Group': Joi.string().optional(),
+  'DOB (dd-mm-yyyy)': Joi.alternatives().try(
+    Joi.string().pattern(/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/), 
+    Joi.number()
+    ).optional(),
+  'Address': Joi.string().optional(),
+  'City': Joi.string().optional(),
+  'District': Joi.string().optional(),
+  'State': Joi.string().optional(),
+  'Country': Joi.string().optional(),
+  'Pincode': Joi.number().optional(),
 
-  parentName: Joi.string().required().messages({
-    "any.required": "Parent name is required."
+  'Guardian Name': Joi.string().required().messages({
+    "any.required": "Guardian name is required"
   }),
-  phone: Joi.number()
-    .integer()
-    .min(6000000000)
-    .max(9999999999)
-    .required()
+  'Phone': Joi.number().integer().min(6000000000).max(9999999999).required()
     .messages({
       "number.base": "Phone number must be a valid number.",
       "number.min": "Phone number must have exactly 10 digits.",
       "number.max": "Phone number must have exactly 10 digits.",
       "any.required": "Phone number is required."
     }),
-  email: Joi.string().optional(),
-  qualification: Joi.string().optional(),
-  occupation: Joi.string().optional()
+  'Email': Joi.string().optional(),
+  'Qualification': Joi.string().optional(),
+  'Occupation': Joi.string().optional()
 });
 
 const deleteStudentSchema = Joi.object({
