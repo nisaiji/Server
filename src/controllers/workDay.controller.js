@@ -41,7 +41,7 @@ export async function getWorkDaysController(req, res) {
 
 export async function updateWorkDayController(req, res) {
   try {
-    const id = req.params.eventId;
+    const id = req.params.workDayId;
     const { title, description } = req.body;
     let workDay = await getWorkDayService({ _id: id });
 
@@ -65,7 +65,7 @@ export async function updateWorkDayController(req, res) {
 
 export async function deleteWorkDayController(req, res) {
   try {
-    const id = req.params.eventId;
+    const id = req.params.workDayId;
     const workday = await getWorkDayService({ _id: id });
     if (!workday) {
       return res.status(StatusCodes.NOT_FOUND).send(error(400, "Workday not found"));

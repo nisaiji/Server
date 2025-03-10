@@ -9,7 +9,7 @@ const workDayRouter = express.Router();
 workDayRouter.post("/register", adminAuthenticate, createWorkDayValidation, registerWorkDayController );
 workDayRouter.post("/", adminAuthenticate, getWorkDayValidation, getWorkDaysController );
 workDayRouter.post("/teacher", teacherAuthenticate, getWorkDayValidation, getWorkDaysController );
-workDayRouter.put("/:eventId", adminAuthenticate, updateWorkDayValidation, updateWorkDayController );
-workDayRouter.delete("/:eventId", adminAuthenticate, deleteWorkDayController );
+workDayRouter.put("/:workDayId", adminAuthenticate, updateWorkDayValidation, updateWorkDayController );
+workDayRouter.delete("/:workDayId", adminAuthenticate, deleteWorkDayController );
 
 export default workDayRouter;

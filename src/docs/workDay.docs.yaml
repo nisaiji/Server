@@ -1,0 +1,133 @@
+openapi: 3.0.1
+info: 
+  title: WorkDay Event API
+  version: 1.0.0
+paths:
+  /workdays/register: 
+    post:
+      security:
+        - Authorization: []
+      tags:
+        - "Work-Day"
+      summary: "To mark any holiday(sunday) as workday"
+      description: "This API will allow admin to mark any holiday(sunday) as workday"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  example: "2024-12-25"
+                title:
+                  type: string
+                  example: "Work day"
+                description:
+                  type: string
+                  example: "work day description"
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /workdays: 
+    post:
+      security:
+        - Authorization: []
+      tags:
+        - "Work-Day"
+      summary: "To get a list of Workdays"
+      description: "This API will allow admin to get a list of holiday marked as working days"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: date
+                  example: "2024-08-26"
+                endDate:
+                  type: date
+                  example: "2024-08-26"
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+  /holiday-event/{workDayId}: 
+    delete:
+      security:
+        - Authorization: []
+      tags:
+        - "Holiday-Event"
+      summary: "To delete a workday"
+      description: "This API will allow admin to delete a workday"
+      parameters:
+        - in: path
+          name: workDayId
+          required: true
+          description: ID of the workday.
+          schema:
+            type: string
+            example: "1234"
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"
+
+    put:
+      security:
+        - Authorization: []
+      tags:
+        - "Work-Day"
+      summary: "To update a Workday"
+      description: "This API will allow admin to update workday"
+      parameters:
+        - in: path
+          name: workDayId
+          required: true
+          description: ID of the workDay.
+          schema:
+            type: string
+            example: "1234"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "WorkDay title"
+                description:
+                  type: string
+                  example: "An description for marked workday"
+      responses:
+        200:
+          description: "successful"
+        422:
+          description: "Unprocessable Entity"
+        403:
+          description: "Forbidden"
+        500:
+          description: "Internal Server Error"

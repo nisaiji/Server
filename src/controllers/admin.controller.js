@@ -24,7 +24,7 @@ export async function registerAdminController(req, res) {
     const accessToken = await getAccessTokenService({
       role: 'admin',
       adminId: registeredAdmin['_id'],
-      schoolNumber: registeredAdmin['schoolName'],
+      schoolName: registeredAdmin['schoolName'],
       email: registeredAdmin['email'],
       phone: registeredAdmin['phone'],
       active: registeredAdmin["isActive"]
@@ -32,7 +32,7 @@ export async function registerAdminController(req, res) {
     const refreshToken = await getRefreshTokenService({
       role: 'admin',
       _id: registeredAdmin['_id'],
-      schoolNumber: registeredAdmin['schoolName'],
+      schoolName: registeredAdmin['schoolName'],
       email: registeredAdmin['email'],
       phone: registeredAdmin['phone'],
       active: registeredAdmin["isActive"]
