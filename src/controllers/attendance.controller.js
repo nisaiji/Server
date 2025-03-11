@@ -9,6 +9,7 @@ import { getDayNameService, getStartAndEndTimeService } from "../services/celend
 import { getHolidayService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
+import { getWorkDayService } from "../services/workDay.services.js";
 
 export async function attendanceByTeacherController(req, res) { 
   try {
@@ -33,7 +34,10 @@ export async function attendanceByTeacherController(req, res) {
     const day = getDayNameService(date.getDay());
     date = date.getTime();
     if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.todayIsSunday));
+      const sundayAsWorkDay = await getWorkDayService({date: {$gte: startTime, $lte: endTime}, admin: adminId});
+      if(!sundayAsWorkDay) {
+        return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.todayIsSunday));
+      }
     }
 
     const holiday = await getHolidayService({date:{$gte:startTime,$lte:endTime}, admin:adminId });
@@ -175,8 +179,15 @@ export async function bulkAttendanceMarkController(req, res) {
       const { startTime, endTime } = getStartAndEndTimeService(formattedDate, formattedDate);
       const sectionAttendance = await getSectionAttendanceService({section: sectionId, date : {$gte: startTime, $lte: endTime}});
       const holiday = await getHolidayService({ date: { $gte: startTime, $lte: endTime }, admin: adminId });
-      if (dayName === 'Sunday' || holiday || attendanceTimestamp > new Date().getTime()) {
+      if (holiday || attendanceTimestamp > new Date().getTime()) {
         continue;
+      }
+
+      if(day==='Sunday') {
+        const sundayAsWorkDay = await getWorkDayService({date: {$gte: startTime, $lte: endTime}, admin: adminId});
+        if(!sundayAsWorkDay) {
+          continue;
+        }
       }
 
       for (const studentAttendance of studentsAttendances[attendanceTimestamp]) {
@@ -290,7 +301,10 @@ export async function checkAttendaceMarkedController(req, res) {
     const day = getDayNameService(date.getDay());
     date = date.getTime();
     if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is Sunday"));
+      const sundayAsWorkDay = await getWorkDayService({date: {$gte: startTime, $lte: endTime}, admin: adminId});
+      if(!sundayAsWorkDay) {
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Today is Sunday"));
+      }
     }
 
     const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime, $lte:endTime}});

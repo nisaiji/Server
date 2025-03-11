@@ -11,6 +11,7 @@ import fs from 'fs/promises'
 import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
 import { getHolidayCountService } from "../services/holiday.service.js";
 import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
+import { getWorkDayCountService } from "../services/workDay.services.js";
 
 
 export async function registerStudentController(req, res) {
@@ -363,8 +364,9 @@ export async function getStudentsController(req, res){
             const startDate = sectionInfo["startTime"];
             const holidaysCount = await getHolidayCountService({admin: sectionInfo['admin'], date:{ $gte:startDate,$lte:currentDate }});
             const sundayCount =  calculateSundays(startDate, currentDate);
+            const sundayAsWorkDayCount = await getWorkDayCountService({admin: sectionInfo['admin'], date: {$gte: startDate, $lte: currentDate}});
             const dayscount =  calculateDaysBetweenDates(startDate, currentDate);
-            const attendancableDays = dayscount - holidaysCount - sundayCount;
+            const attendancableDays = dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
 
             pipeline.push({
                 $lookup: {
