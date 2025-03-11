@@ -10,6 +10,10 @@ export async function registerHolidayController(req, res) {
     const adminId = req.adminId;
     const day = getDayNameService(date.getDay());
 
+    if(day==='Sunday') {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
+    }
+
     const { startTime, endTime } = getStartAndEndTimeService(date, date);
     date = date.getTime();
 
