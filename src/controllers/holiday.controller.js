@@ -11,7 +11,7 @@ export async function registerHolidayController(req, res) {
     const day = getDayNameService(date.getDay());
 
     if(day==='Sunday') {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Today is sunday"));
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Sunday can't marked as holiday"));
     }
 
     const { startTime, endTime } = getStartAndEndTimeService(date, date);
