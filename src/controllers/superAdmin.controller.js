@@ -148,7 +148,12 @@ export async function updateAdminController(req, res){
     let statusChangeCount = admin['statusChangeCount'];
     statusChangeCount += 1;
     await updateAdminService({ _id: admin["_id"] }, {isActive: active, statusChangeCount, $push: {statusChangeLog: {status: active ? "activated": "deactivated"}}})
-    return res.status(StatusCodes.OK).send(success(200, "Admin updated successfully"))
+    let successMessage = "Admin updated successfully";
+    if(statusChangeCount===1 && active === true){ successMessage = "The School has been Approved Successfully"}
+    else if(active === true) { successMessage = "The School has been Activated Successfully" }
+    else if(active === false) { successMessage = "The School has been Deactivated Successfully"}
+
+    return res.status(StatusCodes.OK).send(success(200, successMessage))
     
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

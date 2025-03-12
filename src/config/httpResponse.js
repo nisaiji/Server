@@ -14,7 +14,7 @@ const adminControllerResponse = {
       emailExists: "Email already exists",
       phoneExists: "Phone already exists",
       affiliationExists: "Affiliation No already exists",
-      adminUpdatedSuccessfully: "Admin updated successfully"
+      adminUpdatedSuccessfully: "Admin Profile updated successfully"
     }
   }
 
