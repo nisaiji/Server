@@ -22,7 +22,7 @@ export async function registerLeaveRequestController(req, res){
       {
         $match: {
           'sender.id': convertToMongoId(senderId),
-          status: 'pending',
+          status: {$in: ['pending', 'accept']},
           startTime: {$lte: endTime},
           endTime: {$gte: startTime}
         }
@@ -32,8 +32,9 @@ export async function registerLeaveRequestController(req, res){
   const leaveRequests = await getLeaveRequestsPipelineService(pipeline);
   if(leaveRequests.length > 0){
     const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
-    const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime))
-    return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already applied from ${startDate} to ${endDate}.`))
+    const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime));
+    const leaveStatus = leaveRequests[0].status==='accept'?'issued':'applied';
+    return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already ${leaveStatus} from ${startDate} to ${endDate}.`))
   }
 
   const leaveRequestObj = {
@@ -184,7 +185,7 @@ export async function getLeaveRequestsController(req, res){
             },
             {
                $sort: { 
-                createdAt: 1 
+                createdAt: -1
               } 
             },
             {
@@ -283,7 +284,7 @@ export async function updateTeacherLeavRequestController(req ,res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
     }
     if(leaveRequest['status'] !=='pending') {
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Can't update leave request now"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Can't update leave request now"));
     }
     const pipeline = [
       {

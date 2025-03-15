@@ -26,7 +26,6 @@ studentRouter.put("/teacher/:studentId", teacherAuthenticate, authorizeTeacherRo
 studentRouter.put("/admin/:studentId", adminAuthenticate, updateStudentParentByAdminValidation, updateStudentController );
 studentRouter.put("/parent/:studentId", parentAuthenticate, updateStudentByParentValidation, updateStudentController );
 
-
 studentRouter.put("/teacher/photo-upload/:studentId", teacherAuthenticate, authorizeTeacherRoles('teacher'), uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentController)
 studentRouter.put("/parent/photo-upload/:studentId", parentAuthenticate, uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentController)
   
