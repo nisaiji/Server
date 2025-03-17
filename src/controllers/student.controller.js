@@ -484,6 +484,9 @@ export async function registerStudentsFromExcelController(req, res){
     const sheetName = workbook.SheetNames[0]
     const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
     const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, adminId)
+    if(registeredStudentsCount===0){
+      throw new Error("Student registration failed")
+    }
     await fs.unlink(file.path)
     return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`))
   } catch(err){

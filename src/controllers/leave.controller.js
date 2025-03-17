@@ -173,7 +173,8 @@ export async function getLeaveRequestsController(req, res){
                   firstname: "$teacher.firstname",
                   lastname: "$teacher.lastname",
                   section: "$section.name",
-                  class: "$class.name"
+                  class: "$class.name",
+                  leaveRequestCount: "$teacher.leaveRequestCount"
                 },
                 guestTeacher: {
                   _id: '$guestTeacher._id',
@@ -266,7 +267,8 @@ export async function updateTeacherLeavRequestByAdminController(req, res){
     }
     
     await updateLeaveRequestService({_id: leaveRequestId}, {status})
-    return res.status(StatusCodes.OK).send(success(200, "Leave Request updated successfully"))
+    const successMessage = status === 'accept' ? "Leave Request Accepted Successfully" : "Leave Request Rejected Successfully";
+    return res.status(StatusCodes.OK).send(success(200, successMessage))
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
