@@ -183,7 +183,7 @@ export async function bulkAttendanceMarkController(req, res) {
         continue;
       }
 
-      if(day==='Sunday') {
+      if(dayName==='Sunday') {
         const sundayAsWorkDay = await getWorkDayService({date: {$gte: startTime, $lte: endTime}, admin: adminId});
         if(!sundayAsWorkDay) {
           continue;

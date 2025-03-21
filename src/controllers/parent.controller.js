@@ -60,7 +60,7 @@ export async function updateParentController(req, res){
     if(username){
       const parent = await getParentService({ username, isActive: true, _id: { $ne: id } });
       if(parent){
-        return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists"));
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists. Try a different one."));
       }
       fieldsToBeUpdated["username"] = username;
      }

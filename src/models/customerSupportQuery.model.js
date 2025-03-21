@@ -25,6 +25,7 @@ const customerSupportQuerySchema = new mongoose.Schema({
     },
     phone:{
         type:String,
+        lowercase: true,
         required: true
     },
     teacherCount: {

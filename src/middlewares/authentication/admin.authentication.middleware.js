@@ -21,8 +21,11 @@ export async function adminAuthenticate(req, res, next) {
       return res.send(error(404, "Admin not exists"));
     }
 
-    if(admin && !admin['isActive']){
+    if(admin && !admin['isActive'] && admin['statusChangeCount']===0){
       return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."))
+    }
+    if(admin && !admin['isActive']){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Services are temporarily paused. Please contact support."))
     }
     req.adminId = _id;
     req.role = "admin";

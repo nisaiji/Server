@@ -258,7 +258,7 @@ export async function updateTeacherLeavRequestByAdminController(req, res){
         getGuestTeacherService({ username, isActive: true })      
       ])
       if(existingTeacher || existingGuestTeacher){
-        return res.status(StatusCodes.CONFLICT).send(success(409, "Username already exists"));
+        return res.status(StatusCodes.CONFLICT).send(success(409, "Username already exists. Try a different one"));
       }
       const teacher = await getTeacherService({_id: leaveRequest.sender.id})
       const guestTeacherObj = { username, password: hashedPassword, secretKey: password, tagline, startTime: leaveRequest['startTime'], endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}

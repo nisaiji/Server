@@ -10,7 +10,7 @@ const adminControllerResponse = {
     },
 
     updateAdminController: {
-      usernameExists: "Username already exists",
+      usernameExists: "Username already exists. Try a different one",
       emailExists: "Email already exists",
       phoneExists: "Phone already exists",
       affiliationExists: "Affiliation No already exists",

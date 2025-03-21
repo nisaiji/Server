@@ -26,7 +26,8 @@ const teacherSchema = mongoose.Schema({
   },
   email: {
     type: String,
-    sparse: true, 
+    sparse: true,
+    lowercase: true
   },
   isActive:{
     type: Boolean,

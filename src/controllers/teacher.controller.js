@@ -32,14 +32,17 @@ export async function loginTeacherController(req, res) {
   try {
     const { user, password, platform, deviceId } = req.body;
     const [teacher, guestTeacher] = await Promise.all([
-      getTeacherService({$or: [{ username: user }, { phone: user }, { email: user }], isActive: true }),
-      getGuestTeacherService({ username: user, isActive: true })
+      getTeacherService({$or: [{ username: user }, { phone: user }, { email: user?.toLowerCase() }]}),
+      getGuestTeacherService({ username: user })
     ]);
 
     const currentTeacher = teacher ? teacher : guestTeacher;
 
     if (!currentTeacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid credentials. Please try again"));
+    }
+    if (!currentTeacher['isActive']) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found. Please check your credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "));
     }
     const admin = await getAdminService({_id: currentTeacher['admin']});
     if (!admin){
@@ -176,7 +179,7 @@ export async function updateTeacherController(req, res) {
     if (username) {
       const teacher = await getTeacherService({_id: { $ne: teacherId }, username, isActive: true });
       if (teacher) {
-        return res.status(StatusCodes.CONFLICT).send(error(409, "Username already registered"));
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists. Try a different one"));
       }
       fieldsToBeUpdated.username = username;
     }
@@ -312,6 +315,14 @@ export async function changePasswordTeacherController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function assignTeacherAsGuestTeacherToSectionController(req, res) {
+  try {
+    const {teacherId, sectionId} = req.body;
+  } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
