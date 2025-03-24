@@ -1,4 +1,5 @@
-import {getDayNameService, getStartAndEndTimeService } from "../services/celender.service.js";
+import { deleteWorkDayService, getWorkDayService } from "../services/workDay.services.js";
+import {getDayNameService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
 import { createHolidayService, deleteHolidayService, getHolidaysService, updateHolidayService, getHolidayService } from "../services/holiday.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
@@ -25,6 +26,47 @@ export async function registerHolidayController(req, res) {
     await createHolidayService(data);
     return res.status(StatusCodes.OK).send(success(200, "Holiday created sucessfully"));
   } catch (err) {
+    return res.send(error(500, err.message));
+  }
+}
+
+export async function registerHolidaysController(req, res) {
+  try {
+    // expect startTime, endTime timestamps as timeset zero. eg: 2025:03:22T00:00:00
+    let { title, description, startTime, endTime } = req.body;
+    const adminId = req.adminId;
+    if(startTime > endTime) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Please select valid dates"));
+    }
+
+    let startIstDate = timestampToIstDate(startTime);
+    let endIstDate = timestampToIstDate(endTime);
+
+    const{startTime:tempStartTimestamp, endTime:tempEndTimestamp} = getStartAndEndTimeService(startIstDate, endIstDate);
+  
+    startIstDate = timestampToIstDate(tempStartTimestamp);
+    endIstDate = timestampToIstDate(tempEndTimestamp);
+    
+    let currIstDate = startIstDate;
+    while(currIstDate <= endIstDate) {
+      const {startTime:currIstDateStartTimestamp, endTime:currIstDateEndTimestamp} = getStartAndEndTimeService(currIstDate, currIstDate);
+      const currDateHoliday = await getHolidayService({admin: adminId, date: {$gte: currIstDateStartTimestamp, $lte: currIstDateEndTimestamp}});
+      
+      const day = getDayNameService(currIstDate.getDay());
+      if(day==='Sunday') {
+        const currDateWorkday = await getWorkDayService({admin: adminId, date: {$gte: currIstDateStartTimestamp, $lte: currIstDateEndTimestamp}});
+        if(currDateWorkday){
+          await deleteWorkDayService({'_id': currDateWorkday['_id']});
+        }
+      }
+
+      if(!currDateHoliday && day!=='Sunday') {
+        await createHolidayService({ date:currIstDate.getTime(), day, title, description, admin: adminId });
+      }
+      currIstDate.setDate(currIstDate.getDate()+1)
+    }
+    return res.status(StatusCodes.OK).send(success(200, "Holidays created successfully"));
+   } catch (err) {
     return res.send(error(500, err.message));
   }
 }

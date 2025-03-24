@@ -73,3 +73,12 @@ export async function getMisMatchAttendanceService(data) {
     throw error;
   }
 }
+
+export async function deleteAttendancesService(paramObj) {
+  try {
+    const result = await attendanceModel.deleteMany(paramObj);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}

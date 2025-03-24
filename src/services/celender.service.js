@@ -56,7 +56,6 @@ export function calculateDaysBetweenDates(startTime, endTime) {
   return differenceInDays === 0 ? 1 : differenceInDays;
 }
 
-
 export const excelDateToJSDate = (date) => {
 return new Date(Math.round((date - 25569)*86400*1000));
 }
@@ -82,4 +81,13 @@ switch(dateFormat.toLowerCase()){
       default:
        throw new Error("format not matching")
 }
+}
+
+export const timestampToIstDate = (timestamp) => {
+  const utcDate = new Date(timestamp)
+ 
+  const offset = 5.5*60*60*1000;
+  const istTimestamp = utcDate.getTime() + offset;
+  const istDate = new Date(istTimestamp)
+  return istDate;
 }

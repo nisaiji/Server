@@ -205,6 +205,108 @@ paths:
                     type: string
                     example: "An unexpected error occurred."
 
+  /attendance/teacher/undoAttendance:
+    post:
+      security:
+        - Authorization: []
+      tags:
+        - "Attendance"
+      summary: "Undo attendance by Teacher"
+      description: "This API allows the class-teacher to undo attendance for today"
+      produces:
+        - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sectionId:
+                  type: string
+                  example: "123"
+      responses:
+        "200":
+          description: "Attendance marked successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Attendance marked successfully."
+        "404":
+          description: "Authentication failed due to incorrect or missing input."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Authentication error: missing or invalid fields."
+        "400":
+          description: "No student provided due to incorrect or missing input."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "No student provided: missing or invalid fields."
+        "409":
+          description: "Conflict error: already exists."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: "Resource already exists."
+        "500":
+          description: "Internal server error. Unexpected issue during registration."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+
   /attendance/parent:
     post:
       security:

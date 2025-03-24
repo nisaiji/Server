@@ -53,3 +53,12 @@ export async function updateSectionAttendanceService(filter, update){
     throw error;    
   }
 }
+
+export async function deleteSectionAttendanceService(filter){
+  try {
+    const sectionAttendance = await sectionAttendanceModel.findOneAndDelete(filter);
+    return sectionAttendance;
+  } catch (error){
+    throw error;    
+  }
+}

@@ -1,6 +1,6 @@
 import express from "express";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
-import { checkAttendaceMarkedController, getMisMatchAttendanceController, checkParentAttendaceMarkedController, updateAttendanceController, attendanceStatusOfSectionController, attendanceCountOfStudentController, attendanceByTeacherController, attendanceByParentController, attendanceStatusOfStudentController, getAttendancesController, bulkAttendanceMarkController } from "../controllers/attendance.controller.js";
+import { checkAttendaceMarkedController, getMisMatchAttendanceController, checkParentAttendaceMarkedController, updateAttendanceController, attendanceStatusOfSectionController, attendanceCountOfStudentController, attendanceByTeacherController, attendanceByParentController, attendanceStatusOfStudentController, getAttendancesController, bulkAttendanceMarkController, undoAttendanceByTeacherController } from "../controllers/attendance.controller.js";
 import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
 import { attendanceByParentValidation, attendanceByTeacherValidation, attendanceCountValidation, attendanceStatusValidation, getAttendanceValidation, updateAttendanceValidation } from "../middlewares/validation/attendance.validation.middleware.js";
 import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
@@ -22,5 +22,6 @@ attendanceRouter.post("/status", teacherAuthenticate, authorizeTeacherRoles('tea
 attendanceRouter.post("/status/:studentId", parentAuthenticate, attendanceStatusValidation, attendanceStatusOfStudentController);
 attendanceRouter.post("/parent/count", parentAuthenticate, attendanceCountValidation, attendanceCountOfStudentController)
 attendanceRouter.post("/teacher/count", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), attendanceCountValidation, attendanceCountOfStudentController)
+attendanceRouter.post("/teacher/undoAttendance", teacherAuthenticate, authorizeTeacherRoles('teacher'), undoAttendanceByTeacherController)
 
 export default attendanceRouter

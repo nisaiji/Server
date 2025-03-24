@@ -1,5 +1,5 @@
-import { createSectionAttendanceService, getSectionAttendanceService, getSectionAttendancesService, getSectionAttendanceStatusService, updateSectionAttendanceService } from "../services/sectionAttendance.services.js";
-import {createAttendanceService,getAttendanceService, getAttendancesService, updateAttendanceService, getMisMatchAttendanceService, getAttendancePipelineService} from "../services/attendance.service.js";
+import { createSectionAttendanceService, deleteSectionAttendanceService, getSectionAttendanceService, getSectionAttendancesService, getSectionAttendanceStatusService, updateSectionAttendanceService } from "../services/sectionAttendance.services.js";
+import {createAttendanceService,getAttendanceService, getAttendancesService, updateAttendanceService, getMisMatchAttendanceService, getAttendancePipelineService, deleteAttendancesService} from "../services/attendance.service.js";
 import {getStudentService, getStudentsPipelineService} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
@@ -84,6 +84,20 @@ export async function attendanceByTeacherController(req, res) {
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
+}
+
+export async function undoAttendanceByTeacherController(req, res) {
+  const { sectionId } = req.body;
+  let date = new Date();
+  const { startTime, endTime } = getStartAndEndTimeService(date, date);
+  const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}})
+  if(!sectionAttendance){
+    return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Attendance is not marked yet"));
+  }
+  await deleteSectionAttendanceService({_id: sectionAttendance['_id']});
+  const result = await deleteAttendancesService({section: sectionId, date:{$gte:startTime,$lte:endTime}})
+  console.log({result, sectionAttendance})
+  return res.status(StatusCodes.OK).send(success(200, "Attendance for today deleted successfully"));  
 }
 
 export async function attendanceByParentController(req, res) {
