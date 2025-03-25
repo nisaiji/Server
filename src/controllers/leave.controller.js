@@ -172,6 +172,7 @@ export async function getLeaveRequestsController(req, res){
                   _id: "$teacher._id",
                   firstname: "$teacher.firstname",
                   lastname: "$teacher.lastname",
+                  phone: "$teacher.phone",
                   section: "$section.name",
                   class: "$class.name",
                   leaveRequestCount: "$teacher.leaveRequestCount"
