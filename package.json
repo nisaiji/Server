@@ -7,7 +7,7 @@
   "scripts": {
     "start": "nodemon index.js",
     "build": "babel index.js -d dist",
-     "test": "jest"
+    "test": "jest"
   },
   "_moduleAliases": {
     "@src": "src"
@@ -38,6 +38,7 @@
     "school-server": "file:",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
+    "twilio": "^5.5.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

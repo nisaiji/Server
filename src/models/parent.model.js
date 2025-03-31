@@ -26,8 +26,9 @@ const parentSchema = mongoose.Schema({
   district:{
     type:String
   },
-  state:{
-    type:String
+  status:{
+    type:String,
+    enum: ['unVerified', 'phoneVerified', 'verified']
   },
   country:{
     type:String

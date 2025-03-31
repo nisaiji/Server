@@ -287,7 +287,7 @@ export async function updateTeacherLeavRequestController(req ,res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
     }
     if(leaveRequest['status'] !=='pending') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Can't update leave request now"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Can't update leave request now as action has been taken by Admin."));
     }
     const pipeline = [
       {

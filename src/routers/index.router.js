@@ -16,9 +16,11 @@ import leaveRouter from "./leave.router.js";
 import guestTeacherRouter from './guestTeacher.router.js'
 import customerSupportRouter from "./customerSupport.router.js";
 import workDayRouter from "./workDay.router.js";
+import v2Router from "./v2/index.router.js";
 
 const router = express();
 
+router.use("/v2", v2Router);
 router.use("/admin", adminRouter);
 router.use("/parent", parentRouter);
 router.use("/teacher", teacherRouter);
