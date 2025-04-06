@@ -32,7 +32,7 @@ export async function loginTeacherController(req, res) {
   try {
     const { user, password, platform, deviceId } = req.body;
     const [teacher, guestTeacher] = await Promise.all([
-      getTeacherService({$or: [{ username: user }, { phone: user }, { email: user?.toLowerCase() }]}),
+      getTeacherService({isActive: true, $or: [{ username: user }, { phone: user }, { email: user?.toLowerCase() }]}),
       getGuestTeacherService({ username: user })
     ]);
 
@@ -41,9 +41,9 @@ export async function loginTeacherController(req, res) {
     if (!currentTeacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid credentials. Please try again"));
     }
-    if (!currentTeacher['isActive']) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found. Please check your credentials.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "));
-    }
+    // if (!currentTeacher['isActive']) {
+    //   return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found. Please check your credentials."))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "));
+    // }
     const admin = await getAdminService({_id: currentTeacher['admin']});
     if (!admin){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));

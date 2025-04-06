@@ -1,8 +1,10 @@
 import express from "express";
 import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
-import { searchStudentsController } from "../../controllers/v2/student.controller.js";
+import { registerStudentController, searchStudentsController, updateStudentBySchoolController } from "../../controllers/v2/student.controller.js";
 
 const studentRouter = express.Router();
 
 studentRouter.get('/admin', adminAuthenticate, searchStudentsController)
+studentRouter.post('/', adminAuthenticate, registerStudentController)
+studentRouter.put('/:studentId', adminAuthenticate, updateStudentBySchoolController)
 export default studentRouter;

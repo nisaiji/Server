@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const parentSchema = mongoose.Schema({
+const schoolParentSchema = mongoose.Schema({
   username:{
     type: String,
   },
@@ -56,10 +56,23 @@ const parentSchema = mongoose.Schema({
   },
   password: {
     type: String
+  },
+  school: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"admin",
+    required: true
+  },
+  parent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"parent",
+    required: true
   }
-});
-parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });
+},
+{
+timestamps:true
+}
+);
 
-const parentModel = mongoose.model("parentt", parentSchema);
+const schoolParentModel = mongoose.model("schoolParent", schoolParentSchema);
 
-export default parentModel;
+export default schoolParentModel;

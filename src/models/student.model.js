@@ -51,6 +51,10 @@ const studentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "parent"
   },
+  schoolParent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "schoolParent"
+  },
   section: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "section"

@@ -10,7 +10,10 @@ const _config = {
     enableCron: process.env.ENABLE_CRON,
     twilioAccountSID: process.env.TWILIO_ACCOUNT_SID,
     twilioAuthToken: process.env.TWILIO_AUTH_TOKEN,
-    twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER
+    twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER,
+    otpExpirationInMinutes: 2,
+    sendGridApiKey: process.env.SEND_GRID_API_KEY,
+    sendGridEmail: process.env.SEND_GRID_EMAIL
 }
 
 export const config =   Object.freeze(_config);    

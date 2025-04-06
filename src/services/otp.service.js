@@ -53,3 +53,13 @@ export async function deleteOtpService(filter) {
     throw error;
   }
 }
+
+
+export async function getOtpsPipelineService(pipeline){
+  try {
+    const otps = await otpModel.aggregate(pipeline).exec();
+    return otps;
+  } catch (error) {
+    throw error;    
+  }
+}

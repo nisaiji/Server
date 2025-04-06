@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const otpSchema = mongoose.Schema({
+  // value: either phone number or email id
   identifier: {
     type: String,
     required: true
@@ -16,7 +17,7 @@ const otpSchema = mongoose.Schema({
   },
   otpType: {
     type: String,
-    enum: ['register', 'forgetPassword'],
+    enum: ['phoneVerification', 'emailVerification', 'forgetPassword'],
     required: true
   },
   medium: {

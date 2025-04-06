@@ -28,6 +28,8 @@ const parentSchema = mongoose.Schema({
   },
   status:{
     type:String,
+    // phone: phoneVerified
+    // phone + email: verified
     enum: ['unVerified', 'phoneVerified', 'verified']
   },
   country:{
@@ -56,10 +58,18 @@ const parentSchema = mongoose.Schema({
   },
   password: {
     type: String
-  }
+  },
+  students: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:"student",
+    required: true
+  }]
+},
+{
+timestamps: true
 });
 parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });
 
-const parentModel = mongoose.model("parentt", parentSchema);
+const parentModel = mongoose.model("parent", parentSchema);
 
 export default parentModel;

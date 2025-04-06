@@ -1,5 +1,4 @@
 import parentModel from "../models/parent.model.js";
-import studentModel from "../models/student.model.js";
 
 export async function getParentService(filter, projection = {}) {
   try {
