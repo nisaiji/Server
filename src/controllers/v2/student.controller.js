@@ -10,10 +10,9 @@ import { TrustProductsEntityAssignmentsInstance } from "twilio/lib/rest/trusthub
 
 export async function searchStudentsController(req, res){
 try{
-  let { search, page = 1, limit } = req.query;
+  let { search, page = 1, limit, classId, section } = req.query;
   search = search.trim();
   const[searchFirstname, searchLastname] = search.split(" ");
-  console.log({ search, searchFirstname, searchLastname });
   const adminId = req.adminId;
 
   const pageNum = parseInt(page);
@@ -22,6 +21,14 @@ try{
   let filter = {
     admin: convertToMongoId(adminId)
   };
+
+  if(classId) {
+    filter['classId'] = convertToMongoId(classId)
+  }
+
+  if(section) {
+    filter['section'] = convertToMongoId(section)
+  }
 
   if(searchLastname){
     filter['$and'] = [
