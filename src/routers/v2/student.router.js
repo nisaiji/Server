@@ -4,7 +4,7 @@ import { registerStudentController, searchStudentsController, updateStudentBySch
 
 const studentRouter = express.Router();
 
-studentRouter.get('/admin', searchStudentsController)
+studentRouter.get('/admin', adminAuthenticate, searchStudentsController)
 studentRouter.post('/', adminAuthenticate, registerStudentController)
 studentRouter.put('/:studentId', adminAuthenticate, updateStudentBySchoolController)
 export default studentRouter;

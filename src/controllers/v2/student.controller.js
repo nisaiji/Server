@@ -11,7 +11,7 @@ export async function searchStudentsController(req, res){
 try{
   let { search, page = 1, limit, classId, section } = req.query;
 
-  const adminId = req.adminId || '67c883a94511e3a73ea136fc';
+  const adminId = req.adminId;
 
   const pageNum = parseInt(page);
   const limitNum = limit ? parseInt(limit) : "no limit";

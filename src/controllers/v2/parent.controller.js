@@ -183,10 +183,10 @@ export async function loginParentController(req, res) {
     }
     const enteredPassword = password;
     const storedPassword = parent.password;
-    // const matchPassword = await matchPasswordService({enteredPassword, storedPassword});
-    // if (!matchPassword) {
-    //   return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
-    // }
+    const matchPassword = await matchPasswordService({enteredPassword, storedPassword});
+    if (!matchPassword) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
+    }
     const email = parent["email"] || "not available";
     const accessToken = getAccessTokenService({
       role: "parent",
