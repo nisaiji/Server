@@ -6,14 +6,12 @@ import { getSectionService, updateSectionService } from "../../services/section.
 import { getClassService } from "../../services/class.sevices.js";
 import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
 import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
-import { TrustProductsEntityAssignmentsInstance } from "twilio/lib/rest/trusthub/v1/trustProducts/trustProductsEntityAssignments.js";
 
 export async function searchStudentsController(req, res){
 try{
   let { search, page = 1, limit, classId, section } = req.query;
-  search = search.trim();
-  const[searchFirstname, searchLastname] = search.split(" ");
-  const adminId = req.adminId;
+
+  const adminId = req.adminId || '67c883a94511e3a73ea136fc';
 
   const pageNum = parseInt(page);
   const limitNum = limit ? parseInt(limit) : "no limit";
@@ -30,7 +28,10 @@ try{
     filter['section'] = convertToMongoId(section)
   }
 
-  if(searchLastname){
+  if(search){
+    search = search.trim();
+    const[searchFirstname, searchLastname] = search.split(" ");
+    if(searchLastname){
     filter['$and'] = [
         { firstname: { $regex: new RegExp(searchFirstname, "i") } },
         { lastname: { $regex: new RegExp(searchLastname, "i") } }
@@ -43,13 +44,14 @@ try{
       { "parentDetails.phone": { $regex: new RegExp(search, "i") } },
     ]
   }
+}
 
   const pipeline = [
       // Join students with parents
       {
         $lookup: {
-          from: "parents",
-          localField: "parent",
+          from: "schoolparents",
+          localField: "schoolParent",
           foreignField: "_id",
           as: "parentDetails",
           pipeline: [
@@ -144,7 +146,7 @@ try{
     $project: {
       isActive: 0,
       admin: 0,
-      parent: 0,
+      schoolParent: 0,
       section: 0,
       classId: 0,
     },

@@ -81,7 +81,7 @@ export async function getChangePasswordRequestsController(req, res) {
 
     const pipeline = [
       { $match: filter },
-      { $sort: { date: 1 } },
+      { $sort: { date: -1 } },
       { $skip: skipNum },
       { $limit: limitNum }
     ];

@@ -10,11 +10,12 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
      // validate each student from excel file
      students.shift();
     for(const student of students){
+      console.log({student})
     const studentValidation =  registerStudentFromExcelSchema.validate(student);
     if(studentValidation.error){
       throw new Error(JSON.stringify({
         status: "Failed",
-        student: student['firstname'],
+        student: student['First Name'],
         reason: studentValidation.error.message
       }));      
     }
