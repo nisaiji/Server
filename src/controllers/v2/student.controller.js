@@ -34,7 +34,8 @@ try{
     if(searchLastname){
     filter['$and'] = [
         { firstname: { $regex: new RegExp(searchFirstname, "i") } },
-        { lastname: { $regex: new RegExp(searchLastname, "i") } }
+        { lastname: { $regex: new RegExp(searchLastname, "i") } },
+        {isActive: true}
       ]
   } else {
     filter['$or'] = [
@@ -42,6 +43,7 @@ try{
       { lastname: { $regex: new RegExp(search, "i") } },
       { "parentDetails.email": { $regex: new RegExp(search, "i") } },
       { "parentDetails.phone": { $regex: new RegExp(search, "i") } },
+      {isActive: true}
     ]
   }
 }
