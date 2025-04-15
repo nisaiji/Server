@@ -7,6 +7,9 @@ import { getParentService, updateParentService } from "../../services/v2/parent.
 import { parentEmailVerification, sendEmailBySendGrid } from "../../config/sendGrid.config.js";
 import { updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
 import { getAccessTokenService } from "../../services/JWTToken.service.js";
+import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
+import { convertToMongoId } from "../../services/mongoose.services.js";
+import { getStudentsPipelineService } from "../../services/student.service.js";
 
 export async function parentSendOtpToPhoneController (req, res) {
   try {
@@ -37,7 +40,7 @@ export async function parentSendOtpToPhoneController (req, res) {
 export async function parentPhoneVerifyByOtpController (req, res) {
   try {
     const { phone, otp } = req.body;
-    const parent = await getParentService({ phone });
+    let parent = await getParentService({ phone });
     if(!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
     }
@@ -83,7 +86,18 @@ export async function parentPhoneVerifyByOtpController (req, res) {
       updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
     ]);
 
-    res.status(StatusCodes.OK).send(success(200, "OTP verified successfully"));
+    parent = await getParentService({ _id: parent['_id'] });
+    const token = getAccessTokenService({
+      parentId: parent['_id'],
+      status: parent['status'],
+      isLoginAlready: parent['isLoginAlready'],
+      phoneVerified: parent['status'] !== 'unVerified',
+      emailVerified: parent['status'] === 'verified',
+      passwordUpdated: parent['password'] ? true : false,
+      personalInfoUpdated: parent['fullname'] ? true : false
+    })
+
+    res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", token}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -109,7 +123,8 @@ export async function parentEmailInsertAndSendEmailOtpController (req, res) {
     await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 })
     await updateParentService({_id: parent['_id']}, {email});
 
-    await parentEmailVerification(email, sms);
+    console.log('inside controller')
+    const rej = await parentEmailVerification(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -120,7 +135,7 @@ export async function parentEmailVerifyByOtpController (req, res) {
   try {
     const { otp } = req.body;
     const parentId = req.parentId;
-    const parent = await getParentService({ _id: parentId });
+    let parent = await getParentService({ _id: parentId });
     if(!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
     }
@@ -168,7 +183,18 @@ export async function parentEmailVerifyByOtpController (req, res) {
       updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
     ]);
 
-    res.status(StatusCodes.OK).send(success(200, "OTP verified successfully"));
+    parent = await getParentService({ _id: parent['_id'] });
+    const token = getAccessTokenService({
+      parentId: parent['_id'],
+      status: parent['status'],
+      isLoginAlready: parent['isLoginAlready'],
+      phoneVerified: parent['status'] !== 'unVerified',
+      emailVerified: parent['status'] === 'verified',
+      passwordUpdated: parent['password'] ? true : false,
+      personalInfoUpdated: parent['fullname'] ? true : false
+    })
+
+    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully" , token}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -177,22 +203,34 @@ export async function parentEmailVerifyByOtpController (req, res) {
 export async function loginParentController(req, res) {
   try {
     const { user, password } = req.body;
-    const parent = await getParentService({$or: [{username: user}, {email: user}, {phone:user}], isActive:true});
+    const parent = await getParentService({$or: [{username: user}, {email: user}, {phone:user}]});
     if (!parent) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
     }
+    if (parent['isActive']===false) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Services are temporarily paused. Please contact support"));
+    }
+
+    if(parent['status']==='unVerified') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User verification is pending"));
+    }
+
+    if(parent['status']==='phoneVerified') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User email Verification is pending"));
+    }
+
     const enteredPassword = password;
     const storedPassword = parent.password;
     const matchPassword = await matchPasswordService({enteredPassword, storedPassword});
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
     }
-    const email = parent["email"] || "not available";
+
     const accessToken = getAccessTokenService({
       role: "parent",
       parentId: parent["_id"],
       phone: parent["phone"],
-      email,
+      email: parent["email"] ? parent['email'] : "",
       address: parent["address"]? parent["address"]:"",
       username: parent["username"]? parent["username"]: ""
     });
@@ -201,6 +239,119 @@ export async function loginParentController(req, res) {
       await updateParentService({_id:parent["_id"]}, {"isLoginAlready":true});
     }
     return res.status(StatusCodes.OK).send(success(200, { accessToken, isLoginAlready }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function parentPasswordUpdateController(req, res) {
+  try {
+    const { password } = req.body;
+    const parentId = req.parentId;
+    await updateParentService({ _id: parentId }, { password });
+    return res.status(StatusCodes.OK).send(success(200, 'Password updated successfully'));  
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function updateParentController(req, res) {
+  try {
+    const parentId = req.parentId;
+
+    const fieldsToBeUpdated = {};
+    if(req.body['username']) { fieldsToBeUpdated['username'] = req.body['username'] }
+    if(req.body['fullname']) { fieldsToBeUpdated['fullname'] = req.body['fullname'] }
+    if(req.body['gender']) { fieldsToBeUpdated['gender'] = req.body['gender'] }
+    if(req.body['address']) { fieldsToBeUpdated['address'] = req.body['address'] }
+    if(req.body['city']) { fieldsToBeUpdated['city'] = req.body['city'] }
+    if(req.body['district']) { fieldsToBeUpdated['district'] = req.body['district'] }
+    if(req.body['country']) { fieldsToBeUpdated['country'] = req.body['country'] }
+    if(req.body['pincode']) { fieldsToBeUpdated['pincode'] = req.body['pincode'] }
+    if(req.body['qualification']) { fieldsToBeUpdated['qualification'] = req.body['qualification'] }
+    if(req.body['occupation']) { fieldsToBeUpdated['occupation'] = req.body['occupation'] }
+    if (req.body["password"]) {
+      const hashedPassword = await hashPasswordService(req.body["password"]);
+      fieldsToBeUpdated.password = hashedPassword;
+    }
+
+    await updateParentService({ _id: parentId }, fieldsToBeUpdated);
+
+    return res.status(StatusCodes.OK).send(success(200, "User updated successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getParentStatusController(req, res) {
+  try {
+    const { phone } = req.body;
+    const parent = await getParentService({phone: phone, isActive: true})
+    if(!parent){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not registered"))
+    }
+    const parentStatus = {
+      isLoginAlready: false,
+      phoneVerified: false,
+      emailVerified: false,
+      passwordUpdated: false,
+      personalInfoUpdated: false,
+    }
+
+    parentStatus['status'] = parent['status'];
+    parentStatus['isLoginAlready'] = parent['isLoginAlready'];
+    parentStatus['phoneVerified'] = parent['status'] !== 'unVerified';
+    parentStatus['emailVerified'] = parent['status'] === 'verified';
+    parentStatus['passwordUpdated'] = parent['password'] ? true : false;
+    parentStatus['personalInfoUpdated'] = parent['fullname'] ? true : false;
+
+    return res.status(StatusCodes.OK).send(success(200, parentStatus))
+    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function addStudentController(req, res) {
+  try {
+    let { studentName } = req.body;
+    const parentId = req.parentId;
+    studentName = studentName.trim();
+    const [firstname, lastname] = studentName.split(" ");
+    const pipeline = [
+      {
+        $match: {
+          firstname: { $regex: new RegExp(`^${firstname}$`, 'i') },
+          lastname: { $regex: new RegExp(`^${lastname}$`, 'i') },
+          isActive: true
+        }
+      },
+      {
+        $lookup: {
+          from: "schoolparents",
+          localField: "schoolParent",
+          foreignField: "_id",
+          as: "schoolParent"
+        }
+      },
+      {
+        $unwind: "$schoolParent"
+      },
+      {
+        $match: {
+          "schoolParent.parent": convertToMongoId(parentId)
+        }
+      }
+    ];
+
+    const students = await getStudentsPipelineService(pipeline);
+    if(students.length === 0){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Student not found!'));
+    }
+
+    const student = students[0];
+    await updateParentService({_id: parentId},  { $push: { students: student['_id'] } });
+    return res.status(StatusCodes.OK).send(success(200, students[0]));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

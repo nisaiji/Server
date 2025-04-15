@@ -237,10 +237,7 @@ const updateStudentParentByAdminSchema = Joi.object({
     "any.required": "gender is required"
   }),
 
-  dob: Joi.string()
-    .optional()
-    .pattern(/^(00|[0-2][0-9]|(3[0-1]))\/(0[0-9]|1[0-2])\/\d{4}$/)
-    .messages({
+  dob: Joi.string().optional().pattern(/^(00|[0-2][0-9]|(3[0-1]))\/(0[0-9]|1[0-2])\/\d{4}$/).messages({
       "string.pattern.base": "Invalid date format, use DD/MM/YYYY."
     })
     .custom((value, helpers) => {

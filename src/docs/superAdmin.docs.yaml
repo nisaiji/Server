@@ -406,3 +406,87 @@ paths:
                     type: string
                     example: "An unexpected error occurred."
 
+  /super-admin/admins/{adminId}:
+    put:
+      security:
+        - Authorization: []
+      tags:
+        - Super-Admin
+      summary: Update admin info
+      description: This API allows the super-admin to update admin information.
+      parameters:
+        - in: path
+          name: adminId
+          required: true
+          description: "Admin ID"
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                active:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Successfully updated admin info.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 200
+                  data:
+                    type: object
+                    properties:
+                      admin:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                            example: "admin@123"
+                          active:
+                            type: boolean
+                            example: true
+        '400':
+          description: Bad request due to validation errors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Invalid data provided."
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+

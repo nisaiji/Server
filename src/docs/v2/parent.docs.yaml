@@ -24,6 +24,29 @@ paths:
         500:
           description: "Server error"
 
+  /v2/parent/status:
+    post:
+      summary: "To get parent status"
+      description: "This API to get parent status."
+      tags:
+      - "v2/Parent"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+      responses:
+        200:
+          description: "parent status object"
+        400:
+          description: "Unauthorized request"
+        500:
+          description: "Server error"
+
   /v2/parent/phoneVerify:
     post:
       summary: "Send OTP to a parent's phone number for verification"
@@ -137,7 +160,7 @@ paths:
       tags:
         - 'v2/Parent'
       security:
-        - bearerAuth: []
+        - Authorization: []
       requestBody:
         required: true
         content:
@@ -189,7 +212,7 @@ paths:
       tags:
         - v2/Parent
       security:
-        - bearerAuth: []
+        - Authorization: []
       requestBody:
         required: true
         content:
@@ -230,6 +253,144 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
           description: Email already verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/parent/password:
+    put:
+      summary: update parent password
+      tags:
+        - v2/Parent
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otp
+              properties:
+                password:
+                  type: string
+                  example: "password@12345"
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: User updated successfully
+        '404':
+          description: Parent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/parent/fullname:
+    put:
+      summary: update parent fullname
+      tags:
+        - v2/Parent
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otp
+              properties:
+                fullname:
+                  type: string
+                  example: "john doe"
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: User updated successfully
+        '404':
+          description: Parent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/parent/add:
+    put:
+      summary: Add students to parent app
+      tags:
+        - v2/Parent
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otp
+              properties:
+                studentName:
+                  type: string
+                  example: "john doe"
+      responses:
+        '200':
+          description: Student Added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: User updated successfully
+        '404':
+          description: Parent not found
           content:
             application/json:
               schema:

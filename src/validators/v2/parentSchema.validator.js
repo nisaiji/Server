@@ -16,6 +16,23 @@ const parentEmailValidator = Joi.object({
   })
 });
 
+const parentPasswordValidator = Joi.object({
+  password: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/)).required().min(8).max(16).messages({
+    "string.pattern.base": "Password should contain only alphabets, numbers, and special characters.",
+    "string.empty": "Password cannot be empty!",
+    "any.required": "Password is required!",
+    "string.min": "Password must be at least 8 characters long.",
+    "string.max": "Password must not exceed 16 characters.",
+    "string.base": "Password must be a valid string."
+  })
+});
+
+const parentFullnameValidator = Joi.object({
+  fullname: Joi.string().required().messages({
+    "any.required": "full name is required."
+  })
+});
+
 const parentPhoneAndOtpValidator = Joi.object({
   phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).message("invalid phone number").length(10).required().messages({
     "string.pattern": "invalid phone numberrr",
@@ -35,5 +52,7 @@ const parentPhoneAndOtpValidator = Joi.object({
 export {
   parentPhoneValidator,
   parentEmailValidator,
+  parentPasswordValidator,
+  parentFullnameValidator,
   parentPhoneAndOtpValidator
 }

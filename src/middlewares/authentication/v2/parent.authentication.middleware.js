@@ -17,9 +17,18 @@ export async function parentAuthenticate(req, res, next) {
     if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
+
     if (parent['isActive']===false) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Services are temporarily paused. Please contact support"));
     }
+
+    if(parent['status']==='unVerified') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User verification is pending"));
+    }
+
+    // if(parent['status']==='phoneVerified') {
+    //   return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User email Verification is pending"));
+    // }
 
     req.parentId = decoded.parentId;
     req.role = "parent";

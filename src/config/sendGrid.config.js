@@ -4,14 +4,14 @@ import { config } from './config.js';
 sendGrid.setApiKey(config.sendGridApiKey);
 
 export async function sendEmailBySendGrid({fromEmail, toEmail, subject, html}) {
-try {
-  const msg =  {
-    to: toEmail,
-    from: fromEmail,
-    subject: subject,
-    html: html
-  };
-
+  try {
+    const msg =  {
+      to: toEmail,
+      from: fromEmail,
+      subject: subject,
+      html: html
+    };
+    
   const res = await sendGrid.send(msg);
   console.log(res);
   return res;

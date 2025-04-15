@@ -18,39 +18,15 @@ paths:
                 schoolName:
                   type: string
                   example: "N.V.V.H.S.S"
-                affiliationNo:
-                  type: string
-                  example: "123456"
-                address:
-                  type: string
-                  example: "Kerala"
                 email:
                   type: string
                   example: "admin@example.com"
                 phone:
                   type: string
                   example: "1234567890"
-                username:
-                  type: string
-                  example: "admin"
                 password:
                   type: string
                   format: password
-                country:
-                  type: string
-                  example: "India"
-                state:
-                  type: string
-                  example: "Kerala"
-                district:
-                  type: string
-                  example: "Thrissur"
-                city:
-                  type: string
-                  example: "Thrissur"
-                pincode:
-                  type: string
-                  example: "680001"
       responses:
         '201':
           description: "Admin successfully registered."
@@ -327,6 +303,164 @@ paths:
                     type: string
                     example: "An unexpected error occurred."
 
+  /admin/address:
+    put:
+      security:
+        - Authorization: []
+      tags:
+        - "Admin"
+      summary: "Update address of admin"
+      description: "This API endpoint updates the addresses of admin."
+      produces:
+        - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                country:
+                  type: string
+                  example: "india"
+                state:
+                  type: string
+                  example: "madhya pradesh"
+                district:
+                  type: string
+                  example: "indore"
+                city:
+                  type: string
+                  example: "indore"
+                address:
+                  type: string
+                  example: 'bholaram indore mp'
+                pincode:
+                  type: string
+                  example: '451115'
+      responses:
+        '201':
+          description: "Admin updated successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: "Admin updated successfully."
+        '400':
+          description: "Validation failed due to incorrect or missing input."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Validation error: missing or invalid fields."
+        '500':
+          description: "Internal server error. Unexpected issue during registration."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+
+  /admin/details:
+    put:
+      security:
+        - Authorization: []
+      tags:
+        - "Admin"
+      summary: "Update details of admin"
+      description: "This API endpoint updates admin details."
+      produces:
+        - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "username@123"
+                affiliationNo:
+                  type: string
+                  example: "1000000000"
+      responses:
+        '201':
+          description: "Admin updated successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  statusCode:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: "Admin updated successfully."
+        '400':
+          description: "Validation failed due to incorrect or missing input."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Validation error: missing or invalid fields."
+        '500':
+          description: "Internal server error. Unexpected issue during registration."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  statusCode:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    example: "An unexpected error occurred."
+
   /admin/login:
     post:
       tags:
@@ -415,7 +549,6 @@ paths:
                     type: string
                     example: "An unexpected error occurred."
 
-
   /admin/refresh:
    get:
     security:
@@ -473,7 +606,6 @@ paths:
                 message:
                   type: string
                   example: "An unexpected error occurred while refreshing the token."
-
 
   /admin/social:
     put:
