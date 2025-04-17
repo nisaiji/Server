@@ -7,6 +7,7 @@ import { teacherAuthenticate } from "../../middlewares/authentication/teacher.au
 const studentRouter = express.Router();
 
 studentRouter.get('/admin', adminAuthenticate, searchStudentsController)
+studentRouter.post('/admin', adminAuthenticate, registerStudentController)
 studentRouter.post('/teacher', teacherAuthenticate, registerStudentController)
 studentRouter.put('/:studentId', adminAuthenticate, updateStudentBySchoolController)
 studentRouter.post('/bulk', adminAuthenticate, upload, registerStudentsFromExcelController )

@@ -5,7 +5,6 @@ import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.a
 
 const parentRouter = express.Router();
 // check phone no todo
-// 
 parentRouter.post("/login", loginParentController)
 parentRouter.post('/status', getParentStatusController)
 parentRouter.post("/phoneVerify", parentPhoneValidation, parentSendOtpToPhoneController )

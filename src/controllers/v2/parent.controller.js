@@ -5,7 +5,6 @@ import { getOtpsPipelineService, registerOtpService, updateOtpService } from "..
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
 import { getParentService, updateParentService } from "../../services/v2/parent.services.js";
 import { parentEmailVerification, sendEmailBySendGrid } from "../../config/sendGrid.config.js";
-import { updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
 import { getAccessTokenService } from "../../services/JWTToken.service.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
@@ -348,8 +347,12 @@ export async function addStudentController(req, res) {
     if(students.length === 0){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Student not found!'));
     }
-
+    const parent = await getParentService({_id: parentId});
+    
     const student = students[0];
+    if (parent?.students.some(id => id.equals(student._id))) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Student already added'));
+    }
     await updateParentService({_id: parentId},  { $push: { students: student['_id'] } });
     return res.status(StatusCodes.OK).send(success(200, students[0]));
   } catch (err) {
