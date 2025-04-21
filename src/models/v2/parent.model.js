@@ -61,8 +61,7 @@ const parentSchema = mongoose.Schema({
   },
   students: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref:"student",
-    // required: true
+    ref:"student"
   }]
 },
 {

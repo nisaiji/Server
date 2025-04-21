@@ -29,7 +29,11 @@ const sectionSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"
   }
-});
+},
+{
+  timestamps:true
+}
+);
 
 const sectionModel = mongoose.model("section", sectionSchema);
 export default sectionModel;

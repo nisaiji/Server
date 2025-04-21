@@ -44,3 +44,12 @@ export async function getParentCountService(filter){
     throw error;  
   }
 }
+
+export async function getParentsPipelineService(pipeline){
+  try {
+    const parents = await parentModel.aggregate(pipeline).exec();
+    return parents;
+  } catch (error) {
+    throw error;    
+  }
+}

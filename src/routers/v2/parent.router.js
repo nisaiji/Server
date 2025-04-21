@@ -1,10 +1,11 @@
 import { parentPhoneValidation, parentEmailValidation, parentPhoneAndOtpValidation, parentPasswordValidation, parentFullnameValidation } from "../../middlewares/validation/v2/parent.validation.middleware.js";
-import { addStudentController, getParentStatusController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, updateParentController } from "../../controllers/v2/parent.controller.js";
+import { addStudentController, getParentController, getParentStatusController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, updateParentController } from "../../controllers/v2/parent.controller.js";
 import express from "express";
 import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
 
 const parentRouter = express.Router();
 // check phone no todo
+parentRouter.get("/", parentAuthenticate, getParentController)
 parentRouter.post("/login", loginParentController)
 parentRouter.post('/status', getParentStatusController)
 parentRouter.post("/phoneVerify", parentPhoneValidation, parentSendOtpToPhoneController )

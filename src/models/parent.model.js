@@ -57,7 +57,11 @@ const parentSchema = mongoose.Schema({
   password: {
     type: String
   }
-});
+},
+{
+  timestamps:true
+}
+);
 parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });
 
 const parentModel = mongoose.model("parentt", parentSchema);

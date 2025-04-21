@@ -16,7 +16,11 @@ const classSchema = new mongoose.Schema({
     ref: "admin",
     required: true
   }
-});
+},
+{
+  timestamps:true
+}
+);
 
 const classModel = mongoose.model("class", classSchema);
 export default classModel;
