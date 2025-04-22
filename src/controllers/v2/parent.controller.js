@@ -17,9 +17,9 @@ export async function parentSendOtpToPhoneController (req, res) {
     if(!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
     }
-    if(['phoneVerified', 'verified'].includes(parent['status'])) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
-    }
+    // if(['phoneVerified', 'verified'].includes(parent['status'])) {
+    //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
+    // }
 
     const otp = otpGenerator.generate(5, {
       lowerCaseAlphabets: false,
@@ -43,9 +43,10 @@ export async function parentPhoneVerifyByOtpController (req, res) {
     if(!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
     }
-    if(['phoneVerified', 'verified'].includes(parent['status'])) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
-    }
+
+    // if(['phoneVerified', 'verified'].includes(parent['status'])) {
+    //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
+    // }
 
     const getOtpPipeline = [
       {
@@ -303,6 +304,7 @@ export async function getParentStatusController(req, res) {
     parentStatus['emailVerified'] = parent['status'] === 'verified';
     parentStatus['passwordUpdated'] = parent['password'] ? true : false;
     parentStatus['personalInfoUpdated'] = parent['fullname'] ? true : false;
+    parentStatus['studentAdded'] = parent['students']?.length > 0 ? true :false;
 
     return res.status(StatusCodes.OK).send(success(200, parentStatus))
     
