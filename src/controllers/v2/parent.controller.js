@@ -215,16 +215,16 @@ export async function loginParentController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User verification is pending"));
     }
 
-    if(parent['status']==='phoneVerified') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User email Verification is pending"));
-    }
+    // if(parent['status']==='phoneVerified') {
+    //   return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User email Verification is pending"));
+    // }
 
     const enteredPassword = password;
     const storedPassword = parent.password;
     const matchPassword = await matchPasswordService({enteredPassword, storedPassword});
-    // if (!matchPassword) {
-    //   return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
-    // }
+    if (!matchPassword) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
+    }
 
     const accessToken = getAccessTokenService({
       role: "parent",
@@ -382,9 +382,12 @@ export async function getParentController(req, res) {
       }
     ]
 
-    const parent = await getParentsPipelineService(pipeline);
+    const parents = await getParentsPipelineService(pipeline);
+    if(parents.length <=0){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User details not found"))
+    }
 
-    return res.status(StatusCodes.OK).send(success(200, parent));
+    return res.status(StatusCodes.OK).send(success(200, parent[0]));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

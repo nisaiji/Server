@@ -49,10 +49,60 @@ const parentPhoneAndOtpValidator = Joi.object({
     })    
 });
 
+const parentUpdateValidator = Joi.object({
+  username: Joi.string().required().messages({
+      'string.base': 'Username must be a string',
+       "any.required": "username is required."
+    }),
+
+  fullname: Joi.string().required().messages({
+      'string.base': 'Full name must be a string',
+       "any.required": "full name is required."
+    }),
+
+  age: Joi.number().optional().messages({
+      'number.base': 'Age must be a number'
+    }),
+
+  gender: Joi.string().valid('Male', 'Female', 'Other').optional().messages({
+      'string.base': 'Gender must be a string',
+      'any.only': 'Gender must be Male, Female, or Other'
+    }),
+
+  address: Joi.string().optional().messages({
+      'string.base': 'Address must be a string'
+    }),
+
+  city: Joi.string().optional().messages({
+      'string.base': 'City must be a string'
+    }),
+
+  district: Joi.string().optional().messages({
+      'string.base': 'District must be a string'
+    }),
+
+  country: Joi.string().optional().messages({
+      'string.base': 'Country must be a string'
+    }),
+
+  pincode: Joi.string().optional().messages({
+      'string.base': 'Pincode must be a string'
+    }),
+
+  qualification: Joi.string().optional().messages({
+      'string.base': 'Qualification must be a string'
+    }),
+
+  occupation: Joi.string().optional().messages({
+      'string.base': 'Occupation must be a string'
+    })
+});
+
 export {
   parentPhoneValidator,
   parentEmailValidator,
   parentPasswordValidator,
   parentFullnameValidator,
-  parentPhoneAndOtpValidator
+  parentPhoneAndOtpValidator,
+  parentUpdateValidator
 }

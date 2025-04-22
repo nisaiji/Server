@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { error } from "../../../utills/responseWrapper.js";
-import { parentEmailValidator, parentFullnameValidator, parentPasswordValidator, parentPhoneAndOtpValidator, parentPhoneValidator } from "../../../validators/v2/parentSchema.validator.js";
+import { parentEmailValidator, parentFullnameValidator, parentPasswordValidator, parentPhoneAndOtpValidator, parentPhoneValidator, parentUpdateValidator } from "../../../validators/v2/parentSchema.validator.js";
 
 export async function parentPhoneValidation(req, res, next) {
   try {
@@ -53,6 +53,18 @@ export async function parentFullnameValidation(req, res, next) {
 export async function parentPhoneAndOtpValidation(req, res, next) {
   try {
     const { error: schemaError } = parentPhoneAndOtpValidator.validate(req.body);
+    if (schemaError) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
+    }
+    next();
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function parentUpdateValidation(req, res, next) {
+  try {
+    const { error: schemaError } = parentUpdateValidator.validate(req.body);
     if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
