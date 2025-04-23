@@ -274,6 +274,10 @@ export async function updateParentController(req, res) {
       const hashedPassword = await hashPasswordService(req.body["password"]);
       fieldsToBeUpdated.password = hashedPassword;
     }
+    if(req.body["photo"] || req.body["method"]==="DELETE"){ 
+      fieldsToBeUpdated['photo'] = (req.body["method"]==="DELETE")? "": req.body["photo"]; 
+    }
+
 
     await updateParentService({ _id: parentId }, fieldsToBeUpdated);
 
@@ -387,7 +391,7 @@ export async function getParentController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User details not found"))
     }
 
-    return res.status(StatusCodes.OK).send(success(200, parent[0]));
+    return res.status(StatusCodes.OK).send(success(200, parents[0]));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

@@ -117,6 +117,16 @@ const parentPasswordEditValidator = Joi.object({
   })
 });
 
+const uploadParentPhotoValidator = Joi.object({
+  photo: Joi.string().optional(),
+  method: Joi.string().valid("POST", "DELETE").required().messages({
+    "any.required": "method is required.",
+    "string.empty": "method can not be an empty string.",
+    "string.base": "method must be a string.",
+    "any.only": 'method must be either "POST" or "DELETE".'
+  })
+});
+
 export {
   parentPhoneValidator,
   parentEmailValidator,
@@ -124,5 +134,6 @@ export {
   parentFullnameValidator,
   parentPhoneAndOtpValidator,
   parentUpdateValidator,
-  parentPasswordEditValidator
+  parentPasswordEditValidator,
+  uploadParentPhotoValidator
 }

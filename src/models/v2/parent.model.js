@@ -20,6 +20,9 @@ const parentSchema = mongoose.Schema({
   address:{
     type:String
   },
+  photo:{
+    type: String,
+  },
   city:{
     type:String
   },

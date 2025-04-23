@@ -1,7 +1,8 @@
-import { parentPhoneValidation, parentEmailValidation, parentPhoneAndOtpValidation, parentPasswordValidation, parentFullnameValidation, parentUpdateValidation, parentPasswordEditValidation } from "../../middlewares/validation/v2/parent.validation.middleware.js";
+import { parentPhoneValidation, parentEmailValidation, parentPhoneAndOtpValidation, parentPasswordValidation, parentFullnameValidation, parentUpdateValidation, parentPasswordEditValidation, parentPhotoUploadValidation } from "../../middlewares/validation/v2/parent.validation.middleware.js";
 import { addStudentController, editPasswordController, getParentController, getParentStatusController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, updateParentController } from "../../controllers/v2/parent.controller.js";
 import express from "express";
 import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
+import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
 
 const parentRouter = express.Router();
 // check phone no todo
@@ -17,5 +18,6 @@ parentRouter.put("/password", parentAuthenticate, parentPasswordValidation, upda
 parentRouter.put("/password/edit", parentAuthenticate, parentPasswordEditValidation, editPasswordController)
 parentRouter.put("/fullname", parentAuthenticate, parentFullnameValidation, updateParentController)
 parentRouter.put('/add', parentAuthenticate, addStudentController)
+parentRouter.put("/parent/photo-upload/:studentId", parentAuthenticate, parentPhotoUploadValidation, validateImageSizeMiddleware, updateParentController)
 
 export default parentRouter;
