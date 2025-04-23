@@ -98,11 +98,31 @@ const parentUpdateValidator = Joi.object({
     })
 });
 
+const parentPasswordEditValidator = Joi.object({
+  newPassword: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/)).required().min(8).max(16).messages({
+    "string.pattern.base": "Password should contain only alphabets, numbers, and special characters.",
+    "string.empty": "Password cannot be empty!",
+    "any.required": "New password is required!",
+    "string.min": "Password must be at least 8 characters long.",
+    "string.max": "Password must not exceed 16 characters.",
+    "string.base": "Password must be a valid string."
+  }),
+  oldPassword: Joi.string().pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/)).required().min(8).max(16).messages({
+    "string.pattern.base": "Password should contain only alphabets, numbers, and special characters.",
+    "string.empty": "Password cannot be empty!",
+    "any.required": "Old password is required!",
+    "string.min": "Password must be at least 8 characters long.",
+    "string.max": "Password must not exceed 16 characters.",
+    "string.base": "Password must be a valid string."
+  })
+});
+
 export {
   parentPhoneValidator,
   parentEmailValidator,
   parentPasswordValidator,
   parentFullnameValidator,
   parentPhoneAndOtpValidator,
-  parentUpdateValidator
+  parentUpdateValidator,
+  parentPasswordEditValidator
 }

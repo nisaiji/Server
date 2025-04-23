@@ -392,3 +392,24 @@ export async function getParentController(req, res) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+export async function editPasswordController(req, res) {
+  try {
+    const parentId = req.parentId || '67fe851bc9ae5cf26bfeab80';
+    const { newPassword, oldPassword } = req.body;
+    const parent = await getParentService({_id: parentId});
+    if(!parent['password']) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Please complete your profile"));
+    }
+    const matchPassword = await matchPasswordService({enteredPassword: oldPassword, storedPassword: parent['password']});
+    if (!matchPassword) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Please enter correct previous password"));
+    }
+
+    const hashedPassword = await hashPasswordService(newPassword);
+    await updateParentService({_id: parentId}, {password: hashedPassword});
+    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
