@@ -358,3 +358,113 @@ export async function updateStudentByParentController(req, res) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
   }
 }
+
+export async function getAttendancesController(req, res){
+  try {
+    let { startTime, endTime, studentId } = req.body;
+    const parentId = req.parentId;
+    const student = await getStudentService({_id: studentId});
+    if(!student) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"))
+    }
+    const parent = await getParentService({_id: parentId})
+    if(!parent['student'].some(id => id.equals(student._id))) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(400, 'Unauthorized access'));
+    }
+
+    const filter = { isActive: true, _id: convertToMongoId(studentId) };
+    const attendanceFilter = {'date': { $gte: Number(startTime), $lte: Number(endTime) }};
+
+    const pipeline = [
+      {
+        $match: filter,
+      },
+      {
+        $lookup: {
+          from: 'sections',
+          localField: 'section',
+          foreignField: '_id',
+          as: 'section',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: '$section',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'classes',
+          localField: 'classId',
+          foreignField: '_id',
+          as: 'class',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: '$class',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'attendances',
+          localField: '_id',
+          foreignField: 'student',
+          as: 'attendances',
+          pipeline: [
+            {
+              $match: attendanceFilter,
+            },
+            {
+              $project: {
+                date: {
+                  $dateToString: {
+                    format: "%Y-%m-%d",
+                    date: {$toDate: '$date'},
+                    timezone: 'Asia/Kolkata'
+                  }
+                },
+                day: 1,
+                parentAttendance: 1,
+                teacherAttendance: 1
+              }
+            }
+          ],
+        },
+      },
+      {
+        $project: {
+          firstname: 1,
+          lastname: 1,
+          gender: 1,
+          sectionName: '$section.name',
+          className: '$class.name',
+          attendances: 1,
+        },
+      },
+    ];
+    const attendances = await getStudentsPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, {
+      attendances
+    }));
+    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
