@@ -319,3 +319,42 @@ export async function registerStudentsFromExcelController(req, res){
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
   }
 }
+
+export async function updateStudentByParentController(req, res) {
+  try {
+    const studentId = req.params.studentId;
+    const parentId = req.parentId;
+    const studentUpdate = {};
+    
+    const student = await getStudentService({ _id:studentId });
+    if(!student){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+    }
+    const parent = await getParentService({ _id: parentId});
+    if(!parent){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+    }
+
+    if(!parent['students']?.some(id => id.equals(studentId))) {
+          return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'User is not authorized'));
+    }
+
+    if(req.body["firstname"]){ studentUpdate.firstname = req.body["firstname"]; }
+    if(req.body["lastname"]){ studentUpdate.lastname = req.body["lastname"]; }
+    if(req.body["gender"]){ studentUpdate.gender = req.body["gender"]; }
+    if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
+    if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
+    if(req.body["photo"] || req.body["method"]==="DELETE"){ studentUpdate.photo = (req.body["method"]==="DELETE")? "": req.body["photo"]; }    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
+    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
+    if(req.body["city"]){ studentUpdate.city = req.body["city"]; }
+    if(req.body["district"]){ studentUpdate.district = req.body["district"]; }
+    if(req.body["state"]){ studentUpdate.state = req.body["state"]; }
+    if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
+    if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
+
+    await updateStudentService({ _id:studentId }, studentUpdate);
+    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
+  }
+}

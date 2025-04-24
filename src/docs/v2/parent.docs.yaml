@@ -409,7 +409,7 @@ paths:
       summary: "To get parent info"
       description: "This API will get parent. It requires parent login token."
       tags:
-      - "Parent"
+      - "v2/Parent"
     responses:
       '200':
         description: "Parent information retrieved successfully."

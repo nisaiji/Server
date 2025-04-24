@@ -167,3 +167,148 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/student/parent/photo-upload/{studentId}:
+    put:
+      security:
+        - Authorization: []  
+      tags:
+        - v2/Student
+      summary: Upload or delete a student's photo (by parent)
+      description: Parent can upload or delete the photo of their child (student). Requires authentication.
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  description: Base64-encoded image string (optional if method is DELETE)
+                method:
+                  type: string
+                  enum: [POST, DELETE]
+                  description: Specify whether to upload (`POST`) or delete (`DELETE`) the photo
+              required:
+                - method
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+        '400':
+          description: Bad Request (Validation Error)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+        '401':
+          description: Unauthorized (Authentication required)
+        '500':
+          description: Internal Server Error
+
+  /v2/student/parent/{studentId}:
+    put:
+      security:
+        - Authorization: []  
+      tags:
+        - v2/Student
+      summary: Update student profile by parent
+      description: Allows a parent to update the student's personal information such as name, address, photo, etc.
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the student to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                gender:
+                  type: string
+                bloodGroup:
+                  type: string
+                dob:
+                  type: string
+                  format: date
+                photo:
+                  type: string
+                  description: Base64-encoded photo (optional if deleting)
+                method:
+                  type: string
+                  enum: [DELETE]
+                  description: If method is DELETE and photo is present, photo will be removed
+                address:
+                  type: string
+                city:
+                  type: string
+                district:
+                  type: string
+                state:
+                  type: string
+                country:
+                  type: string
+                pincode:
+                  type: string
+      responses:
+        '200':
+          description: Student updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Student updated successfully
+        '400':
+          description: Bad Request (e.g. unauthorized parent)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+        '404':
+          description: Student or Parent not found
+        '500':
+          description: Internal Server Error
