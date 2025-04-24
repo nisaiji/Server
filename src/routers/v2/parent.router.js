@@ -18,6 +18,6 @@ parentRouter.put("/password", parentAuthenticate, parentPasswordValidation, upda
 parentRouter.put("/password/edit", parentAuthenticate, parentPasswordEditValidation, editPasswordController)
 parentRouter.put("/fullname", parentAuthenticate, parentFullnameValidation, updateParentController)
 parentRouter.put('/add', parentAuthenticate, addStudentController)
-parentRouter.put("/parent/photo-upload/:studentId", parentAuthenticate, parentPhotoUploadValidation, validateImageSizeMiddleware, updateParentController)
+parentRouter.put("/photo-upload", parentAuthenticate, parentPhotoUploadValidation, validateImageSizeMiddleware, updateParentController)
 
 export default parentRouter;

@@ -381,11 +381,97 @@ export async function getParentController(req, res) {
           from: 'students',
           localField: 'students',
           foreignField: '_id',
-          as:'students'
+          as: 'students'
+        }
+      },
+      {
+        $unwind: {
+          path: "$students",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "students.section",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                startTime: 1
+              }
+            }
+          ],
+          as: "students.section"
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "students.classId",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                name: 1
+              }
+            }
+          ],
+          as: "students.classId"
+        }
+      },
+      {
+        $lookup: {
+          from: "admins",
+          localField: "students.admin",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                schoolName: 1,
+                principal: 1,
+                schoolBoard: 1,
+                phone: 1,
+                email: 1,
+                address: 1,
+                city: 1,
+                district: 1,
+                state: 1,
+                country: 1,
+                pincode: 1
+              }
+            }
+          ],
+          as: "students.admin"
+        }
+      },
+      {
+        $unwind: { path: "$students.section", preserveNullAndEmptyArrays: true }
+      },
+      {
+        $unwind: { path: "$students.classId", preserveNullAndEmptyArrays: true }
+      },
+      {
+        $unwind: { path: "$students.admin", preserveNullAndEmptyArrays: true }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          username: { $first: "$username" },
+          fullname: { $first: "$fullname" },
+          phone: { $first: "$phone" },
+          // add any other parent fields you need here
+          students: { $push: "$students" }
+        }
+      },
+      {
+        $project: {
+          password: 0
         }
       }
-    ]
-
+    ];
+    
     const parents = await getParentsPipelineService(pipeline);
     if(parents.length <=0){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User details not found"))
