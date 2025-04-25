@@ -461,10 +461,41 @@ export async function getParentController(req, res) {
           username: { $first: "$username" },
           fullname: { $first: "$fullname" },
           phone: { $first: "$phone" },
-          // add any other parent fields you need here
+          gender: { $first: "$gender" },
+          address: { $first: "$address" },
+          photo: { $first: "$photo" },
+          city: { $first: "$city" },
+          district: { $first: "$district" },
+          status: { $first: "$status" },
+          country: { $first: "$country" },
+          pincode: {$first: '$pincode'},
+          qualification: { $first: "$qualification" },
+          occupation: { $first: "$occupation" },
+          isLoginAlready: { $first: "$isLoginAlready" },
+          email: { $first: "$email" },
           students: { $push: "$students" }
         }
       },
+      {
+        $project: {
+          username: { $cond: [{ $ne: ["$username", null] }, "$username", "$$REMOVE"] },
+          fullname: { $cond: [{ $ne: ["$fullname", null] }, "$fullname", "$$REMOVE"] },
+          phone: { $cond: [{ $ne: ["$phone", null] }, "$phone", "$$REMOVE"] },
+          gender: { $cond: [{ $ne: ["$gender", null] }, "$gender", "$$REMOVE"] },
+          address: { $cond: [{ $ne: ["$address", null] }, "$address", "$$REMOVE"] },
+          photo: { $cond: [{ $ne: ["$photo", null] }, "$photo", "$$REMOVE"] },
+          city: { $cond: [{ $ne: ["$city", null] }, "$city", "$$REMOVE"] },
+          district: { $cond: [{ $ne: ["$district", null] }, "$district", "$$REMOVE"] },
+          status: { $cond: [{ $ne: ["$status", null] }, "$status", "$$REMOVE"] },
+          country: { $cond: [{ $ne: ["$country", null] }, "$country", "$$REMOVE"] },
+          pincode: { $cond: [{ $ne: ["$pincode", null] }, "$pincode", "$$REMOVE"] },
+          qualification: { $cond: [{ $ne: ["$qualification", null] }, "$qualification", "$$REMOVE"] },
+          occupation: { $cond: [{ $ne: ["$occupation", null] }, "$occupation", "$$REMOVE"] },
+          isLoginAlready: { $cond: [{ $ne: ["$isLoginAlready", null] }, "$isLoginAlready", "$$REMOVE"] },
+          email: { $cond: [{ $ne: ["$email", null] }, "$email", "$$REMOVE"] },
+          students: 1
+        }
+      },      
       {
         $project: {
           password: 0

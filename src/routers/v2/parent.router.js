@@ -5,7 +5,7 @@ import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.a
 import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
 
 const parentRouter = express.Router();
-// check phone no todo
+
 parentRouter.get("/", parentAuthenticate, getParentController)
 parentRouter.put("/", parentAuthenticate, parentUpdateValidation, updateParentController)
 parentRouter.post("/login", loginParentController)

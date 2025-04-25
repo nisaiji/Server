@@ -368,7 +368,7 @@ export async function getAttendancesController(req, res){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"))
     }
     const parent = await getParentService({_id: parentId})
-    if(!parent['student'].some(id => id.equals(student._id))) {
+    if(!parent['students']?.some(id => id.equals(student._id))) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(400, 'Unauthorized access'));
     }
 
