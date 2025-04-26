@@ -815,17 +815,17 @@ export async function updateStudentController(req, res){
     if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
     
 
-    if(req.body["phone"]){ 
-      const parentWithPhone = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
-      if(parentWithPhone){
-        return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
-      }
-      parentUpdate.phone = req.body["phone"];
-    }
+    // if(req.body["phone"]){ 
+    //   const parentWithPhone = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
+    //   if(parentWithPhone){
+    //     return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
+    //   }
+    //   parentUpdate.phone = req.body["phone"];
+    // }
     if(req.body["parentName"]){ parentUpdate.fullname = req.body["parentName"]; }
     if(req.body["parentGender"]){ parentUpdate.gender = req.body["parentGender"]; }
     if(req.body["parentAge"]){ parentUpdate.age = req.body["parentAge"]; }
-    if(req.body["parentEmail"]){ parentUpdate.email = req.body["parentEmail"]; }
+    // if(req.body["parentEmail"]){ parentUpdate.email = req.body["parentEmail"]; }
     if(req.body["parentQualification"]){ parentUpdate.qualification = req.body["parentQualification"]; }
     if(req.body["parentOccupation"]){ parentUpdate.occupation = req.body["parentOccupation"]; }
     if(req.body["parentAddress"]){ parentUpdate.address = req.body["parentAddress"]; }
