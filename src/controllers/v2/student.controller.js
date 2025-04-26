@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import xlsx from 'xlsx';
 import fs from 'fs/promises'
-import { getStudentService, getStudentsPipelineService, registerStudentService, updateStudentService } from "../../services/student.service.js";
+import { getStudentCountService, getStudentService, getStudentsPipelineService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
@@ -463,6 +463,381 @@ export async function getAttendancesController(req, res){
     return res.status(StatusCodes.OK).send(success(200, {
       attendances
     }));
+    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getStudentsController(req, res){
+    try {
+        let {admin, classId, section, parent, student, firstname, lastname, gender, startTime, endTime, include, page = 1, limit } = req.query;
+
+        if(!admin && !classId && !section && !parent && !student && !firstname && !lastname && !gender){
+          return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
+        }
+
+        if( admin && req.adminId!==admin ){
+          return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+        }
+
+        if(req.role==="parent" && !parent && parent!==req.parentId){
+          return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+        }
+
+        if(req.role=="teacher" && !section){
+          section = req.sectionId;
+        }
+
+        if(req.role=="admin" && !admin){
+          admin = req.adminId;
+        }
+
+        if(req.role=="parent" && !parent){
+          parent = req.parentId;
+        }
+
+        if(req.role==="teacher" && (admin || classId ||(section && req.sectionId!==section))){
+          return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+        }
+        const filter = { isActive: true };
+        if(admin){ filter.admin = convertToMongoId(admin); }
+        if(classId){ filter.classId = convertToMongoId(classId); }
+        if(section){ filter.section = convertToMongoId(section); }
+        if(parent){ filter.parent = convertToMongoId(parent); }
+        if(student){ filter._id = convertToMongoId(student); }
+        if(firstname){ 
+          const regexFirstname = new RegExp(firstname, 'i'); 
+          filter.firstname = { $regex: regexFirstname }; 
+        }
+        if(lastname){ 
+          const regexLastname = new RegExp(firstname, 'i'); 
+          filter.lastname = { $regex: regexLastname }; 
+        }
+        if(gender){ filter.gender = gender; }
+
+        const pageNum = parseInt(page);
+        const limitNum = limit? parseInt(limit):"no limit";
+        const skipNum = (pageNum-1)*limitNum;
+
+        const pipeline = [
+            {
+                $match: filter
+            },
+            {
+              $sort:{firstname:1},
+            }
+        ];
+
+        if(limit){
+          pipeline.push(
+            {
+              $skip:skipNum
+            },
+            {
+              $limit: limitNum
+            }
+          );
+        }
+
+        if (include) {
+          const includes = include.split(',');
+          if(includes.includes('attendance') && (!startTime || !endTime)){
+            return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Start time and end time are required"));
+          }
+          if(includes.includes('attendance')) {
+            pipeline.push({
+              $lookup: {
+                  from: 'attendances',
+                  let: { 
+                    studentId: '$_id',
+                    startTime: { $toLong: startTime },
+                    endTime: { $toLong: endTime}
+                   },
+                  pipeline: [
+                      {
+                          $match: {
+                              $expr: {
+                                  $and: [
+                                      { $eq: ['$student', '$$studentId'] },
+                                      {$gte: ['$date', '$$startTime']},
+                                      {$lte: ['$date', '$$endTime']}
+                                  ]
+                              }
+                          }
+                      },
+                      {
+                        $project:{
+                          date:1,
+                          day:1,
+                          parentAttendance:1,
+                          teacherAttendance:1
+                        }
+                      },
+
+                  ],
+                  as: 'attendance'
+              }
+          })
+          }
+          if (includes.includes('parent')) {
+            pipeline.push({
+              $lookup: {
+                from: 'schoolparents',
+                localField: 'schoolParent',
+                foreignField: '_id',
+                as:'parentDetails',
+                pipeline: [
+                  {
+                    $project:{
+                      school:0,
+                      parent:0,
+                      isActive:0,
+                      isLoginAlready:0
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$parentDetails',
+                preserveNullAndEmptyArrays: true
+              }
+            });
+          }
+          if (includes.includes('section')) {
+            pipeline.push({
+              $lookup: {
+                from: 'sections',
+                localField: 'section',
+                foreignField: '_id',
+                as:'sectionDetails',
+                pipeline: [
+                  {
+                    $project:{
+                      name:1,
+                      studentCount:1
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$sectionDetails',
+                preserveNullAndEmptyArrays: true
+              }
+            });
+          }
+          if (includes.includes('class')) {
+            pipeline.push({
+              $lookup: {
+                from: 'classes',
+                localField: 'classId',
+                foreignField: '_id',
+                as:'classDetails',
+                pipeline: [
+                  {
+                    $project:{
+                      name:1,
+                      sectionCount:{$size:'$section'}
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$classDetails',
+                preserveNullAndEmptyArrays: true
+              }
+            });
+          }
+          if (includes.includes('admin')) {
+            pipeline.push({
+              $lookup: {
+                from: 'admins',
+                localField: 'admin',
+                foreignField: '_id',
+                as:'adminDetails',
+                pipeline: [
+                  {
+                    $project:{
+                      schoolName:1,
+                      affiliationNo:1,
+                      schoolBoard:1,
+                      schoolNumber:1,
+                      phone:1,
+                      email:1,
+                      address:1,
+                      city:1,
+                      state:1
+                    }
+                  }
+                ]
+              }
+            });
+            pipeline.push({
+              $unwind: {
+                path: '$adminDetails',
+                preserveNullAndEmptyArrays: true
+              }
+            })
+          }
+          if (includes.includes('percentageAttendance')) {
+            const currentDate = new Date().getTime();
+            const sectionInfo = await getSectionService({_id: section});
+            const startDate = sectionInfo["startTime"];
+            const holidaysCount = await getHolidayCountService({admin: sectionInfo['admin'], date:{ $gte:startDate,$lte:currentDate }});
+            const sundayCount =  calculateSundays(startDate, currentDate);
+            const sundayAsWorkDayCount = await getWorkDayCountService({admin: sectionInfo['admin'], date: {$gte: startDate, $lte: currentDate}});
+            const dayscount =  calculateDaysBetweenDates(startDate, currentDate);
+            const attendancableDays = dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
+
+            pipeline.push({
+                $lookup: {
+                    from: 'attendances',
+                    let: { 
+                      studentId: '$_id', 
+                      startTime: '$sectionInfo.startTime', 
+                      currentTime: currentDate 
+                  },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$student', '$$studentId'] },
+                                        { $gte: ['$date', '$$startTime'] },
+                                        { $lte: ['$date', '$$currentTime'] }
+                                    ]
+                                },
+                                teacherAttendance: { $in: ['present', 'absent'] }
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: null,
+                                totalDays: { $sum: 1 },
+                                presentDays: {
+                                    $sum: {
+                                        $cond: [{ $eq: ['$teacherAttendance', 'present'] }, 1, 0]
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    as: 'attendanceStats'
+                }
+            });
+
+            pipeline.push({
+                $addFields: {
+                    attendancePercentage: {
+                        $cond: [
+                            { $gt: [attendancableDays, 0] },
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            { $arrayElemAt: ['$attendanceStats.presentDays', 0] },
+                                            attendancableDays
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+                            0
+                        ]
+                    }
+                }
+            });
+
+            pipeline.push({
+                $unset: ['attendanceStats', 'sectionInfo']
+            });
+          }
+        }
+
+        pipeline.push({
+          $project:{
+            isActive:0,
+            admin:0,
+            parent:0,
+            section:0,
+            classId:0
+          }
+        });
+
+        const students = await getStudentsPipelineService(pipeline);
+        const totalStudents = await getStudentCountService(filter);
+        const totalPages = Math.ceil(totalStudents / limitNum);
+
+        return res.status(StatusCodes.OK).send(success(200, {
+          students,
+          currentPage: pageNum,
+          totalPages,
+          totalStudents,
+          pageSize: limitNum
+        }));
+    } catch (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    }
+};
+
+export async function updateStudentController(req, res){
+  try {
+    const studentId = req.params.studentId;
+    const studentUpdate = {};
+    const parentUpdate = {};
+
+    const student = await getStudentService({ _id:studentId });
+    if(!student){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+    }
+    const parent = await getSchoolParentService({ _id: student["schoolParent"] });
+    if(!parent){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+    }
+
+    if(req.body["firstname"]){ studentUpdate.firstname = req.body["firstname"]; }
+    if(req.body["lastname"]){ studentUpdate.lastname = req.body["lastname"]; }
+    if(req.body["gender"]){ studentUpdate.gender = req.body["gender"]; }
+    if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
+    if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
+    if(req.body["photo"] || req.body["method"]==="DELETE"){ studentUpdate.photo = (req.body["method"]==="DELETE")? "": req.body["photo"]; }    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
+    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
+    if(req.body["city"]){ studentUpdate.city = req.body["city"]; }
+    if(req.body["district"]){ studentUpdate.district = req.body["district"]; }
+    if(req.body["state"]){ studentUpdate.state = req.body["state"]; }
+    if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
+    if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
+    
+
+    if(req.body["phone"]){ 
+      const parentWithPhone = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
+      if(parentWithPhone){
+        return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
+      }
+      parentUpdate.phone = req.body["phone"];
+    }
+    if(req.body["parentName"]){ parentUpdate.fullname = req.body["parentName"]; }
+    if(req.body["parentGender"]){ parentUpdate.gender = req.body["parentGender"]; }
+    if(req.body["parentAge"]){ parentUpdate.age = req.body["parentAge"]; }
+    if(req.body["parentEmail"]){ parentUpdate.email = req.body["parentEmail"]; }
+    if(req.body["parentQualification"]){ parentUpdate.qualification = req.body["parentQualification"]; }
+    if(req.body["parentOccupation"]){ parentUpdate.occupation = req.body["parentOccupation"]; }
+    if(req.body["parentAddress"]){ parentUpdate.address = req.body["parentAddress"]; }
+    if(req.body["parentCity"]){ parentUpdate.city = req.body["parentCity"]; }
+    if(req.body["parentDistrict"]){ parentUpdate.district = req.body["parentDistrict"]; }
+    if(req.body["parentState"]){ parentUpdate.state = req.body["parentState"]; }
+    if(req.body["parentCountry"]){ parentUpdate.country = req.body["parentCountry"]; }
+    if(req.body["parentPincode"]){ parentUpdate.pincode = req.body["parentPincode"]; }
+    
+
+    await Promise.all([ updateStudentService({ _id:studentId }, studentUpdate), updateSchoolParentService({ _id: student["schoolParent"] }, parentUpdate) ]);
+    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
     
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
