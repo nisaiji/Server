@@ -368,54 +368,55 @@ export async function checkValidStudentController(req, res) {
 
 export async function addStudentController(req, res) {
   try {
-    const studentId = req.params.studentId;
+    const { studentIds } = req.body;
     const parentId = req.parentId;
     const parent = await getParentService({_id: parentId});
     if(!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
-    let student = await getStudentService({_id: studentId, isActive: true});
-    if(!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
-    }
+    const validStudentIds = [];
 
-    const pipeline = [
-      {
-        $match: {
-          _id: convertToMongoId(studentId),
-          isActive: true
+    for(const studentId of studentIds) {
+      const pipeline = [
+        {
+          $match: {
+            _id: convertToMongoId(studentId),
+            isActive: true
+          }
+        },
+        {
+          $lookup: {
+            from: "schoolparents",
+            localField: "schoolParent",
+            foreignField: "_id",
+            as: "schoolParent"
+          }
+        },
+        {
+          $unwind: "$schoolParent"
+        },
+        {
+          $match: {
+            "schoolParent.parent": convertToMongoId(parentId)
+          }
         }
-      },
-      {
-        $lookup: {
-          from: "schoolparents",
-          localField: "schoolParent",
-          foreignField: "_id",
-          as: "schoolParent"
-        }
-      },
-      {
-        $unwind: "$schoolParent"
-      },
-      {
-        $match: {
-          "schoolParent.parent": convertToMongoId(parentId)
-        }
+      ];
+
+      const students = await getStudentsPipelineService(pipeline);
+      console.log({students})
+      if(students.length === 0 || parent?.students.some(id => id.equals(studentId))){
+        continue
       }
-    ];
+      validStudentIds.push(studentId);
+    }
 
-    const students = await getStudentsPipelineService(pipeline);
-    if(students.length === 0){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Student not found!'));
-    }
-    
-    student = students[0];
-    if (parent?.students.some(id => id.equals(student._id))) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Student already added'));
-    }
-    await updateParentService({_id: parentId},  { $push: { students: student['_id'] } });
-    return res.status(StatusCodes.OK).send(success(200, "Student added successfully"));
+    await updateParentService(
+      { _id: parentId },
+      { $addToSet: { students: { $each: validStudentIds } } }
+    );
+
+    return res.status(StatusCodes.OK).send(success(200, "Students added successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

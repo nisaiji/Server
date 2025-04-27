@@ -17,7 +17,7 @@ parentRouter.put("/emailVerify", parentAuthenticate, parentEmailVerifyByOtpContr
 parentRouter.put("/password", parentAuthenticate, parentPasswordValidation, updateParentController)
 parentRouter.put("/password/edit", parentAuthenticate, parentPasswordEditValidation, editPasswordController)
 parentRouter.put("/fullname", parentAuthenticate, parentFullnameValidation, updateParentController)
-parentRouter.put('/check-valid-student/:studentId', parentAuthenticate, checkValidStudentController)
+parentRouter.put('/check-valid-student', parentAuthenticate, checkValidStudentController)
 parentRouter.put('/add', parentAuthenticate, addStudentController)
 parentRouter.put("/photo-upload", parentAuthenticate, parentPhotoUploadValidation, validateImageSizeMiddleware, updateParentController)
 
