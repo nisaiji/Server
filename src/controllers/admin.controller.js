@@ -58,9 +58,9 @@ export async function loginAdminController(req, res) {
     const storedPassword = admin.password;
     const enteredPassword = password;
     const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
-    // if (!matchPassword) {
-    //   return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
-    // }
+    if (!matchPassword) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
+    }
     const accessToken = getAccessTokenService({
       role: "admin",
       username: admin["username"] ? admin['username'] : '',

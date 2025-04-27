@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import xlsx from 'xlsx';
 import fs from 'fs/promises'
-import { getStudentCountService, getStudentService, getStudentsPipelineService, registerStudentService, updateStudentService } from "../../services/student.service.js";
+import { getStudentCountService, getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
@@ -839,6 +839,39 @@ export async function updateStudentController(req, res){
     await Promise.all([ updateStudentService({ _id:studentId }, studentUpdate), updateSchoolParentService({ _id: student["schoolParent"] }, parentUpdate) ]);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
     
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function deleteStudentController(req, res) {
+  try {
+    const studentId = req.params.studentId;
+    const student = await getStudentService({ _id: studentId, isActive:true });
+    if (!student) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student doesn't exists"));
+    }
+  
+    const[ parent, section] = await Promise.all([
+      getSchoolParentService({ _id:student["schoolParent"], isActive:true }),
+      getSectionService({ _id:student["section"] })
+    ]);
+
+    if (!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
+    }
+    
+    await Promise.all([
+      updateStudentService({_id:studentId}, {isActive:false}),
+      updateSectionService({_id:section["_id"]},{studentCount:section["studentCount"]-1})
+    ])
+
+    const siblings = await getStudentsService({parent:student["schoolParent"], isActive:true});
+    if (siblings?.length === 0) {
+      await updateSchoolParentService({_id:student["schoolParent"]}, {isActive:false});
+    }
+
+    return res.status(StatusCodes.OK).send(success(200, "Student deleted successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
