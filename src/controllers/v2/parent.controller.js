@@ -8,7 +8,7 @@ import { parentEmailVerification, sendEmailBySendGrid } from "../../config/sendG
 import { getAccessTokenService } from "../../services/JWTToken.service.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
-import { getStudentsPipelineService } from "../../services/student.service.js";
+import { getStudentService, getStudentsPipelineService } from "../../services/student.service.js";
 
 export async function parentSendOtpToPhoneController (req, res) {
   try {
@@ -317,7 +317,7 @@ export async function getParentStatusController(req, res) {
   }
 }
 
-export async function addStudentController(req, res) {
+export async function checkValidStudentController(req, res) {
   try {
     let { studentName } = req.body;
     const parentId = req.parentId;
@@ -359,8 +359,63 @@ export async function addStudentController(req, res) {
     if (parent?.students.some(id => id.equals(student._id))) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Student already added'));
     }
-    await updateParentService({_id: parentId},  { $push: { students: student['_id'] } });
+    // await updateParentService({_id: parentId},  { $push: { students: student['_id'] } });
     return res.status(StatusCodes.OK).send(success(200, students[0]));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function addStudentController(req, res) {
+  try {
+    const studentId = req.params.studentId;
+    const parentId = req.parentId;
+    const parent = await getParentService({_id: parentId});
+    if(!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+    }
+
+    let student = await getStudentService({_id: studentId, isActive: true});
+    if(!student) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+    }
+
+    const pipeline = [
+      {
+        $match: {
+          _id: convertToMongoId(studentId),
+          isActive: true
+        }
+      },
+      {
+        $lookup: {
+          from: "schoolparents",
+          localField: "schoolParent",
+          foreignField: "_id",
+          as: "schoolParent"
+        }
+      },
+      {
+        $unwind: "$schoolParent"
+      },
+      {
+        $match: {
+          "schoolParent.parent": convertToMongoId(parentId)
+        }
+      }
+    ];
+
+    const students = await getStudentsPipelineService(pipeline);
+    if(students.length === 0){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Student not found!'));
+    }
+    
+    student = students[0];
+    if (parent?.students.some(id => id.equals(student._id))) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Student already added'));
+    }
+    await updateParentService({_id: parentId},  { $push: { students: student['_id'] } });
+    return res.status(StatusCodes.OK).send(success(200, "Student added successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

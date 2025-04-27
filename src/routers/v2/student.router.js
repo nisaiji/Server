@@ -22,5 +22,4 @@ studentRouter.put("/parent/photo-upload/:studentId", parentAuthenticate, uploadS
 studentRouter.put("/parent/:studentId", parentAuthenticate, updateStudentByParentController)
 studentRouter.post("/parent/get-attendance", parentAuthenticate, getAttendancesController)
 
-
 export default studentRouter;

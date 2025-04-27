@@ -1,5 +1,5 @@
 import { parentPhoneValidation, parentEmailValidation, parentPhoneAndOtpValidation, parentPasswordValidation, parentFullnameValidation, parentUpdateValidation, parentPasswordEditValidation, parentPhotoUploadValidation } from "../../middlewares/validation/v2/parent.validation.middleware.js";
-import { addStudentController, editPasswordController, getParentController, getParentStatusController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, updateParentController } from "../../controllers/v2/parent.controller.js";
+import { addStudentController, checkValidStudentController, editPasswordController, getParentController, getParentStatusController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, updateParentController } from "../../controllers/v2/parent.controller.js";
 import express from "express";
 import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
 import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
@@ -17,6 +17,7 @@ parentRouter.put("/emailVerify", parentAuthenticate, parentEmailVerifyByOtpContr
 parentRouter.put("/password", parentAuthenticate, parentPasswordValidation, updateParentController)
 parentRouter.put("/password/edit", parentAuthenticate, parentPasswordEditValidation, editPasswordController)
 parentRouter.put("/fullname", parentAuthenticate, parentFullnameValidation, updateParentController)
+parentRouter.put('/check-valid-student/:studentId', parentAuthenticate, checkValidStudentController)
 parentRouter.put('/add', parentAuthenticate, addStudentController)
 parentRouter.put("/photo-upload", parentAuthenticate, parentPhotoUploadValidation, validateImageSizeMiddleware, updateParentController)
 
