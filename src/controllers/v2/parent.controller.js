@@ -103,6 +103,89 @@ export async function parentPhoneVerifyByOtpController (req, res) {
   }
 }
 
+export async function parentPhoneUpdateSendOtpToPhoneController (req, res) {
+  try {
+    const { phone } = req.body;
+    const parent = await getParentService({ phone, isActive: true });
+    if(parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number already used"))
+    }
+    // if(['phoneVerified', 'verified'].includes(parent['status'])) {
+    //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
+    // }
+
+    const otp = otpGenerator.generate(5, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false
+    });
+    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await sentSMSByTwillio("+91"+phone,sms);
+    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 })
+
+    res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function parentPhoneUpdateVerifyByOtpController (req, res) {
+  try {
+    const { phone, otp } = req.body;
+    const parentId = req.parentId;
+    let parent = await getParentService({ _id:parentId, isActive: true });
+    if(!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not found"))
+    }
+
+    // if(['phoneVerified', 'verified'].includes(parent['status'])) {
+    //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
+    // }
+
+    const getOtpPipeline = [
+      {
+        $match: {
+          identifier: phone,
+          medium: 'sms',
+          entityType: 'parent',
+          otpType: 'phoneVerification'
+        }
+      },
+      {
+        $sort: {
+          createdAt: -1
+        }
+      },
+      {
+        $limit: 1
+      }
+    ]
+
+    const otps = await getOtpsPipelineService(getOtpPipeline);
+    const storedOtp = otps.length >= 1 ? otps[0] : null;
+    if(!storedOtp) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
+    }
+
+    if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Your OTP has expired'));
+    }
+
+    if(otp!==storedOtp['otp']) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, `You entered wrong OTP`));
+    }
+
+    await Promise.all([
+      updateParentService({_id: parent['_id']}, {phone}),
+      updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+    ]);
+
+    res.status(StatusCodes.OK).send(success(200, "Phone updated successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
 export async function parentEmailInsertAndSendEmailOtpController (req, res) {
   try {
     const { email } = req.body;
