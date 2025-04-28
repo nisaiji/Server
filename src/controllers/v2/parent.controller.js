@@ -9,6 +9,7 @@ import { getAccessTokenService } from "../../services/JWTToken.service.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getStudentService, getStudentsPipelineService } from "../../services/student.service.js";
+import { updateSchoolParentsService } from "../../services/v2/schoolParent.services.js";
 
 export async function parentSendOtpToPhoneController (req, res) {
   try {
@@ -177,6 +178,7 @@ export async function parentPhoneUpdateVerifyByOtpController (req, res) {
 
     await Promise.all([
       updateParentService({_id: parent['_id']}, {phone}),
+      updateSchoolParentsService({parent: parent['_id']}, {phone}),
       updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
     ]);
 
@@ -669,6 +671,88 @@ export async function editPasswordController(req, res) {
     const hashedPassword = await hashPasswordService(newPassword);
     await updateParentService({_id: parentId}, {password: hashedPassword});
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function parentUpdateEmailAndSendEmailOtpController (req, res) {
+  try {
+    const { email } = req.body;
+    const parentId = req.parentId;
+    const emailParent = await getParentService({email, isActive: true});
+    const parent = await getParentService({_id: parentId});
+    if(emailParent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Email already used'));
+    }
+    if(!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'User not found'));
+    }
+
+    const otp = otpGenerator.generate(5, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false
+    });
+    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 })
+
+    await parentEmailVerification(email, sms);
+    res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function parentUpdateEmailVerifyByOtpController (req, res) {
+  try {
+    const {email, otp } = req.body;
+    const parentId = req.parentId;
+    let parent = await getParentService({ _id: parentId });
+    if(!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
+    }
+
+    const getOtpPipeline = [
+      {
+        $match: {
+          identifier: email,
+          medium: 'email',
+          entityType: 'parent',
+          otpType: 'emailVerification'
+        }
+      },
+      {
+        $sort: {
+          createdAt: -1
+        }
+      },
+      {
+        $limit: 1
+      }
+    ]
+
+    const otps = await getOtpsPipelineService(getOtpPipeline);
+    const storedOtp = otps.length >= 1 ? otps[0] : null;
+    if(!storedOtp) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
+    }
+
+    if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, 'Your OTP has expired'));
+    }
+
+    if(otp!==storedOtp['otp']) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, `You entered wrong OTP`));
+    }
+
+    await Promise.all([
+      updateParentService({_id: parent['_id']}, { email }),
+      updateSchoolParentsService({parent: parent['_id']}, {email}),
+      updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+    ]);
+
+    res.status(StatusCodes.OK).send(success(200, "Email updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

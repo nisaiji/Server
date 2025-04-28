@@ -36,6 +36,15 @@ export async function updateSchoolParentService(filter, update){
   }
 }
 
+export async function updateSchoolParentsService(filter, update){
+  try {
+      const schoolParent = await schoolParentModel.updateMany(filter, update);
+      return schoolParent;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function getSchoolParentCountService(filter){
   try {
     const schoolParents = await schoolParentModel.countDocuments(filter);
