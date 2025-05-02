@@ -12,8 +12,8 @@ adminRouter.put("/address", deactivatedAdminAuthenticate, adminAddressValidation
 adminRouter.put("/details", deactivatedAdminAuthenticate, adminDetailsValidation, updateAdminController);
 adminRouter.put("/", adminAuthenticate, adminProfileUpdateValidation, updateAdminController);
 adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation, updateAdminController);
-adminRouter.put("/photo-upload", adminAuthenticate,photoUpdateAdminValidation, validateImageSizeMiddleware, updateAdminController )
+adminRouter.put("/photo-upload", adminAuthenticate,photoUpdateAdminValidation, validateImageSizeMiddleware, updateAdminController);
 adminRouter.get("/", deactivatedAdminAuthenticate, getAdminController);
-adminRouter.get("/students-excelsheet", adminAuthenticate, getStudentDemoExcelSheetController)
+adminRouter.get("/students-excelsheet", adminAuthenticate, getStudentDemoExcelSheetController);
 
 export default adminRouter;
