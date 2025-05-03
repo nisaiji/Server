@@ -20,6 +20,7 @@ studentRouter.post('/teacher', teacherAuthenticate, registerStudentController)
 studentRouter.put('/:studentId', adminAuthenticate, updateStudentBySchoolController)
 studentRouter.post('/bulk', adminAuthenticate, upload, registerStudentsFromExcelController )
 studentRouter.put("/parent/photo-upload/:studentId", parentAuthenticate, uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentByParentController)
+studentRouter.put("/teacher/photo-upload/:studentId", teacherAuthenticate, uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentController)
 studentRouter.put("/parent/:studentId", parentAuthenticate, updateStudentByParentController)
 studentRouter.post("/parent/get-attendance", parentAuthenticate, getAttendancesController)
 studentRouter.delete("/teacher/:studentId", teacherAuthenticate, authorizeTeacherRoles('teacher'), deleteStudentController );
