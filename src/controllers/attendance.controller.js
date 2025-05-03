@@ -434,7 +434,7 @@ export async function getAttendancesController(req, res){
       admin = null;
       section = req.sectionId;
     }
-    if(student){ filter['student'] = convertToMongoId(student) }
+    if(student){ filter['_id'] = convertToMongoId(student) }
     if(section) { filter['section'] = convertToMongoId(section) }
     if(classId){ filter['classId'] = convertToMongoId(classId) }
     if(admin){ filter['admin'] = convertToMongoId(admin) }
