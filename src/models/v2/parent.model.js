@@ -33,7 +33,8 @@ const parentSchema = mongoose.Schema({
     type:String,
     // phone: phoneVerified
     // phone + email: verified
-    enum: ['unVerified', 'phoneVerified', 'verified']
+    enum: ['unVerified', 'phoneVerified', 'verified'],
+    default: 'unVerified'
   },
   country:{
     type:String

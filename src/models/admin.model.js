@@ -7,7 +7,6 @@ const adminSchema = mongoose.Schema({
   },
   schoolName: {
     type: String,
-    required: true
   },
   affiliationNo: {
     type: String
@@ -31,13 +30,16 @@ const adminSchema = mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
     lowercase: true,
     unique: true
   },
+  status: {
+    type: String,
+    enum: ['unVerified', 'phoneVerified', 'verified'],
+    default: 'unVerified'
+  },
   password: {
     type: String,
-    required: true
   },
   address: {
     type: String,

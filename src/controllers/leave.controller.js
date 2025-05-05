@@ -311,7 +311,7 @@ export async function updateTeacherLeavRequestController(req ,res) {
     await updateLeaveRequestService({ _id: leaveRequestId }, {reason, description, startTime, endTime});
     return res.status(StatusCodes.OK).send(success(200, "Leave Request updated successfully"));
     
-  } catch (error) {
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
 }

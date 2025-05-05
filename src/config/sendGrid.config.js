@@ -1,31 +1,36 @@
-import sendGrid from '@sendgrid/mail';
-import { config } from './config.js';
+import sendGrid from "@sendgrid/mail";
+import { config } from "./config.js";
 
 sendGrid.setApiKey(config.sendGridApiKey);
 
-export async function sendEmailBySendGrid({fromEmail, toEmail, subject, html}) {
+export async function sendEmailBySendGrid({
+  fromEmail,
+  toEmail,
+  subject,
+  html,
+}) {
   try {
-    const msg =  {
+    const msg = {
       to: toEmail,
       from: fromEmail,
       subject: subject,
-      html: html
+      html: html,
     };
-    
-  const res = await sendGrid.send(msg);
-  console.log(res);
-  return res;
-} catch (error) {
-  throw error;
- } 
+
+    const res = await sendGrid.send(msg);
+    console.log(res);
+    return res;
+  } catch (error) {
+    throw error;
+  }
 }
 
-export async function parentEmailVerification(toEmail, msg ){
+export async function sendEmailService(toEmail, msg) {
   const response = await sendEmailBySendGrid({
-    fromEmail: config.sendGridEmail, 
+    fromEmail: config.sendGridEmail,
     toEmail,
-    subject: 'Email Verification',
-    html: msg
-  })
+    subject: "Email Verification",
+    html: msg,
+  });
   return response;
 }

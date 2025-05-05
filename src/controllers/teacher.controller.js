@@ -322,7 +322,7 @@ export async function changePasswordTeacherController(req, res) {
 export async function assignTeacherAsGuestTeacherToSectionController(req, res) {
   try {
     const {teacherId, sectionId} = req.body;
-  } catch (error) {
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

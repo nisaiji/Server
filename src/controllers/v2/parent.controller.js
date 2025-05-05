@@ -4,7 +4,7 @@ import { error, success } from "../../utills/responseWrapper.js";
 import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
 import { getParentService, getParentsPipelineService, updateParentService } from "../../services/v2/parent.services.js";
-import { parentEmailVerification, sendEmailBySendGrid } from "../../config/sendGrid.config.js";
+import { sendEmailService } from "../../config/sendGrid.config.js";
 import { getAccessTokenService } from "../../services/JWTToken.service.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
@@ -209,7 +209,7 @@ export async function parentEmailInsertAndSendEmailOtpController (req, res) {
     await updateParentService({_id: parent['_id']}, {email});
 
     console.log('inside controller')
-    const rej = await parentEmailVerification(email, sms);
+    const rej = await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -335,7 +335,7 @@ export async function parentPasswordUpdateController(req, res) {
     const parentId = req.parentId;
     await updateParentService({ _id: parentId }, { password });
     return res.status(StatusCodes.OK).send(success(200, 'Password updated successfully'));  
-  } catch (error) {
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
@@ -697,7 +697,7 @@ export async function parentUpdateEmailAndSendEmailOtpController (req, res) {
     const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
     await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 })
 
-    await parentEmailVerification(email, sms);
+    await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
