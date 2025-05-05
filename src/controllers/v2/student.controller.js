@@ -866,7 +866,7 @@ export async function deleteStudentController(req, res) {
       updateSectionService({_id:section["_id"]},{studentCount:section["studentCount"]-1})
     ])
 
-    const siblings = await getStudentsService({parent:student["schoolParent"], isActive:true});
+    const siblings = await getStudentsService({schoolParent:student["schoolParent"], isActive:true});
     if (siblings?.length === 0) {
       await updateSchoolParentService({_id:student["schoolParent"]}, {isActive:false});
     }
