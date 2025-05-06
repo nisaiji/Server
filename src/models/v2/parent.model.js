@@ -71,7 +71,7 @@ const parentSchema = mongoose.Schema({
 {
 timestamps: true
 });
-parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });
+// parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });
 
 const parentModel = mongoose.model("parent", parentSchema);
 

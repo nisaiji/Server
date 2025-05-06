@@ -243,9 +243,13 @@ export async function updateStudentBySchoolController(req, res){
     if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
     if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
 
-
     if(req.body["phone"]){
       const phone = req.body['phone'];
+      let parent = await getParentService({_id: schoolParent['parent']});
+      console.log(parent['students'])
+      if (parent && parent['students']?.includes(studentId)) {
+        return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Phone number can not be updated'));
+      }
       const schoolParentWithPhone = await getSchoolParentService({ phone, school: student['adminId'], isActive:true, _id: { $ne: schoolParent["_id"] } });
       const parentWithPhone = await getParentService({ phone, isActive:true, _id: {$ne: schoolParent['parent']}});
       if(parentWithPhone || schoolParentWithPhone){
@@ -796,8 +800,8 @@ export async function updateStudentController(req, res){
     if(!student){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
-    const parent = await getSchoolParentService({ _id: student["schoolParent"] });
-    if(!parent){
+    const schoolParent = await getSchoolParentService({ _id: student["schoolParent"] });
+    if(!schoolParent){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
