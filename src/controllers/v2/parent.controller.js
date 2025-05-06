@@ -520,8 +520,19 @@ export async function getParentController(req, res) {
       {
         $lookup: {
           from: 'students',
-          localField: 'students',
-          foreignField: '_id',
+          let: { studentIds: '$students' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $in: ['$_id', '$$studentIds'] },
+                    { $eq: ['$isActive', true] }
+                  ]
+                }
+              }
+            }
+          ],
           as: 'students'
         }
       },
