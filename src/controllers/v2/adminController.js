@@ -275,3 +275,25 @@ export async function adminEmailVerifyByOtpController(req, res) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+export async function adminGetStatusController(req, res) {
+  try {
+    const { phone }  = req.body;
+    const admin = await getAdminService({ phone });
+    if(!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Admin not found'));
+    }
+
+    const status = {
+      phoneVerified: admin['status'] !== 'unVerified',
+      emailVerified: admin['status'] === 'verified',
+      passwordUpdated: !!admin['password'],
+      affiliationExists: !!admin['affiliationNo'],
+      status: admin['status']
+    }
+    
+    return res.status(StatusCodes.OK).send(success(200, status));
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
