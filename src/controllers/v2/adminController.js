@@ -4,10 +4,10 @@ import { sentSMSByTwillio } from "../../config/twilio.config.js";
 import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { adminControllerResponse } from "../../config/httpResponse.js";
-import { hashPasswordService } from "../../services/password.service.js";
+import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
 import { sendEmailService } from "../../config/sendGrid.config.js";
-import { getAccessTokenService } from "../../services/JWTToken.service.js";
+import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
 
 export async function adminSendOtpToPhoneController (req, res) {
   try {
@@ -289,11 +289,57 @@ export async function adminGetStatusController(req, res) {
       emailVerified: admin['status'] === 'verified',
       passwordUpdated: !!admin['password'],
       affiliationExists: !!admin['affiliationNo'],
-      status: admin['status']
+      status: admin['status'],
+      addressUpdated: !!admin['address'],
+      isActive: admin["isActive"]
     }
-    
+
     return res.status(StatusCodes.OK).send(success(200, status));
   } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function adminLoginController(req, res) {
+  try {
+    const { user, password } = req.body;
+  
+    const admin = await getAdminService({ $or: [{email: user}, {phone: user}] });
+    if (!admin) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
+    }
+    // if(!admin['isActive']){
+    //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."))
+    // }
+    const storedPassword = admin.password;
+    const enteredPassword = password;
+    const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
+    if (!matchPassword) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
+    }
+    const accessToken = getAccessTokenService({
+      role: "admin",
+      username: admin["username"] ? admin['username'] : '',
+      schoolName: admin["schoolName"],
+      email: admin["email"],
+      adminId: admin["_id"],
+      phone: admin["phone"],
+      active: admin["isActive"],
+      pincode: admin['pincode'] ? admin['pincode'] : ''
+    });
+
+    const refreshToken = getRefreshTokenService({
+      role: "admin",
+      username: admin["username"] ? admin['username'] : '',
+      schoolName: admin["schoolName"],
+      email: admin["email"],
+      adminId: admin["_id"],
+      phone: admin["phone"],
+      active: admin["isActive"],
+      pincode: admin['pincode'] ? admin['pincode'] : ''
+    });
+    return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, username: admin.username }));
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
