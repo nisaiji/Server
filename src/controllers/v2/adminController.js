@@ -12,7 +12,7 @@ import { getAccessTokenService, getRefreshTokenService } from "../../services/JW
 export async function adminSendOtpToPhoneController (req, res) {
   try {
     const { phone } = req.body;
-    const admin = await getAdminService({ phone, isActive: true });
+    const admin = await getAdminService({ phone });
     if(admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number already used"));
     }
