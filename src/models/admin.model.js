@@ -31,7 +31,6 @@ const adminSchema = mongoose.Schema({
   email: {
     type: String,
     lowercase: true,
-    unique: true
   },
   status: {
     type: String,
