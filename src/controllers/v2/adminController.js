@@ -95,10 +95,12 @@ export async function adminPhoneVerifyByOtpController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, `You entered wrong OTP`));
     }
 
-    await Promise.all([
-      updateAdminService({_id: admin['_id']}, {status: 'phoneVerified'}),
-      updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
-    ]);
+    if(admin['status'] === 'unVerified') {
+     await updateAdminService({_id: admin['_id']}, {status: 'phoneVerified'});
+    }
+
+    await updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+  
 
     admin = await getAdminService({_id: admin['_id']});
     const token = getAccessTokenService({
