@@ -324,6 +324,7 @@ export async function adminLoginController(req, res) {
       email: admin["email"],
       adminId: admin["_id"],
       phone: admin["phone"],
+      status: admin["status"],
       active: admin["isActive"],
       pincode: admin['pincode'] ? admin['pincode'] : ''
     });

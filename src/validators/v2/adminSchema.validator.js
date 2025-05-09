@@ -58,7 +58,7 @@ export const adminDetailsValidator = Joi.object({
     "string.max": "Affiliation no. length must be smaller than 50 chars",
     "any.required": "Affiliation no. is required!"
   }),
-  schoolNumber: Joi.string().min(5).max(50).required().messages({
+  schoolName: Joi.string().min(5).max(50).required().messages({
     "string.min": "School number should be atleast 5 chars long",
     "string.max": "School number length must be smaller than 50 chars",
   }),
@@ -67,7 +67,5 @@ export const adminDetailsValidator = Joi.object({
     "string.max": "admin name length must be smaller than 15 chars",
     "any.required": "Admin name is required"
   }),
-  principal: Joi.string().required().messages({
-    "any.required": "Principal name is required!"
-  }),
+  
 })
