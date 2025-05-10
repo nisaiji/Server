@@ -10,19 +10,21 @@ import { authorizeTeacherRoles } from "../../middlewares/authorization/teacherRo
 
 const studentRouter = express.Router();
 
-studentRouter.get('/admin-get', adminAuthenticate, getStudentsController )
-studentRouter.get('/teacher-get', teacherAuthenticate, getStudentsController )
-studentRouter.put('/admin/:studentId', adminAuthenticate, updateStudentController)
-studentRouter.put('/teacher/:studentId', teacherAuthenticate, updateStudentController)
-studentRouter.get('/admin', adminAuthenticate, searchStudentsController)
-studentRouter.post('/admin', adminAuthenticate, registerStudentController)
-studentRouter.post('/teacher', teacherAuthenticate, registerStudentController)
-studentRouter.put('/:studentId', adminAuthenticate, updateStudentBySchoolController)
-studentRouter.post('/bulk', adminAuthenticate, upload, registerStudentsFromExcelController )
-studentRouter.put("/parent/photo-upload/:studentId", parentAuthenticate, uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentByParentController)
-studentRouter.put("/teacher/photo-upload/:studentId", teacherAuthenticate, uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentController)
-studentRouter.put("/parent/:studentId", parentAuthenticate, updateStudentByParentController)
-studentRouter.post("/parent/get-attendance", parentAuthenticate, getAttendancesController)
+studentRouter.get('/admin-get', adminAuthenticate, getStudentsController );
+studentRouter.get('/teacher-get', teacherAuthenticate, getStudentsController );
+studentRouter.get('/admin', adminAuthenticate, searchStudentsController);
+studentRouter.post('/admin', adminAuthenticate, registerStudentController);
+studentRouter.post('/teacher', teacherAuthenticate, registerStudentController);
+studentRouter.post('/bulk', adminAuthenticate, upload, registerStudentsFromExcelController );
+// studentRouter.post('/admin/register', adminAuthenticate, );
+studentRouter.put('/admin/:studentId', adminAuthenticate, updateStudentController);
+studentRouter.put('/teacher/:studentId', teacherAuthenticate, updateStudentController);
+studentRouter.put('/update-student/:studentId', adminAuthenticate, updateStudentBySchoolController);
+studentRouter.put('/:studentId', adminAuthenticate, updateStudentBySchoolController);
+studentRouter.put("/parent/photo-upload/:studentId", parentAuthenticate, uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentByParentController);
+studentRouter.put("/teacher/photo-upload/:studentId", teacherAuthenticate, uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentController);
+studentRouter.put("/parent/:studentId", parentAuthenticate, updateStudentByParentController);
+studentRouter.post("/parent/get-attendance", parentAuthenticate, getAttendancesController);
 studentRouter.delete("/teacher/:studentId", teacherAuthenticate, authorizeTeacherRoles('teacher'), deleteStudentController );
 studentRouter.delete("/admin/:studentId", adminAuthenticate, deleteStudentController );
 
