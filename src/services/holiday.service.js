@@ -54,3 +54,12 @@ export async function getHolidayCountService(filter){
     throw error;  
   }
 }
+
+export async function getHolidayPipelineService(pipeline){
+  try {
+    const holidays = await holidayModel.aggregate(pipeline).exec();
+    return holidays;
+  } catch (error) {
+    throw error;    
+  }
+}

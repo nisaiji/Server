@@ -10,6 +10,8 @@ import { hashPasswordService, matchPasswordService } from "../../services/passwo
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getStudentService, getStudentsPipelineService } from "../../services/student.service.js";
 import { updateSchoolParentsService } from "../../services/v2/schoolParent.services.js";
+import { getHolidayPipelineService } from "../../services/holiday.service.js";
+import { getWorkdayPipelineService } from "../../services/workDay.services.js";
 
 export async function parentSendOtpToPhoneController (req, res) {
   try {
@@ -764,6 +766,32 @@ export async function parentUpdateEmailVerifyByOtpController (req, res) {
     ]);
 
     res.status(StatusCodes.OK).send(success(200, "Email updated successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getHolidayAndWorkdayController(req, res) {
+  try {
+   const parentId = req.parentId;
+   const { studentId, startTime, endTime } = req.body;
+   const student = await getStudentService({_id: studentId, isActive: true});
+   if(!student) {
+    return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+   }
+   const pipeline = [
+    {
+      $match: {
+        admin: convertToMongoId(student['admin']),
+        date: { $gte: startTime, $lte: endTime }
+      }
+    }
+   ];
+
+   const holidays = await getHolidayPipelineService(pipeline);
+   const workdays = await getWorkdayPipelineService(pipeline);
+
+   return res.status(StatusCodes.OK).send(success(200, {holidays, workdays}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

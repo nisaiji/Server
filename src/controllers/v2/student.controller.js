@@ -42,11 +42,10 @@ try{
       ]
   } else {
     filter['$or'] = [
-      { firstname: { $regex: new RegExp(search, "i") } },
-      { lastname: { $regex: new RegExp(search, "i") } },
-      { "parentDetails.email": { $regex: new RegExp(search, "i") } },
-      { "parentDetails.phone": { $regex: new RegExp(search, "i") } },
-      {isActive: true}
+      { firstname: { $regex: new RegExp(search, "i") }, isActive: true },
+      { lastname: { $regex: new RegExp(search, "i") }, isActive: true },
+      { "parentDetails.email": { $regex: new RegExp(search, "i") }, isActive: true },
+      { "parentDetails.phone": { $regex: new RegExp(search, "i") }, isActive: true },
     ]
   }
 }

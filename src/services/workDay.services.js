@@ -53,3 +53,12 @@ export async function getWorkDayCountService(filter){
     throw error;  
   }
 }
+
+export async function getWorkdayPipelineService(pipeline){
+  try {
+    const workdays = await workDayModel.aggregate(pipeline).exec();
+    return workdays;
+  } catch (error) {
+    throw error;    
+  }
+}
