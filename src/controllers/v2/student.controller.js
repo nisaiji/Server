@@ -176,7 +176,7 @@ try{
 
 export async function registerStudentController(req, res) {
   try {
-    const { firstname, lastname, gender, parentName, phone, sectionId } = req.body;
+    const { firstname, lastname, gender, parentName, phone, email, qualification, occupation, address, age, parentAddress, parentGender, dob,  sectionId } = req.body;
     const adminId = req.adminId;
 
     const section = await getSectionService({ _id:sectionId });
@@ -195,14 +195,25 @@ export async function registerStudentController(req, res) {
       if(!parent) {
         parent = await registerParentService({phone, status: 'unVerified'});
       }
-      schoolParent = await registerSchoolParentService({fullname: parentName, phone, school: adminId, parent: parent['_id']});
+      schoolParent = await registerSchoolParentService({
+        fullname: parentName, 
+        phone, 
+        school: adminId, 
+        parent: parent['_id'],
+        ...(qualification && { qualification }),
+        ...(occupation && { occupation }),
+        ...(parentAddress && { address: parentAddress }),
+        ...(parentGender && { gender: parentGender }),
+        ...(age && { age }),
+        ...(email && {adminEmailValidation})
+      });
     }
 
     let student = await getStudentService({ firstname, schoolParent: schoolParent["_id"] });
     if (student) {
       return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
     }
-    const studentObj = {firstname, lastname, gender, schoolParent: schoolParent["_id"], section:sectionId, classId:classInfo["_id"], admin:adminId};
+    const studentObj = {firstname, lastname, gender, schoolParent: schoolParent["_id"], section:sectionId, classId:classInfo["_id"], admin:adminId, ...(address && {address}), ...(dob && {dob})};
     student = await registerStudentService(studentObj);
 
     await updateSectionService({_id:sectionId}, {studentCount:section["studentCount"]+1});
