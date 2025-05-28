@@ -15,6 +15,7 @@ export async function teacherAuthenticate(req, res, next) {
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
+    console.log({decoded})
     let teacher;
     if(decoded['role']==='teacher'){
       teacher = await getTeacherService({_id:decoded.teacherId, isActive:true});

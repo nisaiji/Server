@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { createAnnouncementService, getAnnouncementsPipelineService } from "../services/announcement.services.js";
+import { createAnnouncementService, getAnnouncementCountService, getAnnouncementsPipelineService } from "../services/announcement.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 
@@ -50,22 +50,40 @@ export async function createAnnouncementByTeacherController(req, res) {
   }
 }
 
-export async function getAnnouncementsByAdminPipelineController(req, res) {
+export async function getAnnouncementsByAdminController(req, res) {
   try {
     const adminId = req.adminId;
 
-    const { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } = req.query;
+    const { page = 1, limit = 10, sortBy = "createdAt", order = "desc", createdBy="admin", section } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sortOrder = order === "asc" ? 1 : -1;
+    const filter = {
+      school: convertToMongoId(adminId),
+      isActive: true,
+    };
+    console.log({createdBy})
+
+    if (createdBy === "admin") {
+      filter.createdBy = convertToMongoId(adminId);
+      filter.createdByRole = "admin";
+    } 
+    else if(createdBy === "teacher") {
+      filter.createdByRole = "teacher";
+    } 
+    else if (createdBy === "all") {
+      filter.$or = [
+        { createdBy: convertToMongoId(adminId), createdByRole: "admin" },
+        { createdByRole: "teacher" },
+      ];
+    }
+
+    if(section) {
+      filter.section = section;
+    }
 
     const pipeline = [
       {
-        $match: {
-          createdBy: convertToMongoId(adminId),
-          createdByRole: "admin",
-          school: convertToMongoId(adminId),
-          isActive: true
-        }
+        $match: filter
       },
       {
         $sort: {
@@ -80,25 +98,86 @@ export async function getAnnouncementsByAdminPipelineController(req, res) {
       },
       {
         $lookup: {
-          from: "classes",
-          localField: "targetClasses.classId",
-          foreignField: "_id",
-          as: "classDetails"
-        }
-      },
-      {
-        $lookup: {
           from: "sections",
-          localField: "targetClasses.sectionId",
+          localField: "section",
           foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                name: 1
+              }
+            }
+          ],
           as: "sectionDetails"
         }
       }
     ];
 
     const announcements = await getAnnouncementsPipelineService(pipeline);
+    const total = await getAnnouncementCountService(filter);
 
-    return res.status(200).json(success(200, {announcements, page, limit}));
+    return res.status(200).json(success(200, {announcements, page, limit, total}));
+
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
+  }
+}
+
+export async function getAnnouncementsByTeacherController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const teacherId = req.teacherId;
+    const sectionId = req.sectionId;
+
+    const { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const sortOrder = order === "asc" ? 1 : -1;
+
+    const filter = {
+      createdBy: convertToMongoId(teacherId),
+      createdByRole: "teacher",
+      school: convertToMongoId(adminId),
+      isActive: true
+    }
+
+    const pipeline = [
+      {
+        $match: filter
+      },
+      {
+        $sort: {
+          [sortBy]: sortOrder
+        }
+      },
+      {
+        $skip: skip
+      },
+      {
+        $limit: parseInt(limit)
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                name: 1
+              }
+            }
+          ],
+          as: "sectionDetails"
+        }
+      }
+    ];
+
+    const announcements = await getAnnouncementsPipelineService(pipeline);
+    const total = await getAnnouncementCountService(filter);
+
+    return res.status(200).json(success(200, {announcements, page, limit, total}));
 
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
