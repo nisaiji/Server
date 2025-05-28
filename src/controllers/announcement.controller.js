@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { createAnnouncementService, getAnnouncementCountService, getAnnouncementsPipelineService } from "../services/announcement.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
+import { getStudentService } from "../services/student.service.js";
 
 export async function createAnnouncementByAdminController(req, res) {
   try {
@@ -61,7 +62,6 @@ export async function getAnnouncementsByAdminController(req, res) {
       school: convertToMongoId(adminId),
       isActive: true,
     };
-    console.log({createdBy})
 
     if (createdBy === "admin") {
       filter.createdBy = convertToMongoId(adminId);
@@ -118,7 +118,6 @@ export async function getAnnouncementsByAdminController(req, res) {
     const total = await getAnnouncementCountService(filter);
 
     return res.status(200).json(success(200, {announcements, page, limit, total}));
-
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
   }
@@ -184,4 +183,71 @@ export async function getAnnouncementsByTeacherController(req, res) {
   }
 }
 
+export async function getAnnouncementsByParentController(req, res) {
+ try {
+   const parentId = req.parentId;
+   const { studentId, page = 1, limit = 10 } = req.query;
+   const student = await getStudentService({ _id: studentId, isActive: true });
+   if (!student) {
+     return res
+       .status(StatusCodes.NOT_FOUND)
+       .send(error(404, "Student not found"));
+   }
+   const adminId = student["admin"];
+   const sectionId = student["section"];
+   const skip = (parseInt(page) - 1) * parseInt(limit);
+   const filter = {
+     school: convertToMongoId(adminId),
+     isActive: true,
+     $or: [
+       { createdBy: convertToMongoId(adminId), createdByRole: "admin" },
+       { createdByRole: "teacher", section: convertToMongoId(sectionId) },
+     ],
+   };
+
+   const pipeline = [
+     {
+       $match: filter,
+     },
+     {
+       $sort: {
+         createdAt: -1,
+       },
+     },
+     {
+       $skip: skip,
+     },
+     {
+       $limit: parseInt(limit),
+     },
+     {
+       $lookup: {
+         from: "sections",
+         localField: "section",
+         foreignField: "_id",
+         pipeline: [
+           {
+             $project: {
+               _id: 1,
+               name: 1,
+             },
+           },
+         ],
+         as: "sectionDetails",
+       },
+     },
+   ];
+
+   const announcements = await getAnnouncementsPipelineService(pipeline);
+   const total = await getAnnouncementCountService(filter);
+
+   return res
+     .status(200)
+     .json(success(200, { announcements, page, limit, total }));
+ } catch (err) {
+   return res
+     .status(StatusCodes.INTERNAL_SERVER_ERROR)
+     .send(error(500, err.message));
+ }
+}
 
