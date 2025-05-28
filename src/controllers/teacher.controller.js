@@ -33,7 +33,7 @@ export async function loginTeacherController(req, res) {
     const { user, password, platform, deviceId } = req.body;
     const [teacher, guestTeacher] = await Promise.all([
       getTeacherService({isActive: true, $or: [{ username: user }, { phone: user }, { email: user?.toLowerCase() }]}),
-      getGuestTeacherService({ username: user })
+      getGuestTeacherService({ username: user, isActive:true })
     ]);
 
     const currentTeacher = teacher ? teacher : guestTeacher;

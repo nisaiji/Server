@@ -17,6 +17,7 @@ import guestTeacherRouter from './guestTeacher.router.js'
 import customerSupportRouter from "./customerSupport.router.js";
 import workDayRouter from "./workDay.router.js";
 import v2Router from "./v2/index.router.js";
+import announcementRouter from "./announcement.router.js";
 
 const router = express();
 
@@ -35,8 +36,9 @@ router.use("/admin-dashboard",adminDashboardRouter);
 router.use("/parent-dashboard",parentDashboardRouter);
 router.use("/teacher-dashboard",teacherDashboardRouter);
 router.use('/super-admin', superAdminRouter);
-router.use('/guest-teacher', guestTeacherRouter)
-router.use('/customer-support', customerSupportRouter)
-router.use('/workdays', workDayRouter)
+router.use('/guest-teacher', guestTeacherRouter);
+router.use('/customer-support', customerSupportRouter);
+router.use('/workdays', workDayRouter);
+router.use('/announcement', announcementRouter);
 
 export default router;
