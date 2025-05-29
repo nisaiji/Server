@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { createAnnouncementService, getAnnouncementCountService, getAnnouncementsPipelineService } from "../services/announcement.services.js";
+import { createAnnouncementService, getAnnouncementCountService, getAnnouncementService, getAnnouncementsPipelineService, updateAnnouncementService } from "../services/announcement.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getStudentService } from "../services/student.service.js";
@@ -251,3 +251,83 @@ export async function getAnnouncementsByParentController(req, res) {
  }
 }
 
+export async function updateAnnouncementByAdminController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const announcementId = req.params.announcementId;
+    console.log({announcementId})
+    const {
+      title,
+      description,
+      targetAudience,
+      startsAt,
+      expiresAt,
+      isActive,
+    } = req.body;
+
+    const filter = {
+      _id: convertToMongoId(announcementId),
+      createdBy: convertToMongoId(adminId),
+      createdByRole: "admin"
+    };
+    const announcement = await getAnnouncementService(filter);
+    if(!announcement) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found!"));
+    }
+    const fieldToBeUpdated = {};
+    if (title) fieldToBeUpdated.title = title;
+    if (description) fieldToBeUpdated.description = description;
+    if (targetAudience.length > 0)
+      fieldToBeUpdated.targetAudience = targetAudience;
+    if (startsAt) fieldToBeUpdated.startsAt = startsAt;
+    if (expiresAt) fieldToBeUpdated.expiresAt = expiresAt;
+    if (isActive === true || isActive === false)
+      fieldToBeUpdated.isActive = isActive;
+
+    await updateAnnouncementService({ _id: announcementId }, fieldToBeUpdated);
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Announcement updated successfully!"));
+  } catch (err) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
+  }
+}
+
+export async function updateAnnouncementByTeacherController(req, res) {
+  try {
+    const teacherId = req.teacherId;
+    const announcementId = req.params.announcementId;
+    const {
+      title,
+      description,
+      startsAt,
+      expiresAt,
+      isActive,
+    } = req.body;
+
+    const fieldToBeUpdated = {};
+    if (title) fieldToBeUpdated.title = title;
+    if (description) fieldToBeUpdated.description = description;
+    if (startsAt) fieldToBeUpdated.startsAt = startsAt;
+    if (expiresAt) fieldToBeUpdated.expiresAt = expiresAt;
+    if (typeof isActive === "boolean") fieldToBeUpdated.isActive = isActive;
+
+    const filter = {
+      _id: convertToMongoId(announcementId),
+      createdBy: convertToMongoId(teacherId),
+      createdByRole: "teacher"
+    };
+
+    const result = await updateAnnouncementService(filter, fieldToBeUpdated);
+
+    if (result.modifiedCount === 0) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found."));
+    }
+
+    return res.status(StatusCodes.OK).send(success(200, "Announcement updated successfully!"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
