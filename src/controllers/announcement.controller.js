@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { createAnnouncementService, getAnnouncementCountService, getAnnouncementService, getAnnouncementsPipelineService, updateAnnouncementService } from "../services/announcement.services.js";
+import { createAnnouncementService, deleteAnnouncementService, getAnnouncementCountService, getAnnouncementService, getAnnouncementsPipelineService, updateAnnouncementService } from "../services/announcement.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getStudentService } from "../services/student.service.js";
@@ -327,6 +327,54 @@ export async function updateAnnouncementByTeacherController(req, res) {
     }
 
     return res.status(StatusCodes.OK).send(success(200, "Announcement updated successfully!"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function deleteAnnouncementByAdminController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const announcementId = req.params.announcementId;
+
+    const filter = {
+      _id: convertToMongoId(announcementId),
+      createdBy: convertToMongoId(adminId),
+      createdByRole: "admin"
+    };
+
+    const announcement = await getAnnouncementService(filter);
+    if(!announcement) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found"));
+    }
+
+    await deleteAnnouncementService(filter);
+
+    return res.status(StatusCodes.OK).send(success(200, "Announcement deleted successfully!"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function deleteAnnouncementByTeacherController(req, res) {
+  try {
+    const teacherId = req.teacherId;
+    const announcementId = req.params.announcementId;
+
+    const filter = {
+      _id: convertToMongoId(announcementId),
+      createdBy: convertToMongoId(teacherId),
+      createdByRole: "teacher"
+    };
+
+    const announcement = await getAnnouncementService(filter);
+    if(!announcement) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found"));
+    }
+
+    await deleteAnnouncementService(filter);
+
+    return res.status(StatusCodes.OK).send(success(200, "Announcement deleted successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
