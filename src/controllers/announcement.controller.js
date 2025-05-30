@@ -183,6 +183,49 @@ export async function getAnnouncementsByTeacherController(req, res) {
   }
 }
 
+export async function getAdminAnnouncementsByTeacherController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const teacherId = req.teacherId;
+
+    const { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const sortOrder = order === "asc" ? 1 : -1;
+
+    const filter = {
+      createdBy: convertToMongoId(adminId),
+      createdByRole: "admin",
+      school: convertToMongoId(adminId),
+      targetAudience: { $in: ["teacher"] }
+    }
+
+    const pipeline = [
+      {
+        $match: filter
+      },
+      {
+        $sort: {
+          [sortBy]: sortOrder
+        }
+      },
+      {
+        $skip: skip
+      },
+      {
+        $limit: parseInt(limit)
+      }
+    ];
+
+    const announcements = await getAnnouncementsPipelineService(pipeline);
+    const total = await getAnnouncementCountService(filter);
+
+    return res.status(200).json(success(200, {announcements, page, limit, total}));
+
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
+  }
+}
+
 export async function getAnnouncementsByParentController(req, res) {
  try {
    const parentId = req.parentId;
