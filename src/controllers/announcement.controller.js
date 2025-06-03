@@ -54,7 +54,6 @@ export async function createAnnouncementByTeacherController(req, res) {
 export async function getAnnouncementsByAdminController(req, res) {
   try {
     const adminId = req.adminId;
-
     const { page = 1, limit = 10, sortBy = "createdAt", order = "desc", createdBy="admin", section } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sortOrder = order === "asc" ? 1 : -1;
@@ -129,15 +128,32 @@ export async function getAnnouncementsByTeacherController(req, res) {
     const teacherId = req.teacherId;
     const sectionId = req.sectionId;
 
-    const { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } = req.query;
+    const { page = 1, limit = 10, sortBy = "createdAt", order = "desc", createdBy="teacher" } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sortOrder = order === "asc" ? 1 : -1;
 
+    if(!["admin", "teacher", "all"].includes(createdBy)) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+   }
+
     const filter = {
-      createdBy: convertToMongoId(teacherId),
-      createdByRole: "teacher",
-      school: convertToMongoId(adminId),
-      isActive: true
+      school: convertToMongoId(adminId)
+    }
+
+    if (createdBy === "admin") {
+      filter.createdBy = convertToMongoId(adminId);
+      filter.createdByRole = "admin";
+      filter.targetAudience = { $in: ["teacher"] };
+    } 
+    else if(createdBy === "teacher") {
+      filter.createdBy = convertToMongoId(teacherId);
+      filter.createdByRole = "teacher";
+    } 
+    else if (createdBy === "all") {
+      filter.$or = [
+        { createdBy: convertToMongoId(adminId), createdByRole: "admin", targetAudience: {$in: ['teacher']} },
+        { createdBy: convertToMongoId(teacherId), createdByRole: "teacher" }
+      ];
     }
 
     const pipeline = [
@@ -175,7 +191,6 @@ export async function getAnnouncementsByTeacherController(req, res) {
 
     const announcements = await getAnnouncementsPipelineService(pipeline);
     const total = await getAnnouncementCountService(filter);
-
     return res.status(200).json(success(200, {announcements, page, limit, total}));
 
   } catch (err) {
@@ -269,24 +284,46 @@ export async function getTeacherAnnouncementsByAdminController(req, res) {
 export async function getAnnouncementsByParentController(req, res) {
  try {
    const parentId = req.parentId;
-   const { studentId, page = 1, limit = 10 } = req.query;
+   const { studentId, page = 1, limit = 10, createdBy = "admin" } = req.query;
    const student = await getStudentService({ _id: studentId, isActive: true });
    if (!student) {
      return res
        .status(StatusCodes.NOT_FOUND)
        .send(error(404, "Student not found"));
    }
+
+   if(!["admin", "teacher", "all"].includes(createdBy)) {
+    return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+   }
    const adminId = student["admin"];
    const sectionId = student["section"];
    const skip = (parseInt(page) - 1) * parseInt(limit);
+
    const filter = {
      school: convertToMongoId(adminId),
-     isActive: true,
-     $or: [
-       { createdBy: convertToMongoId(adminId), createdByRole: "admin" },
-       { createdByRole: "teacher", section: convertToMongoId(sectionId) },
-     ],
+     isActive: true
+    //  $or: [
+    //    { createdBy: convertToMongoId(adminId), createdByRole: "admin" },
+    //    { createdByRole: "teacher", section: convertToMongoId(sectionId) },
+    //  ],
    };
+
+   if (createdBy === "admin") {
+     filter.createdBy = convertToMongoId(adminId);
+     filter.createdByRole = "admin";
+     filter.targetAudience = { $in: ["parent"] };
+    } 
+    else if(createdBy === "teacher") {
+      filter.section = convertToMongoId(sectionId);
+      filter.createdByRole = "teacher";
+      filter.targetAudience = { $in: ["parent"] };
+    } 
+    else if (createdBy === "all") {
+      filter.$or = [
+        { createdBy: convertToMongoId(adminId), createdByRole: "admin", targetAudience: {$in: ['parent']} },
+        { section: convertToMongoId(sectionId), createdByRole: "teacher", targetAudience: {$in: ['parent']} }
+      ];
+    }
 
    const pipeline = [
      {
