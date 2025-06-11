@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { error } from "../../utills/responseWrapper.js";
-import {teacherRegisterSchema,teacherUpdateSchema,teacherUsernamePasswordUpdateSchema,teacherLoginSchema,teacherEmailPhoneUpdateSchema, teacherPhotoUpdateSchema, teacherAddressUpdateSchema} from "../../validators/teacherSchema.validator.js";
+import {teacherRegisterSchema,teacherUpdateSchema,teacherUsernamePasswordUpdateSchema,teacherLoginSchema,teacherEmailPhoneUpdateSchema, teacherPhotoUpdateSchema, teacherAddressUpdateSchema, teacherFcmTokenSchema} from "../../validators/teacherSchema.validator.js";
 
 
 export async function registerTeacherValidation(req, res, next) {
@@ -30,6 +30,18 @@ export async function loginTeacherValidation(req, res, next) {
 export async function UsernamePasswordUpdateTeacherValidation(req, res, next) {
   try {
     const { error: schemaError } = teacherUsernamePasswordUpdateSchema.validate(req.body);
+    if (schemaError) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
+    }
+    next();
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function fcmTokenValidation(req, res, next) {
+  try {
+    const { error: schemaError } = teacherFcmTokenSchema.validate(req.body);
     if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }

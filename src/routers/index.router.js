@@ -18,6 +18,7 @@ import customerSupportRouter from "./customerSupport.router.js";
 import workDayRouter from "./workDay.router.js";
 import v2Router from "./v2/index.router.js";
 import announcementRouter from "./announcement.router.js";
+import notificationRouter from "./notification.router.js";
 
 const router = express();
 
@@ -40,5 +41,6 @@ router.use('/guest-teacher', guestTeacherRouter);
 router.use('/customer-support', customerSupportRouter);
 router.use('/workdays', workDayRouter);
 router.use('/announcement', announcementRouter);
+router.use('/notification', notificationRouter);
 
 export default router;

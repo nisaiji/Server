@@ -36,6 +36,9 @@ const parentSchema = mongoose.Schema({
     enum: ['unVerified', 'phoneVerified', 'verified'],
     default: 'unVerified'
   },
+  fcmToken: {
+    type: String
+  },
   country:{
     type:String
   },

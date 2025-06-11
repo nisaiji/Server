@@ -11,6 +11,9 @@ const adminSchema = mongoose.Schema({
   affiliationNo: {
     type: String
   },
+  fcmToken: {
+    type: String
+  },
   principal:{
     type: String,
   },

@@ -357,6 +357,7 @@ export async function updateParentController(req, res) {
     if(req.body['pincode']) { fieldsToBeUpdated['pincode'] = req.body['pincode'] }
     if(req.body['qualification']) { fieldsToBeUpdated['qualification'] = req.body['qualification'] }
     if(req.body['occupation']) { fieldsToBeUpdated['occupation'] = req.body['occupation'] }
+    if(req.body['fcmToken']) { fieldsToBeUpdated['fcmToken'] = req.body['fcmToken'] }
     if (req.body["password"]) {
       const hashedPassword = await hashPasswordService(req.body["password"]);
       fieldsToBeUpdated.password = hashedPassword;

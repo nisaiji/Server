@@ -100,7 +100,7 @@ export async function refreshAccessTokenController(req, res) {
 
 export async function updateAdminController(req, res) {
   try {
-    const{schoolName, principal, schoolBoard, schoolNumber, affiliationNo, address,city,state,country, district, pincode, email, phone, username, photo, method, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
+    const{schoolName, principal, schoolBoard, schoolNumber, fcmToken, affiliationNo, address,city,state,country, district, pincode, email, phone, username, photo, method, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
     const fieldsToBeUpdated = {};
     const adminId = req.adminId;
     const condition = [];
@@ -146,6 +146,7 @@ export async function updateAdminController(req, res) {
     if(whatsapp){ fieldsToBeUpdated["whatsapp"] = whatsapp; }
     if(youtube){ fieldsToBeUpdated["youtube"] = youtube; }
     if(linkedin){ fieldsToBeUpdated["linkedin"] = linkedin; }
+    if(fcmToken){ fieldsToBeUpdated["fcmToken"] = fcmToken; }
     if (photo || method === "DELETE") {
       fieldsToBeUpdated.photo = method === "DELETE" ? "" : photo;
     }

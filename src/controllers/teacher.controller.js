@@ -156,7 +156,8 @@ export async function updateTeacherController(req, res) {
       district,
       pincode,
       photo,
-      method
+      method,
+      fcmToken
     } = req.body;
 
     if (!isValidMongoId(teacherId)) {
@@ -235,6 +236,9 @@ export async function updateTeacherController(req, res) {
     }
     if (pincode) {
       fieldsToBeUpdated["pincode"] = pincode;
+    }
+    if (fcmToken) {
+      fieldsToBeUpdated["fcmToken"] = fcmToken;
     }
     if (photo || method === "DELETE") {
       fieldsToBeUpdated.photo = method === "DELETE" ? "" : photo;

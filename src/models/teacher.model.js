@@ -15,6 +15,9 @@ const teacherSchema = mongoose.Schema({
     type:Boolean,
     default:false
   },
+  fcmToken: {
+    type: String
+  },
   deviceId: {
     type: String
   },

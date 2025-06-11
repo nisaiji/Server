@@ -28,7 +28,7 @@ export async function adminSendOtpToPhoneController (req, res) {
     await registerAdminService({ phone, status: 'unVerified' });
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err));
   }
 }
 
