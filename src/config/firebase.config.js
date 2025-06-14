@@ -8,6 +8,7 @@ admin.initializeApp({
 });
 
 export async function sendPushNotification(fcmToken, title, body) {
+  try {
   const message = {
     notification: {
       title,
@@ -15,10 +16,8 @@ export async function sendPushNotification(fcmToken, title, body) {
     },
     token: fcmToken,
   };
-
-  try {
-    const response = await admin.messaging().send(message);
-    return response;
+  const response = await admin.messaging().send(message);
+  return response;
   } catch (error) {
     throw error;
   }

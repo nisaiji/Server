@@ -1,4 +1,5 @@
 import teacherModel from "../models/teacher.model.js";
+import { convertToMongoId } from "./mongoose.services.js";
 
 export async function getTeacherService(filter, projection={}) {
   try {
@@ -51,5 +52,21 @@ export async function getTeacherCountService(filter){
     return teachers;
   } catch (error) {
     throw error;  
+  }
+}
+
+export async function getTeachersByAdminIdService(adminId) {
+  try {
+    const teachers = await teacherModel.aggregate([
+      {
+        $match: {
+          admin: convertToMongoId(adminId),
+          isActive: true
+        }
+      }
+    ])
+    return teachers;
+  } catch (error) {
+    throw error;
   }
 }

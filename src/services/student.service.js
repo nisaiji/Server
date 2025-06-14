@@ -1,4 +1,5 @@
 import studentModel from "../models/student.model.js";
+import { convertToMongoId } from "./mongoose.services.js";
 
 
 export async function getStudentService(paramObj, projection={}){
@@ -85,3 +86,37 @@ export async function getStudentCountService(filter){
   }
   }
   
+  //----------- NON GENERIC SERVICES ----------------------
+export async function getParentsByStudentId(studentIds) {
+  try {
+    const parents = await studentModel.aggregate([
+      {
+        $match: {
+          _id: { $in: studentIds.map(id => convertToMongoId(id))}
+        }
+      },
+      {
+        $lookup: {
+          from: 'schoolparents',
+          localField: 'schoolParent',
+          foreignField: '_id',
+          as: 'schoolParent'
+        }
+      }, 
+      { $unwind: '$schoolParent' },
+      {
+        $lookup: {
+          from: 'parents',
+          localField: 'schoolParent.parent',
+          foreignField: '_id',
+          as: 'parent'
+        }
+      },
+      { $unwind: '$parent' },
+      // { $match: {fcmToken: { $ne: null }}}
+    ]);
+    return parents;
+  } catch (error) {
+    throw error;    
+  }
+}

@@ -78,6 +78,12 @@ const adminDetailsSchema = Joi.object({
   }),
 });
 
+const adminFcmTokenSchema = Joi.object({
+  fcmToken: Joi.string().required().messages({
+    "any.required": "FCM Token is required"
+  }),
+});
+
 const loginAdminSchema = Joi.object({
   email: Joi.string().email({minDomainSegments: 2}).required().messages({
     "string.email": "Invalid Email Id",
@@ -188,4 +194,4 @@ const adminPhotoUpdateSchema = Joi.object({
   })
 });
 
-export {registerAdminSchema, adminAddressSchema, adminDetailsSchema, loginAdminSchema, updateAdminProfileSchema, updateAdminSocialProfileSchema, adminPhotoUpdateSchema};
+export {registerAdminSchema, adminAddressSchema, adminDetailsSchema, adminFcmTokenSchema, loginAdminSchema, updateAdminProfileSchema, updateAdminSocialProfileSchema, adminPhotoUpdateSchema};

@@ -3,6 +3,10 @@ import {getDayNameService, getStartAndEndTimeService, timestampToIstDate } from 
 import { createHolidayService, deleteHolidayService, getHolidaysService, updateHolidayService, getHolidayService } from "../services/holiday.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
+import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
+import { getTeachersByAdminIdService } from "../services/teacher.services.js";
+import { getAdminService } from "../services/admin.services.js";
+import { sendPushNotification } from "../config/firebase.config.js";
 
 export async function registerHolidayController(req, res) {
   try {
@@ -24,6 +28,27 @@ export async function registerHolidayController(req, res) {
     }
     const data = { date, day, title, description, admin: adminId };
     await createHolidayService(data);
+    const school = await getAdminService({_id: adminId});
+    const parents =  await getParentsByAdminIdService(adminId);
+    const teachers = await getTeachersByAdminIdService(adminId);
+    const pushTitle = `${title} holiday on ${date}`;
+    const pushDescription = `Holiday in ${school?.schoolName} on ${date}`;
+
+    for(const parent of parents) {
+      try {
+        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription);
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    for(const teacher of teachers) {
+      try {
+        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription);
+      } catch (error) {
+        throw error;
+      }
+    }
     return res.status(StatusCodes.OK).send(success(200, "Holiday created sucessfully"));
   } catch (err) {
     return res.send(error(500, err.message));

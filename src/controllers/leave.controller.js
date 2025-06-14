@@ -7,6 +7,7 @@ import { hashPasswordService } from "../services/password.service.js";
 import { getSectionService, updateSectionService } from "../services/section.services.js";
 import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { getFormattedDateService } from "../services/celender.service.js";
+import { sendPushNotification } from "../config/firebase.config.js";
 
 export async function registerLeaveRequestController(req, res){
   try {
@@ -249,6 +250,7 @@ export async function updateTeacherLeavRequestByAdminController(req, res){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
     }
     const section = await getSectionService({teacher: leaveRequest.sender.id})
+    const teacher = await getTeacherService({_id: leaveRequest.sender.id})
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
@@ -261,13 +263,13 @@ export async function updateTeacherLeavRequestByAdminController(req, res){
       if(existingTeacher || existingGuestTeacher){
         return res.status(StatusCodes.CONFLICT).send(success(409, "Username already exists. Try a different one"));
       }
-      const teacher = await getTeacherService({_id: leaveRequest.sender.id})
       const guestTeacherObj = { username, password: hashedPassword, secretKey: password, tagline, startTime: leaveRequest['startTime'], endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}
       const guestTeacher = await registerGuestTeacherService(guestTeacherObj);
       await updateTeacherService({_id: teacher['_id']}, {leaveRequestCount: teacher['leaveRequestCount']+1 })
     }
     
     await updateLeaveRequestService({_id: leaveRequestId}, {status})
+    await sendPushNotification(teacher['fcmToken'], `Your Leave Request ${status==='accept' ? 'Accepted' : 'Rejected'}`, `Mr ${teacher?.firstname}! Leave Request ${status==='accept' ? 'Accepted' : 'Rejected'}`)
     const successMessage = status === 'accept' ? "Leave Request Accepted Successfully" : "Leave Request Rejected Successfully";
     return res.status(StatusCodes.OK).send(success(200, successMessage))
   } catch (err) {

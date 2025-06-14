@@ -17,6 +17,7 @@ import {
 } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import {
   emailPhoneUpdateTeacherValidation,
+  fcmTokenValidation,
   loginTeacherValidation,
   photoUpdateTeacherValidation,
   registerTeacherValidation,
@@ -78,6 +79,14 @@ teacherRouter.put(
   teacherAuthenticate,
   authorizeTeacherRoles("teacher"),
   UsernamePasswordUpdateTeacherValidation,
+  updateTeacherController
+);
+
+teacherRouter.put(
+  "/fcm-token",
+  teacherAuthenticate,
+  authorizeTeacherRoles("teacher"),
+  fcmTokenValidation,
   updateTeacherController
 );
 

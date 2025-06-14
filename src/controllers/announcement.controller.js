@@ -3,6 +3,10 @@ import { createAnnouncementService, deleteAnnouncementService, getAnnouncementCo
 import { error, success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getStudentService } from "../services/student.service.js";
+import { getTeachersByAdminIdService } from "../services/teacher.services.js";
+import { getAdminService } from "../services/admin.services.js";
+import { sendPushNotification } from "../config/firebase.config.js";
+import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
 
 export async function createAnnouncementByAdminController(req, res) {
   try {
@@ -19,6 +23,21 @@ export async function createAnnouncementByAdminController(req, res) {
       createdByRole: "admin",
       school: adminId
     })
+    const admin = await getAdminService({_id: adminId});
+    const pushTitle = `Announcement by ${admin.schoolName}`;
+    if(targetAudience.includes("teacher")) {
+      const teachers = await getTeachersByAdminIdService(adminId);
+      for(const teacher of teachers) {
+        await sendPushNotification(teacher['fcmToken'], pushTitle, title);
+      }
+    }
+
+    if(targetAudience.includes("parent")) {
+      const parents = await getParentsByAdminIdService(adminId);
+      for(const parent of parents) {
+        await sendPushNotification(parent['fcmToken'], pushTitle, title);
+      }
+    }
     return res.status(StatusCodes.CREATED).json(success(201, "Announcement created successfully!"));
 
   } catch (err) {

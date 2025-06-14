@@ -126,6 +126,11 @@ const uploadParentPhotoValidator = Joi.object({
     "any.only": 'method must be either "POST" or "DELETE".'
   })
 });
+const parentFcmTokenValidator = Joi.object({
+  fcmToken: Joi.string().required().messages({
+    "any.required": "FCM Token is required."
+  })
+});
 
 export {
   parentPhoneValidator,
@@ -135,5 +140,6 @@ export {
   parentPhoneAndOtpValidator,
   parentUpdateValidator,
   parentPasswordEditValidator,
-  uploadParentPhotoValidator
+  uploadParentPhotoValidator,
+  parentFcmTokenValidator
 }

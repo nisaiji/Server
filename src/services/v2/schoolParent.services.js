@@ -1,4 +1,5 @@
 import schoolParentModel from "../../models/v2/schoolParent.model.js";
+import { convertToMongoId } from "../mongoose.services.js";
 
 export async function getSchoolParentService(filter, projection={}) {
   try {
@@ -51,5 +52,35 @@ export async function getSchoolParentCountService(filter){
     return schoolParents;
   } catch (error) {
     throw error;  
+  }
+}
+
+export async function getParentsByAdminIdService(adminId){
+  try {
+    const parents = await schoolParentModel.aggregate([
+      {
+        $match: {
+          school: convertToMongoId(adminId),
+          isActive: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'parents',
+          localField: 'parent',
+          foreignField: '_id',
+          as: 'parent'
+        }
+      },
+      {
+        $unwind: '$parent'
+      },
+      {
+        $replaceWith: '$parent'
+      }
+    ])
+    return parents;
+  } catch (error) {
+    throw error;    
   }
 }

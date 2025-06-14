@@ -1,6 +1,6 @@
 import { createSectionAttendanceService, deleteSectionAttendanceService, getSectionAttendanceService, getSectionAttendancesService, getSectionAttendanceStatusService, updateSectionAttendanceService } from "../services/sectionAttendance.services.js";
 import {createAttendanceService,getAttendanceService, getAttendancesService, updateAttendanceService, getMisMatchAttendanceService, getAttendancePipelineService, deleteAttendancesService} from "../services/attendance.service.js";
-import {getStudentService, getStudentsPipelineService} from "../services/student.service.js";
+import {getParentsByStudentId, getStudentService, getStudentsPipelineService} from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionByIdService, getSectionService } from "../services/section.services.js";
@@ -10,6 +10,7 @@ import { getHolidayService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
 import { getWorkDayService } from "../services/workDay.services.js";
+import { sendPushNotification } from "../config/firebase.config.js";
 
 export async function attendanceByTeacherController(req, res) { 
   try {
@@ -49,33 +50,45 @@ export async function attendanceByTeacherController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.attendanceAlreadyMarked));
     }
 
-    present.map(async (student) => {
-      const paramObj = {"student":student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
-      const parentMarkedAttendance = await getAttendanceService(paramObj);
+    for (const student of present) {
+      try {
+        const paramObj = {"student":student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
+        const parentMarkedAttendance = await getAttendanceService(paramObj);
 
-      if(parentMarkedAttendance){
-        const id = parentMarkedAttendance["id"];
-        const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
-        await updateAttendanceService({_id: id}, fieldsToBeUpdated);
-      }else{
-        const attendanceObj = {date, day, student:student["id"], teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
-        await createAttendanceService(attendanceObj);
+        if(parentMarkedAttendance){
+          const id = parentMarkedAttendance["id"];
+          const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
+          await updateAttendanceService({_id: id}, fieldsToBeUpdated);
+        }else{
+          const attendanceObj = {date, day, student:student["id"], teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
+          await createAttendanceService(attendanceObj);
+        }
+        const studentWithParent = await getParentsByStudentId([student['id']]);
+        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance for ${studentWithParent?.firstname}`, `Congrats! your child is present today` )
+      } catch (error) {
+        throw error;
       }
-    });
+   };
 
-    absent.map(async (student) => {
-      const paramObj = {student:student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
-      const parentMarkedAttendance = await getAttendanceService(paramObj);
+    for(const student of absent) {
+      try {
+        const paramObj = {student:student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
+        const parentMarkedAttendance = await getAttendanceService(paramObj);
 
-      if(parentMarkedAttendance){
-        const id = parentMarkedAttendance["id"];
-        const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
-        await updateAttendanceService({_id: id}, fieldsToBeUpdated);
-      }else{
-        const attendanceObj = {date, day, student:student["id"], teacherAttendance:"absent", section:sectionId, classId:section['classId'], admin:adminId};
-        await createAttendanceService(attendanceObj);
+        if(parentMarkedAttendance){
+          const id = parentMarkedAttendance["id"];
+          const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
+          await updateAttendanceService({_id: id}, fieldsToBeUpdated);
+        }else{
+          const attendanceObj = {date, day, student:student["id"], teacherAttendance:"absent", section:sectionId, classId:section['classId'], admin:adminId};
+          await createAttendanceService(attendanceObj);
+        }
+        const studentWithParent = await getParentsByStudentId([student['id']]);
+        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance for ${studentWithParent?.firstname}`, `Ohh sitt! your child is absent today` )
+      } catch (error) {
+        throw error;
       }
-    });
+   };
 
     const presentCount = present?.length;
     const absentCount = absent?.length;

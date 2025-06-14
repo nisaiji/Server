@@ -46,6 +46,12 @@ const teacherUsernamePasswordUpdateSchema = Joi.object({
   password: Joi.string().required()
 });
 
+const teacherFcmTokenSchema = Joi.object({
+  fcmToken: Joi.string().required().messages({
+    "any.required": "FCM Token is required"
+  })
+});
+
 const teacherEmailPhoneUpdateSchema = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).optional().messages({
     "string.email": "Invalid email format."
@@ -174,6 +180,7 @@ export {
   teacherRegisterSchema,
   teacherUsernamePasswordUpdateSchema,
   teacherEmailPhoneUpdateSchema,
+  teacherFcmTokenSchema,
   teacherPhotoUpdateSchema,
   teacherAddressUpdateSchema
 };
