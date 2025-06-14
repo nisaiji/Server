@@ -90,6 +90,27 @@ export async function registerHolidaysController(req, res) {
       }
       currIstDate.setDate(currIstDate.getDate()+1)
     }
+    const school = await getAdminService({_id: adminId});
+    const parents =  await getParentsByAdminIdService(adminId);
+    const teachers = await getTeachersByAdminIdService(adminId);
+    const pushTitle = `${title} holiday on ${date}`;
+    const pushDescription = `Holiday in ${school?.schoolName} on ${date}`;
+
+    for(const parent of parents) {
+      try {
+        await `sendPushNotification`(parent['fcmToken'], pushTitle, pushDescription);
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    for(const teacher of teachers) {
+      try {
+        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription);
+      } catch (error) {
+        throw error;
+      }
+    }
     return res.status(StatusCodes.OK).send(success(200, "Holidays created successfully"));
    } catch (err) {
     return res.send(error(500, err.message));

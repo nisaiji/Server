@@ -8,6 +8,9 @@ admin.initializeApp({
 
 export async function sendPushNotification(fcmToken, title, body) {
   try {
+  if(!fcmToken) {
+    return;
+  }
   const message = {
     notification: {
       title,
