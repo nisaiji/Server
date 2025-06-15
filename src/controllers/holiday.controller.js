@@ -93,8 +93,8 @@ export async function registerHolidaysController(req, res) {
     const school = await getAdminService({_id: adminId});
     const parents =  await getParentsByAdminIdService(adminId);
     const teachers = await getTeachersByAdminIdService(adminId);
-    const pushTitle = `${title} holiday on ${date}`;
-    const pushDescription = `Holiday in ${school?.schoolName} on ${date}`;
+    const pushTitle = `${title} holiday on ${currIstDate}`;
+    const pushDescription = `Holiday in ${school?.schoolName} on ${currIstDate}`;
 
     for(const parent of parents) {
       try {
