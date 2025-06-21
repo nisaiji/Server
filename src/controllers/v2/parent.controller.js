@@ -12,6 +12,7 @@ import { getStudentService, getStudentsPipelineService } from "../../services/st
 import { updateSchoolParentsService } from "../../services/v2/schoolParent.services.js";
 import { getHolidayPipelineService } from "../../services/holiday.service.js";
 import { getWorkdayPipelineService } from "../../services/workDay.services.js";
+import { verifyMsg91Token } from "../../services/msg91.service.js";
 
 export async function parentSendOtpToPhoneController (req, res) {
   try {
@@ -794,6 +795,71 @@ export async function getHolidayAndWorkdayController(req, res) {
 
    return res.status(StatusCodes.OK).send(success(200, {holidays, workdays}));
   } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+
+export async function verifyPhoneController(req, res) {
+  try {
+    const { token, phone } = req.body;
+
+    let parent = await getParentService({phone: phone, isActive: true});
+    if(!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number not registered"));
+    }
+
+    const response =  await verifyMsg91Token(token);
+    
+    if(response?.type !== 'success') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    }
+
+    if(parent['status']==='unVerified') {
+      await updateParentService({_id: parent['_id']}, {status: 'phoneVerified'});
+    }
+    parent = await getParentService({ _id: parent['_id'] });
+    const jwtToken = getAccessTokenService({
+      parentId: parent['_id'],
+      status: parent['status'],
+      isLoginAlready: parent['isLoginAlready'],
+      phoneVerified: parent['status'] !== 'unVerified',
+      emailVerified: parent['status'] === 'verified',
+      passwordUpdated: parent['password'] ? true : false,
+      personalInfoUpdated: parent['fullname'] ? true : false
+    });
+    res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", jwtToken}));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function verifyEmailController(req, res) {
+  try {
+    const { token, email } = req.body;
+    const parentId = req.parentId;
+
+    let parent = await getParentService({_id: parentId, isActive: true});
+
+    const response =  await verifyMsg91Token(token);
+    if(response?.type !== 'success') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    }
+
+    updateParentService({_id: parent['_id']}, { email, status: 'verified'}),
+
+    parent = await getParentService({ _id: parent['_id'] });
+    const jwtToken = getAccessTokenService({
+      parentId: parent['_id'],
+      status: parent['status'],
+      isLoginAlready: parent['isLoginAlready'],
+      phoneVerified: parent['status'] !== 'unVerified',
+      emailVerified: parent['status'] === 'verified',
+      passwordUpdated: parent['password'] ? true : false,
+      personalInfoUpdated: parent['fullname'] ? true : false
+    });
+    res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", jwtToken}));
+  } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

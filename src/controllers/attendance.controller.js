@@ -64,7 +64,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([student['id']]);
-        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance for ${studentWithParent?.firstname}`, `Congrats! your child is present today` )
+        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance for ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname}`, `Congrats! your child is present today` )
       } catch (error) {
         throw error;
       }
@@ -84,7 +84,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([student['id']]);
-        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance for ${studentWithParent?.firstname}`, `Ohh sitt! your child is absent today` )
+        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance for ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname}`, `Ohh sitt! your child is absent today` )
       } catch (error) {
         throw error;
       }

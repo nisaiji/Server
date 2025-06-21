@@ -1,5 +1,5 @@
-import { parentPhoneValidation, parentEmailValidation, parentPhoneAndOtpValidation, parentPasswordValidation, parentFullnameValidation, parentUpdateValidation, parentPasswordEditValidation, parentPhotoUploadValidation, parentFcmTokenValidation } from "../../middlewares/validation/v2/parent.validation.middleware.js";
-import { addStudentController, checkValidStudentController, editPasswordController, getHolidayAndWorkdayController, getParentController, getParentStatusController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneUpdateSendOtpToPhoneController, parentPhoneUpdateVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, parentUpdateEmailAndSendEmailOtpController, parentUpdateEmailVerifyByOtpController, updateParentController } from "../../controllers/v2/parent.controller.js";
+import { parentPhoneValidation, parentEmailValidation, parentPhoneAndOtpValidation, parentPasswordValidation, parentFullnameValidation, parentUpdateValidation, parentPasswordEditValidation, parentPhotoUploadValidation, parentFcmTokenValidation, parentEmailTokenValidation, parentPhoneTokenValidation } from "../../middlewares/validation/v2/parent.validation.middleware.js";
+import { addStudentController, checkValidStudentController, editPasswordController, getHolidayAndWorkdayController, getParentController, getParentStatusController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneUpdateSendOtpToPhoneController, parentPhoneUpdateVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, parentUpdateEmailAndSendEmailOtpController, parentUpdateEmailVerifyByOtpController, updateParentController, verifyEmailController, verifyPhoneController } from "../../controllers/v2/parent.controller.js";
 import express from "express";
 import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
 import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
@@ -26,5 +26,7 @@ parentRouter.put("/update/phone-verify", parentAuthenticate, parentPhoneUpdateVe
 parentRouter.post("/update/email-verify", parentAuthenticate, parentUpdateEmailAndSendEmailOtpController);
 parentRouter.put("/update/email-verify", parentAuthenticate, parentUpdateEmailVerifyByOtpController);
 parentRouter.post('/holiday-workday', parentAuthenticate, getHolidayAndWorkdayController);
+parentRouter.post("/phone/verify", parentPhoneTokenValidation, verifyPhoneController );
+parentRouter.post("/email/verify", parentAuthenticate, parentEmailTokenValidation, verifyEmailController );
 
 export default parentRouter;

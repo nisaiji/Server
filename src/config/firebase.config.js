@@ -22,6 +22,10 @@ export async function sendPushNotification(fcmToken, title, body) {
   const response = await admin.messaging().send(message);
   return response;
   } catch (error) {
-    throw error;
+    console.log({error})
+    if (error.code === 'messaging/registration-token-not-registered') {
+        console.log('Invalid token detected. Removing from DB:');
+        // await deleteTokenFromDB(token);
+    }
   }
 }

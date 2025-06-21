@@ -13,7 +13,9 @@ const _config = {
     twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER,
     otpExpirationInMinutes: 2,
     sendGridApiKey: process.env.SEND_GRID_API_KEY,
-    sendGridEmail: process.env.SEND_GRID_EMAIL
+    sendGridEmail: process.env.SEND_GRID_EMAIL,
+    msg91Url: process.env.MSG91_TOKEN_VALIDATE_URL,
+    msg91AuthKey: process.env.MSG91_AUTH_KEY,
 }
 
-export const config =   Object.freeze(_config);    
+export const config =   Object.freeze(_config);

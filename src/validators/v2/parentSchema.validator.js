@@ -132,6 +132,28 @@ const parentFcmTokenValidator = Joi.object({
   })
 });
 
+const parentPhoneTokenValidator = Joi.object({
+  phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).message("invalid phone number").length(10).required().messages({
+    "string.pattern": "invalid phone numberrr",
+    "string.length": "Phone no. length should have 10 digits",
+    "any.required": "Phone no is required!"
+  }),
+  token: Joi.string().required().messages({
+    "any.required": "Token is required."
+  })
+});
+
+const parentEmailTokenValidator = Joi.object({
+  email: Joi.string().email({ tlds: { allow: false } }).required().messages({
+    'string.base': 'Email must be a text value',
+    'string.email': 'Please enter a valid email address',
+    'any.required': 'Email is required'
+  }),
+  token: Joi.string().required().messages({
+    "any.required": "Token is required."
+  })
+});
+
 export {
   parentPhoneValidator,
   parentEmailValidator,
@@ -141,5 +163,7 @@ export {
   parentUpdateValidator,
   parentPasswordEditValidator,
   uploadParentPhotoValidator,
-  parentFcmTokenValidator
+  parentFcmTokenValidator,
+  parentPhoneTokenValidator,
+  parentEmailTokenValidator,
 }
