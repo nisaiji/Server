@@ -16,7 +16,8 @@ export async function unVerifiedAdminAuthenticate(req, res, next) {
       return res.send(error(409,"Invalid admin token"));
     }
     const _id = decoded.adminId;
-    const admin = await getAdminService({_id, status: {$ne: 'verified'}});
+    const admin = await getAdminService({_id});
+    // const admin = await getAdminService({_id, status: {$ne: 'verified'}});
     if (!admin){
       return res.send(error(404, "Admin not exists"));
     }

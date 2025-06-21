@@ -8,6 +8,7 @@ import { hashPasswordService, matchPasswordService } from "../../services/passwo
 import { StatusCodes } from "http-status-codes";
 import { sendEmailService } from "../../config/sendGrid.config.js";
 import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
+import { verifyMsg91Token } from "../../services/msg91.service.js";
 
 export async function adminSendOtpToPhoneController (req, res) {
   try {
@@ -342,6 +343,72 @@ export async function adminLoginController(req, res) {
       pincode: admin['pincode'] ? admin['pincode'] : ''
     });
     return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, username: admin.username }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function adminPhoneVerifyController(req, res) {
+  try {
+     const { phone, token } = req.body;
+    let admin = await getAdminService({ phone });
+
+    const response = await verifyMsg91Token(token);
+    if(response?.type !== 'success') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    }
+
+    if(!admin) {
+      await registerAdminService({ phone, status: 'phoneVerified' });
+    }
+
+    admin = await getAdminService({phone});
+    const jwttoken = getAccessTokenService({
+      adminId: admin['_id'],
+      role: 'admin',
+      status: admin['status'],
+      isActive: admin['isActive'],
+      phoneVerified: admin['status'] !== 'unVerified',
+      emailVerified: admin['status'] === 'verified',
+      passwordUpdated: admin['password'] ? true : false
+    })
+
+    res.status(StatusCodes.OK).send(success(200,  { msg: "OTP verified successfully", token: jwttoken}));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function adminEmailVerifyController(req, res) {
+  try {
+    const { email, token } = req.body;
+    const adminId = req.adminId;
+
+    let admin = await getAdminService({ _id: adminId });
+    if(!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
+    }
+    const response =  await verifyMsg91Token(token);
+        
+    if(response?.type !== 'success') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    }
+
+    await updateAdminService({_id: admin['_id']}, {email, status: 'verified'});
+
+    admin = await getAdminService({ _id: admin['_id'] });
+    const jwtToken = getAccessTokenService({
+      role: "admin",
+      adminId : admin['_id'],
+      email: admin["email"],
+      status: admin['status'],
+      phone: admin["phone"],
+      active: admin["isActive"],
+      pincode: admin['pincode'] ? admin['pincode'] : '',
+      isLoginAlready: admin['isLoginAlready'],
+    });
+
+    return res.status(StatusCodes.OK).send(success(200, {message: "Email updated successfully", token: jwtToken}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
