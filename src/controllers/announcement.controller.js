@@ -24,11 +24,11 @@ export async function createAnnouncementByAdminController(req, res) {
       school: adminId
     })
     const admin = await getAdminService({_id: adminId});
-    const pushTitle = `Announcement by ${admin.schoolName}`;
+    const pushTitle = `Post by ${admin.schoolName}`;
     if(targetAudience.includes("teacher")) {
       const teachers = await getTeachersByAdminIdService(adminId);
       for(const teacher of teachers) {
-        await sendPushNotification(teacher['fcmToken'], pushTitle, title);
+        await sendPushNotification(teacher['fcmToken'], pushTitle, description);
       }
     }
 

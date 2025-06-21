@@ -268,8 +268,8 @@ export async function updateTeacherLeavRequestByAdminController(req, res){
       await updateTeacherService({_id: teacher['_id']}, {leaveRequestCount: teacher['leaveRequestCount']+1 })
     }
     
-    await updateLeaveRequestService({_id: leaveRequestId}, {status})
-    await sendPushNotification(teacher['fcmToken'], `Your Leave Request ${status==='accept' ? 'Accepted' : 'Rejected'}`, `Mr ${teacher?.firstname}! Leave Request ${status==='accept' ? 'Accepted' : 'Rejected'}`)
+    await updateLeaveRequestService({_id: leaveRequestId}, {status});
+    await sendPushNotification(teacher['fcmToken'], `Your Leave Request is ${status==='accept' ? 'Accepted' : 'Rejected'}`, '');
     const successMessage = status === 'accept' ? "Leave Request Accepted Successfully" : "Leave Request Rejected Successfully";
     return res.status(StatusCodes.OK).send(success(200, successMessage))
   } catch (err) {
