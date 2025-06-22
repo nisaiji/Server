@@ -1,5 +1,5 @@
 import { deleteWorkDayService, getWorkDayService } from "../services/workDay.services.js";
-import {getDayNameService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
+import {getDayNameService, getFormattedDateService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
 import { createHolidayService, deleteHolidayService, getHolidaysService, updateHolidayService, getHolidayService } from "../services/holiday.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
@@ -94,11 +94,11 @@ export async function registerHolidaysController(req, res) {
     const parents =  await getParentsByAdminIdService(adminId);
     const teachers = await getTeachersByAdminIdService(adminId);
     const pushTitle = `${school?.schoolName}: Upcoming Holiday`;
-    const pushDescription = `From ${startIstDate} to ${endIstDate}`;
+    const pushDescription = `From ${getFormattedDateService(new Date(startTime))} to ${getFormattedDateService(new Date(endTime))}`;
 
     for(const parent of parents) {
       try {
-        await `sendPushNotification`(parent['fcmToken'], pushTitle, pushDescription);
+        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription);
       } catch (error) {
         throw error;
       }

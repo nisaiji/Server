@@ -5,7 +5,7 @@ import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionByIdService, getSectionService } from "../services/section.services.js";
 import { getTeacherService } from "../services/teacher.services.js";
-import { getDayNameService, getStartAndEndTimeService } from "../services/celender.service.js";
+import { getDayNameService, getFormattedDateService, getStartAndEndTimeService } from "../services/celender.service.js";
 import { getHolidayService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
@@ -64,7 +64,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([student['id']]);
-        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${new Date()}` )
+        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}` )
       } catch (error) {
         throw error;
       }
@@ -84,7 +84,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([student['id']]);
-        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${new Date()}` )
+        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}` )
       } catch (error) {
         throw error;
       }
