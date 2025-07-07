@@ -307,7 +307,7 @@ export async function adminLoginController(req, res) {
   try {
     const { user, password } = req.body;
   
-    const admin = await getAdminService({ $or: [{email: user}, {phone: user}] });
+    const admin = await getAdminService({ $or: [{email: user}, {phone: user}, {status: 'verified'}] });
     if (!admin) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
     }

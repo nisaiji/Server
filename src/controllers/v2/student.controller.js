@@ -253,7 +253,7 @@ export async function updateStudentBySchoolController(req, res){
     if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
     if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
 
-    if(req.body["phone"]){
+    if(req.body["phone"] && schoolParent['phone']!==req.body['phone']){
       const phone = req.body['phone'];
       let parent = await getParentService({_id: schoolParent['parent']});
       console.log(parent['students'])
