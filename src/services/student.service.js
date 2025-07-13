@@ -1,4 +1,4 @@
-import studentModel from "../models/student.model.js";
+import studentModel from "../models/v2/student.model.js";
 import { convertToMongoId } from "./mongoose.services.js";
 
 

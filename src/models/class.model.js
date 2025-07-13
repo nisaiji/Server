@@ -11,6 +11,10 @@ const classSchema = new mongoose.Schema({
       ref: "section"
     }
   ], 
+  session: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "session"
+  },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin",

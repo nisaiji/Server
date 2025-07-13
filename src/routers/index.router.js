@@ -19,10 +19,13 @@ import workDayRouter from "./workDay.router.js";
 import v2Router from "./v2/index.router.js";
 import announcementRouter from "./announcement.router.js";
 import notificationRouter from "./notification.router.js";
+import sessionRouter from "./session.router.js";
+import v3Router from "./v3/index.router.js";
 
 const router = express();
 
 router.use("/v2", v2Router);
+router.use("/v3", v3Router);
 router.use("/admin", adminRouter);
 router.use("/parent", parentRouter);
 router.use("/teacher", teacherRouter);
@@ -42,5 +45,6 @@ router.use('/customer-support', customerSupportRouter);
 router.use('/workdays', workDayRouter);
 router.use('/announcement', announcementRouter);
 router.use('/notification', notificationRouter);
+router.use("/session", sessionRouter);
 
 export default router;

@@ -25,6 +25,10 @@ const sectionSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "guestTeacher"
   },
+  session: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "session"
+  },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"

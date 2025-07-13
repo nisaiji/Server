@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 
 const studentSchema = mongoose.Schema({
-  rollNumber:{
-    type:String
-  },
   firstname: {
     type: String,
     required: true
@@ -12,7 +9,7 @@ const studentSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  isActive:{
+  isActive: {
     type:Boolean,
     default: true
   },
@@ -55,14 +52,6 @@ const studentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "schoolParent"
   },
-  section: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "section"
-  },
-  classId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "class"
-  },
   admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "admin"
@@ -73,5 +62,5 @@ const studentSchema = mongoose.Schema({
 }
 );
 
-const studentModel = mongoose.model("studentt", studentSchema);
+const studentModel = mongoose.model("student", studentSchema);
 export default studentModel;

@@ -1,18 +1,22 @@
 import { StatusCodes } from "http-status-codes";
 import { deleteClassService, getClassWithSectionsService,getClassService, registerClassService, customGetClassWithSectionTeacherService,} from "../services/class.sevices.js";
-import { checkClassExistById } from "../services/section.services.js";
 import { error, success } from "../utills/responseWrapper.js";
+import { getSessionService } from "../services/session.services.js";
 
 export async function registerClassController(req, res) {
   try {
-    const { name } = req.body;
+    const { name, sessionId } = req.body;
     const admin = req.adminId;
-    const classInfo = await getClassService({ name, admin });
+    const classInfo = await getClassService({ name, admin, sessionId });
+    const session = await getSessionService({_id: sessionId});
+    if(!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
     if (classInfo) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Class already exists"));
     }
 
-    await registerClassService({ name, admin });
+    await registerClassService({ name, admin, session: sessionId });
     return res.status(StatusCodes.OK).send(success(200, "Class registered successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

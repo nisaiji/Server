@@ -17,9 +17,9 @@ const attendanceSchema = new mongoose.Schema({
         type:String,
         default:""
     },
-    student:{
+    sessionStudent:{
         type: mongoose.Schema.Types.ObjectId,
-        ref:"student",
+        ref:"sessionStudent",
         required: true
     }, 
     section:{
@@ -29,6 +29,10 @@ const attendanceSchema = new mongoose.Schema({
     classId:{ 
         type:mongoose.Schema.Types.ObjectId,
         ref:"class"
+    },
+    session:{ 
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"session"
     },
     admin:{
         type:mongoose.Schema.Types.ObjectId,

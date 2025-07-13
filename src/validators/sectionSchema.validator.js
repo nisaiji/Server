@@ -17,7 +17,11 @@ const registerSectionSchema = Joi.object({
     }),
   classId: Joi.string().required().messages({
     "any.required": "Class ID is required."
-    })
+    }),
+  sessionId: Joi.string().required().messages({
+    "any.required": "Session Id is required.",
+    "string.base": "Session Id must be a string."
+  })
 });
 
 export { registerSectionSchema };

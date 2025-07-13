@@ -11,167 +11,167 @@ import { getSchoolParentService, registerSchoolParentService, updateSchoolParent
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
 
 export async function searchStudentsController(req, res){
-try{
-  let { search, page = 1, limit, classId, section } = req.query;
+  try{
+    let { search, page = 1, limit, classId, section } = req.query;
 
-  const adminId = req.adminId;
+    const adminId = req.adminId;
 
-  const pageNum = parseInt(page);
-  const limitNum = limit ? parseInt(limit) : "no limit";
-  const skipNum = (pageNum - 1) * limitNum;
-  let filter = {
-    admin: convertToMongoId(adminId)
-  };
+    const pageNum = parseInt(page);
+    const limitNum = limit ? parseInt(limit) : "no limit";
+    const skipNum = (pageNum - 1) * limitNum;
+    let filter = {
+      admin: convertToMongoId(adminId)
+    };
 
-  if(classId) {
-    filter['classId'] = convertToMongoId(classId)
-  }
+    if(classId) {
+      filter['classId'] = convertToMongoId(classId)
+    }
 
-  if(section) {
-    filter['section'] = convertToMongoId(section)
-  }
+    if(section) {
+      filter['section'] = convertToMongoId(section)
+    }
 
-  if(search){
-    search = search.trim();
-    const[searchFirstname, searchLastname] = search.split(" ");
-    if(searchLastname){
-    filter['$and'] = [
-        { firstname: { $regex: new RegExp(searchFirstname, "i") } },
-        { lastname: { $regex: new RegExp(searchLastname, "i") } },
-        {isActive: true}
+    if(search){
+      search = search.trim();
+      const[searchFirstname, searchLastname] = search.split(" ");
+      if(searchLastname){
+      filter['$and'] = [
+          { firstname: { $regex: new RegExp(searchFirstname, "i") } },
+          { lastname: { $regex: new RegExp(searchLastname, "i") } },
+          {isActive: true}
+        ]
+    } else {
+      filter['$or'] = [
+        { firstname: { $regex: new RegExp(search, "i") }, isActive: true },
+        { lastname: { $regex: new RegExp(search, "i") }, isActive: true },
+        { "parentDetails.email": { $regex: new RegExp(search, "i") }, isActive: true },
+        { "parentDetails.phone": { $regex: new RegExp(search, "i") }, isActive: true },
       ]
-  } else {
-    filter['$or'] = [
-      { firstname: { $regex: new RegExp(search, "i") }, isActive: true },
-      { lastname: { $regex: new RegExp(search, "i") }, isActive: true },
-      { "parentDetails.email": { $regex: new RegExp(search, "i") }, isActive: true },
-      { "parentDetails.phone": { $regex: new RegExp(search, "i") }, isActive: true },
-    ]
+    }
   }
-}
 
-  const pipeline = [
-      // Join students with parents
-      {
-        $lookup: {
-          from: "schoolparents",
-          localField: "schoolParent",
-          foreignField: "_id",
-          as: "parentDetails",
-          pipeline: [
-            {
-              $project: {
-                password: 0,
-                isActive: 0,
-                isLoginAlready: 0,
-                admin: 0,
+    const pipeline = [
+        // Join students with parents
+        {
+          $lookup: {
+            from: "schoolparents",
+            localField: "schoolParent",
+            foreignField: "_id",
+            as: "parentDetails",
+            pipeline: [
+              {
+                $project: {
+                  password: 0,
+                  isActive: 0,
+                  isLoginAlready: 0,
+                  admin: 0,
+                },
               },
-            },
-          ],
+            ],
+          }
+        },
+        {
+          $unwind: {
+            path: "$parentDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $match: filter,
+        },
+
+        {
+          $sort: { firstname: 1 },
+        },
+    ];
+
+    if (limit) {
+      pipeline.push(
+        {
+          $skip: skipNum,
+        },
+        {
+          $limit: limitNum,
         }
-      },
-      {
-        $unwind: {
-          path: "$parentDetails",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+      );
+    }
 
-      {
-        $match: filter,
+    // include section info
+    pipeline.push({
+      $lookup: {
+        from: "sections",
+        localField: "section",
+        foreignField: "_id",
+        as: "sectionDetails",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+              studentCount: 1,
+            },
+          },
+        ],
       },
+    });
+    pipeline.push({
+      $unwind: {
+        path: "$sectionDetails",
+        preserveNullAndEmptyArrays: true,
+      },
+    });
 
-      {
-        $sort: { firstname: 1 },
+    // include class info
+    pipeline.push({
+      $lookup: {
+        from: "classes",
+        localField: "classId",
+        foreignField: "_id",
+        as: "classDetails",
+        pipeline: [
+          {
+            $project: {
+              name: 1,
+              sectionCount: { $size: "$section" },
+            },
+          },
+        ],
       },
-  ];
+    });
+    pipeline.push({
+      $unwind: {
+        path: "$classDetails",
+        preserveNullAndEmptyArrays: true,
+      },
+    });
 
-  if (limit) {
-    pipeline.push(
-      {
-        $skip: skipNum,
+    //remove other entity ids from student entity
+    pipeline.push({
+      $project: {
+        isActive: 0,
+        admin: 0,
+        schoolParent: 0,
+        section: 0,
+        classId: 0,
       },
-      {
-        $limit: limitNum,
-      }
+    });
+
+    const students = await getStudentsPipelineService(pipeline);
+    const totalStudents = students.length;
+    const totalPages = Math.ceil(totalStudents / limitNum);
+
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        students,
+        currentPage: pageNum,
+        totalPages,
+        totalStudents,
+        pageSize: limitNum,
+      })
     );
-  }
-
-  // include section info
-  pipeline.push({
-    $lookup: {
-      from: "sections",
-      localField: "section",
-      foreignField: "_id",
-      as: "sectionDetails",
-      pipeline: [
-        {
-          $project: {
-            name: 1,
-            studentCount: 1,
-          },
-        },
-      ],
-    },
-  });
-  pipeline.push({
-    $unwind: {
-      path: "$sectionDetails",
-      preserveNullAndEmptyArrays: true,
-    },
-  });
-
-  // include class info
-  pipeline.push({
-    $lookup: {
-      from: "classes",
-      localField: "classId",
-      foreignField: "_id",
-      as: "classDetails",
-      pipeline: [
-        {
-          $project: {
-            name: 1,
-            sectionCount: { $size: "$section" },
-          },
-        },
-      ],
-    },
-  });
-  pipeline.push({
-    $unwind: {
-      path: "$classDetails",
-      preserveNullAndEmptyArrays: true,
-    },
-  });
-
-  //remove other entity ids from student entity
-  pipeline.push({
-    $project: {
-      isActive: 0,
-      admin: 0,
-      schoolParent: 0,
-      section: 0,
-      classId: 0,
-    },
-  });
-
-  const students = await getStudentsPipelineService(pipeline);
-  const totalStudents = students.length;
-  const totalPages = Math.ceil(totalStudents / limitNum);
-
-  return res.status(StatusCodes.OK).send(
-    success(200, {
-      students,
-      currentPage: pageNum,
-      totalPages,
-      totalStudents,
-      pageSize: limitNum,
-    })
-  );
-}  catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-  }
+  }  catch (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    }
 };
 
 export async function registerStudentController(req, res) {
@@ -205,7 +205,7 @@ export async function registerStudentController(req, res) {
         ...(parentAddress && { address: parentAddress }),
         ...(parentGender && { gender: parentGender }),
         ...(age && { age }),
-        ...(email && {adminEmailValidation})
+        ...(email && {email})
       });
     }
 

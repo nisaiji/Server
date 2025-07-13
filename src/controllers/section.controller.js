@@ -3,11 +3,16 @@ import { getClassService, updateClassService } from "../services/class.sevices.j
 import { deleteSectionService, getAllSection,getClassSections, getSectionService, registerSectionService, updateSectionService} from "../services/section.services.js";
 import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
+import { getSessionService } from "../services/session.services.js";
 
 export async function registerSectionController(req, res) {
   try {
-    const { name, startTime, teacherId, classId } = req.body;
+    const { name, startTime, teacherId, classId, sessionId } = req.body;
     const adminId = req.adminId;
+    const session = await getSessionService({_id: sessionId});
+    if(!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
     const classInfo = await getClassService({ _id:classId });
     if (!classInfo) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
@@ -16,7 +21,6 @@ export async function registerSectionController(req, res) {
     if (section) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Section already exists"));
     }
-    section = await registerSectionService({name, startTime, teacher:teacherId, classId, admin:adminId});
     const teacher = await getTeacherService({_id:teacherId, isActive:true});
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
@@ -24,6 +28,7 @@ export async function registerSectionController(req, res) {
     if(teacher["section"]){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher already assigned to section"));
     }
+    section = await registerSectionService({name, startTime, teacher:teacherId, classId, admin:adminId, session});
     teacher.section = section["_id"];
     await teacher.save();
     classInfo["section"]?.push(section["_id"]);
