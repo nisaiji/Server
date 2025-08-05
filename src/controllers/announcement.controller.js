@@ -7,6 +7,8 @@ import { getTeachersByAdminIdService } from "../services/teacher.services.js";
 import { getAdminService } from "../services/admin.services.js";
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
+import { getAnnouncementReadStatusService, getAnnouncementsReadStatusService } from "../services/announcementReadStatus.service.js";
+import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 
 export async function createAnnouncementByAdminController(req, res) {
   try {
@@ -615,5 +617,124 @@ export async function deleteAnnouncementByTeacherController(req, res) {
     return res.status(StatusCodes.OK).send(success(200, "Announcement deleted successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getUnReadAnnouncementsCountForParentController(req, res) {
+  try {
+    const parentId = req.parentId || "6890f71bd9166bc74480f46b"; 
+    const { studentId, createdBy = "admin" } = req.query;
+    const student = await getSessionStudentService({ _id: studentId, isActive: true });
+    if (!student) {
+      return res
+          .status(StatusCodes.NOT_FOUND)
+          .send(error(404, "Student not found"));
+    }
+
+    if(!["admin", "teacher", "all"].includes(createdBy)) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+    }
+    const adminId = student["school"];
+    const sectionId = student["section"];
+
+    const filter = {
+      school: convertToMongoId(adminId),
+      isActive: true
+    };
+
+    if (createdBy === "admin") {
+      filter.createdBy = convertToMongoId(adminId);
+      filter.createdByRole = "admin";
+      filter.targetAudience = { $in: ["parent"] };
+    }
+    else if(createdBy === "teacher") {
+      filter.section = convertToMongoId(sectionId);
+      filter.createdByRole = "teacher";
+      filter.targetAudience = { $in: ["parent"] };
+    }
+    else if (createdBy === "all") {
+      filter.$or = [
+        { createdBy: convertToMongoId(adminId), createdByRole: "admin", targetAudience: {$in: ['parent']} },
+        { section: convertToMongoId(sectionId), createdByRole: "teacher", targetAudience: {$in: ['parent']} }
+      ];
+    }
+
+    const pipeline = [
+      {
+        $match: filter,
+      }
+    ];
+
+    
+    const announcements = await getAnnouncementsPipelineService(pipeline);
+    const announcementIds = announcements.map(a => convertToMongoId(a._id));
+
+    const readAnnouncements = await getAnnouncementsReadStatusService({
+      user: convertToMongoId(parentId),
+      userRole: 'parent',
+      announcement: {$in: announcementIds }
+    }, {"announcement": 1});
+
+    const readAnnouncementIds = readAnnouncements.map(r => r.announcement.toString());
+    const unreadCount = announcementIds.filter(id => !readAnnouncementIds.includes(id.toString())).length;
+
+    return res.status(200).json(success(200, { unreadCount }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getUnReadAnnouncementsCountForTeacherController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const teacherId = req.teacherId;
+    const sectionId = req.sectionId;
+
+    const { createdBy="teacher" } = req.query;
+
+    if(!["admin", "teacher", "all"].includes(createdBy)) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+   }
+
+    const filter = {
+      school: convertToMongoId(adminId)
+    }
+
+    if (createdBy === "admin") {
+      filter.createdBy = convertToMongoId(adminId);
+      filter.createdByRole = "admin";
+      filter.targetAudience = { $in: ["teacher"] };
+    } 
+    else if(createdBy === "teacher") {
+      filter.createdBy = convertToMongoId(teacherId);
+      filter.createdByRole = "teacher";
+    } 
+    else if (createdBy === "all") {
+      filter.$or = [
+        { createdBy: convertToMongoId(adminId), createdByRole: "admin", targetAudience: {$in: ['teacher']} },
+        { createdBy: convertToMongoId(teacherId), createdByRole: "teacher" }
+      ];
+    }
+
+    const pipeline = [
+      {
+        $match: filter
+      }
+    ];
+
+    const announcements = await getAnnouncementsPipelineService(pipeline);
+    const announcementIds = announcements.map(a => convertToMongoId(a._id));
+    const readAnnouncements = await getAnnouncementsReadStatusService({
+      user: convertToMongoId(teacherId),
+      userRole: 'teacher',
+      announcement: {$in: announcementIds }
+    }, {"announcement": 1});
+    
+    const readAnnouncementIds = readAnnouncements.map(r => r.announcement.toString());
+    const unreadCount = announcementIds.filter(id => !readAnnouncementIds.includes(id.toString())).length;
+
+    return res.status(200).json(success(200, {unreadCount}));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
   }
 }

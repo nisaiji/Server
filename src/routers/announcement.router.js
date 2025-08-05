@@ -1,5 +1,5 @@
 import express from "express";
-import { createAnnouncementByAdminController, createAnnouncementByTeacherController, deleteAnnouncementByAdminController, deleteAnnouncementByTeacherController, getAnnouncementsByAdminController, getAnnouncementsByParentController, getAnnouncementsByTeacherController, updateAnnouncementByAdminController, updateAnnouncementByTeacherController,  } from "../controllers/announcement.controller.js";
+import { createAnnouncementByAdminController, createAnnouncementByTeacherController, deleteAnnouncementByAdminController, deleteAnnouncementByTeacherController, getAnnouncementsByAdminController, getAnnouncementsByParentController, getAnnouncementsByTeacherController, getUnReadAnnouncementsCountForParentController, getUnReadAnnouncementsCountForTeacherController, updateAnnouncementByAdminController, updateAnnouncementByTeacherController,  } from "../controllers/announcement.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
@@ -17,5 +17,7 @@ announcementRouter.put("/admin/:announcementId", adminAuthenticate, updateAnnoun
 announcementRouter.put("/teacher/:announcementId", teacherAuthenticate, updateAnnouncementByTeacherController);
 announcementRouter.delete("/admin/:announcementId", adminAuthenticate, deleteAnnouncementByAdminController);
 announcementRouter.delete("/teacher/:announcementId", teacherAuthenticate, deleteAnnouncementByTeacherController);
+announcementRouter.get("/teacher/unread", teacherAuthenticate, getUnReadAnnouncementsCountForTeacherController);
+announcementRouter.get("/parent/unread", parentAuthenticate, getUnReadAnnouncementsCountForParentController);
 
 export default announcementRouter;
