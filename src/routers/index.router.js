@@ -21,6 +21,10 @@ import announcementRouter from "./announcement.router.js";
 import notificationRouter from "./notification.router.js";
 import sessionRouter from "./session.router.js";
 import v3Router from "./v3/index.router.js";
+import teachingEventRouter from "./teachingEvent.router.js";
+import subjectRouter from "./subject.router.js";
+import announcementReadStatusRouter from "./announcementReadStatus.router.js";
+import studentLeaveRequestRouter from "./studentLeaveRequest.router.js";
 
 const router = express();
 
@@ -44,7 +48,11 @@ router.use('/guest-teacher', guestTeacherRouter);
 router.use('/customer-support', customerSupportRouter);
 router.use('/workdays', workDayRouter);
 router.use('/announcement', announcementRouter);
+router.use('/announcement-read', announcementReadStatusRouter);
 router.use('/notification', notificationRouter);
 router.use("/session", sessionRouter);
+router.use("/teaching-event", teachingEventRouter);
+router.use("/subject", subjectRouter);
+router.use("/student-leave", studentLeaveRequestRouter);
 
 export default router;

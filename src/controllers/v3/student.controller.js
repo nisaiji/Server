@@ -5,8 +5,8 @@ import { getSessionStudentService, registerSessionStudentService } from "../../s
 import { error, success } from "../../utills/responseWrapper.js";
 import { getClassService } from "../../services/class.sevices.js";
 import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
-import { getSchoolParentService, registerSchoolParentService } from "../../services/v2/schoolParent.services.js";
-import { getStudentService, registerStudentService } from "../../services/student.service.js";
+import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
+import { getStudentService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 
 export async function registerStudentAndSessionStudentController(req, res) {
   try {
@@ -119,3 +119,60 @@ export async function registerSessionStudentController(req, res) {
   }
 }
 
+export async function updateStudentController(req, res){
+  try {
+    const studentId = req.params.studentId;
+    const studentUpdate = {};
+    const parentUpdate = {};
+
+    const student = await getStudentService({ _id:studentId });
+    if(!student){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+    }
+    const schoolParent = await getSchoolParentService({ _id: student["schoolParent"] });
+    if(!schoolParent){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+    }
+
+    if(req.body["firstname"]){ studentUpdate.firstname = req.body["firstname"]; }
+    if(req.body["lastname"]){ studentUpdate.lastname = req.body["lastname"]; }
+    if(req.body["gender"]){ studentUpdate.gender = req.body["gender"]; }
+    if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
+    if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
+    if(req.body["photo"] || req.body["method"]==="DELETE"){ studentUpdate.photo = (req.body["method"]==="DELETE")? "": req.body["photo"]; }    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
+    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
+    if(req.body["city"]){ studentUpdate.city = req.body["city"]; }
+    if(req.body["district"]){ studentUpdate.district = req.body["district"]; }
+    if(req.body["state"]){ studentUpdate.state = req.body["state"]; }
+    if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
+    if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
+    
+
+    // if(req.body["phone"]){ 
+    //   const parentWithPhone = await getParentService({ phone:req.body["phone"], isActive:true, _id: { $ne: parent["_id"] } });
+    //   if(parentWithPhone){
+    //     return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
+    //   }
+    //   parentUpdate.phone = req.body["phone"];
+    // }
+    if(req.body["parentName"]){ parentUpdate.fullname = req.body["parentName"]; }
+    if(req.body["parentGender"]){ parentUpdate.gender = req.body["parentGender"]; }
+    if(req.body["parentAge"]){ parentUpdate.age = req.body["parentAge"]; }
+    // if(req.body["parentEmail"]){ parentUpdate.email = req.body["parentEmail"]; }
+    if(req.body["parentQualification"]){ parentUpdate.qualification = req.body["parentQualification"]; }
+    if(req.body["parentOccupation"]){ parentUpdate.occupation = req.body["parentOccupation"]; }
+    if(req.body["parentAddress"]){ parentUpdate.address = req.body["parentAddress"]; }
+    if(req.body["parentCity"]){ parentUpdate.city = req.body["parentCity"]; }
+    if(req.body["parentDistrict"]){ parentUpdate.district = req.body["parentDistrict"]; }
+    if(req.body["parentState"]){ parentUpdate.state = req.body["parentState"]; }
+    if(req.body["parentCountry"]){ parentUpdate.country = req.body["parentCountry"]; }
+    if(req.body["parentPincode"]){ parentUpdate.pincode = req.body["parentPincode"]; }
+    
+
+    await Promise.all([ updateStudentService({ _id:studentId }, studentUpdate), updateSchoolParentService({ _id: student["schoolParent"] }, parentUpdate) ]);
+    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
+    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}

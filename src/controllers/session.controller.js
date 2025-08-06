@@ -5,8 +5,7 @@ import { success } from "../utills/responseWrapper.js";
 export async function createSessionController(req, res) {
   try {
     const { name, startDate, endDate, academicStartYear, academicEndYear } = req.body;
-    const adminId = req.adminId || "68440afcf5d77f74b79d05f6";
-    console.log(req.body);
+    const adminId = req.adminId;
     
     const sessionData = {
       name,

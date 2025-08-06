@@ -174,6 +174,7 @@ export async function searchStudentsController(req, res){
     }
 };
 
+// DEPRICATED,USE V3
 export async function registerStudentController(req, res) {
   try {
     const { firstname, lastname, gender, parentName, phone, email, qualification, occupation, address, age, parentAddress, parentGender, dob,  sectionId } = req.body;
@@ -851,8 +852,7 @@ export async function updateStudentController(req, res){
     
 
     await Promise.all([ updateStudentService({ _id:studentId }, studentUpdate), updateSchoolParentService({ _id: student["schoolParent"] }, parentUpdate) ]);
-    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
-    
+    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
