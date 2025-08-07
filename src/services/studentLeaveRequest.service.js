@@ -27,6 +27,15 @@ export async function getStudentLeaveRequestsService(filter, projection={}) {
   }
 }
 
+export async function deleteStudentLeaveRequestsService(filter) {
+  try {
+    const leaveRequests = await studentLeaveRequestModel.findOneAndDelete(filter);
+    return leaveRequests;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function registerStudentLeaveRequestService(paramObj){
   try {
     const leaveRequest = await studentLeaveRequestModel.create(paramObj);

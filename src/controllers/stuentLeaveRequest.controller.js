@@ -1,8 +1,9 @@
 import { convertToMongoId } from "../services/mongoose.services.js";
-import { getStudentLeaveRequestsPipelineService, registerStudentLeaveRequestService } from "../services/studentLeaveRequest.service.js";
+import { deleteStudentLeaveRequestsService, getStudentLeaveRequestService, getStudentLeaveRequestsPipelineService, registerStudentLeaveRequestService, updateStudentLeaveRequestService } from "../services/studentLeaveRequest.service.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import StatusCodes from "http-status-codes";
 import { error, success } from "../utills/responseWrapper.js";
+import { updateLeaveRequestService } from "../services/leave.service.js";
 
 export async function registerStudentLeaveRequestController(req, res){
   try {
@@ -64,11 +65,9 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
     const filter = {
       school: convertToMongoId(schoolId),
       section: convertToMongoId(sectionId),
-      startDate:{$gte: startDate},
-      endDate:{$lte: endDate}
+      startDate:{$gte: new Date(startDate)},
+      endDate:{$lte: new Date(endDate)}
     }
-
-    console.log({filter});
 
     const pipeline = [
       {
@@ -100,6 +99,101 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "No leave requests found"));
     } 
     return res.status(StatusCodes.OK).send(success(200, leaveRequests));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getStudentLeaveRequestForParentController(req, res) {
+  try {
+    const {startDate, endDate, sessionStudentId} = req.body;
+    const parentId = req.parentId;
+    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
+    if(!sessionStudent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Session Student not found for this parent'));
+    }
+    
+    const filter = {
+      sessionStudent: convertToMongoId(sessionStudentId),
+      startDate:{$gte: new Date(startDate)},
+      endDate:{$lte: new Date(endDate)}
+    }
+
+    const pipeline = [
+      {
+        $match: filter
+      }
+    ];
+
+    const leaveRequests = await getStudentLeaveRequestsPipelineService(pipeline);
+    if(leaveRequests.length === 0) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "No leave requests found"));
+    } 
+    return res.status(StatusCodes.OK).send(success(200, leaveRequests));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function deleteStudentLeaveRequestByParentController(req, res) {
+  try {
+    const requestId = req.params.requestId;
+    const parentId = req.parentId;
+
+    const request = await getStudentLeaveRequestService({_id: requestId, parent: parentId});
+    if(!request) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
+    }
+    deleteStudentLeaveRequestsService({_id: requestId});
+    return res.status(StatusCodes.OK).send(success(200, "Request deleted successfully!"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function updateStudentLeaveRequestController(req, res) {
+  try {
+    const requestId = req.params.requestId;
+    const { reason, description, startDate, endDate, remark, isRead } = req.body;
+    const parentId = req.parentId;
+    const fieldsToBeUpdated = {};
+    if(reason) fieldsToBeUpdated.reason = reason;
+    if(description) fieldsToBeUpdated.description = description;
+    if(startDate) fieldsToBeUpdated.startDate = startDate;
+    if(endDate) fieldsToBeUpdated.endDate = endDate;
+    if(remark) fieldsToBeUpdated.remark = remark;
+    if(isRead) fieldsToBeUpdated.isRead = isRead;
+
+    const request = await getStudentLeaveRequestService({_id: requestId, parent: parentId});
+    if(!request) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
+    }
+    updateStudentLeaveRequestService({_id: requestId}, fieldsToBeUpdated);
+    return res.status(StatusCodes.OK).send(success(200, "Request deleted successfully!"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function updateStudentLeaveRequestByTeacherController(req, res) {
+  try {
+    const requestId = req.params.requestId;
+    const { reason, description, startDate, endDate, remark, isRead } = req.body;
+    const teacherId = req.teacherId;
+    const fieldsToBeUpdated = {};
+    if(reason) fieldsToBeUpdated.reason = reason;
+    if(description) fieldsToBeUpdated.description = description;
+    if(startDate) fieldsToBeUpdated.startDate = startDate;
+    if(endDate) fieldsToBeUpdated.endDate = endDate;
+    if(remark) fieldsToBeUpdated.remark = remark;
+    if(isRead) fieldsToBeUpdated.isRead = isRead;
+
+    const request = await getStudentLeaveRequestService({_id: requestId, parent: parentId});
+    if(!request) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
+    }
+    updateStudentLeaveRequestService({_id: requestId}, fieldsToBeUpdated);
+    return res.status(StatusCodes.OK).send(success(200, "Request deleted successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
