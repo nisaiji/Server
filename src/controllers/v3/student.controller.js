@@ -11,7 +11,7 @@ import { getStudentService, registerStudentService, updateStudentService } from 
 export async function registerStudentAndSessionStudentController(req, res) {
   try {
     const { firstname, lastname, gender, parentName, phone, email, qualification, occupation, address, age, parentAddress, parentGender, dob,  sectionId } = req.body;
-    const adminId = req.adminId || '6872184b18bdcc2b1847b05b';
+    const adminId = req.adminId;
 
     const section = await getSectionService({ _id:sectionId });
     if(!section){
@@ -68,7 +68,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
 export async function registerSessionStudentController(req, res) {
   try {
     const { enrollmentStatus, studentId, sectionId, classId, sessionId } = req.body;
-    const adminId = req.adminId || '6872184b18bdcc2b1847b05b';
+    const adminId = req.adminId;
 
     const section = await getSectionService({ _id:sectionId });
     if(!section){
