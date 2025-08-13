@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { getSessionService, registerSessionService } from "../services/session.services.js";
+import { getSessionService, getSessionsPipelineService, registerSessionService } from "../services/session.services.js";
 import { success } from "../utills/responseWrapper.js";
+import { convertToMongoId } from "../services/mongoose.services.js";
 
 export async function createSessionController(req, res) {
   try {
@@ -28,3 +29,25 @@ export async function createSessionController(req, res) {
   }
 };
 
+export async function getAllSessionsOfSchoolController(req, res) {
+  try {
+    const adminId  = req.adminId;
+    console.log({adminId})
+    const pipeline = [
+      {
+        $match: {
+          school: convertToMongoId(adminId)
+        }
+      }
+    ]
+    const sessions = await getSessionsPipelineService(pipeline);
+    console.log({sessions})
+    if (!sessions || sessions.length === 0) {
+      return res.status(StatusCodes.NOT_FOUND).send(success(404, "No sessions found"));
+    }
+    return res.status(StatusCodes.OK).send(success(200,  sessions));
+
+  } catch (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
+  }
+}

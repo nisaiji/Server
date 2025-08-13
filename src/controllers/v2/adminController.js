@@ -9,6 +9,7 @@ import { StatusCodes } from "http-status-codes";
 import { sendEmailService } from "../../config/sendGrid.config.js";
 import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
+import { getSessionService, registerSessionService } from "../../services/session.services.js";
 
 export async function adminSendOtpToPhoneController (req, res) {
   try {
@@ -407,6 +408,24 @@ export async function adminEmailVerifyController(req, res) {
       pincode: admin['pincode'] ? admin['pincode'] : '',
       isLoginAlready: admin['isLoginAlready'],
     });
+
+    // create session
+    const currentYear = new Date().getFullYear();
+    const march31 = new Date(currentYear+1, 2, 31, 0, 0, 0);
+    const april1 = new Date(currentYear, 3, 1, 0, 0, 0);
+
+    const session = await getSessionService({ school: admin['_id'], academicStartYear: currentYear, academicEndYear: currentYear + 1 });
+    if(!session) {
+      await registerSessionService({
+        school: admin['_id'], 
+        isCurrent: true, 
+        status: "active", 
+        endDate: march31,
+        startDate: april1,
+        academicStartYear: currentYear,
+        academicEndYear: currentYear + 1
+      });
+    }
 
     return res.status(StatusCodes.OK).send(success(200, {message: "Email updated successfully", token: jwtToken}));
   } catch (err) {

@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const sessionSchema = mongoose.Schema({
   name: {
     type: String,
-    required: true,
     trim: true
   },
   startDate: {

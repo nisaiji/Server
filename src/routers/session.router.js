@@ -1,8 +1,10 @@
 import express from "express";
-import { createSessionController } from "../controllers/session.controller.js";
+import { createSessionController, getAllSessionsOfSchoolController } from "../controllers/session.controller.js";
+import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 
 const sessionRouter = express.Router();
 
-sessionRouter.post("/", createSessionController);
+sessionRouter.post("/", adminAuthenticate, createSessionController);
+sessionRouter.get("/", adminAuthenticate, getAllSessionsOfSchoolController);
 
-export default sessionRouter; 
+export default sessionRouter;
