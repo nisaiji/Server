@@ -51,3 +51,46 @@ export async function getAllSessionsOfSchoolController(req, res) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
   }
 }
+
+export async function getSessionByIdController(req, res) {
+  try {
+    const { sessionId } = req.params;
+    const adminId = req.adminId;
+    const pipeline = [
+      {
+        $match: {
+          _id: convertToMongoId(sessionId)
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "_id",
+          foreignField: "session",
+          as: "classes",
+
+          pipeline: [
+            {
+              $lookup: {
+                from: "sections",
+                localField: "section",
+                foreignField: "_id",
+                as: "section"
+              }
+            }
+          ]
+        }
+      },
+    ];
+    
+    const sessions = await getSessionsPipelineService(pipeline);
+    if (!sessions || sessions.length === 0) {
+      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Session not found"));
+    }
+    const session = sessions[0];
+    
+    return res.status(StatusCodes.OK).send(success(200, session));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
+  }
+}

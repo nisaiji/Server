@@ -411,8 +411,8 @@ export async function adminEmailVerifyController(req, res) {
 
     // create session
     const currentYear = new Date().getFullYear();
-    const march31 = new Date(currentYear+1, 2, 31, 0, 0, 0);
-    const april1 = new Date(currentYear, 3, 1, 0, 0, 0);
+    const march31UTC = new Date(Date.UTC(currentYear + 1, 2, 31, 0, 0, 0));
+    const april1UTC = new Date(Date.UTC(currentYear, 3, 1, 0, 0, 0));
 
     const session = await getSessionService({ school: admin['_id'], academicStartYear: currentYear, academicEndYear: currentYear + 1 });
     if(!session) {
@@ -420,8 +420,8 @@ export async function adminEmailVerifyController(req, res) {
         school: admin['_id'], 
         isCurrent: true, 
         status: "active", 
-        endDate: march31,
-        startDate: april1,
+        endDate: march31UTC,
+        startDate: april1UTC,
         academicStartYear: currentYear,
         academicEndYear: currentYear + 1
       });

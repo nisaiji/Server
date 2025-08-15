@@ -21,6 +21,10 @@ const attendanceSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:"sessionStudent",
         required: true
+    },
+    student:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"student"
     }, 
     section:{
         type:mongoose.Schema.Types.ObjectId,

@@ -11,6 +11,7 @@ import { convertToMongoId } from "../services/mongoose.services.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
 import { getWorkDayService } from "../services/workDay.services.js";
 import { sendPushNotification } from "../config/firebase.config.js";
+import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 
 export async function attendanceByTeacherController(req, res) { 
   try {
@@ -50,40 +51,42 @@ export async function attendanceByTeacherController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.attendanceAlreadyMarked));
     }
 
-    for (const student of present) {
+    for (const sessionStudent of present) {
       try {
-        const paramObj = {"student":student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
+        const paramObj = {"sessionStudent":sessionStudent["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
         const parentMarkedAttendance = await getAttendanceService(paramObj);
+        const storedSessionStudent = await getSessionStudentService({_id: sessionStudent['id']});
 
         if(parentMarkedAttendance){
           const id = parentMarkedAttendance["id"];
           const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
           await updateAttendanceService({_id: id}, fieldsToBeUpdated);
         }else{
-          const attendanceObj = {date, day, student:student["id"], teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
+          const attendanceObj = {date, day, sessionStudent:sessionStudent["id"], student:storedSessionStudent['student'], teacherAttendance:"present", section:sectionId, classId:section['classId'], session: section['session'], admin:adminId};
           await createAttendanceService(attendanceObj);
         }
-        const studentWithParent = await getParentsByStudentId([student['id']]);
+        const studentWithParent = await getParentsByStudentId([storedSessionStudent['student']]);
         await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}` )
       } catch (error) {
         throw error;
       }
    };
 
-    for(const student of absent) {
+    for(const sessionStudent of absent) {
       try {
-        const paramObj = {student:student["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
+        const paramObj = {sessionStudent:sessionStudent["id"], date:{$gte:startTime, $lte:endTime}, parentAttendance: {$ne:""}};
         const parentMarkedAttendance = await getAttendanceService(paramObj);
+        const storedSessionStudent = await getSessionStudentService({_id: sessionStudent['id']});
 
         if(parentMarkedAttendance){
           const id = parentMarkedAttendance["id"];
           const fieldsToBeUpdated = {teacherAttendance:"present", section:sectionId, classId:section['classId'], admin:adminId};
           await updateAttendanceService({_id: id}, fieldsToBeUpdated);
         }else{
-          const attendanceObj = {date, day, student:student["id"], teacherAttendance:"absent", section:sectionId, classId:section['classId'], admin:adminId};
+          const attendanceObj = {date, day, sessionStudent:sessionStudent["id"], student: storedSessionStudent['student'], teacherAttendance:"absent", section:sectionId, session: section['session'], classId:section['classId'], admin:adminId};
           await createAttendanceService(attendanceObj);
         }
-        const studentWithParent = await getParentsByStudentId([student['id']]);
+        const studentWithParent = await getParentsByStudentId([storedSessionStudent['student']]);
         await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}` )
       } catch (error) {
         throw error;
