@@ -240,7 +240,7 @@ export async function getSessionStudentSController(req,res) {
     let {school, session, classId, section, sessionStudentId, startDate, endDate, include, page = 1, limit } = req.query;
     const filter = {school: convertToMongoId(school), session: convertToMongoId(session)};
     if(classId) filter['classId']= convertToMongoId(classId);
-    if(section) filter['section']= section;
+    if(section) filter['section']= convertToMongoId(section);
     if(sessionStudentId) filter['_id'] = convertToMongoId(sessionStudentId);
 
     const pipeline = [
