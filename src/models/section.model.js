@@ -11,7 +11,7 @@ const sectionSchema = mongoose.Schema({
   },
   startTime: {
     type: Number,
-    required: true
+    // required: true
   },
   classId: {
     type: mongoose.Schema.Types.ObjectId,
