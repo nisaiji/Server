@@ -29,6 +29,10 @@ export async function deleteClassController(req, res) {
     const classId = req.params.classId;
     const admin = req.adminId;
     const classInfo = await getClassService({_id:classId});
+    const session = await getSessionService({ _id: classInfo["session"] });
+    if (!session || session['status'] === 'completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! can't delete class"));
+    }
     if (!classInfo) {
       return res.status(StatusCodes.NOT_FOUND).send(error(400, "Class doesn't exists"));
     }

@@ -60,6 +60,10 @@ export async function deleteSectionController(req, res) {
     const sectionId = req.params.sectionId;
     const adminId = req.adminId;
     let section = await getSectionService({_id:sectionId});
+    const session = await getSessionService({_id:section["session"]});
+    if(!session || session['status']==='completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! Can't delete section")); 
+    }
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
@@ -92,9 +96,14 @@ export async function replaceTeacherController(req, res) {
     const adminId = req.adminId;
     const { sectionId, teacherId } = req.body;
     const section = await getSectionService({_id:sectionId});
+    const session = await getSessionService({_id:section["session"]});
+    if(!session || session['status']==='completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! can't change section teacher")); 
+    }
     if(!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
+    
     const[prevTeacher, teacher] = await Promise.all([
       getTeacherService({_id:section["teacher"]}),
       getTeacherService({_id:teacherId})

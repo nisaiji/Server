@@ -12,6 +12,7 @@ import { attendanceControllerResponse } from "../config/httpResponse.js";
 import { getWorkDayService } from "../services/workDay.services.js";
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
+import { getSessionService } from "../services/session.services.js";
 
 export async function attendanceByTeacherController(req, res) { 
   try {
@@ -19,6 +20,10 @@ export async function attendanceByTeacherController(req, res) {
     const teacherId = req.teacherId;
     const adminId = req.adminId;
     const section = await getSectionService({ _id: sectionId })
+    const session = await getSessionService({_id:section["session"]});
+    if(!session || session['status']==='completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! Can't mark attendance")); 
+    }
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, attendanceControllerResponse.attendanceByTeacherController.sectionNotFound))
     }

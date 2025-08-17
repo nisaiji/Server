@@ -32,6 +32,10 @@ export async function registerStudentAndSessionStudentController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
 
+    if(session['status']==='completed'){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session is already completed"));
+    }
+
     let parent = await getParentService({phone, isActive: true});
     let schoolParent = await getSchoolParentService({phone, school:adminId, isActive:true});
 
@@ -93,6 +97,10 @@ export async function registerSessionStudentController(req, res) {
     const session = await getSessionService({ _id:sessionId });
     if(!session){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
+
+    if(session['status']==='completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session is completed"));
     }
 
     if(
