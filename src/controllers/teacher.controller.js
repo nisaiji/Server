@@ -82,6 +82,7 @@ export async function loginTeacherController(req, res) {
       sectionName: section["name"],
       className: Class["name"],
       schoolName: admin['schoolName'],
+      sessionId: section["session"],
       tagline: guestTeacher ? guestTeacher['tagline'] :"",
       phone: currentTeacher["phone"] ? currentTeacher["phone"] : "",
       email: currentTeacher["email"] ? currentTeacher["email"] : "",

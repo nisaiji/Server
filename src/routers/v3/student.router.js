@@ -1,5 +1,5 @@
 import express from "express";
-import { getAttendancesController, getSessionStudentSController, getStudentWithAllSessionStudentsController, registerSessionStudentController, registerStudentAndSessionStudentController, updateStudentByParentController, updateStudentBySchoolController } from "../../controllers/v3/student.controller.js";
+import { getAttendancesController, getSessionStudentSController, getStudentWithAllSessionStudentsController, registerSessionStudentController, registerStudentAndSessionStudentController, searchStudentsController, updateStudentByParentController, updateStudentBySchoolController } from "../../controllers/v3/student.controller.js";
 import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../../middlewares/authentication/teacher.authentication.middleware.js";
 import { uploadStudentPhotoValidation } from "../../middlewares/validation/student.validation.middleware.js";
@@ -26,4 +26,6 @@ studentRouter.get('/get/teacher', teacherAuthenticate, getSessionStudentSControl
 studentRouter.post("/parent/get-attendance", parentAuthenticate, getAttendancesController);
 
 studentRouter.get("/session-students/:studentId", getStudentWithAllSessionStudentsController);
+
+studentRouter.get("/admin", adminAuthenticate, searchStudentsController);
 export default studentRouter;

@@ -328,18 +328,18 @@ export async function getSessionStudentSController(req,res) {
       {
         $addFields: {
           studentId: "$student._id",
-          studentFirstName: "$student.firstname",
-          studentLastName: "$student.lastname",
-          studentDob: "$student.dob",
-          studentGender: "$student.gender",
-          studentBloodGroup: "$student.bloodGroup",
-          studentPhoto: "$student.photo",
-          studentAddress: "$student.address",
-          studentCity: "$student.city",
-          studentDistrict: "$student.district",
-          studentState: "$student.state",
-          studentCountry: "$student.country",
-          studentPincode: "$student.pincode",
+          firstname: "$student.firstname",
+          lastname: "$student.lastname",
+          dob: "$student.dob",
+          gender: "$student.gender",
+          bloodGroup: "$student.bloodGroup",
+          photo: "$student.photo",
+          address: "$student.address",
+          city: "$student.city",
+          district: "$student.district",
+          state: "$student.state",
+          country: "$student.country",
+          pincode: "$student.pincode",
 
           // schoolParent
           parentId: "$schoolParent._id",
@@ -638,3 +638,212 @@ async function calculateAttendancePercentage(sessionStudentId, sessionId) {
     throw error;
   }
 }
+
+export async function searchStudentsController(req, res){
+  try{
+    let { search, page = 1, limit, classId, section, session } = req.query;
+
+    const adminId = req.adminId;
+
+    const pageNum = parseInt(page);
+    const limitNum = limit ? parseInt(limit) : "no limit";
+    const skipNum = (pageNum - 1) * limitNum;
+    let filter = {
+      school: convertToMongoId(adminId)
+    };
+
+    if(classId) {
+      filter['classId'] = convertToMongoId(classId)
+    }
+
+    if(section) {
+      filter['section'] = convertToMongoId(section)
+    }
+
+    if(session) {
+      filter['session'] = convertToMongoId(session)
+    }
+
+    if(search){
+      search = search.trim();
+      const[searchFirstname, searchLastname] = search.split(" ");
+      if(searchLastname){
+      filter['$and'] = [
+          { "student.firstname": { $regex: new RegExp(searchFirstname, "i") } },
+          { "student.lastname": { $regex: new RegExp(searchLastname, "i") } },
+          {isActive: true}
+        ]
+    } else {
+      filter['$or'] = [
+        { "student.firstname" : { $regex: new RegExp(search, "i") }, isActive: true },
+        { "student.lastname": { $regex: new RegExp(search, "i") }, isActive: true },
+        { "schoolParent.email": { $regex: new RegExp(search, "i") }, isActive: true },
+        { "schoolParent.phone": { $regex: new RegExp(search, "i") }, isActive: true },
+      ]
+    }
+  }
+
+    const pipeline = [
+        // Join students with parents
+        {
+          $lookup: {
+            from: "students",
+            localField: "student",
+            foreignField: "_id",
+            as: "student",
+          }
+        },
+        {
+          $unwind: {
+            path: "$student",
+            preserveNullAndEmptyArrays: true,
+          }
+        },
+        {
+          $lookup: {
+            from: "schoolparents",
+            localField: "student.schoolParent",
+            foreignField: "_id",
+            as: "schoolParent"
+          }
+        },
+        {
+          $unwind: {
+            path: "$schoolParent",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $match: filter,
+        },
+        {
+          $sort: { "student.firstname": 1 }
+        },
+        {
+          $lookup: {
+            from: "sections",
+            localField: "section",
+            foreignField: "_id",
+            as: "section"
+          }
+        },
+        {
+          $unwind: {
+            path: "$section",
+            preserveNullAndEmptyArrays: true,
+          }
+        },
+        {
+          $lookup: {
+            from: "classes",
+            localField: "classId",
+            foreignField: "_id",
+            as: "classInfo"
+          }
+        },
+        {
+          $unwind: {
+            path: "$classInfo",
+            preserveNullAndEmptyArrays: true,
+          }
+        },
+        {
+          $lookup: {
+            from: "sessions",
+            localField: "session",
+            foreignField: "_id",
+            as: "session"
+          }
+        },
+        {
+          $unwind: {
+            path: "$session",
+            preserveNullAndEmptyArrays: true,
+          }
+        },
+        {
+          $addFields: {
+            studentId: "$student._id",
+            firstname: "$student.firstname",
+            lastname: "$student.lastname",
+            dob: "$student.dob",
+            gender: "$student.gender",
+            bloodGroup: "$student.bloodGroup",
+            photo: "$student.photo",
+            address: "$student.address",
+            city: "$student.city",
+            district: "$student.district",
+            state: "$student.state",
+            country: "$student.country",
+            pincode: "$student.pincode",
+
+            // schoolParent
+            parentId: "$schoolParent._id",
+            parentFullName: "$schoolParent.fullname",
+            parentGender: "$schoolParent.gender",
+            parentAddress: "$schoolParent.address",
+            parentCity: "$schoolParent.city",
+            parentDistrict: "$schoolParent.disctrict",
+            parentStatus: "$schoolParent.status",
+            parentQualification: "$schoolParent.qualification",
+            parentOccupation: "$schoolParent.occupation",
+            parentPhone: "$schoolParent.phone",
+            parentEmail: "$schoolParent.email",
+
+            // session
+            sessionId: "$session._id",
+            sessionName: "$session.name",
+            sessionStartDate: "$session.startDate",
+            sessionEndDate: "$session.endDate",
+            sessionStatus: "$session.status",
+            sessionStartYear: "$session.academicStartYear",
+            sessionEndYear: "$session.academicEndYear",
+
+            // class
+            classId: "$classInfo._id",
+            className: "$classInfo.name",
+
+            // section
+            sectionId: "$section._id",
+            sectionName: "$section.name",
+          }
+        },
+        {
+          $project: {
+            student: 0,
+            schoolParent: 0,
+            section: 0,
+            classInfo: 0,
+            session: 0,
+          }
+        }
+    ];
+
+    if (limit) {
+      pipeline.push(
+        {
+          $skip: skipNum,
+        },
+        {
+          $limit: limitNum,
+        }
+      );
+    }
+
+    const students = await getSessionStudentsPipelineService(pipeline);
+    const totalStudents = students.length;
+    const totalPages = Math.ceil(totalStudents / limitNum);
+
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        students,
+        currentPage: pageNum,
+        totalPages,
+        totalStudents,
+        pageSize: limitNum,
+      })
+    );
+  }  catch (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    }
+};
