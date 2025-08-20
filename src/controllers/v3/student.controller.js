@@ -353,6 +353,7 @@ export async function getSessionStudentSController(req,res) {
           parentOccupation: "$schoolParent.occupation",
           parentPhone: "$schoolParent.phone",
           parentEmail: "$schoolParent.email",
+          parentAge: "$schoolParent.age",
 
           // session
           sessionId: "$session._id",
@@ -789,6 +790,7 @@ export async function searchStudentsController(req, res){
             parentOccupation: "$schoolParent.occupation",
             parentPhone: "$schoolParent.phone",
             parentEmail: "$schoolParent.email",
+            parentAge: "$schoolParent.age",
 
             // session
             sessionId: "$session._id",
