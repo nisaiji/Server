@@ -18,6 +18,15 @@ export async function getClassWithSectionsService(paramObj){
   }
 }
 
+export async function getClassesPipelineService(pipeline){
+  try {
+    const classes = await classModel.aggregate(pipeline).exec();
+    return classes;
+  } catch (error) {
+    throw error;    
+  }
+}
+
 export async function registerClassService(data){
   try {
     await classModel.create(data);

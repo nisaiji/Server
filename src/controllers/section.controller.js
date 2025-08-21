@@ -13,6 +13,9 @@ export async function registerSectionController(req, res) {
     if(!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
+    if (session['status'] === 'completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! can't register section"));
+    }
     const classInfo = await getClassService({ _id:classId });
     if (!classInfo) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));

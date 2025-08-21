@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { deleteClassService, getClassWithSectionsService,getClassService, registerClassService, customGetClassWithSectionTeacherService,} from "../services/class.sevices.js";
+import { deleteClassService, getClassService, registerClassService, customGetClassWithSectionTeacherService, getClassesPipelineService,} from "../services/class.sevices.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { getSessionService } from "../services/session.services.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
@@ -12,6 +12,9 @@ export async function registerClassController(req, res) {
     const session = await getSessionService({_id: sessionId});
     if(!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
+    if (session['status'] === 'completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! can't register class"));
     }
     if (classInfo) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Class already exists"));
@@ -59,9 +62,32 @@ export async function getClassController(req, res){
 
 export async function getClassListController(req, res) {
   try {
+    const sessionId = req.params.sessionId;
     const admin = req.adminId;
-    const classList = await getClassWithSectionsService({ admin });
-      return res.status(StatusCodes.OK).send(success(200, classList));
+    console.log({ _id: sessionId, school: admin });
+    const session = await getSessionService({ _id: sessionId, school: admin});
+    if(!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
+
+    const pipeline = [
+      {
+        $match: {
+          session: convertToMongoId(sessionId),
+          admin: convertToMongoId(admin)
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "_id",
+          foreignField: "classId",
+          as: "section"
+        }
+      }
+    ];
+    const classes = await getClassesPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, classes));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
