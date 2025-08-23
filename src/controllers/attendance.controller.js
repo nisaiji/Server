@@ -472,7 +472,7 @@ export async function getAttendancesController(req, res){
     if(section) { filter['section'] = convertToMongoId(section) }
     if(session) { filter['session'] = convertToMongoId(session) }
     if(classId){ filter['classId'] = convertToMongoId(classId) }
-    if(school){ filter['admin'] = convertToMongoId(admin) }
+    if(admin){ filter['school'] = convertToMongoId(admin) }
     if(startTime && endTime){
       attendanceFilter['date'] = { $gte: Number(startTime), $lte: Number(endTime) }
     }
