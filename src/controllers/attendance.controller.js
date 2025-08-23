@@ -11,7 +11,7 @@ import { convertToMongoId } from "../services/mongoose.services.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
 import { getWorkDayService } from "../services/workDay.services.js";
 import { sendPushNotification } from "../config/firebase.config.js";
-import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
+import { getSessionStudentService, getSessionStudentsPipelineService } from "../services/v2/sessionStudent.service.js";
 import { getSessionService } from "../services/session.services.js";
 
 export async function attendanceByTeacherController(req, res) { 
@@ -456,7 +456,7 @@ export async function attendanceCountOfStudentController(req, res){
 
 export async function getAttendancesController(req, res){
   try {
-    let { startTime, endTime, student, section, classId, admin } = req.query;
+    let { startTime, endTime, sessionStudent, session, section, classId, admin } = req.query;
     const filter = {isActive: true}
     const attendanceFilter = {}
     const role = req.role;
@@ -468,10 +468,11 @@ export async function getAttendancesController(req, res){
       admin = null;
       section = req.sectionId;
     }
-    if(student){ filter['_id'] = convertToMongoId(student) }
+    if(sessionStudent){ filter['_id'] = convertToMongoId(sessionStudent) }
     if(section) { filter['section'] = convertToMongoId(section) }
+    if(session) { filter['session'] = convertToMongoId(session) }
     if(classId){ filter['classId'] = convertToMongoId(classId) }
-    if(admin){ filter['admin'] = convertToMongoId(admin) }
+    if(school){ filter['admin'] = convertToMongoId(admin) }
     if(startTime && endTime){
       attendanceFilter['date'] = { $gte: Number(startTime), $lte: Number(endTime) }
     }
@@ -503,6 +504,20 @@ export async function getAttendancesController(req, res){
       },
       {
         $lookup: {
+          from: 'students',
+          localField: 'student',
+          foreignField: '_id',
+          as: 'student'
+        },
+      },
+      {
+        $unwind: {
+          path: '$student',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
           from: 'classes',
           localField: 'classId',
           foreignField: '_id',
@@ -526,7 +541,7 @@ export async function getAttendancesController(req, res){
         $lookup: {
           from: 'attendances',
           localField: '_id',
-          foreignField: 'student',
+          foreignField: 'sessionStudent',
           as: 'attendances',
           pipeline: [
             {
@@ -551,16 +566,16 @@ export async function getAttendancesController(req, res){
       },
       {
         $project: {
-          firstname: 1,
-          lastname: 1,
-          gender: 1,
+          firstname: '$student.firstname',
+          lastname: '$student.lastname',
+          gender: '$student.gender',
           sectionName: '$section.name',
           className: '$class.name',
           attendances: 1,
         },
       },
     ];
-    const attendances = await getStudentsPipelineService(pipeline);
+    const attendances = await getSessionStudentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, {
       attendances
     }));
