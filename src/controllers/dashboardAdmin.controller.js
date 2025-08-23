@@ -7,15 +7,24 @@ import { getStudentCountService, getStudentsPipelineService } from "../services/
 import { getParentCountService } from "../services/parent.services.js";
 import { getTeacherCountService } from "../services/teacher.services.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
+import { getSessionService } from "../services/session.services.js";
+import { getSessionStudentCountService } from "../services/v2/sessionStudent.service.js";
 
 export async function getPresentStudentsController(req,res){
   try {
     const adminId = req.adminId;
-    const {startTime, endTime} = req.body;
+    const {startTime, endTime, sessionId} = req.body;
+    const session = await getSessionService({_id:sessionId, admin:adminId});
+    if(!session){ 
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
+    if(session['status'] === 'completed'){ 
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+    }
     const [presentCount, absentCount, totalCount] = await Promise.all([
-      getAttendanceCountService({admin:adminId, date:{$gte:startTime, $lte:endTime}, teacherAttendance:"present"}),
-      getAttendanceCountService({admin:adminId, date:{$gte:startTime, $lte:endTime}, teacherAttendance:"absent"}),
-      getStudentCountService({admin:adminId, isActive:true})
+      getAttendanceCountService({admin:adminId, session: sessionId, date:{$gte:startTime, $lte:endTime}, teacherAttendance:"present"}),
+      getAttendanceCountService({admin:adminId, session: sessionId, date:{$gte:startTime, $lte:endTime}, teacherAttendance:"absent"}),
+      getSessionStudentCountService({school:adminId, session: sessionId, isActive:true})
     ]);
     return res.status(StatusCodes.OK).send(success(200,{presentCount, absentCount, totalCount}));    
   } catch (err) {

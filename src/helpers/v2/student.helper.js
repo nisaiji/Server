@@ -60,8 +60,8 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
       const studentObj = { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode }
 
       if(!studentInfo) {
-        // studentObj['schoolParent'] = schoolParent['_id'];
-        // studentObj['section'] = sectionId;
+        studentObj['schoolParent'] = schoolParent['_id'];
+        studentObj['parent'] = parent['_id'];
         // studentObj['classId'] = classId;
         studentObj['admin'] = adminId;
 

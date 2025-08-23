@@ -188,6 +188,11 @@ export async function bulkAttendanceMarkController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"))
     }
 
+    const session = await getSessionService({_id:section["session"]});
+    if(!session || session['status']==='completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! Can't mark attendance")); 
+    }
+
     if(role==='guestTeacher'){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
     }
@@ -283,6 +288,14 @@ export async function updateAttendanceController(req,res){
     const teacherId = req.teacherId;
     const teacher = await getTeacherService({_id:teacherId, isActive:true});
     const sectionId = teacher["section"];
+    const section = await getSectionService({_id:sectionId});
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404,"Section not found"));
+    }
+    const session = await getSessionService({_id:section["session"]});
+    if(!session || session['status']==='completed') { 
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! Can't update attendance")); 
+    }
 
     const date = new Date();
     const {startTime, endTime} = getStartAndEndTimeService(date, date);
