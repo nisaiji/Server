@@ -12,6 +12,9 @@ import { getHolidayCountService } from "../../services/holiday.service.js";
 import { getWorkDayCountService } from "../../services/workDay.services.js";
 import { calculateDaysBetweenDates, calculateSundays } from "../../services/celender.service.js";
 import { getAttendanceCountService } from "../../services/attendance.service.js";
+import xlsx from 'xlsx';
+import fs from 'fs/promises'
+import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
 
 export async function registerStudentAndSessionStudentController(req, res) {
   try {
@@ -849,3 +852,45 @@ export async function searchStudentsController(req, res){
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
     }
 };
+
+export async function registerStudentsFromExcelController(req, res){
+  try {
+    const file = req.file;
+    const { sectionId, classId, sessionId } = req.body;
+    const adminId = req.adminId;
+
+    const[section, classInfo, session] = await Promise.all([
+      getSectionService({ _id: sectionId }),
+      getClassService({ _id: classId }),
+      getSessionService({ _id: sessionId })
+    ]);
+
+    if(!session){
+      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Session not found"));
+    }
+
+    if(!section){
+      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Section not found"));
+    }
+
+    if(!classInfo){
+      return res.status(StatusCodes.NOT_FOUND).send(404, "Class not found");
+    }
+
+    if(section["classId"].toString()!==classInfo["_id"].toString()){
+      return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Invalid class, section ids"));
+    }
+
+    const workbook = xlsx.readFile(file.path)
+    const sheetName = workbook.SheetNames[0]
+    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
+    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, sessionId, adminId)
+    if(registeredStudentsCount===0){
+      throw new Error("Student registration failed")
+    }
+    await fs.unlink(file.path)
+    return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`))
+  } catch(err){
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
+  }
+}

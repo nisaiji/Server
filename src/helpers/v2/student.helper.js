@@ -4,8 +4,9 @@ import { registerStudentFromExcelSchema } from "../../validators/studentSchema.v
 import { excelDateToStringDateFormat } from "../../services/celender.service.js";
 import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
 import { getSchoolParentService, registerSchoolParentService } from "../../services/v2/schoolParent.services.js";
+import { registerSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 
-export async function registerStudentsFromExcelHelper(students, sectionId, classId, adminId){
+export async function registerStudentsFromExcelHelper(students, sectionId, classId, sessionId, adminId){
   try {
      // validate each student from excel file
      students.shift();
@@ -59,12 +60,13 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
       const studentObj = { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode }
 
       if(!studentInfo) {
-        studentObj['schoolParent'] = schoolParent['_id'];
-        studentObj['section'] = sectionId;
-        studentObj['classId'] = classId;
+        // studentObj['schoolParent'] = schoolParent['_id'];
+        // studentObj['section'] = sectionId;
+        // studentObj['classId'] = classId;
         studentObj['admin'] = adminId;
 
-        await registerStudentService(studentObj);
+        const registeredStudent = await registerStudentService(studentObj);
+        await registerSessionStudentService({student:registeredStudent._id, session: sessionId, classId, section: sectionId, admin: adminId, schoolParent: schoolParent._id, parent: parent._id});
         const section = await getSectionService({_id:sectionId});
         await updateSectionService({_id:sectionId}, {studentCount: section["studentCount"]+1});
         insertedStudentCount++;
