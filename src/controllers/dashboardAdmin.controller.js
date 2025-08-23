@@ -14,7 +14,7 @@ export async function getPresentStudentsController(req,res){
   try {
     const adminId = req.adminId;
     const {startTime, endTime, sessionId} = req.body;
-    const session = await getSessionService({_id:sessionId, admin:adminId});
+    const session = await getSessionService({_id:sessionId, school:adminId});
     if(!session){ 
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
