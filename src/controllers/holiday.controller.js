@@ -7,6 +7,7 @@ import { getParentsByAdminIdService } from "../services/v2/schoolParent.services
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
 import { getAdminService } from "../services/admin.services.js";
 import { sendPushNotification } from "../config/firebase.config.js";
+import { getSessionService } from "../services/session.services.js";
 
 export async function registerHolidayController(req, res) {
   try {
@@ -58,10 +59,14 @@ export async function registerHolidayController(req, res) {
 export async function registerHolidaysController(req, res) {
   try {
     // expect startTime, endTime timestamps as timeset zero. eg: 2025:03:22T00:00:00
-    let { title, description, startTime, endTime } = req.body;
+    let { title, description, startTime, endTime, sessionId, classId, sectionId } = req.body;
     const adminId = req.adminId;
     if(startTime > endTime) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Please select valid dates"));
+    }
+    const session = await getSessionService({_id: sessionId, school:adminId, status: 'active'});
+    if(!session) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Please select valid session"));
     }
 
     let startIstDate = timestampToIstDate(startTime);
@@ -86,7 +91,7 @@ export async function registerHolidaysController(req, res) {
       }
 
       if(!currDateHoliday && day!=='Sunday') {
-        await createHolidayService({ date:currIstDate.getTime(), day, title, description, admin: adminId });
+        await createHolidayService({ date:currIstDate.getTime(), day, title, description, admin: adminId, session: sessionId, classId, section: sectionId });
       }
       currIstDate.setDate(currIstDate.getDate()+1)
     }
@@ -119,9 +124,9 @@ export async function registerHolidaysController(req, res) {
 
 export async function getHolidaysController(req, res) {
   try {
-    let { startTime, endTime } = req.body;
+    let { startTime, endTime, sessionId } = req.body;
     const adminId = req.adminId;
-    const holidays = await getHolidaysService({admin: adminId, date: { $gte: startTime, $lte: endTime } });
+    const holidays = await getHolidaysService({admin: adminId, session: sessionId, date: { $gte: startTime, $lte: endTime } });
     return res.status(StatusCodes.OK).send(success(200, holidays));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -158,6 +163,10 @@ export async function deleteHolidayController(req, res) {
     const holiday = await getHolidayService({ _id: id });
     if (!holiday) {
       return res.status(StatusCodes.NOT_FOUND).send(error(400, "Holiday doesn't exists"));
+    }
+    const session = await getSessionService({_id: holiday['session'], school: req.adminId});
+    if(session && session['status'] === 'completed') {  
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "You can't delete holiday of completed session"));
     }
     await deleteHolidayService({ _id: id });
     return res.status(StatusCodes.OK).send(success(200, "Holiday deleted successfully"));

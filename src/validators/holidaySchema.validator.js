@@ -27,7 +27,15 @@ const createHolidaysSchema = Joi.object({
   title: Joi.string().required().messages({
     "any.required":"Title is required!"
   }),
-  description: Joi.string().allow('').optional()
+  description: Joi.string().allow('').optional(),
+  sessionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+      "string.pattern.base": "Invalid Session ID.",
+      "any.required": "Session ID is required."
+    }),
+  sectionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional().messages({
+      "string.pattern.base": "Invalid section ID.",
+      "any.required": "Section ID is required."
+    }),
 });
 
 const getHolidaySchema = Joi.object({
