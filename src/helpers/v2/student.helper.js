@@ -66,7 +66,7 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
         studentObj['admin'] = adminId;
 
         const registeredStudent = await registerStudentService(studentObj);
-        await registerSessionStudentService({student:registeredStudent._id, session: sessionId, classId, section: sectionId, admin: adminId, schoolParent: schoolParent._id, parent: parent._id});
+        await registerSessionStudentService({student:registeredStudent._id, session: sessionId, classId, section: sectionId, school: adminId, schoolParent: schoolParent._id, parent: parent._id});
         const section = await getSectionService({_id:sectionId});
         await updateSectionService({_id:sectionId}, {studentCount: section["studentCount"]+1});
         insertedStudentCount++;
