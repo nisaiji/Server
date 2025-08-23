@@ -234,11 +234,11 @@ export async function bulkAttendanceMarkController(req, res) {
         if(!['present', 'absent'].includes(studentAttendance['attendance'])){
           continue;
         }
-        const existingAttendance = await getAttendanceService({ student: studentAttendance['student'], date: { $gte: startTime, $lte: endTime } });
+        const existingAttendance = await getAttendanceService({ sessionStudent: studentAttendance['sessionStudent'], date: { $gte: startTime, $lte: endTime } });
         if (existingAttendance) {
           await updateAttendanceService({ _id: existingAttendance["_id"] }, { teacherAttendance: studentAttendance['attendance'] });
         } else {
-          const attendanceObj = { date:attendanceTimestamp, day:dayName, student: studentAttendance['student'], teacherAttendance: studentAttendance['attendance'], section: sectionId, classId: section['classId'], admin: adminId };
+          const attendanceObj = { date:attendanceTimestamp, day:dayName, sessionStudent: studentAttendance['sessionStudent'], teacherAttendance: studentAttendance['attendance'], section: sectionId, classId: section['classId'], admin: adminId, session: section['session'] };
           await createAttendanceService(attendanceObj);
         }
 
