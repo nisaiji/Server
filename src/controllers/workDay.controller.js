@@ -87,7 +87,7 @@ export async function deleteWorkDayController(req, res) {
     if (!workday) {
       return res.status(StatusCodes.NOT_FOUND).send(error(400, "Workday not found"));
     }
-    const session = await getSessionService({_id: workDay.session});
+    const session = await getSessionService({_id: workday.session});
     if(!session){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
