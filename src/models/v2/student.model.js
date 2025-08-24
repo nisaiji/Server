@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { generateCustomId } from "../../helpers/idGenerator.helper.js";
 
 const studentSchema = mongoose.Schema({
   firstname: {
@@ -8,6 +9,9 @@ const studentSchema = mongoose.Schema({
   lastname:{
     type: String,
     required: true
+  },
+    studentId: {
+    type: String
   },
   isActive: {
     type:Boolean,
@@ -61,6 +65,13 @@ const studentSchema = mongoose.Schema({
   timestamps:true
 }
 );
+
+studentSchema.pre("save", async function(next){
+  if(!this.studentId){
+    this.studentId = generateCustomId("student");
+  }
+  next();
+});
 
 const studentModel = mongoose.model("student", studentSchema);
 export default studentModel;

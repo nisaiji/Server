@@ -52,6 +52,10 @@ const getHolidaySchema = Joi.object({
     'number.min': 'End time must be a positive number',
     'any.required': 'End time is required'
   }),
+  sessionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+      "string.pattern.base": "Invalid Session ID.",
+      "any.required": "Session ID is required."
+   }),
 });
  
 const updateHolidaySchema = Joi.object({

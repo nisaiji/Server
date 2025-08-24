@@ -36,6 +36,10 @@ const announcementSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "section"
   },
+  session: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "session"
+  },
   school: {
     type: mongoose.Schema.Types.ObjectId,
     ref:"section"

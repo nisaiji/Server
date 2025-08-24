@@ -9,12 +9,13 @@ import { sendPushNotification } from "../config/firebase.config.js";
 import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
 import { getAnnouncementReadStatusService, getAnnouncementsReadStatusService } from "../services/announcementReadStatus.service.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
+import { getSessionService } from "../services/session.services.js";
 
 export async function createAnnouncementByAdminController(req, res) {
   try {
     const adminId = req.adminId;
 
-    const { title, description, targetAudience, startsAt, expiresAt } = req.body;
+    const { title, description, sessionId, targetAudience, startsAt, expiresAt } = req.body;
     const announcement = await createAnnouncementService({
       title,
       description,
@@ -23,9 +24,17 @@ export async function createAnnouncementByAdminController(req, res) {
       expiresAt,
       createdBy: adminId,
       createdByRole: "admin",
+      session: sessionId,
       school: adminId
     })
     const admin = await getAdminService({_id: adminId});
+    const session = await getSessionService({_id: sessionId, school: adminId});
+    if(!session){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
+    if(session['status'] === 'completed'){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+    } 
     const pushTitle = `Post by ${admin.schoolName}`;
     if(targetAudience.includes("teacher")) {
       const teachers = await getTeachersByAdminIdService(adminId);
@@ -53,7 +62,14 @@ export async function createAnnouncementByTeacherController(req, res) {
     const sectionId = req.sectionId;
     const adminId = req.adminId;
 
-    const { title, description, startsAt, expiresAt } = req.body;
+    const { title, description, sessionId, startsAt, expiresAt } = req.body;
+    const session = await getSessionService({_id: sessionId, school: adminId});
+    if(!session){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
+    if(session['status'] === 'completed'){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+    } 
     const announcement = await createAnnouncementService({
       title,
       description,
@@ -61,10 +77,12 @@ export async function createAnnouncementByTeacherController(req, res) {
       startsAt,
       expiresAt,
       createdBy: teacherId,
+      session: sessionId,
       createdByRole: "teacher",
       section: sectionId,
       school: adminId
     })
+
     return res.status(StatusCodes.CREATED).json(success(201, "Announcement created successfully!"));
 
   } catch (err) {

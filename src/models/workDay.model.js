@@ -17,6 +17,10 @@ const workDaySchema =new mongoose.Schema({
     description:{
         type:String,
     },
+    session:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'session'
+    },
     admin:{
         type: mongoose.Schema.Types.ObjectId,
         ref:'admin'

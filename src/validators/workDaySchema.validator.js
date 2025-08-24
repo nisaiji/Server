@@ -7,7 +7,11 @@ const createWorkDaySchema = Joi.object({
   title: Joi.string().required().messages({
     "any.required":"Title is required"
   }),
-  description: Joi.string().allow('').optional()
+  description: Joi.string().allow('').optional(),
+  sessionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+      "string.pattern.base": "Invalid Session ID.",
+      "any.required": "Session ID is required."
+    }),
 });
 
 const getWorkDaySchema = Joi.object({
@@ -24,6 +28,10 @@ const getWorkDaySchema = Joi.object({
     'number.min': 'End time must be a positive number',
     'any.required': 'End time is required'
   }),
+  sessionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+      "string.pattern.base": "Invalid Session ID.",
+      "any.required": "Session ID is required."
+    }),
 });
  
 const updateWorkDaySchema = Joi.object({
