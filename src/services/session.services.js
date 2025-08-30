@@ -55,6 +55,15 @@ export async function updateSessionService(filter, update){
   }
 }
 
+export async function updateSessionsService(filter, update){
+  try {
+    const session = await sessionModel.updateMany(filter, update);
+    return session;
+  } catch (error) {
+    throw error;    
+  }
+}
+
 export async function getSessionsPipelineService(pipeline){
   try {
     const sessions = await sessionModel.aggregate(pipeline).exec();

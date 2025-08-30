@@ -7,18 +7,19 @@ const SessionCreateJob =  async() => {
   console.log("session create job")
   const schools = await getAdminsService({});
   const currentYear = new Date().getFullYear();
-
-  const march31 = new Date(currentYear+1, 2, 31, 0, 0, 0);
-  const april1 = new Date(currentYear, 3, 1, 0, 0, 0);
+  const march31UTC = new Date(Date.UTC(currentYear + 1, 2, 31, 0, 0, 0));
+  const april1UTC = new Date(Date.UTC(currentYear, 3, 1, 0, 0, 0));
   
   for (const school of schools) {
     await updateSessionService({ school: convertToMongoId(school['_id']) }, { isCurrent: false, status: 'completed' });
     await registerSessionService({
       school: school['_id'], 
       isCurrent: true, 
-      status: "active", 
-      acedmicStartYear: march31,
-      acedmicEndYear: april1
+      status: "active",
+      endDate: march31UTC,
+      startDate: april1UTC,
+      academicStartYear: currentYear,
+      academicEndYear: currentYear + 1
      });
      console.log(`Session created for school: ${school['schoolName']}`);
   }

@@ -1,21 +1,25 @@
 import { StatusCodes } from "http-status-codes";
-import { getSessionService, getSessionsPipelineService, registerSessionService } from "../services/session.services.js";
+import { getSessionService, getSessionsPipelineService, registerSessionService, updateSessionService, updateSessionsService } from "../services/session.services.js";
 import { success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 
 export async function createSessionController(req, res) {
   try {
-    const { name, startDate, endDate, academicStartYear, academicEndYear } = req.body;
+    const { academicStartYear, academicEndYear } = req.body;
     const adminId = req.adminId;
-    
+    const march31UTC = new Date(Date.UTC(academicStartYear + 1, 2, 31, 0, 0, 0));
+    const april1UTC = new Date(Date.UTC(academicStartYear, 3, 1, 0, 0, 0));
+    if(april1UTC <= new Date() ) {
+      await updateSessionsService({ school: convertToMongoId(adminId), status: "active" }, { isCurrent: false, status: 'completed' });
+    }
+
     const sessionData = {
-      name,
-      startDate,
-      endDate,
+      startDate: april1UTC,
+      endDate: march31UTC,
       academicStartYear,
       academicEndYear,
       school: adminId,
-      status: "upcoming"
+      status: (april1UTC <= new Date()) ? "active" : "upcoming"
     };
 
     const session = await getSessionService({school: adminId, academicStartYear, academicEndYear});
@@ -90,6 +94,27 @@ export async function getSessionByIdController(req, res) {
     const session = sessions[0];
     
     return res.status(StatusCodes.OK).send(success(200, session));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
+  }
+}
+
+export async function MarkSessionAsCompletedController(req, res) {
+  try {
+    const { sessionId } = req.params;
+    const adminId = req.adminId;
+
+    const session = await getSessionService({ _id: sessionId, school: adminId });
+    if (!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Session not found"));
+    }
+    if (session.status === 'completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Session is already completed"));
+    }
+
+    await updateSessionService({ _id: sessionId }, { status: 'completed', isCurrent: false });
+
+    return res.status(StatusCodes.OK).send(success(200, "Session marked as completed successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
   }
