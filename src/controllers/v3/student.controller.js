@@ -330,7 +330,8 @@ export async function getSessionStudentSController(req,res) {
       },
       {
         $addFields: {
-          studentId: "$student._id",
+          id: "$student._id",
+          studentId: "$student.studentId",
           firstname: "$student.firstname",
           lastname: "$student.lastname",
           dob: "$student.dob",
@@ -767,7 +768,8 @@ export async function searchStudentsController(req, res){
         },
         {
           $addFields: {
-            studentId: "$student._id",
+            id: "$student._id",
+            studentId: "$student.studentId",
             firstname: "$student.firstname",
             lastname: "$student.lastname",
             dob: "$student.dob",
