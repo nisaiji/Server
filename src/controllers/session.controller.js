@@ -109,12 +109,12 @@ export async function MarkSessionAsCompletedController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "Session not found"));
     }
     if (session.status === 'completed') {
-      return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Session is already completed"));
+      await updateSessionService({ _id: sessionId }, { status: 'active', isCurrent: true });
+      return res.status(StatusCodes.OK).send(success(200, "Session marked as active successfully"));
+    } else {
+      await updateSessionService({ _id: sessionId }, { status: 'completed', isCurrent: false });
+      return res.status(StatusCodes.OK).send(success(200, "Session marked as completed successfully"));
     }
-
-    await updateSessionService({ _id: sessionId }, { status: 'completed', isCurrent: false });
-
-    return res.status(StatusCodes.OK).send(success(200, "Session marked as completed successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
   }
