@@ -230,3 +230,96 @@ export async function getAllSubjectsTeachersOfSectionController(req, res) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
     }   
 }
+
+export async function getAllSubjectsTeachersOfSectionForAdminController(req, res) {
+    try {
+         const sectionId = req.params.sectionId;
+         const pipeline = [
+            {
+                $match: {
+                    section: convertToMongoId(sectionId)
+                }
+            },
+            {
+                $lookup: {
+                    from: "subjects",
+                    localField: "subject",
+                    foreignField: "_id",
+                    as: "subject"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$subject",
+                    preserveNullAndEmptyArrays: true
+                }  
+            },
+            {
+                $lookup: {
+                    from: "sections",
+                    localField: "section",
+                    foreignField: "_id",
+                    as: "section"
+                }
+            },
+            {
+                $unwind: {  
+                    path: "$section",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: "classes",
+                    localField: "classId",
+                    foreignField: "_id",
+                    as: "class"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$class",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {  
+                    from: "teachers",
+                    localField: "teacher",
+                    foreignField: "_id",
+                    as: "teacher"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$teacher",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    teacherId: "$teacher._id",
+                    teacherFirstName: "$teacher.firstname",
+                    teacherLastName: "$teacher.lastname",
+                    teacherEmail: "$teacher.email",
+                    teacherPhone: "$teacher.phone",
+                    teacherGender: "$teacher.gender",
+                    teacherTId: "$teacher.teacherId",
+                    classId: "$class._id",
+                    className: "$class.name",
+                    sectionId: "$section._id",
+                    sectionName: "$section.name",
+                    subjectId: "$subject._id",
+                    subjectName: "$subject.name",
+                    subjectCode: "$subject.code",
+                    _id: 0
+                }
+            }
+         ];
+        
+        const teacherSubjectSections = await getTeacherSubjectSectionPipelineService(pipeline);
+        return res.status(StatusCodes.OK).send(success(200, teacherSubjectSections));
+    }catch (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    }   
+}
