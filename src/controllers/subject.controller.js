@@ -2,6 +2,7 @@ import {StatusCodes} from "http-status-codes";
 import {error, success} from "../utills/responseWrapper.js";
 import {deleteSubjectService, getSubjectService, getSubjectsService, registerSubjectService} from "../services/subject.service.js";
 import { getSessionService } from "../services/session.services.js";
+import { getTeacherSubjectSectionsService } from "../services/teacherSubjectSection.service.js";
 
 export async function createSubjectController(req, res) {
     try {
@@ -49,6 +50,18 @@ export async function deleteSubjectController(req, res) {
         }
         deleteSubjectService({_id: subjectId, school: schoolId });
         return res.status(StatusCodes.OK).send(success(200, "Subject deleted successfully"));
+    } catch (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    }
+}
+
+export async function getUnassignedSubjectsForSectionController(req, res) {
+    try {
+      const sectionId = req.params.sectionId;
+      const sectionSubjects = await getTeacherSubjectSectionsService({section: sectionId});
+      const sectionSubjectIds = sectionSubjects.map((sub) => sub.subject.toString());
+      const unassignedSubjects = await getSubjectsService({_id: { $nin: sectionSubjectIds } });
+      return res.status(StatusCodes.OK).send(success(200, unassignedSubjects));      
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
     }
