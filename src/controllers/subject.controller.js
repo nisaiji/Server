@@ -42,13 +42,11 @@ export async function getSubjectsController(req, res) {
 export async function deleteSubjectController(req, res) {
     try {
         const subjectId = req.params.subjectId;
-        const schoolId = req.adminId;
-        const subject = await getSubjectService({_id: subjectId, school: schoolId });
-        const session = await getSessionService({_id: subject['session']});
-        if(session['status']!=='active') {
-            return res.status(StatusCodes.BAD_REQUEST).send(error(400, "You can delete subject of old sessions"));
+        const subject = await getSubjectService({_id: subjectId });
+        if(!subject) {
+            return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject doesn't exists"));
         }
-        deleteSubjectService({_id: subjectId, school: schoolId });
+        deleteSubjectService({_id: subjectId });
         return res.status(StatusCodes.OK).send(success(200, "Subject deleted successfully"));
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

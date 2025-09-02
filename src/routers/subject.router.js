@@ -10,9 +10,9 @@ subjectRouter.post("/", superAdminAuthenticate, createSubjectController);
 subjectRouter.get("/super-admin", superAdminAuthenticate, getAllSubjectsController);
 subjectRouter.get("/admin/:sectionId", adminAuthenticate, getUnassignedSubjectsForSectionController);
 subjectRouter.get("/teacher/:sectionId", teacherAuthenticate, getUnassignedSubjectsForSectionController);
+subjectRouter.delete("/:subjectId", superAdminAuthenticate, deleteSubjectController);
 
 // subjectRouter.get("/:sessionId", adminAuthenticate, getSubjectsController);
 // subjectRouter.get("/:sessionId", teacherAuthenticate, getSubjectsController);
-// subjectRouter.delete("/:subjectId", adminAuthenticate, deleteSubjectController);
 
 export default subjectRouter;
