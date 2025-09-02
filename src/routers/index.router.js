@@ -25,6 +25,7 @@ import teachingEventRouter from "./teachingEvent.router.js";
 import subjectRouter from "./subject.router.js";
 import announcementReadStatusRouter from "./announcementReadStatus.router.js";
 import studentLeaveRequestRouter from "./studentLeaveRequest.router.js";
+import teacherSubjectSectionRouter from "./teacherSubjectSection.router.js";
 
 const router = express();
 
@@ -54,5 +55,6 @@ router.use("/session", sessionRouter);
 router.use("/teaching-event", teachingEventRouter);
 router.use("/subject", subjectRouter);
 router.use("/student-leave", studentLeaveRequestRouter);
+router.use("/teacher-subject-section", teacherSubjectSectionRouter);
 
 export default router;
