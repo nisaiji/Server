@@ -15,6 +15,7 @@ import { getAttendanceCountService } from "../../services/attendance.service.js"
 import xlsx from 'xlsx';
 import fs from 'fs/promises'
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
+import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
 
 export async function registerStudentAndSessionStudentController(req, res) {
   try {
@@ -894,5 +895,103 @@ export async function registerStudentsFromExcelController(req, res){
     return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`))
   } catch(err){
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
+  }
+}
+
+
+export async function getSubjectsForStudentSectionController(req, res) {
+  try {
+    const sessionStudentId = req.params.sessionStudentId;
+    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
+    if(!sessionStudent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
+    }
+    const pipeline = [
+      {
+        $match: {
+          section: convertToMongoId(sessionStudent.section)
+        }
+      },
+      {
+        $lookup: {
+          from: "subjects",
+          localField: "subject",
+          foreignField: "_id",
+          as: "subject"
+        }
+      },
+      {
+        $unwind: {
+          path: "$subject",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+        $unwind: {
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "class"
+        }
+      },
+      {
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "teachers",
+          localField: "teacher",
+          foreignField: "_id",
+          as: "teacher"
+        }
+      },
+      {
+        $unwind: {
+          path: "$teacher",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          teacherId: "$teacher._id",
+          teacherFirstName: "$teacher.firstname",
+          teacherLastName: "$teacher.lastname",
+          teacherEmail: "$teacher.email",
+          teacherPhone: "$teacher.phone",
+          teacherGender: "$teacher.gender",
+          teacherTId: "$teacher.teacherId",
+          classId: "$class._id",
+          className: "$class.name",
+          sectionId: "$section._id",
+          sectionName: "$section.name",
+          subjectId: "$subject._id",
+          subjectName: "$subject.name",
+          subjectCode: "$subject.code",
+          _id: 0
+        }
+      }
+    ];
+
+    const teacherSubjectSections = await getTeacherSubjectSectionPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, teacherSubjectSections));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

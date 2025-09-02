@@ -1,11 +1,11 @@
 import express from "express";
-import { getAttendancesController, registerStudentsFromExcelController, getSessionStudentSController, getStudentWithAllSessionStudentsController, registerSessionStudentController, registerStudentAndSessionStudentController, searchStudentsController, updateStudentByParentController, updateStudentBySchoolController } from "../../controllers/v3/student.controller.js";
+import { getAttendancesController, registerStudentsFromExcelController, getSessionStudentSController, getStudentWithAllSessionStudentsController, registerSessionStudentController, registerStudentAndSessionStudentController, searchStudentsController, updateStudentByParentController, updateStudentBySchoolController, getSubjectsForStudentSectionController } from "../../controllers/v3/student.controller.js";
 import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../../middlewares/authentication/teacher.authentication.middleware.js";
 import { uploadStudentPhotoValidation } from "../../middlewares/validation/student.validation.middleware.js";
 import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
-import { parentAuthenticate } from "../../middlewares/authentication/parent.authentication.middleware.js";
 import upload from "../../middlewares/multer.middleware.js";
+import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
 const studentRouter = express.Router();
 
 studentRouter.post('/admin', adminAuthenticate, registerStudentAndSessionStudentController);
@@ -30,5 +30,7 @@ studentRouter.get("/session-students/:studentId", getStudentWithAllSessionStuden
 
 studentRouter.get("/admin", adminAuthenticate, searchStudentsController);
 studentRouter.post('/excel', adminAuthenticate, upload, registerStudentsFromExcelController);
+
+studentRouter.get("/subjects/:sessionStudentId", parentAuthenticate, getSubjectsForStudentSectionController);
 
 export default studentRouter;
