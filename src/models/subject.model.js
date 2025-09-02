@@ -18,11 +18,6 @@ const subjectSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  school: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'admin',
-    required: true
-  },
   isActive: {
     type: Boolean,
     default: true
