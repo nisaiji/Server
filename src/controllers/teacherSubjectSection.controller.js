@@ -7,9 +7,11 @@ import {getTeacherService} from "../services/teacher.services.js";
 import {getSubjectService} from "../services/subject.service.js";
 import {getSessionService} from "../services/session.services.js";
 import {
+    deleteTeacherSubjectSectionService,
     getTeacherSubjectSectionPipelineService,
     getTeacherSubjectSectionService,
-    registerTeacherSubjectSectionService
+    registerTeacherSubjectSectionService,
+    updateTeacherSubjectSectionService
 } from "../services/teacherSubjectSection.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 
@@ -322,4 +324,41 @@ export async function getAllSubjectsTeachersOfSectionForAdminController(req, res
     }catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
     }   
+}
+
+export async function deleteTeacherSubjectSectionController(req, res) {
+    try {
+        const teacherSubjectSectionId = req.params.teacherSubjectSectionId;
+        const schoolId = req.adminId;
+        const teacherSubjectSection = await getTeacherSubjectSectionService({_id: teacherSubjectSectionId, school: schoolId });
+        if(!teacherSubjectSection) {
+            return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
+        }
+        await deleteTeacherSubjectSectionService({_id: teacherSubjectSectionId, school: schoolId });
+        return res.status(StatusCodes.OK).send(success(200, "Teacher Subject Section deleted successfully"));
+    } catch (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    }
+}
+
+export async function updateTeacherSubjectSectionController(req, res) {
+    try {
+        const teacherSubjectSectionId = req.params.teacherSubjectSectionId;
+        const { sectionId, classId, teacherId, subjectId, sessionId } = req.body;
+        const schoolId = req.adminId;
+        const teacherSubjectSection = await getTeacherSubjectSectionService({_id: teacherSubjectSectionId, school: schoolId });
+        if(!teacherSubjectSection) {
+            return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
+        }
+        const update = {};
+        if(sectionId) update.section = sectionId;
+        if(classId) update.classId = classId;
+        if(teacherId) update.teacher = teacherId;
+        if(subjectId) update.subject = subjectId;
+        if(sessionId) update.session = sessionId;
+        await updateTeacherSubjectSectionService({_id: teacherSubjectSectionId }, update );
+        return res.status(StatusCodes.OK).send(success(200, "Teacher assigned to subject successfully"));
+    } catch (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    }
 }

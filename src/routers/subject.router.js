@@ -1,5 +1,5 @@
 import express from "express";
-import {createSubjectController, deleteSubjectController, getAllSubjectsController, getSubjectsController, getUnassignedSubjectsForSectionController} from "../controllers/subject.controller.js";
+import {createSubjectController, deleteSubjectController, getAllSubjectsController, getSubjectsController, getUnassignedSubjectsForSectionController, updateSubjectController} from "../controllers/subject.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import { superAdminAuthenticate } from "../middlewares/authentication/superAdmin.authentication.middleware.js";
@@ -7,6 +7,7 @@ import { superAdminAuthenticate } from "../middlewares/authentication/superAdmin
 const subjectRouter = express.Router();
 
 subjectRouter.post("/", superAdminAuthenticate, createSubjectController);
+subjectRouter.put("/:subjectId", superAdminAuthenticate, updateSubjectController);
 subjectRouter.get("/super-admin", superAdminAuthenticate, getAllSubjectsController);
 subjectRouter.get("/admin/:sectionId", adminAuthenticate, getUnassignedSubjectsForSectionController);
 subjectRouter.get("/teacher/:sectionId", teacherAuthenticate, getUnassignedSubjectsForSectionController);
