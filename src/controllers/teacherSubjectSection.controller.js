@@ -314,7 +314,6 @@ export async function getAllSubjectsTeachersOfSectionForAdminController(req, res
                     subjectId: "$subject._id",
                     subjectName: "$subject.name",
                     subjectCode: "$subject.code",
-                    _id: 0
                 }
             }
          ];
