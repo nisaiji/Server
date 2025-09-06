@@ -128,7 +128,151 @@ export async function refreshAccessTokenController(req, res) {
 export async function getAllTeacherOfAdminController(req, res) {
   try {
     const adminId = req.adminId;
-    const teachers = await getAllTeacherOfAdminService(adminId);
+    const teachers = await getTeachersPipelineService([
+      {
+        $match: { admin: convertToMongoId(adminId) }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+         $unwind: {
+           path: "$section", 
+           preserveNullAndEmptyArrays: true
+         }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "section.classId",
+          foreignField: "_id",
+          as:"class"
+        }
+      },
+      {
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "teachersubjectsections",
+          localField: "_id",
+          foreignField: "teacher",
+          as: "sectionSubjects",
+          pipeline: [
+            {
+              $lookup: {
+                from: "subjects",
+                localField: "subject",
+                foreignField: "_id",
+                as: "subject",
+              }
+            },
+            {
+              $unwind: {
+                path: "$subject",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: "sections",
+                localField: "section",
+                foreignField: "_id",
+                as: "section",
+              }
+            },
+            {
+              $unwind: {
+                path: "$section",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: "classes",
+                localField: "classId",
+                foreignField: "_id",
+                as: "class",
+              }
+            },
+            {
+              $unwind: {
+                path: "$class",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                teacherSubjectSectionId: "$_id",
+                subjectId: "$subject._id",
+                subjectName: "$subject.name",
+                classId: "$class._id",
+                className: "$class.name",
+                sectionId: "$section._id",
+                sectionName: "$section.name"
+              }
+            }
+          ]
+        }
+      },
+      {
+        $project: {
+          id: "$_id",
+          teacherId: "$teacherId",
+          username: "$username",
+          firstname: "$firstname",
+          lastname: "$lastname",
+          isLoginAlready: "$isLoginAlready",
+          fcmToken: "$fcmToken",
+          deviceId: "$deviceId",
+          dob: "$dob",
+          bloodGroup: "$bloodGroup",
+          email: "$email",
+          isActive: "$isActive",
+          gender: "$gender",
+          university: "$university",
+          degree: "$degree",
+          phone: "$phone",
+          address: "$address",
+          city: "$city",
+          district: "$district",
+          state: "$state",
+          country: "$country",
+          pincode: "$pincode",
+          photo: "$photo",
+          forgetPasswordCount: "$forgetPasswordCount",
+          leaveRequestCount: "$leaveRequestCount",
+          section: "$section",
+          admin: "$admin",
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+          sectionId: "$section._id",
+          sectionName: "$section.name",
+          sectionStudentCount: "$section.studentCount",
+          sectionStartTime: "$section.startTime",
+          classId: "$class._id",
+          className: "$class.name",
+          sectionCountInClass: { $size: { $ifNull: ["$class.section", []] } },
+          sectionSubjects: "$sectionSubjects",
+        }
+      },
+      {
+        $project: {
+          section: 0,
+          _id: 0
+        }
+      }
+    ]);
+    // const teachers = await getAllTeacherOfAdminService(adminId);
     return res.status(StatusCodes.OK).send(success(200, teachers));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
