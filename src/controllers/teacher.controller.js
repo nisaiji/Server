@@ -1,11 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { getTeacherService, registerTeacherService, getAllTeacherOfAdminService, updateTeacherService, getTeachersService } from "../services/teacher.services.js";
+import { getTeacherService, registerTeacherService, getAllTeacherOfAdminService, updateTeacherService, getTeachersService, getTeachersPipelineService } from "../services/teacher.services.js";
 import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
 import { getSectionService } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";
-import { isValidMongoId } from "../services/mongoose.services.js";
+import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getGuestTeacherService } from "../services/guestTeacher.service.js";
 import { getAdminService } from "../services/admin.services.js";
 
@@ -63,9 +63,9 @@ export async function loginTeacherController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Guest teacher does not support on web"));
     }
     const section = await getSectionService({ _id: currentTeacher["section"] });
-    if (!section) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
-    }
+    // if (!section) {
+    //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
+    // }
 
     if(platform=='app' && teacher && teacher['isLoginAlready'] && teacher['deviceId']!==deviceId){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Access denied due to device mismatch"))
@@ -76,13 +76,13 @@ export async function loginTeacherController(req, res) {
       role: teacher ? "teacher" : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
-      sectionId: section["_id"],
-      sectionStart: section['startTime'],
-      classId: Class["_id"],
-      sectionName: section["name"],
-      className: Class["name"],
+      sectionId: section["_id"]? section["_id"]:"",
+      sectionStart: section['startTime']? section['startTime']:"",
+      classId: Class["_id"]?Class["_id"]:"",
+      sectionName: section["name"]? section["name"] : "",
+      className: Class["name"] ? Class["name"] : "",
       schoolName: admin['schoolName'],
-      sessionId: section["session"],
+      sessionId: section["session"]? section["session"]: "",
       tagline: guestTeacher ? guestTeacher['tagline'] :"",
       phone: currentTeacher["phone"] ? currentTeacher["phone"] : "",
       email: currentTeacher["email"] ? currentTeacher["email"] : "",
@@ -93,10 +93,10 @@ export async function loginTeacherController(req, res) {
       role: teacher ? "teacher" : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
-      sectionId: section["_id"],
-      classId: Class["_id"],
-      sectionName: section["name"],
-      className: Class["name"],
+      sectionId: section["_id"]?section["_id"]:"",
+      classId: Class["_id"]?Class["_id"]:"",
+      sectionName: section["name"]? section["name"] : "",
+      className: Class["name"] ? Class["name"] : "",
       phone: currentTeacher["phone"] ? currentTeacher["phone"] : "",
       email: currentTeacher["email"] ? currentTeacher["email"] : "",
       pincode: currentTeacher["pincode"] ? currentTeacher["pincode"] : "",
@@ -284,9 +284,153 @@ export async function getTeacherController(req, res) {
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "User not found"));
     }
+    const teacherInfo = await getTeachersPipelineService([
+      {
+        $match: { _id: convertToMongoId(id) }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+         $unwind: {
+           path: "$section", 
+           preserveNullAndEmptyArrays: true
+         }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "section.classId",
+          foreignField: "_id",
+          as:"class"
+        }
+      },
+      {
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "teachersubjectsections",
+          localField: "_id",
+          foreignField: "teacher",
+          as: "sectionSubjects",
+          pipeline: [
+            {
+              $lookup: {
+                from: "subjects",
+                localField: "subject",
+                foreignField: "_id",
+                as: "subject",
+              }
+            },
+            {
+              $unwind: {
+                path: "$subject",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: "sections",
+                localField: "section",
+                foreignField: "_id",
+                as: "section",
+              }
+            },
+            {
+              $unwind: {
+                path: "$section",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: "classes",
+                localField: "classId",
+                foreignField: "_id",
+                as: "class",
+              }
+            },
+            {
+              $unwind: {
+                path: "$class",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $project: {
+                _id: 0,
+                teacherSubjectSectionId: "$_id",
+                subjectId: "$subject._id",
+                subjectName: "$subject.name",
+                classId: "$class._id",
+                className: "$class.name",
+                sectionId: "$section._id",
+                sectionName: "$section.name"
+              }
+            }
+          ]
+        }
+      },
+      {
+        $project: {
+          id: "$_id",
+          teacherId: "$teacherId",
+          username: "$username",
+          firstname: "$firstname",
+          lastname: "$lastname",
+          isLoginAlready: "$isLoginAlready",
+          fcmToken: "$fcmToken",
+          deviceId: "$deviceId",
+          dob: "$dob",
+          bloodGroup: "$bloodGroup",
+          email: "$email",
+          isActive: "$isActive",
+          gender: "$gender",
+          university: "$university",
+          degree: "$degree",
+          phone: "$phone",
+          address: "$address",
+          city: "$city",
+          district: "$district",
+          state: "$state",
+          country: "$country",
+          pincode: "$pincode",
+          photo: "$photo",
+          forgetPasswordCount: "$forgetPasswordCount",
+          leaveRequestCount: "$leaveRequestCount",
+          section: "$section",
+          admin: "$admin",
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+          sectionId: "$section._id",
+          sectionName: "$section.name",
+          sectionStudentCount: "$section.studentCount",
+          sectionStartTime: "$section.startTime",
+          classId: "$class._id",
+          className: "$class.name",
+          sectionCountInClass: {$size: "$class.section"},
+          sectionSubjects: "$sectionSubjects",
+        }
+      },
+      {
+        $project: {
+          section: 0,
+          _id: 0
+        }
+      }
+    ]);
     const section = await getSectionService({_id: teacher["section"]}, {_id:0, teacher:0});
     const combinedData = { ...teacher._doc, ...section._doc };
-    return res.status(StatusCodes.OK).send(success(200, combinedData));
+    return res.status(StatusCodes.OK).send(success(200, teacherInfo));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
