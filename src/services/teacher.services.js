@@ -70,3 +70,12 @@ export async function getTeachersByAdminIdService(adminId) {
     throw error;
   }
 }
+
+export async function getTeachersPipelineService(pipeline){
+  try {
+    const teachers = await teacherModel.aggregate(pipeline).exec();
+    return teachers;
+  } catch (error) {
+    throw error;    
+  }
+}
