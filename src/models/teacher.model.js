@@ -15,9 +15,9 @@ const teacherSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  isLoginAlready:{
-    type:Boolean,
-    default:false
+  isLoginAlready: {
+    type: Boolean,
+    default: false
   },
   fcmToken: {
     type: String
@@ -36,7 +36,7 @@ const teacherSchema = mongoose.Schema({
     sparse: true,
     lowercase: true
   },
-  isActive:{
+  isActive: {
     type: Boolean,
     default: true
   },
@@ -46,7 +46,7 @@ const teacherSchema = mongoose.Schema({
   university: {
     type: String
   },
-  degree: { 
+  degree: {
     type: String
   },
   password: {
@@ -57,36 +57,36 @@ const teacherSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  address:{
-    type:String
-  }, 
-  city:{
-    type:String
-  },
-  district:{
-    type:String
-  },
-  state:{
-    type:String
-  },
-  country:{
-    type:String
-  },
-  pincode:{
-    type:String
-  }, 
-  photo:{
+  address: {
     type: String
   },
-  forgetPasswordCount:{
-    type:Number,
-    default:0
+  city: {
+    type: String
+  },
+  district: {
+    type: String
+  },
+  state: {
+    type: String
+  },
+  country: {
+    type: String
+  },
+  pincode: {
+    type: String
+  },
+  photo: {
+    type: String
+  },
+  forgetPasswordCount: {
+    type: Number,
+    default: 0
   },
   leaveRequestCount: {
     type: Number,
     default: 0
   },
-  section:{
+  section: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "section",
     default: null
@@ -96,15 +96,15 @@ const teacherSchema = mongoose.Schema({
     ref: "admin"
   }
 },
-{
-  timestamps:true
-}
+  {
+    timestamps: true
+  }
 );
 
-teacherSchema.pre("save", async function(next){
-  if(!this.teacherId){
+teacherSchema.pre("save", async function (next) {
+  if (!this.teacherId) {
     this.teacherId = generateCustomId("teacher");
-  } 
+  }
   next();
 });
 

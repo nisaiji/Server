@@ -38,7 +38,6 @@ const teachingEventSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true,
         trim: true
     },
     subtopics: [{
@@ -46,7 +45,7 @@ const teachingEventSchema = new mongoose.Schema({
         trim: true
     }],
     date: {
-        type: Date,
+        type: Number,
         required: true
     },
     notes: {

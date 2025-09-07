@@ -16,7 +16,7 @@ export async function teacherAuthenticate(req, res, next) {
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
     let teacher;
-    if(decoded['role']==='teacher'){
+    if(decoded['role']==='teacher' || decoded['role']==='classTeacher'){
       teacher = await getTeacherService({_id:decoded.teacherId, isActive:true});
     }
     if(decoded['role']==='guestTeacher'){
@@ -34,7 +34,7 @@ export async function teacherAuthenticate(req, res, next) {
       return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact admin."))
     }
     const section = await getSectionService({_id : decoded?.sectionId})
-    if (!section) {
+    if (decoded['role']=='classTeacher' && !section) {
       return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
     }
     if (decoded['role']==='teacher' && section['teacher'].toString()!==decoded?.teacherId) {
