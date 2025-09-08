@@ -46,7 +46,7 @@ teacherRouter.post(
 teacherRouter.get(
   "/",
   teacherAuthenticate,
-  authorizeTeacherRoles("teacher"),
+  authorizeTeacherRoles("teacher", "classTeacher"),
   getTeacherController
 );
 
@@ -77,7 +77,7 @@ teacherRouter.get(
 teacherRouter.put(
   "/auth",
   teacherAuthenticate,
-  authorizeTeacherRoles("teacher"),
+  authorizeTeacherRoles("teacher", "classTeacher"),
   UsernamePasswordUpdateTeacherValidation,
   updateTeacherController
 );
@@ -85,7 +85,7 @@ teacherRouter.put(
 teacherRouter.put(
   "/fcm-token",
   teacherAuthenticate,
-  authorizeTeacherRoles("teacher"),
+  authorizeTeacherRoles("teacher", "classTeacher"),
   fcmTokenValidation,
   updateTeacherController
 );
@@ -100,7 +100,7 @@ teacherRouter.put(
 teacherRouter.put(
   "/",
   teacherAuthenticate,
-  authorizeTeacherRoles("teacher"),
+  authorizeTeacherRoles("teacher", "classTeacher"),
   updateTeacherValidation,
   updateTeacherController
 );
@@ -115,14 +115,14 @@ teacherRouter.put(
 teacherRouter.put(
   "/password-change",
   teacherAuthenticate,
-  authorizeTeacherRoles("teacher"),
+  authorizeTeacherRoles("teacher", "classTeacher"),
   changePasswordTeacherController
 );
 
 teacherRouter.put(
   "/address",
   teacherAuthenticate,
-  authorizeTeacherRoles("teacher"),
+  authorizeTeacherRoles("teacher", "classTeacher"),
   updateAddressValidation,
   updateTeacherController
 );
@@ -130,7 +130,7 @@ teacherRouter.put(
 teacherRouter.put(
   "/photo-upload",
   teacherAuthenticate,
-  authorizeTeacherRoles("teacher"),
+  authorizeTeacherRoles("teacher", "classTeacher"),
   validateImageSizeMiddleware,
   photoUpdateTeacherValidation,
   updateTeacherController

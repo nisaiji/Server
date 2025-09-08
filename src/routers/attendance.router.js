@@ -8,20 +8,20 @@ import { adminAuthenticate } from "../middlewares/authentication/admin.authentic
 
 const attendanceRouter = express.Router();
 
-attendanceRouter.post("/teacher", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), attendanceByTeacherValidation, attendanceByTeacherController);
+attendanceRouter.post("/teacher", teacherAuthenticate, authorizeTeacherRoles('classTeacher', 'guestTeacher'), attendanceByTeacherValidation, attendanceByTeacherController);
 attendanceRouter.post("/parent", parentAuthenticate, attendanceByParentValidation, attendanceByParentController);
-attendanceRouter.put("/teacher", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), updateAttendanceValidation, updateAttendanceController);
+attendanceRouter.put("/teacher", teacherAuthenticate, authorizeTeacherRoles('classTeacher', 'guestTeacher'), updateAttendanceValidation, updateAttendanceController);
 attendanceRouter.post("/teacher/bulk-mark/:sectionId", teacherAuthenticate, bulkAttendanceMarkController)
 attendanceRouter.post("/admin/bulk-mark/:sectionId", adminAuthenticate, bulkAttendanceMarkController)
 attendanceRouter.get("/admin", adminAuthenticate, getAttendancesController);
 attendanceRouter.get("/teacher", teacherAuthenticate, getAttendancesController);
-attendanceRouter.get("/mismatch", teacherAuthenticate, authorizeTeacherRoles('teacher'), getMisMatchAttendanceController);
-attendanceRouter.get("/teacher/is-marked", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), checkAttendaceMarkedController);
+attendanceRouter.get("/mismatch", teacherAuthenticate, authorizeTeacherRoles('classTeacher'), getMisMatchAttendanceController);
+attendanceRouter.get("/teacher/is-marked", teacherAuthenticate, authorizeTeacherRoles('classTeacher', 'guestTeacher'), checkAttendaceMarkedController);
 attendanceRouter.get("/parent/is-marked/:studentId", parentAuthenticate, checkParentAttendaceMarkedController);
-attendanceRouter.post("/status", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), attendanceStatusValidation, attendanceStatusOfSectionController);
+attendanceRouter.post("/status", teacherAuthenticate, authorizeTeacherRoles('classTeacher', 'guestTeacher'), attendanceStatusValidation, attendanceStatusOfSectionController);
 attendanceRouter.post("/status/:studentId", parentAuthenticate, attendanceStatusValidation, attendanceStatusOfStudentController);
 attendanceRouter.post("/parent/count", parentAuthenticate, attendanceCountValidation, attendanceCountOfStudentController)
-attendanceRouter.post("/teacher/count", teacherAuthenticate, authorizeTeacherRoles('teacher', 'guestTeacher'), attendanceCountValidation, attendanceCountOfStudentController)
-attendanceRouter.post("/teacher/undoAttendance", teacherAuthenticate, authorizeTeacherRoles('teacher'), undoAttendanceByTeacherController)
+attendanceRouter.post("/teacher/count", teacherAuthenticate, authorizeTeacherRoles('classTeacher', 'guestTeacher'), attendanceCountValidation, attendanceCountOfStudentController)
+attendanceRouter.post("/teacher/undoAttendance", teacherAuthenticate, authorizeTeacherRoles('classTeacher'), undoAttendanceByTeacherController)
 
 export default attendanceRouter

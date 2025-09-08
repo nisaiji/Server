@@ -497,8 +497,7 @@ export async function addStudentController(req, res) {
       if(students.length === 0 || parent?.students.some(id => id.equals(studentId))){
         continue
       }
-      validStudentIds.push(studentId);
-    }
+      validStudentIds.push(studentId);    }
 
     await updateParentService(
       { _id: parentId },
@@ -545,6 +544,14 @@ export async function getParentController(req, res) {
           path: "$students",
           preserveNullAndEmptyArrays: true
         }
+      },
+      {
+        $lookup: {
+          from: "sessionstudents",
+          localField: "students._id",
+          foreignField: "student",
+          as: "students.sessionstudents"
+      }
       },
       {
         $lookup: {
@@ -612,6 +619,9 @@ export async function getParentController(req, res) {
         $unwind: { path: "$students.admin", preserveNullAndEmptyArrays: true }
       },
       {
+        $unwind: { path: "$students.sessionStudents", preserveNullAndEmptyArrays: true }
+      },
+      {
         $group: {
           _id: "$_id",
           username: { $first: "$username" },
@@ -666,6 +676,187 @@ export async function getParentController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, parents[0]));
   } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getParentWithStudentsController(req, res) { 
+  try {
+    const parentId = req.parentId;
+    const pipeline = [
+      {
+        $match: {
+          _id: convertToMongoId(parentId),
+          isActive: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'students',
+          localField: 'students',
+          foreignField: '_id',
+          as:  'students',
+          pipeline: [
+            {
+              $lookup: {
+                from: 'sessionstudents',
+                localField: '_id',
+                foreignField: 'student',
+                as: 'sessionStudents',
+                pipeline: [
+                  {
+                    $lookup: {
+                      from: 'sections',
+                      localField: 'section',
+                      foreignField: '_id',
+                      as: 'section'
+                    }
+                  },
+                  {
+                    $unwind: {
+                      path: '$section',
+                      preserveNullAndEmptyArrays: true
+                    }
+                  },
+                  {
+                    $lookup: {
+                      from: 'classes',
+                      localField: 'classId',
+                      foreignField: '_id',
+                      as: 'class'
+                    }
+                  },
+                  {
+                    $unwind: {
+                      path: '$class',
+                      preserveNullAndEmptyArrays: true
+                    }
+                  },
+                  {
+                    $lookup: {
+                      from: 'sessions',
+                      localField: 'session',
+                      foreignField: '_id',
+                      as: 'session'
+                    }
+                  },
+                  {
+                    $unwind: {
+                      path: '$session',
+                      preserveNullAndEmptyArrays: true
+                    }
+                  },
+                  {
+                    $sort: {
+                      createdAt: -1
+                    }
+                  },
+                  {
+                    $project: {
+                      sessionStudentId: '$_id',
+                      sessionStudentRollNumber: '$rollNumber',
+                      sessionStuddentEnrollmentStatus: '$enrollmentStatus',
+                      sessionStudentExams: '$exams',
+                      sessionStudentTests: '$tests',
+                      sessionStudentFeeStatus: '$feeStatus',
+                      sessionStudentFeeDetails: '$feeDetails',
+                      sessionStudentScholorship: '$scholorship',
+                      sectionName: '$section.name',
+                      sectionStartTime: '$section.startTime',
+                      sessionName: '$session.name',
+                      sessionStartDate: '$session.startDate',
+                      sessionEndDate: '$session.endDate',
+                      sessionStatus: '$session.status',
+                      sessionStartYear: '$session.academicStartYear',
+                      sessionEndYear: '$session.academicEndYear',
+                      className: '$class.name',
+                      classId: '$class._id',
+                      sessionId: '$session._id',
+                      sectionId: '$section._id',
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              $lookup: {
+                from : 'admins',
+                localField: 'admin',
+                foreignField: '_id',
+                as: 'school'
+              }
+            },
+            {
+              $unwind: {
+                path: '$school',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $sort: {
+                createdAt: -1
+              }
+            },
+            {
+              $project: {
+                studentId: '$_id',
+                studentFirstName: '$firstname',
+                studentLastName: '$lastname',
+                studentGender: '$gender',
+                studentbloodGroup: '$bloodGroup',
+                studentDOB: '$dob',
+                studentPhoto: '$photo',
+                studentAddress: '$address',
+                studentCity: '$city',
+                studentDistrict: '$district',
+                studentCountry: '$country',
+                studentPincode: '$pincode',
+                studentState: '$state',
+                studentCountry: '$country',
+                sessionStudents: 1,
+                schoolName: '$school.schoolName',
+                schoolAffiliationNo: '$school.affiliationNo',
+                schoolphone: '$school.phone',
+                schoolEmail: '$school.email',
+                schoolBoard: '$school.schoolBoard',
+                schoolAddress: '$school.address',
+                schoolCity: '$school.city',
+                schoolDistrict: '$school.district', 
+                schoolState: '$school.state',
+                schoolCountry: '$school.country',
+                schoolPhoto: '$school.photo',
+                schoolPincode: '$school.pincode',
+                schoolId: '$school._id'
+              }
+            }
+          ]
+        }
+      },
+      {
+        $project: {
+          parentFullName: '$fullname',
+          parentAge: '$age',
+          parentGender: '$gender',
+          parentAddress: '$address',
+          parentPhoto: '$photo',
+          parentAddress: '$address',
+          parentCity: '$city',
+          parentState: '$state',
+          parentCountry: '$country',
+          parentPincode: '$pincode',
+          parentQualification: '$qualification',
+          parentOccupation: '$occupation',
+          parentEmail: '$email',
+          parentPhone: '$phone',
+          parentIsLoginAlready: '$isLoginAlready',
+          students: 1
+        }     
+      }
+    ];
+
+    const students = await getParentsPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, students));
+  }catch (err) {  
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
@@ -809,11 +1000,11 @@ export async function verifyPhoneController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number not registered"));
     }
 
-    const response =  await verifyMsg91Token(token);
+    // const response =  await verifyMsg91Token(token);
     
-    if(response?.type !== 'success') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
-    }
+    // if(response?.type !== 'success') {
+    //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    // }
 
     if(parent['status']==='unVerified') {
       await updateParentService({_id: parent['_id']}, {status: 'phoneVerified'});
@@ -841,10 +1032,10 @@ export async function verifyEmailController(req, res) {
 
     let parent = await getParentService({_id: parentId, isActive: true});
 
-    const response =  await verifyMsg91Token(token);
-    if(response?.type !== 'success') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
-    }
+    // const response =  await verifyMsg91Token(token);
+    // if(response?.type !== 'success') {
+    //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    // }
 
     updateParentService({_id: parent['_id']}, { email, status: 'verified'}),
 
@@ -859,7 +1050,7 @@ export async function verifyEmailController(req, res) {
       personalInfoUpdated: parent['fullname'] ? true : false
     });
     res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", jwtToken}));
-  } catch (error) {
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
