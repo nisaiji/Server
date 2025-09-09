@@ -403,7 +403,7 @@ export async function getAttendancesController(req, res){
     let { startTime, endTime, sessionStudentId } = req.body;
     const parentId = req.parentId;
     const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
-    if(!student) {
+    if(!sessionStudent) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"))
     }
     const parent = await getParentService({_id: parentId})
@@ -508,8 +508,7 @@ export async function getAttendancesController(req, res){
           gender: "$student.gender",
           sectionName: '$section.name',
           className: '$class.name',
-          attendances: 1,
-          student: 0
+          attendances: 1
         },
       },
     ];

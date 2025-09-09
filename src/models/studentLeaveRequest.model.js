@@ -56,12 +56,12 @@ const studentLeaveRequestSchema = mongoose.Schema({
   },
 
   startDate: {
-    type: Date,
+    type: Number,
     required: true
   },
 
   endDate: {
-    type: Date,
+    type: Number,
     required: true
   },
 },

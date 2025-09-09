@@ -65,8 +65,8 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
     const filter = {
       school: convertToMongoId(schoolId),
       section: convertToMongoId(sectionId),
-      startDate:{$gte: new Date(startDate)},
-      endDate:{$lte: new Date(endDate)}
+      startDate:{$gte: startDate},
+      endDate:{$lte: endDate}
     }
 
     const pipeline = [
@@ -115,8 +115,8 @@ export async function getStudentLeaveRequestForParentController(req, res) {
     
     const filter = {
       sessionStudent: convertToMongoId(sessionStudentId),
-      startDate:{$gte: new Date(startDate)},
-      endDate:{$lte: new Date(endDate)}
+      startDate:{$gte: startDate},
+      endDate:{$lte: endDate}
     }
 
     const pipeline = [
