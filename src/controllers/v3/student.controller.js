@@ -10,12 +10,13 @@ import { getStudentService, getStudentsPipelineService, registerStudentService, 
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getHolidayCountService } from "../../services/holiday.service.js";
 import { getWorkDayCountService } from "../../services/workDay.services.js";
-import { calculateDaysBetweenDates, calculateSundays } from "../../services/celender.service.js";
+import { calculateDaysBetweenDates, calculateSundays, getStartAndEndTimeService } from "../../services/celender.service.js";
 import { getAttendanceCountService } from "../../services/attendance.service.js";
 import xlsx from 'xlsx';
 import fs from 'fs/promises'
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
+import path from "path";
 
 export async function registerStudentAndSessionStudentController(req, res) {
   try {
@@ -168,7 +169,6 @@ export async function updateStudentBySchoolController(req, res){
     if(req.body["phone"] && schoolParent['phone']!==req.body['phone']){
       const phone = req.body['phone'];
       let parent = await getParentService({_id: schoolParent['parent']});
-      console.log(parent['students'])
       if (parent && parent['students']?.includes(studentId)) {
         return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Phone number can not be updated'));
       }
@@ -254,6 +254,7 @@ export async function getSessionStudentSController(req,res) {
     if(classId) filter['classId']= convertToMongoId(classId);
     if(section) filter['section']= convertToMongoId(section);
     if(sessionStudentId) filter['_id'] = convertToMongoId(sessionStudentId);
+    const {startTime, endTime} = getStartAndEndTimeService(new Date(), new Date());
 
     const pipeline = [
       {
@@ -330,6 +331,24 @@ export async function getSessionStudentSController(req,res) {
         }
       },
       {
+        $lookup: {
+          from: 'attendances',
+          localField: '_id',
+          foreignField: 'sessionStudent',
+          as: 'attendances',
+          pipeline: [
+            { $match: { date: { $gte: startTime, $lte: endTime } } },
+            { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } }
+          ]
+        }
+      },
+      {
+        $unwind: {
+          path: '$attendances',
+          preserveNullAndEmptyArrays: true,
+        }
+      },
+      {
         $addFields: {
           id: "$student._id",
           studentId: "$student.studentId",
@@ -376,6 +395,9 @@ export async function getSessionStudentSController(req,res) {
           // section
           sectionId: "$section._id",
           sectionName: "$section.name",
+
+          // attendance
+          todayAttendance: "$attendances.teacherAttendance",
         }
       },
       {
@@ -384,7 +406,8 @@ export async function getSessionStudentSController(req,res) {
           schoolParent: 0,
           section: 0,
           session: 0,
-          classInfo: 0
+          classInfo: 0,
+          attendances: 0,
         }
       }
     ]
@@ -627,7 +650,7 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
 async function calculateAttendancePercentage(sessionStudentId, sessionId) {
   try {
     const session = await getSessionService({_id: convertToMongoId(sessionId)})
-   console.log({session})
+
     const startTime = session['startDate'].getTime();
     const endTime = session['endDate'].getTime();
 
@@ -754,6 +777,24 @@ export async function searchStudentsController(req, res){
         },
         {
           $lookup: {
+            from: 'attendances',
+            localField: '_id',
+            foreignField: 'sessionStudent',
+            as: 'attendances',
+            pipeline: [
+              { $match: { date: { $gte: startTime, $lte: endTime } } },
+              { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } }
+            ]
+          }
+        },
+        {
+          $unwind: {
+            path: '$attendances',
+            preserveNullAndEmptyArrays: true,
+          }
+        },
+        {
+          $lookup: {
             from: "sessions",
             localField: "session",
             foreignField: "_id",
@@ -813,6 +854,9 @@ export async function searchStudentsController(req, res){
             // section
             sectionId: "$section._id",
             sectionName: "$section.name",
+
+            // attendance
+            todayAttendance: "$attendances.teacherAttendance",
           }
         },
         {

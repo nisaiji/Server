@@ -109,6 +109,15 @@ export async function checkClassExistById(classId) {
   }
 }
 
+export async function getSectionsPipelineService(pipeline){
+  try {
+    const sections = await sectionModel.aggregate(pipeline).exec();
+    return sections;
+  } catch (error) {
+    throw error;    
+  }
+}
+
 // export async function deleteSection(sectionId) {
 //   try {
 //     const section = await sectionModel.findByIdAndDelete(sectionId);

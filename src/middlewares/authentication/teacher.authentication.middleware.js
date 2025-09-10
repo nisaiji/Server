@@ -33,13 +33,17 @@ export async function teacherAuthenticate(req, res, next) {
     if(admin && !admin['isActive']){
       return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact admin."))
     }
-    const section = await getSectionService({_id : decoded?.sectionId})
-    if (decoded['role']=='classTeacher' && !section) {
-      return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
+
+    if (decoded['role']=='classTeacher') {
+      const section = await getSectionService({_id : decoded?.sectionId})
+      if (!section) {
+       return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
+      }
+      if (section['teacher'].toString()!==decoded?.teacherId) {
+       return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
+      }
     }
-    if (decoded['role']==='teacher' && section['teacher'].toString()!==decoded?.teacherId) {
-      return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
-    }
+
     if (decoded['role']==='guestTeacher' && section['guestTeacher'].toString()!==decoded?.teacherId) {
       return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
     }

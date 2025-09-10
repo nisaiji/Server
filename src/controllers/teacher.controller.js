@@ -565,7 +565,6 @@ export async function getTeacherController(req, res) {
           sectionStartTime: "$section.startTime",
           classId: "$class._id",
           className: "$class.name",
-          sectionCountInClass: {$size: "$class.section"},
           sectionSubjects: "$sectionSubjects",
         }
       },
@@ -576,8 +575,6 @@ export async function getTeacherController(req, res) {
         }
       }
     ]);
-    const section = await getSectionService({_id: teacher["section"]}, {_id:0, teacher:0});
-    const combinedData = { ...teacher._doc, ...section._doc };
     return res.status(StatusCodes.OK).send(success(200, teacherInfo));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
