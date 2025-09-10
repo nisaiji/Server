@@ -29,6 +29,7 @@ studentRouter.post("/parent/get-attendance", parentAuthenticate, getAttendancesC
 studentRouter.get("/session-students/:studentId", getStudentWithAllSessionStudentsController);
 
 studentRouter.get("/admin", adminAuthenticate, searchStudentsController);
+studentRouter.get("/teacher", teacherAuthenticate, searchStudentsController);
 studentRouter.post('/excel', adminAuthenticate, upload, registerStudentsFromExcelController);
 
 studentRouter.get("/subjects/:sessionStudentId", parentAuthenticate, getSubjectsForStudentSectionController);

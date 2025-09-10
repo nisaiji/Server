@@ -308,13 +308,13 @@ export async function adminLoginController(req, res) {
   try {
     const { user, password } = req.body;
   
-    const admin = await getAdminService({ $or: [{email: user}, {phone: user}, {status: 'verified'}] });
+    const admin = await getAdminService({ $or: [{email: user, status: 'verified'}, {phone: user, status: 'verified'}] });
     if (!admin) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
     }
-    // if(!admin['isActive']){
-    //   return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."))
-    // }
+    if(!admin['isActive']){
+      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."));
+    }
     const storedPassword = admin.password;
     const enteredPassword = password;
     const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
@@ -417,7 +417,7 @@ export async function adminEmailVerifyController(req, res) {
     const session = await getSessionService({ school: admin['_id'], academicStartYear: currentYear, academicEndYear: currentYear + 1 });
     if(!session) {
       await registerSessionService({
-        school: admin['_id'], 
+        school: admin['_id'],
         isCurrent: true, 
         status: "active", 
         endDate: march31UTC,

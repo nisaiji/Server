@@ -62,7 +62,12 @@ export async function loginTeacherController(req, res) {
     if (guestTeacher && platform === "web") {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Guest teacher does not support on web"));
     }
-    const section = await getSectionService({ _id: currentTeacher["section"] });
+    let section;
+    let Class;
+    if(currentTeacher['section']){
+      section = await getSectionService({_id: currentTeacher['section']}); 
+      Class = await getClassService({ _id: section["classId"] });
+    }
     // if (!section) {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
     // }
@@ -70,19 +75,18 @@ export async function loginTeacherController(req, res) {
     if(platform=='app' && teacher && teacher['isLoginAlready'] && teacher['deviceId']!==deviceId){
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Access denied due to device mismatch"))
     }
-    const Class = await getClassService({ _id: section["classId"] });
 
     const accessToken = getAccessTokenService({
         role: teacher ? (teacher['section'] ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
-      sectionId: section["_id"]? section["_id"]:"",
-      sectionStart: section['startTime']? section['startTime']:"",
-      classId: Class["_id"]?Class["_id"]:"",
-      sectionName: section["name"]? section["name"] : "",
-      className: Class["name"] ? Class["name"] : "",
+      sectionId: section? section["_id"]:"",
+      sectionStart: section? section['startTime']:"",
+      classId: Class?Class["_id"]:"",
+      sectionName: section? section["name"] : "",
+      className: Class ? Class["name"] : "",
       schoolName: admin['schoolName'],
-      sessionId: section["session"]? section["session"]: "",
+      sessionId: section? section["session"]: "",
       tagline: guestTeacher ? guestTeacher['tagline'] :"",
       phone: currentTeacher["phone"] ? currentTeacher["phone"] : "",
       email: currentTeacher["email"] ? currentTeacher["email"] : "",
@@ -93,10 +97,10 @@ export async function loginTeacherController(req, res) {
       role: teacher ? "teacher" : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
-      sectionId: section["_id"]?section["_id"]:"",
-      classId: Class["_id"]?Class["_id"]:"",
-      sectionName: section["name"]? section["name"] : "",
-      className: Class["name"] ? Class["name"] : "",
+      sectionId: section?section["_id"]:"",
+      classId: Class?Class["_id"]:"",
+      sectionName: section? section["name"] : "",
+      className: Class ? Class["name"] : "",
       phone: currentTeacher["phone"] ? currentTeacher["phone"] : "",
       email: currentTeacher["email"] ? currentTeacher["email"] : "",
       pincode: currentTeacher["pincode"] ? currentTeacher["pincode"] : "",
