@@ -711,6 +711,7 @@ export async function searchStudentsController(req, res){
       ]
     }
   }
+  const {startTime, endTime} = getStartAndEndTimeService(new Date(), new Date());
 
     const pipeline = [
         // Join students with parents
