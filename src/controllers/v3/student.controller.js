@@ -250,7 +250,7 @@ export async function updateStudentByParentController(req, res) {
 export async function getSessionStudentSController(req,res) {
   try {
     let {school, session, classId, section, sessionStudentId, startDate, endDate, include, page = 1, limit } = req.query;
-    const filter = {school: convertToMongoId(school), session: convertToMongoId(session)};
+    const filter = {school: convertToMongoId(school), session: convertToMongoId(session), isActive: true};
     if(classId) filter['classId']= convertToMongoId(classId);
     if(section) filter['section']= convertToMongoId(section);
     if(sessionStudentId) filter['_id'] = convertToMongoId(sessionStudentId);
@@ -677,7 +677,8 @@ export async function searchStudentsController(req, res){
     const limitNum = limit ? parseInt(limit) : "no limit";
     const skipNum = (pageNum - 1) * limitNum;
     let filter = {
-      school: convertToMongoId(adminId)
+      school: convertToMongoId(adminId),
+      isActive: true
     };
 
     if(classId) {
