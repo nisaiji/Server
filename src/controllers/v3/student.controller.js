@@ -1,12 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
-import { getSessionStudentService, getSessionStudentsPipelineService, registerSessionStudentService } from "../../services/v2/sessionStudent.service.js";
+import { getSessionStudentService, getSessionStudentsPipelineService, registerSessionStudentService, updateSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { getClassService } from "../../services/class.sevices.js";
 import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
 import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
-import { getStudentService, getStudentsPipelineService, registerStudentService, updateStudentService } from "../../services/student.service.js";
+import { getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getHolidayCountService } from "../../services/holiday.service.js";
 import { getWorkDayCountService } from "../../services/workDay.services.js";
@@ -1034,6 +1034,43 @@ export async function getSubjectsForStudentSectionController(req, res) {
 
     const teacherSubjectSections = await getTeacherSubjectSectionPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, teacherSubjectSections));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function deleteStudentController(req, res) {
+  try {
+    const sessionStudentId = req.params.sessionStudentId;
+    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId, isActive:true });
+    if (!sessionStudent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Student doesn't exists"));
+    }
+    const student = await getStudentService({_id: sessionStudent['student']});
+    if (!student) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student doesn't exists"));
+    }
+  
+    const[ parent, section] = await Promise.all([
+      getSchoolParentService({ _id:student["schoolParent"], isActive:true }),
+      getSectionService({ _id:sessionStudent["section"] })
+    ]);
+
+    if (!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
+    }
+    
+    await Promise.all([
+      updateSessionStudentService({_id:sessionStudentId}, {isActive:false}),
+      updateSectionService({_id:section["_id"]},{studentCount:section["studentCount"]-1})
+    ])
+
+    const siblings = await getStudentsService({schoolParent:student["schoolParent"], isActive:true});
+    if (siblings?.length === 0) {
+      await updateSchoolParentService({_id:student["schoolParent"]}, {isActive:false});
+    }
+
+    return res.status(StatusCodes.OK).send(success(200, "Student deleted successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

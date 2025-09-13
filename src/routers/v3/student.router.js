@@ -1,11 +1,12 @@
 import express from "express";
-import { getAttendancesController, registerStudentsFromExcelController, getSessionStudentSController, getStudentWithAllSessionStudentsController, registerSessionStudentController, registerStudentAndSessionStudentController, searchStudentsController, updateStudentByParentController, updateStudentBySchoolController, getSubjectsForStudentSectionController } from "../../controllers/v3/student.controller.js";
+import { getAttendancesController, registerStudentsFromExcelController, getSessionStudentSController, getStudentWithAllSessionStudentsController, registerSessionStudentController, registerStudentAndSessionStudentController, searchStudentsController, updateStudentByParentController, updateStudentBySchoolController, getSubjectsForStudentSectionController, deleteStudentController } from "../../controllers/v3/student.controller.js";
 import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../../middlewares/authentication/teacher.authentication.middleware.js";
 import { uploadStudentPhotoValidation } from "../../middlewares/validation/student.validation.middleware.js";
 import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
 import upload from "../../middlewares/multer.middleware.js";
 import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
+import { authorizeTeacherRoles } from "../../middlewares/authorization/teacherRoles.authorization.middleware.js";
 const studentRouter = express.Router();
 
 studentRouter.post('/admin', adminAuthenticate, registerStudentAndSessionStudentController);
@@ -33,5 +34,9 @@ studentRouter.get("/teacher", teacherAuthenticate, searchStudentsController);
 studentRouter.post('/excel', adminAuthenticate, upload, registerStudentsFromExcelController);
 
 studentRouter.get("/subjects/:sessionStudentId", parentAuthenticate, getSubjectsForStudentSectionController);
+
+studentRouter.delete("/teacher/:sessionStudentId", teacherAuthenticate, authorizeTeacherRoles('classTeacher'), deleteStudentController );
+studentRouter.delete("/admin/:sessionStudentId", adminAuthenticate, deleteStudentController );
+
 
 export default studentRouter;
