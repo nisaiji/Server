@@ -95,9 +95,6 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
     ];
 
     const leaveRequests = await getStudentLeaveRequestsPipelineService(pipeline);
-    if(leaveRequests.length === 0) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "No leave requests found"));
-    } 
     return res.status(StatusCodes.OK).send(success(200, leaveRequests));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -126,9 +123,6 @@ export async function getStudentLeaveRequestForParentController(req, res) {
     ];
 
     const leaveRequests = await getStudentLeaveRequestsPipelineService(pipeline);
-    if(leaveRequests.length === 0) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "No leave requests found"));
-    } 
     return res.status(StatusCodes.OK).send(success(200, leaveRequests));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -169,7 +163,7 @@ export async function updateStudentLeaveRequestController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
     }
     updateStudentLeaveRequestService({_id: requestId}, fieldsToBeUpdated);
-    return res.status(StatusCodes.OK).send(success(200, "Request deleted successfully!"));
+    return res.status(StatusCodes.OK).send(success(200, "Request updated successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -188,12 +182,12 @@ export async function updateStudentLeaveRequestByTeacherController(req, res) {
     if(remark) fieldsToBeUpdated.remark = remark;
     if(isRead) fieldsToBeUpdated.isRead = isRead;
 
-    const request = await getStudentLeaveRequestService({_id: requestId, parent: parentId});
+    const request = await getStudentLeaveRequestService({_id: requestId});
     if(!request) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
     }
     updateStudentLeaveRequestService({_id: requestId}, fieldsToBeUpdated);
-    return res.status(StatusCodes.OK).send(success(200, "Request deleted successfully!"));
+    return res.status(StatusCodes.OK).send(success(200, "Request updated successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

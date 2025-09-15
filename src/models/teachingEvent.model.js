@@ -44,9 +44,11 @@ const teachingEventSchema = new mongoose.Schema({
         type: String,
         trim: true
     }],
-    date: {
+    startDate: {
+        type: Number
+    },
+    endDate: {
         type: Number,
-        required: true
     },
     notes: {
         type: String,

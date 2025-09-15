@@ -54,11 +54,14 @@ const attendanceStatusSchema = Joi.object({
     'number.min': 'End time must be a positive number',
     'any.required': 'End time is required'
   }),
+  sessionStudentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+    "any.required":"session student id is required!"
+  })
 })
 
 const attendanceCountSchema = Joi.object({
-  studentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
-    "any.required":"stuent id is required!"
+  sessionStudentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+    "any.required":"session student id is required!"
   }),
   startTime: Joi.number().integer().min(0).required().messages({
     'number.base': 'Start time must be a number',

@@ -8,7 +8,7 @@ import { getSessionService } from "../services/session.services.js";
 
 export async function createTeachingEventController(req, res) {
     try {
-        const { subjectId, sectionId, sessionId, classId, title, description, date } = req.body;
+        const { subjectId, sectionId, sessionId, startDate, endDate, classId, title, description } = req.body;
         const teacherId = req.teacherId;
         const schoolId = req.adminId;
         const subject = await getSubjectService({_id: subjectId});
@@ -19,7 +19,7 @@ export async function createTeachingEventController(req, res) {
         if(!teacherSubjectSection) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher is not authorized for this action"));
         }
-        const teachingEvent = await createTeachingEventsService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, date, school: schoolId});
+        const teachingEvent = await createTeachingEventsService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, startDate, endDate, school: schoolId});
         return res.status(StatusCodes.CREATED).send(success(201, "Event created successfully"));
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -29,7 +29,7 @@ export async function createTeachingEventController(req, res) {
 export async function updateTeachingEventController(req, res) {
     try {
         const teachingEventId = req.params.teachingEventId;
-        const { title, description, date } = req.body;
+        const { title, description, startDate, endDate } = req.body;
         const teacherId = req.teacherId;
         const schoolId = req.adminId;
         const teachingEvent = await getTeachingEventService({_id: teachingEventId, teacher: teacherId, school: schoolId});
@@ -40,7 +40,7 @@ export async function updateTeachingEventController(req, res) {
         if(!session || session['status'] === 'completed') {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session is completed. You cannot update event"));
         }
-       await updateTeachingEventService( {_id: convertToMongoId(teachingEventId)}, { title, description, date});
+       await updateTeachingEventService( {_id: convertToMongoId(teachingEventId)}, { title, description, startDate, endDate});
         return res.status(StatusCodes.CREATED).send(success(200, "Event updated successfully"));
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -77,7 +77,8 @@ export async function getTeachingEventsForTeacherController(req, res) {
                     teacher: convertToMongoId(teacherId),
                     session: convertToMongoId(sessionId),
                     section: convertToMongoId(sectionId),
-                    date: { $gte: startTime, $lte: endTime}
+                    startDate: { $gte: startTime },
+                    endDate: { $lte: endTime }
                 }
             }
         ]);

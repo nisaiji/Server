@@ -19,7 +19,7 @@ attendanceRouter.get("/mismatch", teacherAuthenticate, authorizeTeacherRoles('cl
 attendanceRouter.get("/teacher/is-marked", teacherAuthenticate, authorizeTeacherRoles('classTeacher', 'guestTeacher'), checkAttendaceMarkedController);
 attendanceRouter.get("/parent/is-marked/:studentId", parentAuthenticate, checkParentAttendaceMarkedController);
 attendanceRouter.post("/status", teacherAuthenticate, authorizeTeacherRoles('classTeacher', 'guestTeacher'), attendanceStatusValidation, attendanceStatusOfSectionController);
-attendanceRouter.post("/status/:studentId", parentAuthenticate, attendanceStatusValidation, attendanceStatusOfStudentController);
+attendanceRouter.post("/status/:sessionStudentId", parentAuthenticate, attendanceStatusValidation, attendanceStatusOfStudentController);
 attendanceRouter.post("/parent/count", parentAuthenticate, attendanceCountValidation, attendanceCountOfStudentController)
 attendanceRouter.post("/teacher/count", teacherAuthenticate, authorizeTeacherRoles('classTeacher', 'guestTeacher'), attendanceCountValidation, attendanceCountOfStudentController)
 attendanceRouter.post("/teacher/undoAttendance", teacherAuthenticate, authorizeTeacherRoles('classTeacher'), undoAttendanceByTeacherController)

@@ -415,14 +415,14 @@ export async function attendanceStatusOfSectionController(req, res) {
 
 export async function attendanceStatusOfStudentController(req, res) {
   try {
-    const studentId = req.params.studentId;
+    const sessionStudentId = req.params.sessionStudentId;
     let {startTime, endTime} = req.body;
 
-    const student = await getStudentService({_id:studentId, isActive:true});
-    if(!student){
+    const sessionStudent = await getSessionService({_id:sessionStudentId, isActive:true});
+    if(!sessionStudent){
       return res.status(StatusCodes.NOT_FOUND).send(error(404,"Student not found"));
     }
-    const attendance = await getAttendancesService({student:studentId, date:{$gte:startTime, $lte:endTime}});
+    const attendance = await getAttendancesService({sessionStudent:sessionStudentId, date:{$gte:startTime, $lte:endTime}});
     return res.status(StatusCodes.OK).send(success(200, {attendance}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -431,17 +431,21 @@ export async function attendanceStatusOfStudentController(req, res) {
 
 export async function attendanceCountOfStudentController(req, res){
   try { 
-    let{ studentId, startTime, endTime } = req.body; 
+    let{ sessionStudentId, startTime, endTime } = req.body; 
 
-    const student = await getStudentService({_id:studentId});
+    const sessionStudent = await getSessionStudentService({_id:sessionStudentId});
+    if(!sessionStudent){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
+    }
+    const student = await getStudentService({_id: sessionStudent['student']});
     if(!student){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
     const [studentPresentAttendance, studentAbsentAttendance, sectionAttendance] = await Promise.all([
-      getAttendancesService({student:studentId, teacherAttendance:"present", date:{$gte: startTime, $lte:endTime}}),
-      getAttendancesService({student:studentId, teacherAttendance:"absent", date:{$gte: startTime, $lte:endTime}}),
-      getSectionAttendancesService({section:student["section"], date:{$gte:startTime, $lte:endTime}})
+      getAttendancesService({sessionStudent:sessionStudentId, teacherAttendance:"present", date:{$gte: startTime, $lte:endTime}}),
+      getAttendancesService({sessionStudent:sessionStudentId, teacherAttendance:"absent", date:{$gte: startTime, $lte:endTime}}),
+      getSectionAttendancesService({section:sessionStudent["section"], date:{$gte:startTime, $lte:endTime}})
     ]);
 
     const studentPresentAttendanceCount = studentPresentAttendance.length;
