@@ -436,6 +436,24 @@ export async function getTeacherController(req, res) {
       {
         $match: { _id: convertToMongoId(id) }
       },
+      {$lookup: {
+        from: "sessions",
+        localField: "admin",
+        foreignField: "school",
+        as: "session",
+        pipeline: [
+          { $match: { status: "active" } },
+          { $sort: { createdAt: -1 } },
+          { $limit: 1 }
+        ]
+       }
+      },
+       {
+         $unwind: {
+           path: "$session", 
+           preserveNullAndEmptyArrays: true
+         }
+      },
       {
         $lookup: {
           from: "sections",
@@ -565,6 +583,13 @@ export async function getTeacherController(req, res) {
           sectionStartTime: "$section.startTime",
           classId: "$class._id",
           className: "$class.name",
+          sessionId: "$session._id",
+          sessionName: "$session.name",
+          sessionStartDate: "$session.startDate",
+          sessionEndDate: "$session.endDate",
+          sessionStatus: "$session.status",
+          sessionStartYear: "$session.academicStartYear",
+          sessionEndYear: "$session.academicEndYear",
           sectionSubjects: "$sectionSubjects",
         }
       },
