@@ -16,6 +16,10 @@ const teacherSubjectSectionSchema = new mongoose.Schema({
         ref: 'section',
         required: true
     },
+    isMainSubject: {
+        type: Boolean,
+        default: true
+    },
     classId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'class',

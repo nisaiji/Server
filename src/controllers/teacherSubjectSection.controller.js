@@ -17,7 +17,7 @@ import { convertToMongoId } from "../services/mongoose.services.js";
 
 export async function createTeacherSubjectSectionController(req, res) {
     try {
-        const { sectionId, classId, teacherId, subjectId, sessionId } = req.body;
+        const { sectionId, classId, teacherId, subjectId, sessionId, isMainSubject } = req.body;
         const schoolId = req.adminId;
         const [section, classInfo, teacher, subject, session] = await Promise.all([
             getSectionService({_id: sectionId, admin: schoolId}),
@@ -40,7 +40,7 @@ export async function createTeacherSubjectSectionController(req, res) {
             return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Teacher already assigned for this subject in this section"));
         }
 
-        await registerTeacherSubjectSectionService({section:sectionId, classId, subject:subjectId, school: schoolId, session: sessionId, teacher: teacherId});
+        await registerTeacherSubjectSectionService({section:sectionId, classId, subject:subjectId, school: schoolId, session: sessionId, teacher: teacherId, isMainSubject});
         return res.status(StatusCodes.CREATED).send(success(201, "Teacher assigned for this subject in this section successfully"));
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -128,6 +128,7 @@ export async function getAllSubjectsOfTeacherInSectionController(req, res) {
                     subjectId: "$subject._id",
                     subjectName: "$subject.name",
                     subjectCode: "$subject.code",
+                    isMainSubject: "$isMainSubject",
                     _id: 0
                 }
             }
@@ -221,6 +222,7 @@ export async function getAllSubjectsTeachersOfSectionController(req, res) {
                     subjectId: "$subject._id",
                     subjectName: "$subject.name",
                     subjectCode: "$subject.code",
+                    isMainSubject: "$isMainSubject",
                     _id: 0
                 }
             }
@@ -314,6 +316,7 @@ export async function getAllSubjectsTeachersOfSectionForAdminController(req, res
                     subjectId: "$subject._id",
                     subjectName: "$subject.name",
                     subjectCode: "$subject.code",
+                    isMainSubject: "$isMainSubject",
                 }
             }
          ];
@@ -343,13 +346,13 @@ export async function deleteTeacherSubjectSectionController(req, res) {
 export async function updateTeacherSubjectSectionController(req, res) {
     try {
         const teacherSubjectSectionId = req.params.teacherSubjectSectionId;
-        const { sectionId, classId, teacherId, subjectId, sessionId } = req.body;
+        const { sectionId, classId, teacherId, subjectId, sessionId, isMainSubject } = req.body;
         const schoolId = req.adminId;
         const teacherSubjectSection = await getTeacherSubjectSectionService({_id: teacherSubjectSectionId, school: schoolId });
         if(!teacherSubjectSection) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
         }
-        const update = {};
+        const update = {isMainSubject};
         if(sectionId) update.section = sectionId;
         if(classId) update.classId = classId;
         if(teacherId) update.teacher = teacherId;
