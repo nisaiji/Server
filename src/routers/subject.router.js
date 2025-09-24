@@ -12,6 +12,7 @@ subjectRouter.get("/super-admin", superAdminAuthenticate, getAllSubjectsControll
 subjectRouter.get("/admin/:sectionId", adminAuthenticate, getUnassignedSubjectsForSectionController);
 subjectRouter.get("/teacher/:sectionId", teacherAuthenticate, getUnassignedSubjectsForSectionController);
 subjectRouter.delete("/:subjectId", superAdminAuthenticate, deleteSubjectController);
+subjectRouter.get("/admin", adminAuthenticate, getSubjectsController);
 
 // subjectRouter.get("/:sessionId", adminAuthenticate, getSubjectsController);
 // subjectRouter.get("/:sessionId", teacherAuthenticate, getSubjectsController);

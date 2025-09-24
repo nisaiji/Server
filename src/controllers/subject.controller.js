@@ -32,7 +32,7 @@ export async function getSubjectsController(req, res) {
     try {
         const sessionId = req.params.sessionId;
         const schoolId = req.adminId;
-        const subjects = await getSubjectsService({school: schoolId, session: sessionId  });
+        const subjects = await getSubjectsService({});
         return res.status(StatusCodes.OK).send(success(200, subjects));
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
