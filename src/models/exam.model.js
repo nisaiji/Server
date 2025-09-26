@@ -26,13 +26,11 @@ const examSchema = new mongoose.Schema({
     required: true 
   },
   description: {
-    type: String,
-    required: true
+    type: String
   },
   type: { 
     type: String, 
     enum: ["test", "exam"], 
-    required: true 
   },
   academicYear: { 
     type: String, 
@@ -43,8 +41,7 @@ const examSchema = new mongoose.Schema({
     default: "offline" 
   },
   startDate: { 
-    type: Date, 
-    required: true 
+    type: Date
   },
   endDate: { 
     type: Date 
@@ -56,13 +53,20 @@ const examSchema = new mongoose.Schema({
         ref: "subject", 
         required: true 
       },
+      subjectType: {
+        type: String,
+        enum: ["mainSubject","gradeOnlySubject"]
+      },
       components: [
         {
-          type: {
+          gradingType: {
             type: String,
-            enum: ["theory", "practical"],
-            required: true
+            enum: ["marks", "grades"],
           },
+          examType: {
+            type: String,
+            enum: ["theory", "practical", "grade"],
+          },          
           maxMarks: { type: Number },
           minMarks: { type: Number },
           maxGrade: { type: String },
