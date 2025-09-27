@@ -5,4 +5,5 @@ const examRouter = express.Router();
 
 examRouter.post("/", adminAuthenticate, createExamController);
 examRouter.get('/:sectionId', adminAuthenticate, getExamsForAdminController);
+
 export default examRouter;
