@@ -110,7 +110,7 @@ const examSchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
-  publishedAt: { 
+  resultPublishedAt: { 
     type: Date 
   },
   remarks: { 

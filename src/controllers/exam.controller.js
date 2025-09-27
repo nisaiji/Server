@@ -25,7 +25,7 @@ export async function createExamController(req, res) {
   }
 }
 
-export async function getExamsForAdminController(req, res) {
+export async function getExamsForSectionController(req, res) {
   try {
     const sectionId  = req.params.sectionId;
     const adminId = req.adminId;

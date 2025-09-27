@@ -5,6 +5,7 @@ import { getSectionService } from '../services/section.services.js';
 import { getExamService } from '../services/exam.services.js';
 import { getSubjectService } from '../services/subject.service.js';
 import { convertToMongoId } from '../services/mongoose.services.js';
+import { getSessionStudentsPipelineService } from '../services/v2/sessionStudent.service.js';
 
 export async function createStudentExamResultController(req, res) {
   try {
@@ -44,7 +45,7 @@ export async function updateStudentExamResultController(req, res) {
   }
 }
 
-export async function getSectionStudentExamMarksController(req, res) {
+export async function getStudentsExamMarksForSubjectController(req, res) {
   try {
     const {subjectId, examId} = req.body;
     const[subject, exam] = await Promise.all([
@@ -166,8 +167,8 @@ export async function getSectionStudentExamMarksController(req, res) {
       {
         $project: {
           id: '$_id',
-          studentFirstName: '$student.firstName',
-          studentLastName: '$student.lastName',
+          studentFirstName: '$student.firstname',
+          studentLastName: '$student.lastname',
           studentId: '$student._id',
           studentGender: '$student.gender',
           studentPhoto: '$student.photo',
@@ -212,6 +213,168 @@ export async function getSectionStudentExamMarksController(req, res) {
     const studentExamMarks = await getStudentExamResultsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, studentExamMarks));
     
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getSectionStudentsExamMarksController(req, res) {
+  try {
+    const {sectionId, examId} = req.body;
+    const pipeline = [
+      {
+        $match: {
+          section: convertToMongoId(sectionId)
+        }
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $unwind: {
+          path: '$student',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sessions",
+          localField: "session",
+          foreignField: "_id",
+          as: "session"
+        }
+      },
+      {
+        $unwind: {
+          path: "$session",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+        $unwind: {
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "class"
+        }
+      },
+      {
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'studentexamresults',
+          localField: '_id',
+          foreignField: 'sessionStudent',
+          as: 'studentExamResult',
+          pipeline: [
+            {
+              $match: {
+                exam: convertToMongoId(examId)
+              }
+            },
+            {
+              $lookup: {
+                from: 'subjects',
+                localField: 'subject',
+                foreignField: '_id',
+                as: 'subject'
+              }
+            },
+            {
+              $unwind: {
+                path: '$subject',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'exams',
+                localField: 'exam',
+                foreignField: '_id',
+                as: 'exam'
+              }
+            },
+            {
+              $unwind: {
+                path: '$exam',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $project: {
+                subjectId: '$subject._id',
+                subjectName: '$subject.name',
+                subjectCode: '$subject.code',
+                subjectDescription: '$subject.description',
+                examId: '$exam._id',
+                examName: '$exam.name',
+                examType: '$exam.type',
+                examStatus: '$exam.status',
+                examResultPublished: '$exam.resultPublished',
+                examResultPublishedAt: '$exam.resultPublishedAt',
+                components: '$components',
+              }
+            }
+          ]
+        }
+      },
+            {
+        $project: {
+          id: '$_id',
+          studentFirstName: '$student.firstname',
+          studentLastName: '$student.lastname',
+          studentId: '$student._id',
+          studentGender: '$student.gender',
+          studentPhoto: '$student.photo',
+          studntBloodGroup: '$student.bloodGroup',
+          studentAddress: '$student.address',
+          studentCity: '$student.city',
+          studentDistrict: '$student.district',
+          studentState: '$student.state',
+          studentCountry: '$student.country',
+          studentPincode: '$student.pincode',
+          sessionStudentId: '$sessionStudent._id',
+          sectionId: '$section._id',
+          sectionName: '$section.name',
+          classId: '$class._id',
+          className: '$class.name',
+          sessionId: '$session._id',
+          sessionName: '$session.name',
+          sessionStatus: '$session.status',
+          sessionStartDate: '$session.startDate',
+          sessionEndDate: '$session.endDate',
+          isCurrentSession: '$session.isCurrent',
+          studentExamResult: '$studentExamResult'
+
+        }
+      }
+    ]
+
+    const sessionStudents = await getSessionStudentsPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, sessionStudents))
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
