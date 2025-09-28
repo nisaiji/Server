@@ -292,6 +292,45 @@ export async function getSectionStudentsExamMarksController(req, res) {
       },
       {
         $lookup: {
+          from: "exams",
+          let: { examId: convertToMongoId(examId) },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$examId"] }
+              }
+            },
+            {
+              $unwind: "$subjects"
+            },
+            {
+              $lookup: {
+                from: "subjects",
+                localField: "subjects.subject",
+                foreignField: "_id",
+                as: "subject"
+              }
+            },
+            {
+              $project: {
+                examId: '$_id',
+                examName: '$name',
+                examType: '$type',
+                subjects: '$subject'
+              }
+            }
+          ],
+          as: "exam"
+        }
+      },
+      {
+        $unwind: {
+          path: "$exam",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
           from: 'studentexamresults',
           localField: '_id',
           foreignField: 'sessionStudent',
@@ -374,8 +413,8 @@ export async function getSectionStudentsExamMarksController(req, res) {
           sessionStartDate: '$session.startDate',
           sessionEndDate: '$session.endDate',
           isCurrentSession: '$session.isCurrent',
-          studentExamResult: '$studentExamResult'
-
+          studentExamResult: '$studentExamResult',
+          exam: '$exam'
         }
       }
     ]
