@@ -56,6 +56,17 @@ export async function getSectionExamsForTeacherController(req, res) {
         }
       },
       {
+      $addFields: {
+        subjects: {
+          $filter: {
+            input: "$subjects",
+            as: "s",
+            cond: { $eq: ["$$s.subject", convertToMongoId(subjectId)] }
+          }
+        }
+      }
+    },
+    {
         $lookup: {
           from: "subjects",
           localField: "subjects.subject",
