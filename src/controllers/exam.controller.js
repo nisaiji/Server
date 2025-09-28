@@ -44,3 +44,62 @@ export async function getExamsForSectionController(req, res) {
   }
 }
 
+export async function getSectionExamsForTeacherController(req, res) {
+  try {
+    const {sectionId, subjectId} = req.body;
+    const adminId = req.adminId;
+    const teacherId = req.teacherId;
+    const pipeline = [
+      {
+        $match: {
+          section: convertToMongoId(sectionId)
+        }
+      },
+      {
+        $lookup: {
+          from: "subjects",
+          localField: "subjects.subject",
+          foreignField: "_id",
+          as: "subjectDocs"
+        }
+      },
+      {
+        $addFields: {
+          subjects: {
+            $map: {
+              input: "$subjects",
+              as: "s",
+              in: {
+                subjectType: "$$s.subjectType",
+                components: "$$s.components",
+                subject: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$subjectDocs",
+                        as: "sd",
+                        cond: { $eq: ["$$sd._id", "$$s.subject"] }
+                      }
+                    },
+                    0
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          subjectDocs: 0
+        }
+      }
+    ];
+    const exams = await getExamsPipelineService(pipeline);
+ 
+    return res.status(StatusCodes.OK).send(success(200, exams)); 
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
