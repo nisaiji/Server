@@ -4,7 +4,7 @@ import { teacherAuthenticate } from "../middlewares/authentication/teacher.authe
 const studentExamResultRouter = express.Router();
 
 studentExamResultRouter.post("/", createStudentExamResultController);
-studentExamResultRouter.post("/student-marks",  getStudentsExamMarksForSubjectController)
+studentExamResultRouter.post("/student-subject-marks",  getStudentsExamMarksForSubjectController)
 studentExamResultRouter.post("/section-student-marks",  getSectionStudentsExamMarksController)
 studentExamResultRouter.put("/:studentExamResultId", updateStudentExamResultController);
 
