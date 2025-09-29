@@ -79,7 +79,7 @@ export async function refreshTokenAuthenticate(req, res, next) {
     req.teacherId = decoded.teacherId;
     req.sectionId = decoded?.sectionId;
     req.adminId = decoded.adminId;
-    req.role = "teacher";
+    req.role = decoded?.role;
     req.data = decoded;
     next();
 
