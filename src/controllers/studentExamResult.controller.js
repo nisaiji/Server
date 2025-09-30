@@ -433,7 +433,7 @@ export async function getStudentExamMarksController(req, res) {
     const pipeline = [
       {
         $match: {
-          sessionStudent: convertToMongoId(sessionStudentId)          
+          _id: convertToMongoId(sessionStudentId)          
         }
       },
       {
@@ -492,133 +492,133 @@ export async function getStudentExamMarksController(req, res) {
           preserveNullAndEmptyArrays: true
         }
       },
-      // {
-      //   $lookup: {
-      //     from: "exams",
-      //     let: { examId: convertToMongoId(examId) },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           $expr: { $eq: ["$_id", "$$examId"] }
-      //         }
-      //       },
-      //       {
-      //         $unwind: "$subjects"
-      //       },
-      //       {
-      //         $lookup: {
-      //           from: "subjects",
-      //           localField: "subjects.subject",
-      //           foreignField: "_id",
-      //           as: "subject"
-      //         }
-      //       },
-      //       {
-      //         $project: {
-      //           examId: '$_id',
-      //           examName: '$name',
-      //           examType: '$type',
-      //           subjects: '$subject'
-      //         }
-      //       }
-      //     ],
-      //     as: "exam"
-      //   }
-      // },
-      // {
-      //   $unwind: {
-      //     path: "$exam",
-      //     preserveNullAndEmptyArrays: true
-      //   }
-      // },
-      // {
-      //   $lookup: {
-      //     from: 'studentexamresults',
-      //     localField: '_id',
-      //     foreignField: 'sessionStudent',
-      //     as: 'studentExamResult',
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           exam: convertToMongoId(examId)
-      //         }
-      //       },
-      //       {
-      //         $lookup: {
-      //           from: 'subjects',
-      //           localField: 'subject',
-      //           foreignField: '_id',
-      //           as: 'subject'
-      //         }
-      //       },
-      //       {
-      //         $unwind: {
-      //           path: '$subject',
-      //           preserveNullAndEmptyArrays: true
-      //         }
-      //       },
-      //       {
-      //         $lookup: {
-      //           from: 'exams',
-      //           localField: 'exam',
-      //           foreignField: '_id',
-      //           as: 'exam'
-      //         }
-      //       },
-      //       {
-      //         $unwind: {
-      //           path: '$exam',
-      //           preserveNullAndEmptyArrays: true
-      //         }
-      //       },
-      //       {
-      //         $project: {
-      //           subjectId: '$subject._id',
-      //           subjectName: '$subject.name',
-      //           subjectCode: '$subject.code',
-      //           subjectDescription: '$subject.description',
-      //           examId: '$exam._id',
-      //           examName: '$exam.name',
-      //           examType: '$exam.type',
-      //           examStatus: '$exam.status',
-      //           examResultPublished: '$exam.resultPublished',
-      //           examResultPublishedAt: '$exam.resultPublishedAt',
-      //           components: '$components',
-      //         }
-      //       }
-      //     ]
-      //   }
-      // },
-      // {
-      //   $project: {
-      //     id: '$_id',
-      //     studentFirstName: '$student.firstname',
-      //     studentLastName: '$student.lastname',
-      //     studentId: '$student._id',
-      //     studentGender: '$student.gender',
-      //     studentPhoto: '$student.photo',
-      //     studntBloodGroup: '$student.bloodGroup',
-      //     studentAddress: '$student.address',
-      //     studentCity: '$student.city',
-      //     studentDistrict: '$student.district',
-      //     studentState: '$student.state',
-      //     studentCountry: '$student.country',
-      //     studentPincode: '$student.pincode',
-      //     sessionStudentId: '$sessionStudent._id',
-      //     sectionId: '$section._id',
-      //     sectionName: '$section.name',
-      //     classId: '$class._id',
-      //     className: '$class.name',
-      //     sessionId: '$session._id',
-      //     sessionName: '$session.name',
-      //     sessionStatus: '$session.status',
-      //     sessionStartDate: '$session.startDate',
-      //     sessionEndDate: '$session.endDate',
-      //     isCurrentSession: '$session.isCurrent',
-      //     studentExamResult: '$studentExamResult',
-      //     exam: '$exam'
-      //   }
-      // }
+      {
+        $lookup: {
+          from: "exams",
+          let: { examId: convertToMongoId(examId) },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$examId"] }
+              }
+            },
+            {
+              $unwind: "$subjects"
+            },
+            {
+              $lookup: {
+                from: "subjects",
+                localField: "subjects.subject",
+                foreignField: "_id",
+                as: "subject"
+              }
+            },
+            {
+              $project: {
+                examId: '$_id',
+                examName: '$name',
+                examType: '$type',
+                subjects: '$subject'
+              }
+            }
+          ],
+          as: "exam"
+        }
+      },
+      {
+        $unwind: {
+          path: "$exam",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'studentexamresults',
+          localField: '_id',
+          foreignField: 'sessionStudent',
+          as: 'studentExamResult',
+          pipeline: [
+            {
+              $match: {
+                exam: convertToMongoId(examId)
+              }
+            },
+            {
+              $lookup: {
+                from: 'subjects',
+                localField: 'subject',
+                foreignField: '_id',
+                as: 'subject'
+              }
+            },
+            {
+              $unwind: {
+                path: '$subject',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'exams',
+                localField: 'exam',
+                foreignField: '_id',
+                as: 'exam'
+              }
+            },
+            {
+              $unwind: {
+                path: '$exam',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $project: {
+                subjectId: '$subject._id',
+                subjectName: '$subject.name',
+                subjectCode: '$subject.code',
+                subjectDescription: '$subject.description',
+                examId: '$exam._id',
+                examName: '$exam.name',
+                examType: '$exam.type',
+                examStatus: '$exam.status',
+                examResultPublished: '$exam.resultPublished',
+                examResultPublishedAt: '$exam.resultPublishedAt',
+                components: '$components',
+              }
+            }
+          ]
+        }
+      },
+      {
+        $project: {
+          id: '$_id',
+          studentFirstName: '$student.firstname',
+          studentLastName: '$student.lastname',
+          studentId: '$student._id',
+          studentGender: '$student.gender',
+          studentPhoto: '$student.photo',
+          studntBloodGroup: '$student.bloodGroup',
+          studentAddress: '$student.address',
+          studentCity: '$student.city',
+          studentDistrict: '$student.district',
+          studentState: '$student.state',
+          studentCountry: '$student.country',
+          studentPincode: '$student.pincode',
+          sessionStudentId: '$sessionStudent._id',
+          sectionId: '$section._id',
+          sectionName: '$section.name',
+          classId: '$class._id',
+          className: '$class.name',
+          sessionId: '$session._id',
+          sessionName: '$session.name',
+          sessionStatus: '$session.status',
+          sessionStartDate: '$session.startDate',
+          sessionEndDate: '$session.endDate',
+          isCurrentSession: '$session.isCurrent',
+          studentExamResult: '$studentExamResult',
+          exam: '$exam'
+        }
+      }
     ]
 
     const sessionStudent = await getSessionStudentsPipelineService(pipeline);
