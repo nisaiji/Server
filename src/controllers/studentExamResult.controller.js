@@ -425,3 +425,205 @@ export async function getSectionStudentsExamMarksController(req, res) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+export async function getStudentExamMarksController(req, res) {
+  try {
+    const {sessionStudentId, examId} = req.body;
+    console.log({sessionStudentId, examId})
+    const pipeline = [
+      {
+        $match: {
+          sessionStudent: convertToMongoId(sessionStudentId)          
+        }
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $unwind: {
+          path: '$student',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sessions",
+          localField: "session",
+          foreignField: "_id",
+          as: "session"
+        }
+      },
+      {
+        $unwind: {
+          path: "$session",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+        $unwind: {
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "class"
+        }
+      },
+      {
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      // {
+      //   $lookup: {
+      //     from: "exams",
+      //     let: { examId: convertToMongoId(examId) },
+      //     pipeline: [
+      //       {
+      //         $match: {
+      //           $expr: { $eq: ["$_id", "$$examId"] }
+      //         }
+      //       },
+      //       {
+      //         $unwind: "$subjects"
+      //       },
+      //       {
+      //         $lookup: {
+      //           from: "subjects",
+      //           localField: "subjects.subject",
+      //           foreignField: "_id",
+      //           as: "subject"
+      //         }
+      //       },
+      //       {
+      //         $project: {
+      //           examId: '$_id',
+      //           examName: '$name',
+      //           examType: '$type',
+      //           subjects: '$subject'
+      //         }
+      //       }
+      //     ],
+      //     as: "exam"
+      //   }
+      // },
+      // {
+      //   $unwind: {
+      //     path: "$exam",
+      //     preserveNullAndEmptyArrays: true
+      //   }
+      // },
+      // {
+      //   $lookup: {
+      //     from: 'studentexamresults',
+      //     localField: '_id',
+      //     foreignField: 'sessionStudent',
+      //     as: 'studentExamResult',
+      //     pipeline: [
+      //       {
+      //         $match: {
+      //           exam: convertToMongoId(examId)
+      //         }
+      //       },
+      //       {
+      //         $lookup: {
+      //           from: 'subjects',
+      //           localField: 'subject',
+      //           foreignField: '_id',
+      //           as: 'subject'
+      //         }
+      //       },
+      //       {
+      //         $unwind: {
+      //           path: '$subject',
+      //           preserveNullAndEmptyArrays: true
+      //         }
+      //       },
+      //       {
+      //         $lookup: {
+      //           from: 'exams',
+      //           localField: 'exam',
+      //           foreignField: '_id',
+      //           as: 'exam'
+      //         }
+      //       },
+      //       {
+      //         $unwind: {
+      //           path: '$exam',
+      //           preserveNullAndEmptyArrays: true
+      //         }
+      //       },
+      //       {
+      //         $project: {
+      //           subjectId: '$subject._id',
+      //           subjectName: '$subject.name',
+      //           subjectCode: '$subject.code',
+      //           subjectDescription: '$subject.description',
+      //           examId: '$exam._id',
+      //           examName: '$exam.name',
+      //           examType: '$exam.type',
+      //           examStatus: '$exam.status',
+      //           examResultPublished: '$exam.resultPublished',
+      //           examResultPublishedAt: '$exam.resultPublishedAt',
+      //           components: '$components',
+      //         }
+      //       }
+      //     ]
+      //   }
+      // },
+      // {
+      //   $project: {
+      //     id: '$_id',
+      //     studentFirstName: '$student.firstname',
+      //     studentLastName: '$student.lastname',
+      //     studentId: '$student._id',
+      //     studentGender: '$student.gender',
+      //     studentPhoto: '$student.photo',
+      //     studntBloodGroup: '$student.bloodGroup',
+      //     studentAddress: '$student.address',
+      //     studentCity: '$student.city',
+      //     studentDistrict: '$student.district',
+      //     studentState: '$student.state',
+      //     studentCountry: '$student.country',
+      //     studentPincode: '$student.pincode',
+      //     sessionStudentId: '$sessionStudent._id',
+      //     sectionId: '$section._id',
+      //     sectionName: '$section.name',
+      //     classId: '$class._id',
+      //     className: '$class.name',
+      //     sessionId: '$session._id',
+      //     sessionName: '$session.name',
+      //     sessionStatus: '$session.status',
+      //     sessionStartDate: '$session.startDate',
+      //     sessionEndDate: '$session.endDate',
+      //     isCurrentSession: '$session.isCurrent',
+      //     studentExamResult: '$studentExamResult',
+      //     exam: '$exam'
+      //   }
+      // }
+    ]
+
+    const sessionStudent = await getSessionStudentsPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, sessionStudent))
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}

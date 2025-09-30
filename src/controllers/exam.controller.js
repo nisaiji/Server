@@ -2,6 +2,8 @@ import { createExamService, getExamsPipelineService } from '../services/exam.ser
 import { StatusCodes } from 'http-status-codes';
 import { error, success } from '../utills/responseWrapper.js';
 import { convertToMongoId } from '../services/mongoose.services.js';
+import { getSessionStudentService } from '../services/v2/sessionStudent.service.js';
+import { getSectionService } from '../services/section.services.js';
 
 export async function createExamController(req, res) {
   try {
@@ -34,39 +36,9 @@ export async function getExamsForSectionController(req, res) {
         $match: {
           section: convertToMongoId(sectionId)
         }
-      }
-    ];
-    const exams = await getExamsPipelineService(pipeline);
- 
-    return res.status(StatusCodes.OK).send(success(200, exams)); 
-  } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-  }
-}
-
-export async function getSectionExamsForTeacherController(req, res) {
-  try {
-    const {sectionId, subjectId} = req.body;
-    const adminId = req.adminId;
-    const teacherId = req.teacherId;
-    const pipeline = [
-      {
-        $match: {
-          section: convertToMongoId(sectionId)
-        }
       },
       {
-      $addFields: {
-        subjects: {
-          $filter: {
-            input: "$subjects",
-            as: "s",
-            cond: { $eq: ["$$s.subject", convertToMongoId(subjectId)] }
-          }
-        }
-      }
-    },
-    {
+    
         $lookup: {
           from: "subjects",
           localField: "subjects.subject",
@@ -114,3 +86,136 @@ export async function getSectionExamsForTeacherController(req, res) {
   }
 }
 
+export async function getSectionExamsForTeacherController(req, res) {
+  try {
+    const {sectionId, subjectId} = req.body;
+    const adminId = req.adminId;
+    const teacherId = req.teacherId;
+    const pipeline = [
+      {
+        $match: {
+          section: convertToMongoId(sectionId)
+        }
+      },
+      {
+        $addFields: {
+          subjects: {
+            $filter: {
+              input: "$subjects",
+              as: "s",
+              cond: { $eq: ["$$s.subject", convertToMongoId(subjectId)] }
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "subjects",
+          localField: "subjects.subject",
+          foreignField: "_id",
+          as: "subjectDocs"
+        }
+      },
+      {
+        $addFields: {
+          subjects: {
+            $map: {
+              input: "$subjects",
+              as: "s",
+              in: {
+                subjectType: "$$s.subjectType",
+                components: "$$s.components",
+                subject: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$subjectDocs",
+                        as: "sd",
+                        cond: { $eq: ["$$sd._id", "$$s.subject"] }
+                      }
+                    },
+                    0
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          subjectDocs: 0
+        }
+      }
+    ];
+    const exams = await getExamsPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, exams)); 
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getStudentExamsForParentController(req, res) {
+  try {
+    const {sessionStudentId} = req.body;
+    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
+    if(!sessionStudent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
+    }
+    const section = await getSectionService({_id: sessionStudent['section']});
+    if(!section) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+    }
+
+    const pipeline = [
+      {
+        $match: {
+          section: convertToMongoId(section['id'])
+        }
+      },
+      {
+        $lookup: {
+          from: "subjects",
+          localField: "subjects.subject",
+          foreignField: "_id",
+          as: "subjectDocs"
+        }
+      },
+      {
+        $addFields: {
+          subjects: {
+            $map: {
+              input: "$subjects",
+              as: "s",
+              in: {
+                subjectType: "$$s.subjectType",
+                components: "$$s.components",
+                subject: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$subjectDocs",
+                        as: "sd",
+                        cond: { $eq: ["$$sd._id", "$$s.subject"] }
+                      }
+                    },
+                    0
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          subjectDocs: 0
+        }
+      }
+    ]
+    const exams = await getExamsPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, exams));       
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(err.message));
+  }
+}
