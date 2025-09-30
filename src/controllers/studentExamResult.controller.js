@@ -23,6 +23,29 @@ export async function createStudentExamResultController(req, res) {
   }
 }
 
+export async function createOrUpdateStudentExamResultByTeacherController(req, res) {
+  try {
+    const {studentExamResultId, examId, sessionStudentId, subjectId, components} = req.body;
+    if(studentExamResultId) {
+      const studentExamResult = await getStudentExamResultService({_id: studentExamResultId});
+      if(!studentExamResult) {
+        return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student exam result not found"));
+      }
+      await updateStudentExamResultService({_id: studentExamResultId},{components});
+      return res.status(StatusCodes.OK).send(success(200, "Student exam result updated successfully"));
+    }
+    const studentExamResult = await createStudentExamResultService({
+      exam: examId,
+      sessionStudent: sessionStudentId,
+      subject: subjectId,
+      components
+    });
+    return res.status(StatusCodes.CREATED).send(success(201, 'Student exam result created successfully'));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
 export async function updateStudentExamResultController(req, res) {
   try {
     const id = req.params.studentExamResultId;
