@@ -4,11 +4,45 @@ import { error, success } from '../utills/responseWrapper.js';
 import { convertToMongoId } from '../services/mongoose.services.js';
 import { getSessionStudentService } from '../services/v2/sessionStudent.service.js';
 import { getSectionService } from '../services/section.services.js';
+import { getSessionService } from '../services/session.services.js';
+import { getClassService } from '../services/class.sevices.js';
+import { getTeacherSubjectSectionsService } from '../services/teacherSubjectSection.service.js';
 
-export async function createExamController(req, res) {
+export async function createExambyAdminController(req, res) {
   try {
-    const { sessionId, classId, sectionId, name, description, type, startDate, endDate, subjects } = req.body;
-    const adminId = req.adminId;
+    let { sessionId, classId, sectionId, name, description, type, startDate, endDate, subjects } = req.body;
+    const adminId = req.adminId; 
+    const[session, classinfo, section] = await Promise.all([
+      getSessionService({_id: sessionId, school: adminId}),
+      getClassService({_id: classId, admin: adminId, session: sessionId}),
+      getSectionService({_id: sectionId, classId: classId, session: sessionId, admin: adminId}),
+    ]);
+    if(!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
+    if(!classinfo) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
+    }
+    if(!section) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+    }
+     if(session['status']==='completed'){
+       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Can't create exam for completed session"));
+     }
+     
+    // const subjectIds = subjects.map(s => s.subjectId);
+    const subjectIds = subjects.map(s => s.subject);
+    const assignedSubjects = await getTeacherSubjectSectionsService({
+      subject: { $in: subjectIds },
+      section: sectionId,
+      classId: classId,
+      session: sessionId,
+      school: adminId
+    });
+
+    if (assignedSubjects.length !== subjects.length) {;
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Provided invalid subjects"));
+    }
     const exam = await createExamService({
       school: adminId,
       session: sessionId,

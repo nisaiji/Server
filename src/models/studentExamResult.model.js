@@ -73,7 +73,7 @@ const examResultSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Unique per exam-student-subject
-examResultSchema.index({ exam: 1, sessionStudent: 1, subject: 1 }, { unique: true });
+// examResultSchema.index({ exam: 1, sessionStudent: 1, subject: 1 }, { unique: true });
 
 const studentExamResultModel = mongoose.model("studentExamResult", examResultSchema);
 

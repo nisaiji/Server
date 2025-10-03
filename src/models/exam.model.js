@@ -68,9 +68,7 @@ const examSchema = new mongoose.Schema({
             enum: ["theory", "practical", "grade"],
           },          
           maxMarks: { type: Number },
-          minMarks: { type: Number },
           maxGrade: { type: String },
-          minGrade: { type: String },
           passingMarks: { type: Number },
           passingGrade: { type: String }
         }

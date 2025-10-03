@@ -5,7 +5,8 @@ import { getSectionService } from '../services/section.services.js';
 import { getExamService } from '../services/exam.services.js';
 import { getSubjectService } from '../services/subject.service.js';
 import { convertToMongoId } from '../services/mongoose.services.js';
-import { getSessionStudentsPipelineService } from '../services/v2/sessionStudent.service.js';
+import { getSessionStudentService, getSessionStudentsPipelineService } from '../services/v2/sessionStudent.service.js';
+import { getSessionService } from '../services/session.services.js';
 
 export async function createStudentExamResultController(req, res) {
   try {
@@ -323,17 +324,17 @@ export async function getSectionStudentsExamMarksController(req, res) {
                 $expr: { $eq: ["$_id", "$$examId"] }
               }
             },
-            {
-              $unwind: "$subjects"
-            },
-            {
-              $lookup: {
-                from: "subjects",
-                localField: "subjects.subject",
-                foreignField: "_id",
-                as: "subject"
-              }
-            },
+            // {
+            //   $unwind: "$subjects"
+            // },
+            // {
+            //   $lookup: {
+            //     from: "subjects",
+            //     localField: "subjects.subject",
+            //     foreignField: "_id",
+            //     as: "subject"
+            //   }
+            // },
             {
               $project: {
                 examId: '$_id',
@@ -648,5 +649,67 @@ export async function getStudentExamMarksController(req, res) {
     return res.status(StatusCodes.OK).send(success(200, sessionStudent))
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function createOrUpdateBulkStudentExamResultController(req,res) {
+  try {
+    const {studentExamResults, examId, sectionId} = req.body;
+    const [section, exam] = await Promise.all([
+      getSectionService({_id: sectionId}),
+      getExamService({_id: examId})
+    ]);
+
+    if(!section) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+    }
+    if(!exam) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+    }
+
+    if(exam['section'].toString() !== sectionId) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found for this section"));
+    }
+
+    const session = await getSessionService({_id: section['session']});
+    if(!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
+    if(session['status'] === 'completed') {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "can't save exam results for completed session"));
+    }
+
+    for(const studentExamResult of studentExamResults) {
+      const { studentExamResultId, sessionStudentId, subjectId, components } = studentExamResult;
+      console.log({sessionStudentId, sectionId, session:section['session'], classId: section['classId']});
+      const sessionStudent = await getSessionStudentService({_id: sessionStudentId, section: sectionId, session: section['session'].toString(), classId: section['classId'].toString()});
+      if(!sessionStudent) {
+        return res.status(StatusCodes.NOT_FOUND).send(error(404, `Student not found in this section`));
+      }
+     
+      if(studentExamResultId) {
+        const existingStudentExamResult = await getStudentExamResultService({_id: studentExamResultId, exam: examId, subject: subjectId});
+        if(existingStudentExamResult) {
+          await updateStudentExamResultService({_id: studentExamResultId},{components});
+        } else {
+          await createStudentExamResultService({
+            exam: examId,
+            sessionStudent: sessionStudentId,
+            subject: subjectId,
+            components
+          });
+        }
+      } else {
+        await createStudentExamResultService({
+          exam: examId,
+          sessionStudent: sessionStudentId,
+          subject: subjectId,
+          components
+        });
+      } 
+    }
+    return res.status(StatusCodes.OK).send(success(200, "Student Exam results saved successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.NOT_FOUND).send(error(500, err.message));
   }
 }
