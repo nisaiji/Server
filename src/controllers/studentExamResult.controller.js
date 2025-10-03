@@ -453,7 +453,15 @@ export async function getSectionStudentsExamMarksController(req, res) {
 export async function getStudentExamMarksController(req, res) {
   try {
     const {sessionStudentId, examId} = req.body;
-    console.log({sessionStudentId, examId})
+    const exam = await getExamService({_id: examId});
+    if(!exam) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+    }
+
+    if(!exam.resultPublished){
+      return res.status(StatusCodes.OK).send(success(200, "Exam result is not published yet"));
+    }
+
     const pipeline = [
       {
         $match: {

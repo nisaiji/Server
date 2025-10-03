@@ -1,5 +1,5 @@
-import { createExamService, getExamsPipelineService } from '../services/exam.services.js';
-import { StatusCodes } from 'http-status-codes';
+import { createExamService, getExamService, getExamsPipelineService, updateExamService } from '../services/exam.services.js';
+import { NOT_FOUND, StatusCodes } from 'http-status-codes';
 import { error, success } from '../utills/responseWrapper.js';
 import { convertToMongoId } from '../services/mongoose.services.js';
 import { getSessionStudentService } from '../services/v2/sessionStudent.service.js';
@@ -251,5 +251,26 @@ export async function getStudentExamsForParentController(req, res) {
     return res.status(StatusCodes.OK).send(success(200, exams));       
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(err.message));
+  }
+}
+
+export async function updateExamController(req, res) {
+  try {
+    const examId = req.params.examId;
+    const {name, description, type, resultPublished, status, subjects} = req.body;
+    const exam = await getExamService({_id: examId});
+    if(!exam) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+    }
+    const params = {}
+    if(name) params.name = name;
+    if(description) params.description = description;
+    if(type) params.type = type;
+    if(resultPublished="true") params.resultPublished = resultPublished=="true";
+    if(subjects) params.subjects = subjects;
+    await updateExamService({_id: examId}, params);
+    return res.status(StatusCodes.OK).send(success(200, "Exam updated successfully"));    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
