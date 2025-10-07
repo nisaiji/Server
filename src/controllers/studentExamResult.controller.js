@@ -249,6 +249,186 @@ export async function getStudentsExamMarksForSubjectController(req, res) {
   }
 }
 
+export async function getStudentExamMarksForSubjectController(req, res) {
+  try {
+    const {sessionStudentId, subjectId, examId} = req.body;
+    const[subject, exam, sessionStudent] = await Promise.all([
+      getSubjectService({_id: subjectId}),
+      getExamService({_id: examId}),
+      getSessionStudentService({_id: sessionStudentId})
+    ]);
+    
+    if(!subject) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject not found"));
+    }
+    if(!exam) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+    }
+    if(!sessionStudent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
+    }
+
+    const pipeline = [
+      {
+        $match: {
+          _id: convertToMongoId(sessionStudentId)
+        }
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $unwind: {
+          path: '$student',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sessions",
+          localField: "session",
+          foreignField: "_id",
+          as: "session"
+        }
+      },
+      {
+        $unwind: {
+          path: "$session",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+        $unwind: {
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "class"
+        }
+      },
+      {
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'studentexamresults',
+          localField: '_id',
+          foreignField: 'sessionStudent',
+          as: 'studentExamResult',
+          pipeline: [
+            {
+              $match: {
+                exam: convertToMongoId(examId),
+                subject: convertToMongoId(subjectId)
+              }
+            },
+            {
+              $lookup: {
+                from: 'subjects',
+                localField: 'subject',
+                foreignField: '_id',
+                as: 'subject'
+              }
+            },
+            {
+              $unwind: {
+                path: '$subject',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'exams',
+                localField: 'exam',
+                foreignField: '_id',
+                as: 'exam'
+              }
+            },
+            {
+              $unwind: {
+                path: '$exam',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $project: {
+                subjectId: '$subject._id',
+                subjectName: '$subject.name',
+                subjectCode: '$subject.code',
+                subjectDescription: '$subject.description',
+                examId: '$exam._id',
+                examName: '$exam.name',
+                examType: '$exam.type',
+                examStatus: '$exam.status',
+                examResultPublished: '$exam.resultPublished',
+                examResultPublishedAt: '$exam.resultPublishedAt',
+                components: '$components',
+              }
+            }
+          ]
+        }
+      },
+            {
+        $project: {
+          id: '$_id',
+          studentFirstName: '$student.firstname',
+          studentLastName: '$student.lastname',
+          studentId: '$student._id',
+          studentGender: '$student.gender',
+          studentPhoto: '$student.photo',
+          studntBloodGroup: '$student.bloodGroup',
+          studentAddress: '$student.address',
+          studentCity: '$student.city',
+          studentDistrict: '$student.district',
+          studentState: '$student.state',
+          studentCountry: '$student.country',
+          studentPincode: '$student.pincode',
+          sessionStudentId: '$sessionStudent._id',
+          sectionId: '$section._id',
+          sectionName: '$section.name',
+          classId: '$class._id',
+          className: '$class.name',
+          sessionId: '$session._id',
+          sessionName: '$session.name',
+          sessionStatus: '$session.status',
+          sessionStartDate: '$session.startDate',
+          sessionEndDate: '$session.endDate',
+          isCurrentSession: '$session.isCurrent',
+          studentExamResult: '$studentExamResult'
+
+        }
+      }
+    ]
+
+    const sessionStudents = await getSessionStudentsPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, sessionStudents));
+    
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
 export async function getSectionStudentsExamMarksController(req, res) {
   try {
     const {sectionId, examId} = req.body;
