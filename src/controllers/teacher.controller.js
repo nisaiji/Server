@@ -94,7 +94,7 @@ export async function loginTeacherController(req, res) {
       username: currentTeacher["username"] ? currentTeacher["username"] : "",
     });
     const refreshToken = getRefreshTokenService({
-      role: teacher ? "teacher" : "guestTeacher",
+      role: teacher ? (teacher['section'] ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
       sectionId: section?section["_id"]:"",
