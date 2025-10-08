@@ -4,6 +4,7 @@ import { config } from "../../config/config.js";
 import { getParentService } from "../../services/parent.services.js";
 import { StatusCodes } from "http-status-codes";
 import { getAdminService } from "../../services/admin.services.js";
+import { getParentsService } from "../../services/v2/parent.services.js";
 
 export async function parentAuthenticate(req, res, next) {
   try {
@@ -17,7 +18,7 @@ export async function parentAuthenticate(req, res, next) {
     //   return res.send(error(409,"Invalid parent token"))
     // }
     const _id = decoded.parentId;
-    const parent = await getParentService({_id});
+    const parent = await getParentsService({_id});
     if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
     }

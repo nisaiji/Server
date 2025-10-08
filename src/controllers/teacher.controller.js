@@ -276,8 +276,12 @@ export async function getAllTeacherOfAdminController(req, res) {
         }
       }
     ]);
+    const teachersWithRole = teachers.map(t => {
+      const hasSection = t.sectionId && String(t.sectionId).trim() !== "";
+      return { ...t, role: hasSection ? "classTeacher" : "teacher" };
+    });
     // const teachers = await getAllTeacherOfAdminService(adminId);
-    return res.status(StatusCodes.OK).send(success(200, teachers));
+    return res.status(StatusCodes.OK).send(success(200, teachersWithRole));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

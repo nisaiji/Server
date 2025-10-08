@@ -1,7 +1,7 @@
 import { parentPhoneValidation, parentEmailValidation, parentPhoneAndOtpValidation, parentPasswordValidation, parentFullnameValidation, parentUpdateValidation, parentPasswordEditValidation, parentPhotoUploadValidation, parentFcmTokenValidation, parentEmailTokenValidation, parentPhoneTokenValidation } from "../../middlewares/validation/v2/parent.validation.middleware.js";
-import { addStudentController, checkValidStudentController, editPasswordController, getHolidayAndWorkdayController, getParentController, getParentStatusController, getParentWithStudentsController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneUpdateSendOtpToPhoneController, parentPhoneUpdateVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, parentUpdateEmailAndSendEmailOtpController, parentUpdateEmailVerifyByOtpController, updateParentController, verifyEmailController, verifyPhoneController } from "../../controllers/v2/parent.controller.js";
+import { addStudentController, checkValidStudentController, editPasswordController, getHolidayAndWorkdayController, getParentController, getParentStatusController, getParentWithStudentsController, loginParentController, parentEmailInsertAndSendEmailOtpController, parentEmailVerifyByOtpController, parentPhoneUpdateSendOtpToPhoneController, parentPhoneUpdateVerifyByOtpController, parentPhoneVerifyByOtpController, parentSendOtpToPhoneController, parentUpdateEmailAndSendEmailOtpController, parentUpdateEmailVerifyByOtpController, refreshParentAccessTokenController, updateParentController, verifyEmailController, verifyPhoneController } from "../../controllers/v2/parent.controller.js";
 import express from "express";
-import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
+import { parentAuthenticate, refreshParentTokenAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
 import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
 
 const parentRouter = express.Router();
@@ -28,5 +28,6 @@ parentRouter.put("/update/email-verify", parentAuthenticate, parentUpdateEmailVe
 parentRouter.post('/holiday-workday', parentAuthenticate, getHolidayAndWorkdayController);
 parentRouter.post("/phone/verify", parentPhoneTokenValidation, verifyPhoneController );
 parentRouter.post("/email/verify", parentAuthenticate, parentEmailTokenValidation, verifyEmailController );
+parentRouter.get("/refresh", refreshParentTokenAuthenticate, refreshParentAccessTokenController);
 
 export default parentRouter;

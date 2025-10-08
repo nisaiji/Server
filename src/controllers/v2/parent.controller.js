@@ -5,7 +5,7 @@ import { getOtpsPipelineService, registerOtpService, updateOtpService } from "..
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
 import { getParentService, getParentsPipelineService, updateParentService } from "../../services/v2/parent.services.js";
 import { sendEmailService } from "../../config/sendGrid.config.js";
-import { getAccessTokenService } from "../../services/JWTToken.service.js";
+import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getStudentService, getStudentsPipelineService } from "../../services/student.service.js";
@@ -322,11 +322,22 @@ export async function loginParentController(req, res) {
       address: parent["address"]? parent["address"]:"",
       username: parent["username"]? parent["username"]: ""
     });
+
+    const refreshToken = getRefreshTokenService({
+      role: "parent",
+      parentId: parent["_id"],
+      phone: parent["phone"],
+      email: parent["email"] ? parent['email'] : "",
+      address: parent["address"]? parent["address"]:"",
+      username: parent["username"]? parent["username"]: ""
+    });
+
+
     const isLoginAlready = parent["isLoginAlready"];
     if(!isLoginAlready){
       await updateParentService({_id:parent["_id"]}, {"isLoginAlready":true});
     }
-    return res.status(StatusCodes.OK).send(success(200, { accessToken, isLoginAlready }));
+    return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, isLoginAlready }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -1052,5 +1063,15 @@ export async function verifyEmailController(req, res) {
     res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", jwtToken}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function refreshParentAccessTokenController(req, res) {
+  try {
+    const data = req.data;
+    const accessToken = getAccessTokenService(data);
+    return res.status(StatusCodes.OK).send(success(200, { accessToken }));
+  } catch (err) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
