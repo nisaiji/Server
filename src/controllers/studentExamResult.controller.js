@@ -520,7 +520,7 @@ export async function getSectionStudentsExamMarksController(req, res) {
                 examId: '$_id',
                 examName: '$name',
                 examType: '$type',
-                subjects: '$subject'
+                subjects: '$subjects'
               }
             }
           ],
@@ -714,9 +714,9 @@ export async function getStudentExamMarksController(req, res) {
                 $expr: { $eq: ["$_id", "$$examId"] }
               }
             },
-            {
-              $unwind: "$subjects"
-            },
+            // {
+            //   $unwind: "$subjects"
+            // },
             {
               $lookup: {
                 from: "subjects",
@@ -730,7 +730,8 @@ export async function getStudentExamMarksController(req, res) {
                 examId: '$_id',
                 examName: '$name',
                 examType: '$type',
-                subjects: '$subject'
+                subjectDetails: '$subject',
+                subjects: '$subjects'
               }
             }
           ],

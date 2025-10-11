@@ -257,7 +257,7 @@ export async function getStudentExamsForParentController(req, res) {
 export async function updateExamController(req, res) {
   try {
     const examId = req.params.examId;
-    const {name, description, type, resultPublished, status, subjects} = req.body;
+    let {name, description, type, resultPublished, status, subjects} = req.body;
     const exam = await getExamService({_id: examId});
     if(!exam) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
@@ -266,7 +266,7 @@ export async function updateExamController(req, res) {
     if(name) params.name = name;
     if(description) params.description = description;
     if(type) params.type = type;
-    if(resultPublished="true") params.resultPublished = resultPublished=="true";
+    if(resultPublished="true") params.resultPublished = (resultPublished=="true");
     if(subjects) params.subjects = subjects;
     await updateExamService({_id: examId}, params);
     return res.status(StatusCodes.OK).send(success(200, "Exam updated successfully"));    

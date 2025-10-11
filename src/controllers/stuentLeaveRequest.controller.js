@@ -69,6 +69,8 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
       endDate:{$lte: endDate}
     }
 
+    console.log({filter})
+
     const pipeline = [
       {
         $match: filter
@@ -91,6 +93,20 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
           foreignField: "_id",
           as: "studentDetails"
         }
+      },
+      {
+        $unwind: "$studentDetails"
+      },
+      {
+        $lookup: {
+          from: "schoolparents",
+          localField: "studentDetails.schoolParent",
+          foreignField: "_id",
+          as: "schoolParent"
+        }
+      },
+      {
+        $unwind: "$schoolParent"
       }
     ];
 
