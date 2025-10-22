@@ -4,6 +4,7 @@ import { getSessionStudentService } from "../services/v2/sessionStudent.service.
 import StatusCodes from "http-status-codes";
 import { error, success } from "../utills/responseWrapper.js";
 import { updateLeaveRequestService } from "../services/leave.service.js";
+import { getHolidaysService } from "../services/holiday.service.js";
 
 export async function registerStudentLeaveRequestController(req, res){
   try {
@@ -17,6 +18,11 @@ export async function registerStudentLeaveRequestController(req, res){
     const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
     if(!sessionStudent){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Session Student not found'));
+    }
+
+    const holidays = await getHolidaysService({admin: sessionStudent['school'], session: sessionStudent['session'], date: { $gte: startDate, $lte: endDate } });
+    if(holidays.length > 0){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Leave request overlaps with existing holidays'));
     }
 
     const pipeline = [
