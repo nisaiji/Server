@@ -2,15 +2,19 @@ import {StatusCodes} from "http-status-codes";
 import {error, success} from "../utills/responseWrapper.js";
 import {getSubjectService} from "../services/subject.service.js";
 import {getTeacherSubjectSectionService} from "../services/teacherSubjectSection.service.js";
-import {createTeachingEventsService, deleteTeachingEventService, getTeachingEventService, getTeachingEventsPipelineService, updateTeachingEventService} from "../services/teacherEvent.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSessionService } from "../services/session.services.js";
+import { getDayNameService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
+import { getWorkDayService } from "../services/workDay.services.js";
+import { createTagService, getTagService } from "../services/tag.service.js";
 
-export async function createTeachingEventController(req, res) {
+export async function createTagController(req, res) {
     try {
-        const { subjectId, sectionId, sessionId, startDate, endDate, classId, title, description } = req.body;
+        let { subjectId, sectionId, sessionId, startDate, endDate, classId, title, description } = req.body;
         const teacherId = req.teacherId;
         const schoolId = req.adminId;
+        startDate = parseInt(startDate);
+        endDate = parseInt(endDate);
         const subject = await getSubjectService({_id: subjectId});
         if(!subject) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject not found"));
@@ -19,8 +23,33 @@ export async function createTeachingEventController(req, res) {
         if(!teacherSubjectSection) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher is not authorized for this action"));
         }
-        const teachingEvent = await createTeachingEventsService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, startDate, endDate, school: schoolId});
-        return res.status(StatusCodes.CREATED).send(success(201, "Event created successfully"));
+
+        let startIstDate = timestampToIstDate(startDate);
+        let endIstDate = timestampToIstDate(endDate);
+        const { startTime: tempStartTimestamp, endTime: tempEndTimestamp } = getStartAndEndTimeService(startIstDate, endIstDate);
+
+        startIstDate = timestampToIstDate(tempStartTimestamp);
+        endIstDate = timestampToIstDate(tempEndTimestamp);
+
+        let currIstDate = startIstDate;
+        while (currIstDate <= endIstDate) {
+            const { startTime: currIstDateStartTimestamp, endTime: currIstDateEndTimestamp } = getStartAndEndTimeService(currIstDate, currIstDate);
+            const currDateTag = await getTagService({ school: schoolId, subject: subjectId, session: sessionId, section: sectionId, date: { $gte: currIstDateStartTimestamp, $lte: currIstDateEndTimestamp } });
+
+            // const day = getDayNameService(currIstDate.getDay());
+            // if (day === 'Sunday') {
+            //     const currDateWorkday = await getWorkDayService({ admin: adminId, date: { $gte: currIstDateStartTimestamp, $lte: currIstDateEndTimestamp } });
+            //     if (currDateWorkday) {
+            //         await deleteWorkDayService({ '_id': currDateWorkday['_id'] });
+            //     }
+            // }
+
+            if (!currDateTag) {
+               const teachingEvent = await createTagService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, date: currIstDate, school: schoolId});
+            }
+            currIstDate.setDate(currIstDate.getDate() + 1)
+        }
+        return res.status(StatusCodes.CREATED).send(success(201, "Tag created successfully"));
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
     }

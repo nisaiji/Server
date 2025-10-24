@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const teachingEventSchema = new mongoose.Schema({
+const tagSchema = new mongoose.Schema({
     teacher: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'teacher',
@@ -44,11 +44,8 @@ const teachingEventSchema = new mongoose.Schema({
         type: String,
         trim: true
     }],
-    startDate: {
+    date: {
         type: Number
-    },
-    endDate: {
-        type: Number,
     },
     notes: {
         type: String,
@@ -62,5 +59,5 @@ const teachingEventSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const teachingEventModel = mongoose.model('teachingEvent', teachingEventSchema);
-export default  teachingEventModel;
+const tagModel = mongoose.model('tag', tagSchema);
+export default  tagModel;
