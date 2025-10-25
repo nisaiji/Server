@@ -6,7 +6,7 @@ import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSessionService } from "../services/session.services.js";
 import { getDayNameService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
 import { getWorkDayService } from "../services/workDay.services.js";
-import { createTagService, deleteTagService, getTagService, updateTagService } from "../services/tag.service.js";
+import { createTagService, deleteTagService, getTagService, getTagsPipelineService, updateTagService } from "../services/tag.service.js";
 
 export async function createTagController(req, res) {
     try {
@@ -100,22 +100,22 @@ export async function deleteTagController(req, res) {
     }
 }
 
-export async function getTeachingEventsForTeacherController(req, res) {
+export async function getTagsController(req, res) {
     try {
         const {sectionId, sessionId, startTime, endTime} = req.body;
         const teacherId = req.teacherId;
-        const teachingEvents = await getTeachingEventsPipelineService( [
+        const tags = await getTagsPipelineService( [
             {
                 $match: {
                     teacher: convertToMongoId(teacherId),
                     session: convertToMongoId(sessionId),
                     section: convertToMongoId(sectionId),
-                    startDate: { $gte: startTime },
-                    endDate: { $lte: endTime }
+                    date: { $gte: startTime },
+                    date: { $lte: endTime }
                 }
             }
         ]);
-        return res.status(StatusCodes.OK).send(success(200, teachingEvents));
+        return res.status(StatusCodes.OK).send(success(200, tags));
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
     }
