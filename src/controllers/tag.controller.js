@@ -121,3 +121,149 @@ export async function getTagsController(req, res) {
     }
 }
 
+export async function getTagsWithInfoController(req, res) {
+    try {
+        const {sessionStudentId, sectionId, startTime, endTime} = req.body;
+        const parentId = req.parentId;
+        const tags = await getTagsPipelineService( [
+            {
+                $match: {
+                    section: convertToMongoId(sectionId),
+                    date: { $gte: startTime },
+                    date: { $lte: endTime }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'teachers',
+                    localField: 'teacher',
+                    foreignField: '_id',
+                    as: 'teacher'
+                }
+            },
+            {
+              $unwind: {
+                path: "$teacher",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+                $lookup: {
+                    from: 'subjects',
+                    localField: 'subject',
+                    foreignField: '_id',
+                    as: 'subject'
+                }
+            },
+            {
+              $unwind: {
+                path: "$subject",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+                $lookup: {
+                    from: 'sections',
+                    localField: 'section',
+                    foreignField: '_id',
+                    as: 'section'
+                }
+            },
+            {
+              $unwind: {
+                path: "$section",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+                $lookup: {
+                    from: 'classes',
+                    localField: 'classId',
+                    foreignField: '_id',
+                    as: 'class'
+                }
+            },
+            {
+              $unwind: {
+                path: "$class",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+                $lookup: {
+                    from: 'sessions',
+                    localField: 'session',
+                    foreignField: '_id',
+                    as: 'session'
+                }
+            },
+            {
+              $unwind: {
+                path: "$session",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+                $lookup: {
+                    from: 'admins',
+                    localField: 'school',
+                    foreignField: '_id',
+                    as: 'school'
+                }
+            },
+            {
+              $unwind: {
+                path: "$school",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+                $project: {
+                    tagId: '$_id',
+                    title: '$title',
+                    description: '$description',
+                    date: '$date',
+                    isCompleted: '$isCompleted',
+                    createdAt: '$createdAt',
+                    teacherId: '$teacher._id',
+                    teacherFirstName: '$teacher.firstName',
+                    teacherLastName: '$teacher.lastName',
+                    teacherEmail: '$teacher.email',
+                    teacherGender: '$teacher.gender',
+                    teacherPhone: '$teacher.phone',
+                    teacherPhoto: '$teacher.photo',
+                    subjectId: '$subject._id',
+                    subjectName: '$subject.name',
+                    subjectCode: '$subject.code',
+                    sectionId: '$section._id',
+                    sectionName: '$section.name',
+                    classId: '$class._id',
+                    className: '$class.name',
+                    sessionId: '$session._id',
+                    sessionStartDate: '$session.startDate',
+                    sessionEndDate: '$session.endDate',
+                    isCurrentSession: '$session.isCurrent',
+                    sessionStatus: '$session.status',
+                    schoolId: '$school._id',
+                    schoolName: '$school.schoolName',
+                    schoolPhoto: '$school.photo'
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    teacher: 0,
+                    subject: 0,
+                    section: 0,
+                    classId: 0,
+                    session: 0,
+                    school: 0
+                }
+            }
+        ]);
+        return res.status(StatusCodes.OK).send(success(200, tags));
+    } catch (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    }
+}
+
