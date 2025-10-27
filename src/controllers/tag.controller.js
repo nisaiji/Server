@@ -34,19 +34,7 @@ export async function createTagController(req, res) {
         let currIstDate = startIstDate;
         while (currIstDate <= endIstDate) {
             const { startTime: currIstDateStartTimestamp, endTime: currIstDateEndTimestamp } = getStartAndEndTimeService(currIstDate, currIstDate);
-            const currDateTag = await getTagService({ school: schoolId, subject: subjectId, session: sessionId, section: sectionId, date: { $gte: currIstDateStartTimestamp, $lte: currIstDateEndTimestamp } });
-
-            // const day = getDayNameService(currIstDate.getDay());
-            // if (day === 'Sunday') {
-            //     const currDateWorkday = await getWorkDayService({ admin: adminId, date: { $gte: currIstDateStartTimestamp, $lte: currIstDateEndTimestamp } });
-            //     if (currDateWorkday) {
-            //         await deleteWorkDayService({ '_id': currDateWorkday['_id'] });
-            //     }
-            // }
-
-            if (!currDateTag) {
-               const teachingEvent = await createTagService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, date: currIstDate, school: schoolId});
-            }
+            const teachingEvent = await createTagService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, date: currIstDate, school: schoolId});
             currIstDate.setDate(currIstDate.getDate() + 1)
         }
         return res.status(StatusCodes.CREATED).send(success(201, "Tag created successfully"));
@@ -102,14 +90,15 @@ export async function deleteTagController(req, res) {
 
 export async function getTagsController(req, res) {
     try {
-        const {sectionId, sessionId, startTime, endTime} = req.body;
+        const {sectionId, sessionId, subjectId, startTime, endTime} = req.body;
         const teacherId = req.teacherId;
-        const tags = await getTagsPipelineService( [
+        const tags = await getTagsPipelineService([
             {
                 $match: {
                     teacher: convertToMongoId(teacherId),
                     session: convertToMongoId(sessionId),
                     section: convertToMongoId(sectionId),
+                    subject: convertToMongoId(subjectId),
                     date: { $gte: startTime },
                     date: { $lte: endTime }
                 }
