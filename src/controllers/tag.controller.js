@@ -49,8 +49,8 @@ export async function updateTagController(req, res) {
         const { title, description, date } = req.body;
         const teacherId = req.teacherId;
         const schoolId = req.adminId;
-        const tag = await getTagService({_id: teachingEventId, teacher: teacherId, school: schoolId});
-        const session = await getSessionService({_id: teachingEvent.session});
+        const tag = await getTagService({_id: tagId, teacher: teacherId, school: schoolId});
+        const session = await getSessionService({_id: tag.session});
         if(!tag) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Tag not found"));
         }
@@ -74,7 +74,7 @@ export async function deleteTagController(req, res) {
         const teacherId = req.teacherId;
         const schoolId = req.adminId;
         const tag = await getTagService({_id: tagId, teacher: teacherId, school: schoolId});
-        const session = await getSessionService({_id: teachingEvent.session});
+        const session = await getSessionService({_id: tag.session});
         if(!tag) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Tag not found"));
         }
@@ -215,8 +215,8 @@ export async function getTagsWithInfoController(req, res) {
                     isCompleted: '$isCompleted',
                     createdAt: '$createdAt',
                     teacherId: '$teacher._id',
-                    teacherFirstName: '$teacher.firstName',
-                    teacherLastName: '$teacher.lastName',
+                    teacherFirstName: '$teacher.firstname',
+                    teacherLastName: '$teacher.lastname',
                     teacherEmail: '$teacher.email',
                     teacherGender: '$teacher.gender',
                     teacherPhone: '$teacher.phone',
