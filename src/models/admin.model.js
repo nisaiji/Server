@@ -68,6 +68,9 @@ const adminSchema = mongoose.Schema({
     type: Number,
     default: 0
   },
+  resetPasswordToken: {
+    type: String
+  },
   statusChangeLog: [statusChangeLogSchema],
 
   website:{

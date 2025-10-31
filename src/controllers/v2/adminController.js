@@ -10,6 +10,7 @@ import { sendEmailService } from "../../config/sendGrid.config.js";
 import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
 import { getSessionService, registerSessionService } from "../../services/session.services.js";
+import crypto from "crypto";
 
 export async function adminSendOtpToPhoneController (req, res) {
   try {
@@ -428,6 +429,45 @@ export async function adminEmailVerifyController(req, res) {
     }
 
     return res.status(StatusCodes.OK).send(success(200, {message: "Email updated successfully", token: jwtToken}));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function adminChangePasswordRequestController(req, res) {
+  try {
+    const {email, phone} = req.body;
+    const admin = await getAdminService({email, phone, isActive: true});
+    if(!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid email or phone"));
+    }
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    await updateAdminService({_id: admin['_id']}, { resetPasswordToken: resetToken });
+    return res.status(StatusCodes.OK).send(success(200, { resetToken, email, phone, message: 'Reset password requested successfully' }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function adminChangePasswordHandlerController(req, res) {
+  try {
+    const { phone, email, phoneToken, emailToken, resetPasswordToken, password } = req.body;
+    let admin = await getAdminService({ phone, email, isActive: true, resetPasswordToken });
+    if(!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+    }
+
+    const [phoneResponse, emailResponse] = await Promise.all([
+      verifyMsg91Token(phoneToken),
+      verifyMsg91Token(emailToken)
+    ]);
+
+    if(phoneResponse?.type !== 'success' || emailResponse.type !== 'success' ) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Token can't verified"));
+    }
+    const hashedPassword = await hashPasswordService(password);
+    await updateAdminService({_id: admin['_id']}, { password: hashedPassword, resetPasswordToken: '' });
+    return res.status(StatusCodes.OK).send(error(500, "Password updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
