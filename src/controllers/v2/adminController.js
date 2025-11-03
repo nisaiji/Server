@@ -467,7 +467,7 @@ export async function adminChangePasswordHandlerController(req, res) {
     }
     const hashedPassword = await hashPasswordService(password);
     await updateAdminService({_id: admin['_id']}, { password: hashedPassword, resetPasswordToken: '' });
-    return res.status(StatusCodes.OK).send(error(500, "Password updated successfully"));
+    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
