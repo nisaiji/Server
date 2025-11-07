@@ -434,16 +434,75 @@ export async function adminEmailVerifyController(req, res) {
   }
 }
 
-export async function adminChangePasswordRequestController(req, res) {
+export async function adminChangePasswordRequestByPhoneController(req, res) {
   try {
-    const {email, phone} = req.body;
-    const admin = await getAdminService({email, phone, isActive: true});
+    const {phone} = req.body;
+    const admin = await getAdminService({ phone, isActive: true});
     if(!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid email or phone"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid phone number"));
+    }
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    await updateAdminService({_id: admin['_id']}, { resetPasswordToken: resetToken, resetPasswordStatus: 'requested' });
+    return res.status(StatusCodes.OK).send(success(200, { resetToken, phone, message: 'Phone verified' }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function adminChangePasswordHandlerByPhoneController(req, res) {
+  try {
+    const { phone, phoneToken, resetPasswordToken } = req.body;
+    let admin = await getAdminService({ phone, isActive: true, resetPasswordToken, resetPasswordStatus: 'requested' });
+    if(!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
+    }
+
+    const phoneResponse = await verifyMsg91Token(phoneToken);
+
+    if(phoneResponse?.type !== 'success') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Token can't verified"));
+    }
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    
+    await updateAdminService({_id: admin['_id']}, {resetPasswordToken: resetToken, resetPasswordStatus: 'phoneVerified'});
+    return res.status(StatusCodes.OK).send(success(200, {resetToken, message: "Phone verified successfully"}));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function adminChangePasswordRequestByEmailController(req, res) {
+  try {
+    const {email, resetPasswordToken} = req.body;
+    const admin = await getAdminService({ email, resetPasswordToken, isActive: true, resetPasswordStatus: 'phoneVerified'});
+    if(!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid email"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
     await updateAdminService({_id: admin['_id']}, { resetPasswordToken: resetToken });
-    return res.status(StatusCodes.OK).send(success(200, { resetToken, email, phone, message: 'Reset password requested successfully' }));
+    return res.status(StatusCodes.OK).send(success(200, { resetToken, email, message: 'Email verified' }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function adminChangePasswordHandlerByEmailController(req, res) {
+  try {
+    const { email, emailToken, resetPasswordToken } = req.body;
+    let admin = await getAdminService({ email, isActive: true, resetPasswordToken, resetPasswordStatus: 'phoneVerified' });
+    if(!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+    }
+
+    const emailResponse = await verifyMsg91Token(emailToken);
+
+    if(emailResponse?.type !== 'success') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Token can't verified"));
+    }
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    
+    await updateAdminService({_id: admin['_id']}, {resetPasswordToken: resetToken, resetPasswordStatus: 'emailVerified'});
+    return res.status(StatusCodes.OK).send(success(200, {resetToken, message: "Email verified successfully"}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -451,22 +510,14 @@ export async function adminChangePasswordRequestController(req, res) {
 
 export async function adminChangePasswordHandlerController(req, res) {
   try {
-    const { phone, email, phoneToken, emailToken, resetPasswordToken, password } = req.body;
-    let admin = await getAdminService({ phone, email, isActive: true, resetPasswordToken });
+    const { resetPasswordToken, password } = req.body;
+    let admin = await getAdminService({ resetPasswordStatus: 'emailVerified', isActive: true, resetPasswordToken });
     if(!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
     }
 
-    const [phoneResponse, emailResponse] = await Promise.all([
-      verifyMsg91Token(phoneToken),
-      verifyMsg91Token(emailToken)
-    ]);
-
-    if(phoneResponse?.type !== 'success' || emailResponse.type !== 'success' ) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Token can't verified"));
-    }
     const hashedPassword = await hashPasswordService(password);
-    await updateAdminService({_id: admin['_id']}, { password: hashedPassword, resetPasswordToken: '' });
+    await updateAdminService({_id: admin['_id']}, { password: hashedPassword, resetPasswordToken: '', resetPasswordStatus: '' });
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

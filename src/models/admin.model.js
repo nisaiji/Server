@@ -71,6 +71,11 @@ const adminSchema = mongoose.Schema({
   resetPasswordToken: {
     type: String
   },
+  resetPasswordStatus: {
+    type: String,
+    enum: ['', 'requested', 'phoneVerified', 'emailVerified', 'completed'],
+    default: ''
+  },
   statusChangeLog: [statusChangeLogSchema],
 
   website:{
