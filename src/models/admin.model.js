@@ -98,6 +98,10 @@ const adminSchema = mongoose.Schema({
   },
   youtube:{
     type:String
+  },
+  marchantPaymentConfig: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'marchantPaymentConfig'
   }
 },
 {

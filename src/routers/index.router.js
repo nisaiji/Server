@@ -28,7 +28,8 @@ import studentLeaveRequestRouter from "./studentLeaveRequest.router.js";
 import teacherSubjectSectionRouter from "./teacherSubjectSection.router.js";
 import examRouter from "./exam.router.js";
 import studentExamResultRouter from "./studentExamResult.router.js";
-
+import marchantPaymentRouter from "./marchantPaymentConfig.router.js";
+import paymentIndexRouter from "./payments/index.router.js";
 const router = express();
 
 router.use("/v2", v2Router);
@@ -60,5 +61,7 @@ router.use("/student-leave", studentLeaveRequestRouter);
 router.use("/teacher-subject-section", teacherSubjectSectionRouter);
 router.use("/exam", examRouter);
 router.use("/student-exam-result", studentExamResultRouter);
+router.use("/payment", paymentIndexRouter);
+router.use('/marchant', marchantPaymentRouter);
 
 export default router;
