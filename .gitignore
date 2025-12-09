@@ -1,0 +1,8 @@
+# Node artifact files
+node_modules/
+
+# Environment File
+.env
+
+# config files
+firebase.json
