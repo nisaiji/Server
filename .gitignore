@@ -2,4 +2,11 @@
 node_modules/
 
 # Environment File
+<<<<<<< HEAD
 .env
+=======
+.env
+
+# config files
+firebase.json
+>>>>>>> 5cc359d83aeabd0372cfa49f1839fc9b799ea655
