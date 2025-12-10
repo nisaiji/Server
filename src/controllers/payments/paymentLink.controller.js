@@ -1,10 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import { error } from "../../utills/responseWrapper.js";
-import { createPaymentLinkApiService, createPaymentSessionApiService } from "../../services/zohoPayment.service.js";
+import { createPaymentLinkApiService, createPaymentSessionApiService, refreshTokenService } from "../../services/zohoPayment.service.js";
 import { createPaymentSessionService } from "../../services/paymentSession.service.js";
 import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 import { config } from "../../config/config.js";
-import { getMarchantPaymentConfigService } from "../../services/marchantPaymentConfig.service.js";
+import { getMarchantPaymentConfigService, updateMarchantPaymentConfigService } from "../../services/marchantPaymentConfig.service.js";
 import { getStudentService } from "../../services/student.service.js";
 import { getAdminService } from "../../services/admin.services.js";
 import { createPaymentTransactionService } from "../../services/paymentTransaction.service.js";
@@ -33,6 +33,25 @@ export async function createPaymentLinkController(req, res) {
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 15);
+
+    if (marchant.accessTokenExpiresAt < new Date()) {
+      const response = await refreshTokenService({
+        refreshToken: marchant.zohoRefreshToken,
+        clientId: marchant.zohoClientId,
+        clientSecret: marchant.zohoClientSecret
+      });
+
+      const expiresAt = new Date();
+      expiresAt.setSeconds(expiresAt.getSeconds() + parseInt(response.expires_in, 10));
+      await updateMarchantPaymentConfigService(
+        { _id: marchant._id },
+        {
+          accessTokenExpiresAt: expiresAt,
+          accessTokenScopes: response.scope ? response.scope.split(" ") : [],
+          zohoAccessToken: response.access_token,
+        }
+      );
+    }
 
     const paymentLinkResponse = await createPaymentLink({
       amount, 
