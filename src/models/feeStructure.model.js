@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const feeStructureSchema = mongoose.Schema({
   name: {
     type: String,
-    required: true
   },
   description: {
     type: String
@@ -28,16 +27,12 @@ const feeStructureSchema = mongoose.Schema({
     ref: 'admin',
     required: true
   },
-  feeComponents: [{
-    name: String,
-    amount: Number,
-    isOptional: { type: Boolean, default: false }
-  }],
-  totalAmount: {
-    type: Number,
+  installmentType: {
+    type: String,
+    enum: ['monthly', 'bimonthly', 'quarterly', 'half-yearly', 'annually'],
     required: true
   },
-  dueDate: {
+  totalAmount: {
     type: Number,
     required: true
   },

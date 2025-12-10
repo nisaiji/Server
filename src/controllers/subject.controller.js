@@ -46,6 +46,10 @@ export async function deleteSubjectController(req, res) {
         if(!subject) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject doesn't exists"));
         }
+        const subjectInUse = await getTeacherSubjectSectionsService({subject: subjectId});
+        if(subjectInUse.length > 0) {
+            return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Subject is in use, can't delete"));
+        }
         deleteSubjectService({_id: subjectId });
         return res.status(StatusCodes.OK).send(success(200, "Subject deleted successfully"));
     } catch (err) {

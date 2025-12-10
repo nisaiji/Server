@@ -11,7 +11,12 @@ import  {cronManager}  from "./src/crons/index.cron.js";
 const PORT = config.port || 4000;
 
 const app = express();
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ 
+  limit: "5mb",
+  verify: (req, res, buf) => {
+    req.rawBody = buf.toString();
+  }
+ }));
 app.use(express.static('public'));
 app.use(cookieParser());
 app.use(morgan("common"));

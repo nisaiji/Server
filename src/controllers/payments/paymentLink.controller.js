@@ -10,9 +10,9 @@ import { getAdminService } from "../../services/admin.services.js";
 import { createPaymentTransactionService } from "../../services/paymentTransaction.service.js";
 import { getParentService } from "../../services/v2/parent.services.js";
 
-export async function createPaymentSessionController(req, res) {
+export async function createPaymentLinkController(req, res) {
   try {
-    const { amount, currency, sessionStudentId, description, isSandbox } = req.body;
+    const { amount, sessionStudentId, description } = req.body;
     const parentId = req.parentId;
     const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
     if(!sessionStudent) {
@@ -31,22 +31,6 @@ export async function createPaymentSessionController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "School not found"));
     }
 
-    // const paymentSessionResponse = await createPaymentSession({
-    //   amount, 
-    //   currency: config.currency,
-    //   accountId: marchant.zohoAccountId,
-    //   sessionStudentId: sessionStudent['_id'],
-    //   studentId: sessionStudent['student'],
-    //   parentId: parentId,
-    //   description: `payment for ${student.firstname}`,
-    //   accessToken: marchant.zohoAccessToken,
-    //   isSandbox,
-    //   sectionId: sessionStudent.section,
-    //   classId: sessionStudent.classId,
-    //   sessionId: sessionStudent.session,
-    //   schoolId: sessionStudent.school
-    // });
-
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 15);
 
@@ -59,7 +43,7 @@ export async function createPaymentSessionController(req, res) {
       parentId: parentId,
       description: `payment for ${student.firstname}`,
       accessToken: marchant.zohoAccessToken,
-      isSandbox,
+      isSandbox: config.isSandbox,
       sectionId: sessionStudent.section,
       classId: sessionStudent.classId,
       sessionId: sessionStudent.session,
@@ -87,7 +71,6 @@ export async function createPaymentSession({ amount, currency, accountId, descri
     ]
     const response = await createPaymentSessionApiService({ amount, currency, accountId, metaData, description, accessToken, invoiceNumber, referenceNumber, isSandbox });
     const expiryDate = new Date();
-    console.log({response, type: typeof response, id: response?.payments_session_id});
     expiryDate.setDate(expiryDate.getDate() + 15);
     const params = {
       paymentSessionId: response?.payments_session?.payments_session_id,
@@ -118,7 +101,6 @@ export async function createPaymentLink({amount, currency, accountId, descriptio
     const response = await createPaymentLinkApiService({ isSandbox, amount, currency, accountId, description, phone, email, referenceId: referenceNumber, expiresAt, notifyUser, returnUrl,accessToken });
 
     const data = response.payment_links;
-    console.log({data}); 
     const params = {
       paymentLinkId: data.payment_link_id,
       paymentLinkExpiresAt: new Date(data.expires_at_formatted),

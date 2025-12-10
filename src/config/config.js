@@ -21,7 +21,9 @@ const _config = {
     zohoPaySandBoxUrl: process.env.ZOHO_PAY_SANDBOX_ROOT_URL,
     zohoRedirectUrl: process.env.ZOHO_REDIRECT_URL,
     zohoSandboxRedirectUrl: process.env.ZOHO_REDIRECT_URL,
-    currency: 'INR'
+    currency: 'INR',
+    zohoWebhookAuthSecret: process.env.ZOHO_WEBHOOK_AUTH_SECRET,
+    isSandbox: process.env.ZOHO_IS_SANDBOX === 'true'
 }
 
 export const config =   Object.freeze(_config);
