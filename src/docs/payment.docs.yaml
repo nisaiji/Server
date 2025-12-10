@@ -1,0 +1,294 @@
+/payment/auth/{schoolId}:
+  get:
+    security:
+      - Authorization: []
+    tags:
+      - Payments
+    summary: Initiate Zoho payment authorization
+    description: Redirects to Zoho OAuth authorization URL for payment integration
+    parameters:
+      - name: schoolId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: School ID
+      - name: sandbox
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: ['true', 'false']
+        description: Use sandbox environment
+    responses:
+      '302':
+        description: Redirect to Zoho authorization URL
+      '404':
+        description: School or merchant account not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                statusCode:
+                  type: integer
+                  example: 404
+                message:
+                  type: string
+                  example: "School not found"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Internal server error"
+                error:
+                  type: string
+
+/payment/auth/token:
+  post:
+    security:
+      - Authorization: []
+    tags:
+      - Payments
+    summary: Exchange authorization code for access token
+    description: Exchanges Zoho OAuth authorization code for access and refresh tokens
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - code
+              - isSandbox
+            properties:
+              code:
+                type: string
+                description: Authorization code from Zoho OAuth callback
+              isSandbox:
+                type: boolean
+                description: Whether to use sandbox environment
+    responses:
+      '200':
+        description: Token exchange successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                statusCode:
+                  type: integer
+                  example: 200
+                data:
+                  type: object
+                  properties:
+                    access_token:
+                      type: string
+                    refresh_token:
+                      type: string
+                    expires_in:
+                      type: integer
+                    scope:
+                      type: string
+      '404':
+        description: School or merchant account not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                statusCode:
+                  type: integer
+                  example: 404
+                message:
+                  type: string
+                  example: "School not found"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Internal server error"
+                error:
+                  type: string
+
+/payment/auth/refresh-token:
+  post:
+    tags:
+      - Payments
+    summary: Refresh Zoho access token
+    description: Refreshes expired Zoho access token using stored refresh token
+    security:
+      - Authorization: []
+    responses:
+      '200':
+        description: Token refresh successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                statusCode:
+                  type: integer
+                  example: 200
+                data:
+                  type: object
+                  properties:
+                    access_token:
+                      type: string
+                    expires_in:
+                      type: integer
+                    scope:
+                      type: string
+      '400':
+        description: Invalid request - missing token data
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                statusCode:
+                  type: integer
+                  example: 400
+                message:
+                  type: string
+                  example: "Invalid request"
+      '404':
+        description: School or merchant account not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                statusCode:
+                  type: integer
+                  example: 404
+                message:
+                  type: string
+                  example: "School not found"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Internal server error"
+                error:
+                  type: string
+
+/payment/payment-link/:
+  post:
+    tags:
+      - Payments
+    summary: Create payment link for student fees
+    description: Creates a Zoho payment link for student fee payment
+    security:
+      - Authorization: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - amount
+              - sessionStudentId
+            properties:
+              amount:
+                type: number
+                description: Payment amount
+                example: 1000.50
+              sessionStudentId:
+                type: string
+                description: Session student ID
+                example: "64a7b8c9d1e2f3g4h5i6j7k8"
+              description:
+                type: string
+                description: Payment description
+                example: "Monthly fee payment"
+    responses:
+      '200':
+        description: Payment link created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_links:
+                  type: object
+                  properties:
+                    payment_link_id:
+                      type: string
+                    url:
+                      type: string
+                    amount:
+                      type: number
+                    currency:
+                      type: string
+                    status:
+                      type: string
+                    reference_id:
+                      type: string
+                    expires_at_formatted:
+                      type: string
+      '400':
+        description: Bad request - Student or school not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                statusCode:
+                  type: integer
+                  example: 400
+                message:
+                  type: string
+                  example: "Student not found"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                statusCode:
+                  type: integer
+                  example: 500
+                message:
+                  type: string
