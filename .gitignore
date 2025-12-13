@@ -1,0 +1,8 @@
+/node_modules
+.env
+firebase.json
+SETUP.md
+.env.sample
+TODOs.md
+FEATURES_DOCUMENTATION.md
+SYSTEM_DOCUMENTATION.md
