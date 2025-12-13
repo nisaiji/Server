@@ -1,5 +1,5 @@
 import express from "express";
-import { paymentAuthController, paymentRefreshTokenController, paymentRevokeRefreshTokenController, paymentTokenController } from "../../controllers/payments/payment.controller.js";
+import { paymentAuthController, paymentRefreshTokenController, paymentRevokeRefreshTokenController, paymentTokenController } from "../../controllers/payments/paymentAuth.controller.js";
 import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 
 const authRouter = express.Router();

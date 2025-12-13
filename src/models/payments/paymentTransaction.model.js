@@ -4,10 +4,19 @@ const paymentTransactionSchema = mongoose.Schema({
   paymentLinkId: {
     type: String
   },
+  paymentSessionId: {
+    type: String
+  },
   paymentLinkExpiresAt: {
     type: Date
   },
-  paymentLinkReferenceId: {
+  paymentSessionExpiresAt: {
+    type: Date
+  },
+  paymentReferenceId: {
+    type: String
+  },
+  paymentInvoiceId: {
     type: String
   },
   description: {
@@ -70,13 +79,16 @@ const paymentTransactionSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "feeStructure",
   },
+  feeInstallment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "feeInstallment",
+  },
   amount: {
     type: Number,
     required: true
   },
   amountPaid: {
-    type: Number,
-    required: true
+    type: Number
   },
   currency: {
     type: String,
@@ -84,8 +96,8 @@ const paymentTransactionSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'paid', 'failed'],
-    default: 'initiated'
+    enum: ['active','sessionInitiated', 'paid', 'failed'],
+    default: 'active'
   },
   paymentMethod: {
     type: String,

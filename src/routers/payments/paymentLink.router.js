@@ -2,8 +2,8 @@ import express from "express";
 import { parentAuthenticate } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
 import { createPaymentLinkController } from "../../controllers/payments/paymentLink.controller.js";
 
-const paymentSessionRouter = express.Router();
+const paymentLinkRouter = express.Router();
 
-paymentSessionRouter.post("/", parentAuthenticate, createPaymentLinkController);
+paymentLinkRouter.post("/", parentAuthenticate, createPaymentLinkController);
 
-export default paymentSessionRouter;
+export default paymentLinkRouter;
