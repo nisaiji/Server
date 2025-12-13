@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { error } from "../../utills/responseWrapper.js";
+import { error, success } from "../../utills/responseWrapper.js";
 import { createPaymentLinkApiService, createPaymentSessionApiService, refreshTokenService } from "../../services/zohoPayment.service.js";
 import { createPaymentSessionService } from "../../services/paymentSession.service.js";
 import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
@@ -54,6 +54,9 @@ export async function createPaymentLinkController(req, res) {
 
       marchant = await getMarchantPaymentConfigService({ _id: marchant._id });
     }
+    const linkExpiryDate = new Date();
+    linkExpiryDate.setMinutes(linkExpiryDate.getMinutes() + 15);
+
 
     const paymentLinkResponse = await createPaymentLink({
       amount, 
@@ -72,48 +75,13 @@ export async function createPaymentLinkController(req, res) {
       phone: parent.phone,
       email: parent.email,
       referenceNumber: generateReferenceNumber({sessionStudentId: sessionStudent['_id']}),
-      expiresAt: "2025-12-30",
+      expiresAt: linkExpiryDate,
       notifyUser: true,
       returnUrl: config.zohoRedirectUrl
     })
-    return res.status(StatusCodes.OK).json(paymentLinkResponse);
+    return res.status(StatusCodes.OK).send(success(200, paymentLinkResponse));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-  }
-}
-
-export async function createPaymentSession({ amount, currency, accountId, description, sessionStudentId, parentId, studentId,accessToken, isSandbox, sectionId, classId, sessionId, schoolId }) {
-  try {
-    const referenceNumber = generateReferenceNumber({ sessionStudentId });
-    const invoiceNumber = generateInvoiceNumber({ sessionStudentId });
-    const metaData = [
-      {"key": "type", "value": "sessionStudent"},
-      {"key": "id", "value": sessionStudentId.toString()}
-    ]
-    const response = await createPaymentSessionApiService({ amount, currency, accountId, metaData, description, accessToken, invoiceNumber, referenceNumber, isSandbox });
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 15);
-    const params = {
-      paymentSessionId: response?.payments_session?.payments_session_id,
-      amount: amount,
-      currency: currency,
-      invoiceNumber: invoiceNumber,
-      referenceNumber: referenceNumber,
-      status: 'paymentSessionCreated',
-      sessionStudent: sessionStudentId,
-      student: studentId,
-      section: sectionId,
-      classId: classId,
-      session: sessionId,
-      parent: parentId,
-      school: schoolId,
-      validTill: expiryDate
-    }
-    
-    const paymentSession = await createPaymentSessionService(params);
-    return response;
-  } catch (error) {
-    throw error;
   }
 }
 

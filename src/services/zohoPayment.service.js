@@ -123,7 +123,7 @@ export async function createPaymentLinkApiService({accountId, accessToken, amoun
     const payload = {
       amount,
       currency,
-      email: "kuldeeppanwar460@gmail.com",
+      email: email? email : "no-email@nisaiji.com",
       description,
       phone,
       reference_id: referenceId,
