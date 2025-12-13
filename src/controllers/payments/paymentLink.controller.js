@@ -7,8 +7,9 @@ import { config } from "../../config/config.js";
 import { getMarchantPaymentConfigService, updateMarchantPaymentConfigService } from "../../services/marchantPaymentConfig.service.js";
 import { getStudentService } from "../../services/student.service.js";
 import { getAdminService } from "../../services/admin.services.js";
-import { createPaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import { createPaymentTransactionService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
 import { getParentService } from "../../services/v2/parent.services.js";
+import { get } from "mongoose";
 
 export async function createPaymentLinkController(req, res) {
   try {
@@ -85,7 +86,30 @@ export async function createPaymentLinkController(req, res) {
   }
 }
 
-export async function createPaymentLink({amount, currency, accountId, description, phone, email, referenceNumber, expiresAt, notifyUser, returnUrl, isSandbox, sessionStudentId,accessToken, studentId, parentId, sectionId, classId, sessionId, schoolId  }) {
+
+export async function verifyPaymentController(req, res) {
+  try {
+    const { signature, payment_link_id, payment_link_reference, amount, status, payment_id } = req.body;
+    const payment = await getPaymentTransactionService({
+      paymentReferenceId: payment_link_reference, 
+      paymentLinkId: payment_link_id, 
+      amount: amount, 
+      zohoPaymentId: payment_id, 
+      status: "paid"
+    });
+    
+    if(!payment){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+    }
+
+    return res.status(StatusCodes.OK).send(success(200, "Paid Successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+// ------------------------HELPER FUNCTIONS------------------------
+async function createPaymentLink({amount, currency, accountId, description, phone, email, referenceNumber, expiresAt, notifyUser, returnUrl, isSandbox, sessionStudentId,accessToken, studentId, parentId, sectionId, classId, sessionId, schoolId  }) {
   try {
     const response = await createPaymentLinkApiService({ isSandbox, amount, currency, accountId, description, phone, email, referenceId: referenceNumber, expiresAt, notifyUser, returnUrl,accessToken });
 
