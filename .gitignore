@@ -1,8 +1,8 @@
-# Node artifact files
-node_modules/
-
-# Environment File
+/node_modules
 .env
-
-# config files
 firebase.json
+SETUP.md
+.env.sample
+TODOs.md
+FEATURES_DOCUMENTATION.md
+SYSTEM_DOCUMENTATION.md
