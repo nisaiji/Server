@@ -17,7 +17,6 @@ export async function getTokenService({code, clientId, clientSecret, redirectUri
 
   try {
     const url = new URL(zohoTokenPath, zohoAccountUrl).toString();
-    console.log({url, params: params.toString()});
     const response = await axios.post(url, params.toString(), {
           headers: {
           "Content-Type": "application/x-www-form-urlencoded"
@@ -67,7 +66,6 @@ export async function revokeRefreshTokenService({refreshToken}) {
     const url = new URL(zohoRevokeRefreshTokenPath, zohoAccountUrl);
 
     url.searchParams.append("token", refreshToken);
-    console.log({url: url.toString()});
     const response = await axios.post(url.toString(), {
           headers: {
           "Content-Type": "application/x-www-form-urlencoded"
@@ -101,7 +99,6 @@ export async function createPaymentSessionApiService({accountId, amount, accessT
     reference_number: referenceNumber,
   }
 
-  console.log({url: url.toString(), params: payload.toString()});
   try {
       const response = await axios.post(url.toString(), payload, {
         headers: {
@@ -110,7 +107,6 @@ export async function createPaymentSessionApiService({accountId, amount, accessT
           }
         }
       );
-      console.log("Payment Session Created:", response.data);
       return response.data;    
   } catch (error) {
     console.log({error})
@@ -135,7 +131,6 @@ export async function createPaymentLinkApiService({accountId, accessToken, amoun
       notify_user: notifyUser,
       return_url: returnUrl
     }
-    // console.log({url: url.toString(), params: payload});
     const response = await axios.post(url.toString(), payload, {
       headers: {
         "Content-Type": "application/json",
@@ -146,7 +141,6 @@ export async function createPaymentLinkApiService({accountId, accessToken, amoun
     return response.data;
   } catch (error) {
     console.log("Zoho Error:", error.response?.data || error.message);
-    // console.log({error})
     throw error;
   }
 }

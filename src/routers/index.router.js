@@ -30,6 +30,7 @@ import examRouter from "./exam.router.js";
 import studentExamResultRouter from "./studentExamResult.router.js";
 import marchantPaymentRouter from "./marchantPaymentConfig.router.js";
 import paymentIndexRouter from "./payments/index.router.js";
+import feeStructureRouter from "./feeStructure.router.js";
 const router = express();
 
 router.use("/v2", v2Router);
@@ -63,5 +64,6 @@ router.use("/exam", examRouter);
 router.use("/student-exam-result", studentExamResultRouter);
 router.use("/payment", paymentIndexRouter);
 router.use('/marchant', marchantPaymentRouter);
+router.use('/fee-structure', feeStructureRouter);
 
 export default router;

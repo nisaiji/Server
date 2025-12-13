@@ -36,7 +36,7 @@ export async function paymentAuthController(req, res) {
     const authUrl = url.toString();
 
     return res.redirect(authUrl);
-  } catch (error) {
+  } catch (error) { 
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 }
