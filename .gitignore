@@ -6,3 +6,6 @@ node_modules/
 
 # config files
 firebase.json
+
+# Logs
+logs
