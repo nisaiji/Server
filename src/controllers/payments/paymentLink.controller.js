@@ -90,12 +90,12 @@ export async function createPaymentLinkController(req, res) {
 
 export async function verifyPaymentController(req, res) {
   try {
-    const { signature, payment_link_id, payment_link_reference, amount, status, payment_id } = req.body;
+    const { signature, paymentLinkId, paymentLinkReference, amount, status, paymentId } = req.body;
     const payment = await getPaymentTransactionService({
-      paymentReferenceId: payment_link_reference, 
-      paymentLinkId: payment_link_id, 
+      paymentReferenceId: paymentLinkReference, 
+      paymentLinkId: paymentLinkId, 
       amount: amount, 
-      zohoPaymentId: payment_id, 
+      zohoPaymentId: paymentId, 
       status: "paid"
     });
     
@@ -103,7 +103,7 @@ export async function verifyPaymentController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
     }
 
-    return res.status(StatusCodes.OK).send(success(200, "Paid Successfully"));
+    return res.status(StatusCodes.OK).send(success(200, {paymentCycle: "monthly", paymentMethod: "UPI", paymentDate: new Date(), amountPaid: amount, paymentId, paymentLinkId}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
