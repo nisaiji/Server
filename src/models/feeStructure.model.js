@@ -39,6 +39,10 @@ const feeStructureSchema = mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  lateFee: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

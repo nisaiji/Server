@@ -1,8 +1,11 @@
-/node_modules
+# Node artifact files
+node_modules/
+
+# Environment File
 .env
+
+# config files
 firebase.json
-SETUP.md
-.env.sample
-TODOs.md
-FEATURES_DOCUMENTATION.md
-SYSTEM_DOCUMENTATION.md
+
+# Logs
+logs

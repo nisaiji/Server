@@ -7,18 +7,19 @@ import { config } from "../../config/config.js";
 import { getMarchantPaymentConfigService, updateMarchantPaymentConfigService } from "../../services/marchantPaymentConfig.service.js";
 import { getStudentService } from "../../services/student.service.js";
 import { getAdminService } from "../../services/admin.services.js";
-import { createPaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import { createPaymentTransactionService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
 import { getParentService } from "../../services/v2/parent.services.js";
+import logger from "../../logger/index.js";
 
 export async function createPaymentLinkController(req, res) {
   try {
     const { amount, sessionStudentId, description } = req.body;
+    logger.info("Creating payment link", { requestBody: req.body });
     const parentId = req.parentId;
     const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
     if(!sessionStudent) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
     }
-
 
     let [school, marchant, student, parent] = await Promise.all([
       getAdminService({_id: sessionStudent['school']}),
@@ -51,7 +52,7 @@ export async function createPaymentLinkController(req, res) {
           zohoAccessToken: response.access_token,
         }
       );
-
+      logger.info("Zoho access token refreshed", { marchantId: marchant._id, expiresAt });
       marchant = await getMarchantPaymentConfigService({ _id: marchant._id });
     }
     const linkExpiryDate = new Date();
@@ -75,17 +76,41 @@ export async function createPaymentLinkController(req, res) {
       phone: parent.phone,
       email: parent.email,
       referenceNumber: generateReferenceNumber({sessionStudentId: sessionStudent['_id']}),
-      expiresAt: linkExpiryDate,
+      // expiresAt: linkExpiryDate,
       notifyUser: true,
       returnUrl: config.zohoRedirectUrl
     })
     return res.status(StatusCodes.OK).send(success(200, paymentLinkResponse));
   } catch (err) {
+    logger.error("Error creating payment link", {}, err);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
-export async function createPaymentLink({amount, currency, accountId, description, phone, email, referenceNumber, expiresAt, notifyUser, returnUrl, isSandbox, sessionStudentId,accessToken, studentId, parentId, sectionId, classId, sessionId, schoolId  }) {
+
+export async function verifyPaymentController(req, res) {
+  try {
+    const { signature, payment_link_id, payment_link_reference, amount, status, payment_id } = req.body;
+    const payment = await getPaymentTransactionService({
+      paymentReferenceId: payment_link_reference, 
+      paymentLinkId: payment_link_id, 
+      amount: amount, 
+      zohoPaymentId: payment_id, 
+      status: "paid"
+    });
+    
+    if(!payment){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+    }
+
+    return res.status(StatusCodes.OK).send(success(200, "Paid Successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+// ------------------------HELPER FUNCTIONS------------------------
+async function createPaymentLink({amount, currency, accountId, description, phone, email, referenceNumber, expiresAt, notifyUser, returnUrl, isSandbox, sessionStudentId,accessToken, studentId, parentId, sectionId, classId, sessionId, schoolId  }) {
   try {
     const response = await createPaymentLinkApiService({ isSandbox, amount, currency, accountId, description, phone, email, referenceId: referenceNumber, expiresAt, notifyUser, returnUrl,accessToken });
 
