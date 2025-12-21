@@ -1,6 +1,7 @@
 import axios from "axios";
 import {config} from "../config/config.js";
 import { zohoCreatePaymentLinkPath, zohoCreatePaymentSessionPath, zohoRevokeRefreshTokenPath, zohoTokenPath } from "../constants/zohoPayment.constants.js";
+import logger from "../logger/index.js";
 
 const zohoPayUrl = config.zohoPayUrl;
 const zohoSandBoxUrl = config.zohoPaySandBoxUrl;
@@ -126,11 +127,13 @@ export async function createPaymentLinkApiService({accountId, accessToken, amoun
       email: email? email : "no-email@nisaiji.com",
       description,
       phone,
+      phone_country_code: "IN",
       reference_id: referenceId,
       expires_at: expiresAt,
       notify_user: notifyUser,
       return_url: returnUrl
     }
+    logger.info("Creating Zoho Payment Link", {payload});
     const response = await axios.post(url.toString(), payload, {
       headers: {
         "Content-Type": "application/json",

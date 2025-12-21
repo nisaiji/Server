@@ -10,6 +10,7 @@ import { getAdminService } from "../../services/admin.services.js";
 import { createPaymentTransactionService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
 import { getParentService } from "../../services/v2/parent.services.js";
 import logger from "../../logger/index.js";
+import { getFormattedNewDateService } from "../../services/celender.service.js";
 
 export async function createPaymentLinkController(req, res) {
   try {
@@ -55,9 +56,11 @@ export async function createPaymentLinkController(req, res) {
       logger.info("Zoho access token refreshed", { marchantId: marchant._id, expiresAt });
       marchant = await getMarchantPaymentConfigService({ _id: marchant._id });
     }
-    const linkExpiryDate = new Date();
-    linkExpiryDate.setMinutes(linkExpiryDate.getMinutes() + 15);
 
+    const linkExpiryDate = new Date();
+    linkExpiryDate.setDate(linkExpiryDate.getDate() + 5);
+    const formattedExpiryDate = getFormattedNewDateService(linkExpiryDate);
+    console.log({linkExpiryDate: formattedExpiryDate})
 
     const paymentLinkResponse = await createPaymentLink({
       amount, 
@@ -76,7 +79,7 @@ export async function createPaymentLinkController(req, res) {
       phone: parent.phone,
       email: parent.email,
       referenceNumber: generateReferenceNumber({sessionStudentId: sessionStudent['_id']}),
-      // expiresAt: linkExpiryDate,
+      expiresAt: formattedExpiryDate,
       notifyUser: true,
       returnUrl: config.zohoRedirectUrl
     })
