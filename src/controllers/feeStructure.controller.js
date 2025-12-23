@@ -10,6 +10,7 @@ import { getAdminService } from "../services/admin.services.js";
 import { getPaymentTransactionService } from "../services/paymentTransaction.service.js";
 import logger from "../logger/index.js";
 import mongoose from "mongoose";
+import { convertToMongoId } from "../services/mongoose.services.js";
 
 export async function createFeeStructureController(req, res) {
   const mongoSession = await mongoose.startSession();
@@ -30,13 +31,13 @@ export async function createFeeStructureController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee Structure already exists!"));
     }
 
-    for (const sectionFeeObj of sectionsFee) {
-      for (const installment of sectionFeeObj.feeInstallments) {
-        if (new Date(installment.dueDate) < new Date()) {
-          throw new Error("Installment due date cannot be in the past");
-        }
-      }
-    }
+    // for (const sectionFeeObj of sectionsFee) {
+    //   for (const installment of sectionFeeObj.feeInstallments) {
+    //     if (new Date(installment.dueDate) < new Date()) {
+    //       throw new Error("Installment due date cannot be in the past");
+    //     }
+    //   }
+    // }
 
     // create section wise fee
     for (const sectionFeeObj of sectionsFee) {
@@ -147,6 +148,28 @@ export async function getFeeStructureController(req, res) {
     );
     feeStructureWithInstallments['installments'] = studentFeeStructureInstallments;
     return res.status(StatusCodes.OK).send(success(200, studentFeeStructureInstallments));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getFeeStructureControllerForAdmin(req, res){
+  try {
+    const adminId = req.adminId;
+    const pipeline = [
+      { $match: { school: convertToMongoId(adminId) } },
+      {
+        $lookup: {
+          from: 'feeinstallments',
+          localField: '_id',
+          foreignField: 'feeStructure',
+          as: 'installments'
+        }   
+      }
+    ];
+
+    const feeStructures = await getFeeStructuresPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, feeStructures));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
