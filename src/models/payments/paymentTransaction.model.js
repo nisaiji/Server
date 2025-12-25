@@ -4,10 +4,19 @@ const paymentTransactionSchema = mongoose.Schema({
   paymentLinkId: {
     type: String
   },
+  paymentSessionId: {
+    type: String
+  },
   paymentLinkExpiresAt: {
     type: Date
   },
-  paymentLinkReferenceId: {
+  paymentSessionExpiresAt: {
+    type: Date
+  },
+  paymentReferenceId: {
+    type: String
+  },
+  paymentInvoiceId: {
     type: String
   },
   description: {
@@ -26,8 +35,7 @@ const paymentTransactionSchema = mongoose.Schema({
     type: String
   },
   transactionId: {
-    type: String,
-    unique: true,
+    type: String
   },
   zohoPaymentId: {
     type: String
@@ -71,13 +79,16 @@ const paymentTransactionSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "feeStructure",
   },
+  feeInstallment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "feeInstallment",
+  },
   amount: {
     type: Number,
     required: true
   },
   amountPaid: {
-    type: Number,
-    required: true
+    type: Number
   },
   currency: {
     type: String,
@@ -85,15 +96,12 @@ const paymentTransactionSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'paid', 'completed', 'failed', 'refunded'],
+    enum: ['active','sessionInitiated', 'paid', 'failed'],
     default: 'active'
   },
   paymentMethod: {
     type: String,
     enum: ['card', 'netbanking', 'upi', 'wallet']
-  },
-  gatewayResponse: {
-    type: mongoose.Schema.Types.Mixed
   },
   failureReason: {
     type: String
@@ -103,7 +111,21 @@ const paymentTransactionSchema = mongoose.Schema({
   },
   refundedAt: {
     type: Date
+  },
+  // webhook related fields
+  webhookId: {
+    type: String
+  },
+  webhookType: {
+    type: String
+  },
+  webhookAccountId: {
+    type: String
+  },
+  webhookEventTime: {
+    type: String
   }
 }, { timestamps: true });
 
-export default mongoose.model("paymentTransaction", paymentTransactionSchema);
+const paymentTransactionModel = mongoose.model("paymentTransaction", paymentTransactionSchema);
+export default paymentTransactionModel;

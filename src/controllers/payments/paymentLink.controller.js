@@ -1,17 +1,21 @@
 import { StatusCodes } from "http-status-codes";
-import { getAdminService } from "../../services/admin.services.js";
-import { getMarchantPaymentConfigService, updateMarchantPaymentConfigService } from "../../services/marchantPaymentConfig.service.js";
-import { getParentService } from "../../services/parent.services.js";
-import { getStudentService } from "../../services/student.service.js";
-import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
-import { createPaymentSessionApiService, refreshTokenService } from "../../services/zohoPayment.service.js";
 import { error, success } from "../../utills/responseWrapper.js";
-import {config} from "../../config/config.js";
-import { createPaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import { createPaymentLinkApiService, createPaymentSessionApiService, refreshTokenService } from "../../services/zohoPayment.service.js";
+import { createPaymentSessionService } from "../../services/paymentSession.service.js";
+import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
+import { config } from "../../config/config.js";
+import { getMarchantPaymentConfigService, updateMarchantPaymentConfigService } from "../../services/marchantPaymentConfig.service.js";
+import { getStudentService } from "../../services/student.service.js";
+import { getAdminService } from "../../services/admin.services.js";
+import { createPaymentTransactionService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import { getParentService } from "../../services/v2/parent.services.js";
+import logger from "../../logger/index.js";
+import { getFormattedNewDateService } from "../../services/celender.service.js";
 
-export async function createPaymentSessionController(req, res) {
+export async function createPaymentLinkController(req, res) {
   try {
-    const { amount, sessionStudentId } = req.body;
+    const { amount, sessionStudentId, description } = req.body;
+    logger.info("Creating payment link", { requestBody: req.body });
     const parentId = req.parentId;
     const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
     if(!sessionStudent) {
@@ -49,10 +53,16 @@ export async function createPaymentSessionController(req, res) {
           zohoAccessToken: response.access_token,
         }
       );
-
+      logger.info("Zoho access token refreshed", { marchantId: marchant._id, expiresAt });
       marchant = await getMarchantPaymentConfigService({ _id: marchant._id });
     }
-    const paymentLinkResponse = await createPaymentSession({
+
+    const linkExpiryDate = new Date();
+    linkExpiryDate.setDate(linkExpiryDate.getDate() + 5);
+    const formattedExpiryDate = getFormattedNewDateService(linkExpiryDate);
+    console.log({linkExpiryDate: formattedExpiryDate})
+
+    const paymentLinkResponse = await createPaymentLink({
       amount, 
       currency: config.currency,
       accountId: marchant.zohoAccountId,
@@ -66,54 +76,71 @@ export async function createPaymentSessionController(req, res) {
       classId: sessionStudent.classId,
       sessionId: sessionStudent.session,
       schoolId: sessionStudent.school,
-      phone: parent?.phone,
-      email: parent?.email,
-      expiresAt: "2025-12-30",
+      phone: parent.phone,
+      email: parent.email,
+      referenceNumber: generateReferenceNumber({sessionStudentId: sessionStudent['_id']}),
+      expiresAt: formattedExpiryDate,
       notifyUser: true,
       returnUrl: config.zohoRedirectUrl
-    });
-
+    })
     return res.status(StatusCodes.OK).send(success(200, paymentLinkResponse));
+  } catch (err) {
+    logger.error("Error creating payment link", {}, err);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+
+export async function verifyPaymentController(req, res) {
+  try {
+    const { signature, paymentLinkId, paymentLinkReference, amount, status, paymentId } = req.body;
+    const payment = await getPaymentTransactionService({
+      paymentReferenceId: paymentLinkReference, 
+      paymentLinkId: paymentLinkId, 
+      amount: amount, 
+      zohoPaymentId: paymentId, 
+      status: "paid"
+    });
+    
+    if(!payment){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+    }
+
+    return res.status(StatusCodes.OK).send(success(200, {paymentCycle: "monthly", paymentMethod: "UPI", paymentDate: new Date(), amountPaid: amount, paymentId, paymentLinkId}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
-export async function createPaymentSession({ amount, currency, accountId, description, sessionStudentId, parentId, studentId,accessToken, isSandbox, sectionId, classId, sessionId, schoolId }) {
+// ------------------------HELPER FUNCTIONS------------------------
+async function createPaymentLink({amount, currency, accountId, description, phone, email, referenceNumber, expiresAt, notifyUser, returnUrl, isSandbox, sessionStudentId,accessToken, studentId, parentId, sectionId, classId, sessionId, schoolId  }) {
   try {
-    const referenceNumber = generateReferenceNumber({ sessionStudentId });
-    const invoiceNumber = generateInvoiceNumber({ sessionStudentId });
-    const metaData = [
-      {"key": "type", "value": "sessionStudent"},
-      {"key": "id", "value": sessionStudentId.toString()}
-    ]
-    const response = await createPaymentSessionApiService({ amount, currency, accountId, metaData, description, accessToken, invoiceNumber, referenceNumber, isSandbox });
-    if(response.message !== "success") {
-      throw new Error("Failed to create payment session");
-    }
+    const response = await createPaymentLinkApiService({ isSandbox, amount, currency, accountId, description, phone, email, referenceId: referenceNumber, expiresAt, notifyUser, returnUrl,accessToken });
 
-    const data = response.payments_session;
-    const expiryDate = new Date();
-    expiryDate.setMinutes(expiryDate.getMinutes() + 15);
-
+    const data = response.payment_links;
     const params = {
-      paymentSessionId: data.payments_session_id,
-      paymentSessionExpiresAt: expiryDate,
+      paymentLinkId: data.payment_link_id,
+      paymentLinkExpiresAt: new Date(data.expires_at_formatted),
       amount: data.amount,
+      amountPaid: data.amount_paid,
       currency: data.currency,
-      paymentReferenceId: data.reference_number,
-      paymentInvoiceceId: data.invoice_number,
+      status: data.status,
+      paymentReferenceId: data.reference_id,
+      paymentInvoiceId: data.invoice_id,
       paymentLinkDescription: data.description,
+      paymentLinkReturnUrl: data.return_url,
+      paymentLinkEmail: data.email,
+      paymentLinkPhone: data.phone,
+      PaymentLinkUrl: data.url,
       section: sectionId,
       classId: classId,
       session: sessionId,
       school: schoolId,
       parent: parentId,
-      status: 'sessionInitiated',
       sessionStudent: sessionStudentId,
       student: studentId
     }
-    const paymentSession = await createPaymentTransactionService(params);
+    const paymentLink = await createPaymentTransactionService(params);
     return response;
   } catch (error) {
     throw error;

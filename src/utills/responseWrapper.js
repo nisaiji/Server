@@ -7,7 +7,7 @@ export const success = (statusCode ,result)=>{
 }
 
 export const error = (statusCode,message)=>{
-    return{
+    return {
         status:"error",
         statusCode,
         message
