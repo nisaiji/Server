@@ -30,7 +30,7 @@ import examRouter from "./exam.router.js";
 import studentExamResultRouter from "./studentExamResult.router.js";
 import marchantPaymentRouter from "./marchantPaymentConfig.router.js";
 import paymentIndexRouter from "./payments/index.router.js";
-import feeStructureRouter from "./feeStructure.router.js";
+import feeStructureRouter from "./feeStructure/index.router.js";
 const router = express();
 
 router.use("/v2", v2Router);
