@@ -79,6 +79,7 @@ export async function createPaymentLinkController(req, res) {
       phone: parent.phone,
       email: parent.email,
       referenceNumber: generateReferenceNumber({sessionStudentId: sessionStudent['_id']}),
+      invoiceNumber: generateInvoiceNumber({sessionStudentId: sessionStudent['_id']}),
       expiresAt: formattedExpiryDate,
       notifyUser: true,
       returnUrl: config.zohoRedirectUrl
@@ -113,7 +114,7 @@ export async function verifyPaymentController(req, res) {
 }
 
 // ------------------------HELPER FUNCTIONS------------------------
-async function createPaymentLink({amount, currency, accountId, description, phone, email, referenceNumber, expiresAt, notifyUser, returnUrl, isSandbox, sessionStudentId,accessToken, studentId, parentId, sectionId, classId, sessionId, schoolId  }) {
+async function createPaymentLink({amount, currency, accountId, description, phone, email, referenceNumber, invoiceNumber, expiresAt, notifyUser, returnUrl, isSandbox, sessionStudentId,accessToken, studentId, parentId, sectionId, classId, sessionId, schoolId  }) {
   try {
     const response = await createPaymentLinkApiService({ isSandbox, amount, currency, accountId, description, phone, email, referenceId: referenceNumber, expiresAt, notifyUser, returnUrl,accessToken });
 
@@ -126,7 +127,7 @@ async function createPaymentLink({amount, currency, accountId, description, phon
       currency: data.currency,
       status: data.status,
       paymentReferenceId: data.reference_id,
-      paymentInvoiceId: data.invoice_id,
+      paymentInvoiceId: invoiceNumber,
       paymentLinkDescription: data.description,
       paymentLinkReturnUrl: data.return_url,
       paymentLinkEmail: data.email,
@@ -149,12 +150,10 @@ async function createPaymentLink({amount, currency, accountId, description, phon
 
 function generateInvoiceNumber({ sessionStudentId }) {
   const d = new Date();
-  const date = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  return `INV-${date}-${sessionStudentId.toString().slice(-6)}-${Math.floor(Math.random() * 900000) + 100000}`;
+  return `INV-${d.getTime()}-${sessionStudentId}-${Math.floor(Math.random() * 90000000) + 10000000}`;
 }
 
 function generateReferenceNumber({ sessionStudentId }) {
   const d = new Date();
-  const date = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  return `REF-${date}-${sessionStudentId.toString().slice(-6)}-${Math.floor(Math.random() * 900000) + 100000}`;
+  return `REF-${d.getTime()}-${sessionStudentId}-${Math.floor(Math.random() * 90000000) + 10000000}`;
 }
