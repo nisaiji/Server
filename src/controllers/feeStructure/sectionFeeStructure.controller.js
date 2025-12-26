@@ -3,9 +3,10 @@ import { getSchoolFeeStructureService } from "../../services/feeStructure/school
 import { getSessionService } from "../../services/session.services.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { getClassService } from "../../services/class.sevices.js";
-import { createSectionFeeStructureService, getSectionFeeStructureService } from "../../services/feeStructure/sectionFeeStructure.services.js";
+import { createSectionFeeStructureService, getSectionFeeStructureService, getSectionFeeStructuresPipelineService } from "../../services/feeStructure/sectionFeeStructure.services.js";
 import { createFeeInstallmentService } from "../../services/feeStructure/feeInstallment.service.js";
 import { getSectionService } from "../../services/section.services.js";
+import { convertToMongoId } from "../../services/mongoose.services.js";
 
 export async function createSectionFeeStructureController(req, res) {
   try {
@@ -41,7 +42,8 @@ export async function createSectionFeeStructureController(req, res) {
         session: sessionId,
         totalAmount,
         section: sectionFeeObj.sectionId,
-        school: adminId
+        school: adminId,
+        schoolFeeStructure: schoolFeeStructureId
       };
 
       const newFeeStructure = await createSectionFeeStructureService(feeStructurePayload);
@@ -65,17 +67,85 @@ export async function createSectionFeeStructureController(req, res) {
   }
 }
 
-export async function getSchoolFeeStructureController(req, res) {
+export async function getSectionFeeStructureController(req, res) {
   try {
-    const { sessionId } = req.body;
+    const { sessionId, classId, sectionId } = req.query;
     const adminId = req.adminId;
 
-    const schoolFeeStructure = await getSchoolFeeStructureService({ school: adminId, session: sessionId });
-    if (!schoolFeeStructure) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "School fee structure not found"));
+    const filter = {
+      school: convertToMongoId(adminId)
     }
-    return res.status(StatusCodes.OK).send(success(200, schoolFeeStructure));
+
+    if(classId) {
+      filter.classId = convertToMongoId(classId);
+    }
+
+    if(sectionId) {
+      filter.section = convertToMongoId(sectionId);
+    }
+    if(sessionId) {
+      filter.session = convertToMongoId(sessionId);
+    }
+
+    const pipeline = [
+      {
+        $match: filter
+      },
+      {
+        $lookup: {
+          from: 'classes',
+          localField: 'classId',
+          foreignField: '_id',
+          as: 'class'
+        }
+      },
+      {
+        $unwind: {
+          path: '$class',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'sections',
+          localField: 'section',
+          foreignField: '_id',
+          as: 'section'
+        }
+      },
+      {
+        $unwind: {
+          path: '$section',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'schoolfeestructures',
+          localField: 'schoolFeeStructure',
+          foreignField: '_id',
+          as: 'schoolFeeStructure'
+        }
+      },
+      {
+        $unwind: {
+          path: '$schoolFeeStructure',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'feeinstallments',
+          localField: '_id',
+          foreignField: 'sectionFeeStructure',
+          as: 'feeInstallments'
+        }
+      }
+    ]
+
+    const sectionFeeStructure = await getSectionFeeStructuresPipelineService(pipeline);
+    return res.status(StatusCodes.OK).send(success(200, sectionFeeStructure));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
-} 
+}
