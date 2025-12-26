@@ -26,6 +26,10 @@ const schoolFeeStructureSchema = mongoose.Schema({
     enum: ['monthly', 'bimonthly', 'quarterly', 'half-yearly', 'annually'],
     required: true
   },
+  effectiveFrom: {
+    type: Number,
+    required: true
+  },
   isActive: {
     type: Boolean,
     default: true
