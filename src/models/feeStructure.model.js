@@ -10,12 +10,14 @@ const feeStructureSchema = mongoose.Schema({
   section: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'section',
-    required: true
+    required: true,
+    index: true
   },
   classId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "class",
-    required: true
+    required: true,
+    index: true
   },
   session: {
     type: mongoose.Schema.Types.ObjectId,
@@ -25,7 +27,8 @@ const feeStructureSchema = mongoose.Schema({
   school: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'admin',
-    required: true
+    required: true,
+    index: true
   },
   installmentType: {
     type: String,
@@ -43,8 +46,21 @@ const feeStructureSchema = mongoose.Schema({
   lateFee: {
     type: Number,
     default: 0
-  }
+  },
+  academicYearId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'academicYear',
+    required: true,
+    index: true
+  },
+  effectiveFrom: {
+    type: Date,
+    required: true
+  },
 }, { timestamps: true });
+
+
+feeStructureSchema.index({ school: 1, academicYearId: 1, classId: 1, section: 1, name: 1 }, { unique: false });
 
 const feeStructureModel = mongoose.model("feeStructure", feeStructureSchema);
 export default feeStructureModel;
