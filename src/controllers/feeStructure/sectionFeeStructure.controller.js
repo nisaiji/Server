@@ -4,7 +4,7 @@ import { getSessionService } from "../../services/session.services.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { getClassService } from "../../services/class.sevices.js";
 import { createSectionFeeStructureService, getSectionFeeStructureService, getSectionFeeStructuresPipelineService } from "../../services/feeStructure/sectionFeeStructure.services.js";
-import { createFeeInstallmentService } from "../../services/feeStructure/feeInstallment.service.js";
+import { createFeeInstallmentService, getFeeInstallmentService, updateFeeInstallmentService } from "../../services/feeStructure/feeInstallment.service.js";
 import { getSectionService } from "../../services/section.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 
@@ -145,6 +145,49 @@ export async function getSectionFeeStructureController(req, res) {
 
     const sectionFeeStructure = await getSectionFeeStructuresPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, sectionFeeStructure));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function updateSectionFeeStructureController(req, res) {
+  try {
+    const { sectionsFee, schoolFeeStructureId } = req.body;
+    const adminId = req.adminId;
+
+    const schoolFeeStructure = await getSchoolFeeStructureService({ _id: schoolFeeStructureId, school: adminId });
+    
+    if(!schoolFeeStructure) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee structure not found!"));
+    }
+
+    const session = await getSessionService({ _id: sessionId });
+    if (!session || session['status'] === 'completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed!"));
+    }
+
+    for (const sectionFeeObj of sectionsFee) {
+      const sectionFeeStructure = await getSectionFeeStructureService({_id: sectionFeeObj.sectionFeeStructureId, school: adminId, schoolFeeStructure: schoolFeeStructureId});
+      if(!sectionFeeStructure) {
+        continue;
+      }
+      const sectionFeeStructurePayload = { };
+      if(sectionFeeObj.totalAmount) sectionFeeStructurePayload.totalAmount = sectionFeeObj.totalAmount;
+
+      const updatedSectionFeeStructure = await createSectionFeeStructureService({ _id: sectionFeeObj.sectionFeeStructureId }, sectionFeeStructurePayload);
+
+      for (const installment of sectionFeeObj.feeInstallments) {
+        const installment = await getFeeInstallmentService({_id: installment.feeInstallmentId, sectionFeeStructure: sectionFeeObj.sectionFeeStructureId});
+        if(!installment || installment.dueDate <= new Date().getTime()) {
+          continue;
+        } 
+        const feeInstallmentPayload = { };
+        if(installment.amount) feeInstallmentPayload.amount = installment.amount;
+        await updateFeeInstallmentService({_id: installment.feeInstallmentId}, feeInstallmentPayload);
+      }
+    }
+
+    return res.status(StatusCodes.CREATED).send(success(201, { message: "Fee structure updated successfully"}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
