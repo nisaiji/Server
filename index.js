@@ -8,7 +8,7 @@ import { config } from "./src/config/config.js";
 import cookieParser from "cookie-parser";
 import swaggerDocs from "./swagger.js";
 import  {cronManager}  from "./src/crons/index.cron.js";
-import "./src/config/redis.config.js";
+// import "./src/config/redis.config.js";
 const PORT = config.port || 4000;
 
 const app = express();
