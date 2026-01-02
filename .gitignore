@@ -9,3 +9,10 @@ firebase.json
 
 # Logs
 logs
+
+# md files
+SETUP.md
+FEATURES_DOCUMENTATION.md
+SYSTEM_DOCUMENTATION.md
+TODOs.md
+.env.sample
