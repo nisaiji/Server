@@ -1,12 +1,26 @@
 import express from "express";
-import { monthlyPaymentsSummaryController, paymentsByPaymentModesController, paymentTransactionsController, schoolPaymentsController, sectionFeeSummaryController, sectionStudentsWithPaymentController } from "../../controllers/payments/paymentAdminDashboard.controller.js";
+import { 
+  daywisePaymentsSummaryController, 
+  monthwisePaymentsSummaryController,
+  paymentsByPaymentModesController, 
+  paymentTransactionsController, 
+  schoolPaymentsController, 
+  // sectionFeeSummaryController, 
+  // sectionStudentsWithPaymentController, 
+  // sessionStudentTransactionsController
+} from "../../controllers/payments/paymentAdminDashboard.controller.js";
 const paymentAdminDashboardRouter = express.Router();
 
 paymentAdminDashboardRouter.post("/fee-summary", schoolPaymentsController);
-paymentAdminDashboardRouter.post("/fee-paid", monthlyPaymentsSummaryController);
-paymentAdminDashboardRouter.post("/payment-by-modes", paymentsByPaymentModesController);
-paymentAdminDashboardRouter.post("/payment-transactions", paymentTransactionsController);
-paymentAdminDashboardRouter.post("/:sectionId/fee-summary", sectionFeeSummaryController);
-paymentAdminDashboardRouter.post("/:sectionId/students", sectionStudentsWithPaymentController);
+paymentAdminDashboardRouter.post("/daywise-paid", daywisePaymentsSummaryController);
+paymentAdminDashboardRouter.post("/monthwise-paid", monthwisePaymentsSummaryController);
+paymentAdminDashboardRouter.post("/payment-modes", paymentsByPaymentModesController);
+paymentAdminDashboardRouter.post("/transactions", paymentTransactionsController);
+// paymentAdminDashboardRouter.post("/:sessionStudentId/transactions", sessionStudentTransactionsController);
+// paymentAdminDashboardRouter.post("/:sessionStudentId/fee", sessionStudentTransactionsController);
+
+
+// paymentAdminDashboardRouter.post("/:sectionId/fee-summary", sectionFeeSummaryController);
+// paymentAdminDashboardRouter.post("/:sectionId/students", sectionStudentsWithPaymentController);
 
 export default paymentAdminDashboardRouter;
