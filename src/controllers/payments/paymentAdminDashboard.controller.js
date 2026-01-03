@@ -82,6 +82,9 @@ export async function daywisePaymentsSummaryController(req, res) {
   }
 }
 
+export async function monthwisePaymentsSummaryController(req, res) {
+}
+
 export async function paymentsByPaymentModesController(req, res) {
   try {
     const {startDate, endDate} = req.body;
