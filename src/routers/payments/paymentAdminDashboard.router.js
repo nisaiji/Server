@@ -33,10 +33,6 @@ paymentAdminDashboardRouter.get("/reports/other/summary", classWiseSummaryValida
 paymentAdminDashboardRouter.get("/reports/other/chart", adminDashboardPaymentController.refundFailedChartController);
 paymentAdminDashboardRouter.get("/reports/other/transactions", adminDashboardPaymentController.refundFailedTransactionsController);
 
-
-paymentAdminDashboardRouter.post("/:sectionId/fee-summary", adminDashboardPaymentController.sectionFeeSummaryController);
-paymentAdminDashboardRouter.post("/:sectionId/students", adminDashboardPaymentController.sectionStudentsWithPaymentController);
-
 // paymentAdminDashboardRouter.post("/:sessionStudentId/transactions", sessionStudentTransactionsController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/fee", sessionStudentTransactionsController);
 
