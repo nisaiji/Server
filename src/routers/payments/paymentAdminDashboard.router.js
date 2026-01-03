@@ -1,5 +1,6 @@
 import express from "express";
 import { 
+  classMonthlyCollectionController,
   daywisePaymentsSummaryController, 
   monthwisePaymentsSummaryController,
   paymentsByPaymentModesController, 
@@ -16,6 +17,7 @@ paymentAdminDashboardRouter.post("/daywise-paid", daywisePaymentsSummaryControll
 paymentAdminDashboardRouter.post("/monthwise-paid", monthwisePaymentsSummaryController);
 paymentAdminDashboardRouter.post("/payment-modes", paymentsByPaymentModesController);
 paymentAdminDashboardRouter.post("/transactions", paymentTransactionsController);
+paymentAdminDashboardRouter.post("/class-paid", classMonthlyCollectionController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/transactions", sessionStudentTransactionsController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/fee", sessionStudentTransactionsController);
 

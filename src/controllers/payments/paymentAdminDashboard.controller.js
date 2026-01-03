@@ -228,6 +228,67 @@ export async function paymentTransactionsController(req, res) {
   }
 }
 
+export async function classMonthlyCollectionController(req, res) {
+  try {
+    const { classId } = req.params;
+    const adminId = req.adminId;
+    
+    const data = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          classId: convertToMongoId(classId),
+          school: convertToMongoId(adminId),
+          status: "paid"
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "sectionData"
+        }
+      },
+      {
+        $group: {
+          _id: {
+            section: "$section",
+            sectionName: { $arrayElemAt: ["$sectionData.name", 0] },
+            month: {
+              $dateToString: {
+                format: "%Y-%m",
+                date: "$paidAt"
+              }
+            }
+          },
+          totalAmount: { $sum: "$amount" },
+          transactionCount: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.section",
+          sectionName: { $first: "$_id.sectionName" },
+          monthlyData: {
+            $push: {
+              month: "$_id.month",
+              totalAmount: "$totalAmount",
+              transactionCount: "$transactionCount"
+            }
+          }
+        }
+      },
+      {
+        $sort: { sectionName: 1 }
+      }
+    ]);
+
+    return res.status(StatusCodes.OK).send(success(200, data));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
 // export async function sessionStudentTransactionsController(req, res) {
 //   try {
 //     const { sessionStudentId } = req.params;
