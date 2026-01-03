@@ -38,6 +38,16 @@ export async function updatePaymentTransactionService(filter, update) {
 }
 
 
+export async function getPaymentTransactionPipelineService(pipeline){
+  try {
+    const paymentTransactions = await paymentTransactionModel.aggregate(pipeline).exec();
+    return paymentTransactions;
+  } catch (error) {
+    throw error;    
+  }
+}
+
+
 /**
  * 
  * @param { studentId, amount, gatewayRef: transactionId or related key, metadata} 

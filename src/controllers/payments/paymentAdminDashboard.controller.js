@@ -1,16 +1,33 @@
 import { StatusCodes } from "http-status-codes";
-import { error, success } from "../../utills/responseWrapper";
-import { getPaymentTransactionService } from "../../services/paymentTransaction.service";
+import { error, success } from "../../utills/responseWrapper.js";
+import { getPaymentTransactionPipelineService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import { convertToMongoId } from "../../services/mongoose.services.js";
 
 export async function schoolPaymentsController(req, res) {
   try {
+    // const adminId = req.adminId;
     // returns data for school:
     // 1. collected fees
     // 2. pending payments
     // 3. overdue payments
     // 4. refunded amount
+    const collectedFee = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          // school: convertToMongoId(adminId),
+          status: 'paid'
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" }
+        }
+      }
+    ])
+    console.log(JSON.stringify(collectedFee));
     const data = {
-      collectedFee: 1000,
+      collectedFee: collectedFee[0].totalAmount,
       pending: 1000,
       overdue:1000,
       refunded: 1000
@@ -21,12 +38,40 @@ export async function schoolPaymentsController(req, res) {
   }  
 }
 
-
 export async function monthlyPaymentsSummaryController(req, res) {
   try {
-    // returns month wise collected fees
+    const {startDate, endDate} = req.body;
+    console.log({startDate: new Date(startDate), endDate: new Date(endDate)})
+    const payments = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          status: "paid",
+          paidAt: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$paidAt"
+            }
+          },
+          totalAmount: { $sum: "$amount" },
+          TransactionCount: { $sum: 1 }
+        }
+      },
+      {
+        $sort: {
+          _id: 1
+        }
+      }
+    ])
     
-    return res.status(StatusCodes.OK).send(success(200, {}));
+    return res.status(StatusCodes.OK).send(success(200, { payments }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -35,16 +80,31 @@ export async function monthlyPaymentsSummaryController(req, res) {
 
 export async function paymentsByPaymentModesController(req, res) {
   try {
-    // return total collected fee by payment modes
-    // 1. UPI
-    // 2. Net Banking
-    // 3. Credit Card
-    const data = {
-      upi: 1000,
-      netBanking: 1000,
-      creditCard: 1000
-    }
-    return res.status(StatusCodes.OK).send(success(200, data));
+    const {startDate, endDate} = req.body;
+    const payments = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          status: "paid",
+          paymentMethod: { $exists: true },
+          paidAt: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$paymentMethod",
+          totalAmount: { $sum: "$amount" }
+        }
+      },
+      {
+        $sort: {
+          _id: 1
+        }
+      }
+    ])
+    return res.status(StatusCodes.OK).send(success(200, payments));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
