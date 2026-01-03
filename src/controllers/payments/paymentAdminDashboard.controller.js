@@ -6,18 +6,19 @@ import { countClassService } from "../../services/class.sevices.js";
 
 export async function schoolPaymentsController(req, res) {
   try {
-    // const adminId = req.adminId;
-    // returns data for school:
-    // 1. collected fees
-    // 2. pending payments
-    // 3. overdue payments
-    // 4. refunded amount
+    const {sessionId, classId, sectionId } = req.query;
+    const schoolId = req.adminId;
+    
+    const matchQuery = {};
+    if (schoolId) matchQuery.school = convertToMongoId(schoolId);
+    if (sessionId) matchQuery.session = convertToMongoId(sessionId);
+    if (classId) matchQuery.classId = convertToMongoId(classId);
+    if (sectionId) matchQuery.section = convertToMongoId(sectionId);
+    matchQuery.status = "paid";
+
     const collectedFee = await getPaymentTransactionPipelineService([
       {
-        $match: {
-          // school: convertToMongoId(adminId),
-          status: 'paid'
-        }
+        $match: matchQuery
       },
       {
         $group: {
@@ -26,7 +27,6 @@ export async function schoolPaymentsController(req, res) {
         }
       }
     ])
-    console.log(JSON.stringify(collectedFee));
     const data = {
       collectedFee: collectedFee[0].totalAmount,
       pending: 1000,
@@ -41,7 +41,7 @@ export async function schoolPaymentsController(req, res) {
   }
 }
 
-export async function monthlyPaymentsSummaryController(req, res) {
+export async function daywisePaymentsSummaryController(req, res) {
   try {
     const {startDate, endDate} = req.body;
     console.log({startDate: new Date(startDate), endDate: new Date(endDate)})
@@ -150,16 +150,109 @@ export async function sectionFeeSummaryController(req, res) {
   }
 }
 
-export async function sectionStudentsWithPaymentController(req, res) {
+// export async function sessionStudentTransactionsController(req, res) {
+//   try {
+//     const { sessionStudentId } = req.params;
+//     const adminId = req.adminId;
+//     const data = await getPaymentTransactionPipelineService([
+//       {
+//         $match: {
+//           // school: convertToMongoId(adminId),
+//           sessionStudent: convertToMongoId(sessionStudentId)
+//         } 
+//       },
+//       {
+//         $lookup: {
+//           from: "sections",
+//           localField: "section",
+//           foreignField: "_id",
+//           as: "section"
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: "classes",
+//           localField: "classId",
+//           foreignField: "_id",
+//           as: "class"
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: "sessions",
+//           localField: "session",
+//           foreignField: "_id",
+//           as: "session"
+//         }
+//       },
+//       {
+//         $lookup: {
+//           from: "students",
+//           localField: "student",
+//           foreignField: "_id",
+//           as: "student"
+//         }
+//       },
+//       {
+//         $project: {
+//           amount: 1,
+//           status: 1,
+//           paymentMethod: 1,
+//           paidAt: 1,
+//           createdAt: 1,
+//           paymentReferenceId: 1,
+//           paymentInvoiceId: 1,
+//           transactionId: 1,
+//           zohoPaymentId: 1,
+//           sectionName: { $arrayElemAt: ["$section.name", 0] },
+//           sectionId: { $arrayElemAt: ["$section._id", 0] },
+//           className: { $arrayElemAt: ["$class.name", 0] },
+//           classId: { $arrayElemAt: ["$class._id", 0] },
+//           session: {
+//               $concat: [
+//                 { $toString: { $arrayElemAt: ["$session.academicStartYear", 0] } },
+//                 "-",
+//                 { $toString: { $arrayElemAt: ["$session.academicEndYear", 0] } }
+//               ]
+//             },
+//           sessionEndYear: { $arrayElemAt: ["$session.endYear", 0] },
+//           sessionName: { $arrayElemAt: ["$session.name", 0] },
+//           studentFirstname: { $arrayElemAt: ["$student.firstname", 0] },
+//           studentLastname: { $arrayElemAt: ["$student.lastname", 0] }
+//         }
+//       }
+//     ]);
+//     return res.status(StatusCodes.OK).send(success(200, data));
+//   } catch (err) {
+//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+//   }
+// }
+
+export async function sessionStudentFeesController(req, res) {
   try {
-    // return list of students with payment status
-    const data = [
+    const { sessionStudentId } = req.params;
+    const adminId = req.adminId;
+    const data = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          // school: convertToMongoId(adminId),
+          sessionStudent: convertToMongoId(sessionStudentId)
+        } 
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
       {
         studentId: "string",
         name: "string",
         paymentStatus: "paid/pending/overdue",
       },
-    ];
+    ]);
     return res.status(StatusCodes.OK).send(success(200, data));
   } catch (err) {
     return res
@@ -884,3 +977,35 @@ export async function refundFailedTransactionsController(req, res) {
       .send(error(500, err.message));
   }
 }
+// export async function sectionFeeSummaryController(req, res) {
+//   try {
+//       // return section fee summary
+//       // 1. Collected fee
+//       // 2. Expected fee
+//       // 3. Pending fee
+//       const data = {
+//         collectedFee: 1000,
+//         expectedFee: 1000,
+//         pendingFee: 1000
+//       }
+//     return res.status(StatusCodes.OK).send(success(200, data));
+//   } catch (err) {
+//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+//   }
+// }
+
+// export async function sectionStudentsWithPaymentController(req, res) {
+//   try {
+//     // return list of students with payment status
+//     const data = [
+//       {
+//         studentId: "string",
+//         name: "string",
+//         paymentStatus: "paid/pending/overdue"
+//       }
+//     ]
+//     return res.status(StatusCodes.OK).send(success(200, data));
+//   } catch (err) {
+//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+//   }
+// }

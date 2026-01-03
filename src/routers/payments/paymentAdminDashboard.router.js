@@ -1,14 +1,13 @@
 import express from "express";
 const paymentAdminDashboardRouter = express.Router();
-
 import * as adminDashboardPaymentController from "../../controllers/payments/paymentAdminDashboard.controller.js";
 import { classWiseSummaryValidation, paymentModeReportValidation, installmentReminderValidation } from "../../middlewares/validation/admin-dashboard.validation.middleware.js";
 
 paymentAdminDashboardRouter.post("/fee-summary", adminDashboardPaymentController.schoolPaymentsController);
-paymentAdminDashboardRouter.post("/fee-paid", adminDashboardPaymentController.monthlyPaymentsSummaryController);
-paymentAdminDashboardRouter.post("/payment-by-modes", adminDashboardPaymentController.paymentsByPaymentModesController);
-paymentAdminDashboardRouter.post("/payment-transactions", adminDashboardPaymentController.paymentTransactionsController);
-
+paymentAdminDashboardRouter.post("/daywise-paid", adminDashboardPaymentController.daywisePaymentsSummaryController);
+paymentAdminDashboardRouter.post("/monthwise-paid", adminDashboardPaymentController.monthwisePaymentsSummaryController);
+paymentAdminDashboardRouter.post("/payment-modes", adminDashboardPaymentController.paymentsByPaymentModesController);
+paymentAdminDashboardRouter.post("/transactions", adminDashboardPaymentController.paymentTransactionsController);
 
 /* Class-Wise Reports */
 paymentAdminDashboardRouter.get("/reports/class-wise/summary", classWiseSummaryValidation, adminDashboardPaymentController.classWiseSummaryController);
@@ -38,5 +37,11 @@ paymentAdminDashboardRouter.get("/reports/other/transactions", adminDashboardPay
 paymentAdminDashboardRouter.post("/:sectionId/fee-summary", adminDashboardPaymentController.sectionFeeSummaryController);
 paymentAdminDashboardRouter.post("/:sectionId/students", adminDashboardPaymentController.sectionStudentsWithPaymentController);
 
+// paymentAdminDashboardRouter.post("/:sessionStudentId/transactions", sessionStudentTransactionsController);
+// paymentAdminDashboardRouter.post("/:sessionStudentId/fee", sessionStudentTransactionsController);
+
+
+// paymentAdminDashboardRouter.post("/:sectionId/fee-summary", sectionFeeSummaryController);
+// paymentAdminDashboardRouter.post("/:sectionId/students", sectionStudentsWithPaymentController);
 
 export default paymentAdminDashboardRouter;
