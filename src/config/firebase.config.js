@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import serviceAccount from "../../firebase.json" assert { type: "json" };
+import serviceAccount from "../../firebase.json" with { type: "json" };
 
 const imageUrl = "http://localhost:4000/images/logo.jpeg";
 admin.initializeApp({
