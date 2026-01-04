@@ -3,6 +3,7 @@ import {
   classMonthlyCollectionController,
   daywisePaymentsSummaryController, 
   monthwisePaymentsSummaryController,
+  parentFeeReminderController,
   paymentsByPaymentModesController, 
   paymentTransactionsController, 
   schoolPaymentsController, 
@@ -18,6 +19,7 @@ paymentAdminDashboardRouter.post("/monthwise-paid", monthwisePaymentsSummaryCont
 paymentAdminDashboardRouter.post("/payment-modes", paymentsByPaymentModesController);
 paymentAdminDashboardRouter.post("/transactions", paymentTransactionsController);
 paymentAdminDashboardRouter.post("/class-paid", classMonthlyCollectionController);
+paymentAdminDashboardRouter.post("/parent-reminder", parentFeeReminderController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/transactions", sessionStudentTransactionsController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/fee", sessionStudentTransactionsController);
 

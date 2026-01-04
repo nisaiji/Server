@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { error, success } from "../../utills/responseWrapper.js";
 import { getPaymentTransactionPipelineService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
+import { sendPushNotification } from "../../config/firebase.config.js";
 
 export async function schoolPaymentsController(req, res) {
   try {
@@ -27,7 +28,7 @@ export async function schoolPaymentsController(req, res) {
       }
     ])
     const data = {
-      collectedFee: collectedFee[0].totalAmount,
+      collectedFee: collectedFee[0]?.totalAmount,
       pending: 1000,
       overdue:1000,
       refunded: 1000
@@ -444,6 +445,73 @@ export async function sessionStudentFeesController(req, res) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+export async function parentFeeReminderController(req, res) {
+  try {
+    const { sessionStudentId } = req.params;
+    const adminId = req.adminId;
+    
+    const parentData = await getSessionStudentsPipelineService([
+      {
+        $match: {
+          _id: convertToMongoId(sessionStudentId),
+          school: convertToMongoId(adminId)
+        }
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $lookup: {
+          from: "schoolparents",
+          localField: "student.schoolParent",
+          foreignField: "_id",
+          as: "schoolParent"
+        }
+      },
+      {
+        $lookup: {
+          from: "parents",
+          localField: "schoolParent.parent",
+          foreignField: "_id",
+          as: "parent"
+        }
+      },
+      {
+        $project: {
+          fcmToken: { $arrayElemAt: ["$parent.fcmToken", 0] },
+          studentName: {
+            $concat: [
+              { $arrayElemAt: ["$student.firstname", 0] },
+              " ",
+              { $arrayElemAt: ["$student.lastname", 0] }
+            ]
+          }
+        }
+      }
+    ]);
+
+    if (!parentData[0]?.fcmToken) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Bad Request"));
+    }
+
+    const { fcmToken, studentName } = parentData[0];
+    const title = "Fee Reminder";
+    const description = `Please pay the pending fees for ${studentName}`;
+
+    await sendPushNotification(fcmToken, title, description);
+
+    return res.status(StatusCodes.OK).send(success(200, "Fee reminder sent successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
 
 // export async function sectionFeeSummaryController(req, res) {
 //   try {
