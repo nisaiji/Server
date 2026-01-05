@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 
 const feeInstallmentSchema = mongoose.Schema({
-  feeStructure: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'feeStructure',
-    required: true
-  },
   installmentNumber: {
     type: Number
   },
@@ -13,10 +8,23 @@ const feeInstallmentSchema = mongoose.Schema({
     type: Number
   },
   startDate: {
-    type: Date
+    type: Number
   },
   dueDate: {
     type: Number
+  },
+  sectionFeeStructure: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'sectionFeeStructure',
+    required: true
+  },
+  session: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'session'
+  },
+  school: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'school'
   },
   isActive: {
     type: Boolean,

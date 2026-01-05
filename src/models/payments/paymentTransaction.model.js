@@ -101,7 +101,16 @@ const paymentTransactionSchema = mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['card', 'netbanking', 'upi', 'wallet']
+    enum: ['card', 'net_banking', 'upi', 'default']
+  },
+  failureCode: {
+    type: String
+  },
+  failureCategory: {
+    type: String
+  },
+  failureTip: {
+    type: String
   },
   failureReason: {
     type: String

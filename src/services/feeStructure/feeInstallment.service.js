@@ -1,6 +1,6 @@
-import feeInstallmentModel from "../models/feeInstallment.model.js";
-import feeStructureModel from "../models/feeStructure.model.js";
+import schoolFeeStructureModel from "../../models/feeStructure/schoolFeeStructure.model.js";
 import dayjs from 'dayjs';
+import feeInstallmentModel from "../../models/feeStructure/feeInstallment.model.js";
 
 export async function getFeeInstallmentService(paramObj, projection = {}) {
   try {
@@ -98,7 +98,7 @@ export async function getNextDate(current, frequency) {
 */
 
 export async function createInstallmentsForStudent({ studentId, feeStructureId }) {
-  const fs = await feeStructureModel.findById({_id: feeStructureId});
+  const fs = await schoolFeeStructureModel.findById({_id: feeStructureId});
   if (!fs) throw new Error('Fee structure not found');
   const installments = [];
   let cursor = dayjs(fs.startDate).startOf('day');

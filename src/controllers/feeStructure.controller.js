@@ -3,7 +3,6 @@ import { error, success } from "../utills/responseWrapper.js"
 import { getSessionService } from "../services/session.services.js";
 import { getClassService } from "../services/class.sevices.js";
 import { createFeeStructureService, getFeeStructureService, getFeeStructuresPipelineService } from "../services/feeStructure.service.js";
-import { createFeeInstallmentService } from "../services/feeInstallment.service.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import { getSectionService } from "../services/section.services.js";
 import { getAdminService } from "../services/admin.services.js";
@@ -11,6 +10,7 @@ import { getPaymentTransactionService } from "../services/paymentTransaction.ser
 import logger from "../logger/index.js";
 import mongoose from "mongoose";
 import { convertToMongoId } from "../services/mongoose.services.js";
+import { createFeeInstallmentService } from "../services/feeStructure/feeInstallment.service.js";
 
 export async function createFeeStructureController(req, res) {
   const mongoSession = await mongoose.startSession();
