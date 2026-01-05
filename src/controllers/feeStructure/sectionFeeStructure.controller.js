@@ -7,6 +7,7 @@ import { createSectionFeeStructureService, getSectionFeeStructureService, getSec
 import { createFeeInstallmentService, getFeeInstallmentService, updateFeeInstallmentService } from "../../services/feeStructure/feeInstallment.service.js";
 import { getSectionService } from "../../services/section.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
+import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 
 export async function createSectionFeeStructureController(req, res) {
   try {
@@ -188,6 +189,53 @@ export async function updateSectionFeeStructureController(req, res) {
     }
 
     return res.status(StatusCodes.CREATED).send(success(201, { message: "Fee structure updated successfully"}));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getSessionStudentFeeStructureController(req, res) {
+  try {
+    const { sessionStudentId } = req.params;
+    const parentId = req.parentId;
+
+    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
+    if (!sessionStudent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Student not found"));
+    }
+    const sectionFeeStructure = await getSectionFeeStructuresPipelineService([
+      {
+        $match: {
+          classId: convertToMongoId(sessionStudent.classId),
+          section: convertToMongoId(sessionStudent.section),
+          session: convertToMongoId(sessionStudent.session)
+        }
+      },
+      {
+        $lookup: {
+          from: 'feeinstallments',
+          localField: '_id',
+          foreignField: 'sectionFeeStructure',
+          as: 'feeInstallments'
+        }
+      },
+      {
+        $lookup: {
+          from: 'schoolfeestructures',
+          localField: 'schoolFeeStructure',
+          foreignField: '_id',
+          as: 'schoolFeeStructure'
+        }
+      },
+      {
+        $unwind: {
+          path: '$schoolFeeStructure',
+          preserveNullAndEmptyArrays: true
+        }
+      }
+    ]);
+    
+    return res.status(StatusCodes.OK).send(success(200, sectionFeeStructure));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

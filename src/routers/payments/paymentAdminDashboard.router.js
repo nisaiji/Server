@@ -11,15 +11,16 @@ import {
   // sectionStudentsWithPaymentController, 
   // sessionStudentTransactionsController
 } from "../../controllers/payments/paymentAdminDashboard.controller.js";
+import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 const paymentAdminDashboardRouter = express.Router();
 
-paymentAdminDashboardRouter.post("/fee-summary", schoolPaymentsController);
-paymentAdminDashboardRouter.post("/daywise-paid", daywisePaymentsSummaryController);
-paymentAdminDashboardRouter.post("/monthwise-paid", monthwisePaymentsSummaryController);
-paymentAdminDashboardRouter.post("/payment-modes", paymentsByPaymentModesController);
-paymentAdminDashboardRouter.post("/transactions", paymentTransactionsController);
-paymentAdminDashboardRouter.post("/class-paid", classMonthlyCollectionController);
-paymentAdminDashboardRouter.post("/parent-reminder", parentFeeReminderController);
+paymentAdminDashboardRouter.post("/fee-summary", adminAuthenticate, schoolPaymentsController);
+paymentAdminDashboardRouter.post("/daywise-paid", adminAuthenticate, daywisePaymentsSummaryController);
+paymentAdminDashboardRouter.post("/monthwise-paid", adminAuthenticate, monthwisePaymentsSummaryController);
+paymentAdminDashboardRouter.post("/payment-modes", adminAuthenticate, paymentsByPaymentModesController);
+paymentAdminDashboardRouter.post("/transactions", adminAuthenticate, paymentTransactionsController);
+paymentAdminDashboardRouter.post("/class-paid", adminAuthenticate, classMonthlyCollectionController);
+paymentAdminDashboardRouter.post("/parent-reminder", adminAuthenticate, parentFeeReminderController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/transactions", sessionStudentTransactionsController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/fee", sessionStudentTransactionsController);
 

@@ -204,6 +204,8 @@ export async function paymentTransactionsController(req, res) {
           paymentInvoiceId: 1,
           transactionId: 1,
           zohoPaymentId: 1,
+          paymentLinkId: 1,
+
           sectionName: { $arrayElemAt: ["$section.name", 0] },
           sectionId: { $arrayElemAt: ["$section._id", 0] },
           className: { $arrayElemAt: ["$class.name", 0] },
