@@ -36,6 +36,7 @@ paymentAdminDashboardRouter.post("/payment-modes", adminAuthenticate, paymentsBy
 paymentAdminDashboardRouter.post("/transactions", adminAuthenticate, paymentTransactionsController);
 paymentAdminDashboardRouter.post("/class-paid", adminAuthenticate, classMonthlyCollectionController);
 paymentAdminDashboardRouter.post("/parent-reminder", adminAuthenticate, parentFeeReminderController);
+
 // paymentAdminDashboardRouter.post("/:sessionStudentId/transactions", sessionStudentTransactionsController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/fee", sessionStudentTransactionsController);
 
@@ -59,7 +60,7 @@ paymentAdminDashboardRouter.get("/reports/payment-mode/transactions", paymentMod
 /* Fee Payment Reports */
 paymentAdminDashboardRouter.get("/reports/fee/summary", paymentModeReportValidation, feesSummaryController);
 paymentAdminDashboardRouter.get("/reports/fee/transactions", paymentModeReportValidation, feesTransactionsController);
-paymentAdminDashboardRouter.get("/reports/fee/reminder", installmentReminderValidation, sendReminderController);
+paymentAdminDashboardRouter.post("/reports/fee/reminder", installmentReminderValidation, sendReminderController);
 
 /* Refund and Failed Reports */
 paymentAdminDashboardRouter.get("/reports/other/summary", classWiseSummaryValidation, refundFailedSummaryController);
