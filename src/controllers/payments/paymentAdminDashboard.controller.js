@@ -4,6 +4,7 @@ import { getPaymentTransactionPipelineService, getPaymentTransactionService } fr
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { countClassService } from "../../services/class.sevices.js";
 import { sendPushNotification } from "../../config/firebase.config.js";
+import { getSessionStudentsPipelineService } from "../../services/v2/sessionStudent.service.js";
 
 export async function schoolPaymentsController(req, res) {
   try {
@@ -463,7 +464,7 @@ export async function sessionStudentFeesController(req, res) {
 
 export async function parentFeeReminderController(req, res) {
   try {
-    const { sessionStudentId } = req.params;
+    const { sessionStudentId } = req.body;
     const adminId = req.adminId;
 
     const parentData = await getSessionStudentsPipelineService([
