@@ -22,10 +22,10 @@ export async function createSectionFeeStructureController(req, res) {
     if (!classInfo) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Class not found!"));
     }
-    let sectionFeeStructure = await getSectionFeeStructureService({ classId, session: sessionId, school: adminId });
-    if (sectionFeeStructure) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee Structure already exists!"));
-    }
+    // let sectionFeeStructure = await getSectionFeeStructureService({ classId, session: sessionId, school: adminId });
+    // if (sectionFeeStructure) {
+    //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee Structure already exists!"));
+    // }
     let schoolFeeStructure = await getSchoolFeeStructureService({ _id: schoolFeeStructureId, session: sessionId, school: adminId });
     if (!schoolFeeStructure) {
       return res.status(StatusCodes.NOT_FOUND).send(error(400, "School fee structure not found"));

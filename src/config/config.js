@@ -23,6 +23,7 @@ const _config = {
     zohoSandboxRedirectUrl: process.env.ZOHO_REDIRECT_URL,
     currency: 'INR',
     zohoWebhookAuthSecret: process.env.ZOHO_WEBHOOK_AUTH_SECRET,
+    zohoWebhookRefundAuthSecret: process.env.ZOHO_WEBHOOK_REFUND_AUTH_SECRET,
     isSandbox: process.env.ZOHO_IS_SANDBOX === 'true'
 }
 
