@@ -10,9 +10,10 @@ export async function createPaymentTransactionService(data) {
   }
 }
 
-export async function getPaymentTransactionService(filter) {
+//11-01-2026 projection={}
+export async function getPaymentTransactionService(filter, projection={}) {
   try {
-    const paymentSession = await paymentTransactionModel.findOne(filter).lean();
+    const paymentSession = await paymentTransactionModel.findOne(filter).select(projection).lean();
     return paymentSession;
   } catch (error) {
     throw error;
@@ -28,9 +29,9 @@ export async function getPaymentTransactionCountService(filter) {
   }
 }
 
-export async function updatePaymentTransactionService(filter, update) {
+export async function updatePaymentTransactionService(filter, update, options ={}) {
   try {
-    const paymentTransaction = await paymentTransactionModel.updateOne(filter, update);
+    const paymentTransaction = await paymentTransactionModel.updateOne(filter, update, options);
     return paymentTransaction;
   } catch (error) {
     throw error;

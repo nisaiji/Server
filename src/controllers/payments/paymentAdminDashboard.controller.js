@@ -1,14 +1,19 @@
 import { StatusCodes } from "http-status-codes";
 import { error, success } from "../../utills/responseWrapper.js";
-import { getPaymentTransactionPipelineService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import {
+  getPaymentTransactionPipelineService,
+  getPaymentTransactionService,
+} from "../../services/paymentTransaction.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { countClassService } from "../../services/class.sevices.js";
+import { getFeeDashboardSnapshotsService } from "../../services/feeDashboardSnapshot.service.js";
 
+//TODO kuldeep update Swagger Doc and remove, classId, sectionId  if not needed
 export async function schoolPaymentsController(req, res) {
   try {
-    const {sessionId, classId, sectionId } = req.query;
+    const { sessionId, classId, sectionId } = req.query;
     const schoolId = req.adminId;
-    
+
     const matchQuery = {};
     if (schoolId) matchQuery.school = convertToMongoId(schoolId);
     if (sessionId) matchQuery.session = convertToMongoId(sessionId);
@@ -18,21 +23,49 @@ export async function schoolPaymentsController(req, res) {
 
     const collectedFee = await getPaymentTransactionPipelineService([
       {
-        $match: matchQuery
+        $match: matchQuery,
       },
       {
         $group: {
           _id: null,
-          totalAmount: { $sum: "$amount" }
-        }
-      }
-    ])
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    delete matchQuery.status;
+    delete matchQuery.classId;
+    delete matchQuery.section;
+    // Querying for 48 hours, for a safer side, if cron failed
+    //todo: use redis to store snapshot data and retrieve from there
+    const feeSnapShotData = await getFeeDashboardSnapshotsService(
+      {
+        ...matchQuery,
+        $or: [
+          { generatedAt: { $gte: new Date(Date.now() - 48 * 60 * 60 * 1000) } },
+          { createdAt: { $gte: new Date(Date.now() - 48 * 60 * 60 * 1000) } },
+        ],
+      },
+      { totals: 1 },
+      { _id: -1 }
+    );
+
     const data = {
       collectedFee: collectedFee[0].totalAmount,
-      pending: 1000,
-      overdue: 1000,
-      refunded: 1000,
+      collected: 0,
+      pending: 0,
+      overdue: 0,
+      refunded: 0,
+      collectedChangePct: 0,
+      pendingChangePct: 0,
+      overdueChangePct: 0,
+      refundedChangePct: 0,
+      failedChangePct: 0,
     };
+
+    for (let key in feeSnapShotData[0]?.totals) {
+      data[key] = feeSnapShotData[0]?.totals[key];
+    }
     return res.status(StatusCodes.OK).send(success(200, data));
   } catch (err) {
     return res
@@ -43,37 +76,37 @@ export async function schoolPaymentsController(req, res) {
 
 export async function daywisePaymentsSummaryController(req, res) {
   try {
-    const {startDate, endDate} = req.body;
-    console.log({startDate: new Date(startDate), endDate: new Date(endDate)})
+    const { startDate, endDate } = req.body;
+    console.log({ startDate: new Date(startDate), endDate: new Date(endDate) });
     const payments = await getPaymentTransactionPipelineService([
       {
         $match: {
           status: "paid",
           paidAt: {
             $gte: new Date(startDate),
-            $lte: new Date(endDate)
-          }
-        }
+            $lte: new Date(endDate),
+          },
+        },
       },
       {
         $group: {
           _id: {
             $dateToString: {
               format: "%Y-%m-%d",
-              date: "$paidAt"
-            }
+              date: "$paidAt",
+            },
           },
           totalAmount: { $sum: "$amount" },
-          TransactionCount: { $sum: 1 }
-        }
+          TransactionCount: { $sum: 1 },
+        },
       },
       {
         $sort: {
-          _id: 1
-        }
-      }
-    ])
-    
+          _id: 1,
+        },
+      },
+    ]);
+
     return res.status(StatusCodes.OK).send(success(200, { payments }));
   } catch (err) {
     return res
@@ -82,12 +115,11 @@ export async function daywisePaymentsSummaryController(req, res) {
   }
 }
 
-export async function monthwisePaymentsSummaryController(req, res) {
-}
+export async function monthwisePaymentsSummaryController(req, res) {}
 
 export async function paymentsByPaymentModesController(req, res) {
   try {
-    const {startDate, endDate} = req.body;
+    const { startDate, endDate } = req.body;
     const payments = await getPaymentTransactionPipelineService([
       {
         $match: {
@@ -95,22 +127,22 @@ export async function paymentsByPaymentModesController(req, res) {
           paymentMethod: { $exists: true },
           paidAt: {
             $gte: new Date(startDate),
-            $lte: new Date(endDate)
-          }
-        }
+            $lte: new Date(endDate),
+          },
+        },
       },
       {
         $group: {
           _id: "$paymentMethod",
-          totalAmount: { $sum: "$amount" }
-        }
+          totalAmount: { $sum: "$amount" },
+        },
       },
       {
         $sort: {
-          _id: 1
-        }
-      }
-    ])
+          _id: 1,
+        },
+      },
+    ]);
     return res.status(StatusCodes.OK).send(success(200, payments));
   } catch (err) {
     return res
@@ -162,7 +194,7 @@ export async function sectionFeeSummaryController(req, res) {
 //         $match: {
 //           // school: convertToMongoId(adminId),
 //           sessionStudent: convertToMongoId(sessionStudentId)
-//         } 
+//         }
 //       },
 //       {
 //         $lookup: {
@@ -239,16 +271,16 @@ export async function sessionStudentFeesController(req, res) {
       {
         $match: {
           // school: convertToMongoId(adminId),
-          sessionStudent: convertToMongoId(sessionStudentId)
-        } 
+          sessionStudent: convertToMongoId(sessionStudentId),
+        },
       },
       {
         $lookup: {
           from: "sections",
           localField: "section",
           foreignField: "_id",
-          as: "section"
-        }
+          as: "section",
+        },
       },
       {
         studentId: "string",
@@ -267,9 +299,12 @@ export async function sessionStudentFeesController(req, res) {
 /* Class-Wise Reports */
 export async function classWiseSummaryController(req, res) {
   try {
-    const { sessionID } = req.query;
+    let { sessionID: session } = req.query;
+    session = convertToMongoId(session);
+    // const schoolID = convertToMongoId(req.adminId);
+    const schoolID = convertToMongoId("695e75ae1f25102b2ad2d5f4");  // only for testing
 
-    const totalClasses = await countClassService({ sessionID });
+    const totalClasses = await countClassService({ admin: schoolID, session });
     // TODO get highestCollection, lowestCollection, overallPaid from payment collection data using sessionID
     let results = {
       totalClasses,
@@ -287,6 +322,118 @@ export async function classWiseSummaryController(req, res) {
         percentage: 80,
       },
     };
+
+    const aggregatedData = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          session: session,
+          school: schoolID,
+          status: "paid",
+          amountPaid: { $gt: 0 },
+        },
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "classInfo",
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "sectionInfo",
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $unwind: "$classInfo" },
+      { $unwind: "$sectionInfo" },
+      {
+        $group: {
+          _id: { $concat: ["$classInfo.name", " ", "$sectionInfo.name"] },
+          totalCollected: { $sum: "$amountPaid" },
+          classId: { $first: "$classInfo._id" },
+          sectionId: { $first: "$sectionInfo._id" },
+        },
+      },
+      {
+        $facet: {
+          highestCollection: [
+            { $sort: { totalCollected: -1 } },
+            { $limit: 1 },
+            {
+              $project: {
+                class: "$_id",
+                amount: "$totalCollected",
+                _id: 0,
+              },
+            },
+          ],
+          lowestCollection: [
+            { $match: { totalCollected: { $gt: 0 } } },
+            { $sort: { totalCollected: 1 } },
+            { $limit: 1 },
+            {
+              $project: {
+                class: "$_id",
+                amount: "$totalCollected",
+                _id: 0,
+              },
+            },
+          ],
+          overallPaid: [
+            {
+              $group: {
+                _id: null,
+                totalCollected: { $sum: "$totalCollected" },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: "$highestCollection",
+      },
+      {
+        $unwind: "$lowestCollection",
+      },
+      {
+        $unwind: "$overallPaid",
+      },
+      {
+        $project: {
+          highestCollection: "$highestCollection",
+          lowestCollection: "$lowestCollection",
+          overallPaid: {
+            totalCollected: "$overallPaid.totalCollected",
+            percentage: {
+              $cond: {
+                if: { $gt: ["$overallPaid.totalCollected", 0] },
+                then: {
+                  $round: [
+                    {
+                      $multiply: [
+                        100,
+                        { $divide: ["$overallPaid.totalCollected", 1000000] },
+                      ],
+                    },
+                    2,
+                  ],
+                },
+                else: 0,
+              },
+            },
+          },
+          _id: 0,
+        },
+      },
+    ]);
+
+    results.data = aggregatedData[0]
 
     return res.status(StatusCodes.OK).send(success(200, results));
   } catch (err) {

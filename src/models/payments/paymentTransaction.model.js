@@ -135,6 +135,7 @@ const paymentTransactionSchema = mongoose.Schema(
     webhookEventTime: {
       type: String,
     },
+    //11-01-2026
     processed: { type: Boolean, default: false },
     retryCount: { type: Number, default: 0 },
   },

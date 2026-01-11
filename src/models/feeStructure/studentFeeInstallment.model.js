@@ -48,7 +48,7 @@ const studentFeeInstallmentSchema = new mongoose.Schema(
       required: true,
     },
     month: { type: Number, required: true },
-    year: { type: Number, required: true },
+    // year: { type: Number, required: true },
     baseAmount: { type: Number },
     lateFeeApplied: { type: Number, default: 0 },
     totalPayable: { type: Number },

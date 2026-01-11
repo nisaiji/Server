@@ -79,3 +79,21 @@ export async function getFeeDashboardSnapshotsCountService(filter) {
     throw error;
   }
 }
+
+export async function removeFeeDashboardSnapshotsService(filter) {
+  try {
+    const events = await feeDashboardSnapshotModel.deleteOne(filter);
+    return events;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getStudentFeeInstallmentDistinctService(field, filter) {
+  try {
+    const events = await feeDashboardSnapshotModel.distinct(field, filter);
+    return events;
+  } catch (error) {
+    throw error;
+  }
+}

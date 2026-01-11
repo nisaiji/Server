@@ -12,7 +12,7 @@ export async function getAdminService(filter){
 
 export async function getAdminsService(filter, sortingLogic, skipNumber, limitNumber){
 try {
-  const admins = await adminModel.find(filter).select({password:0}).sort(sortingLogic).skip(skipNumber).limit(limitNumber);
+  const admins = await adminModel.find(filter).select({password:0}).sort(sortingLogic).skip(skipNumber).limit(limitNumber).lean();
   return admins;
 } catch (error) {
   throw error;  

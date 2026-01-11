@@ -36,7 +36,8 @@ const feeDashboardSnapshotSchema = new mongoose.Schema(
         totalCollected: { type: Number, default: 0 },
       },
     ],
-    month: { type: Number, required: true },
+    month: { type: Number },
+    isMonthEndRecord: { type: Boolean, default: false },
   },
   {
     timestamps: true,
