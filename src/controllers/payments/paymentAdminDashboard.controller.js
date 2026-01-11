@@ -7,6 +7,7 @@ import {
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { countClassService } from "../../services/class.sevices.js";
 import { getFeeDashboardSnapshotsService } from "../../services/feeDashboardSnapshot.service.js";
+import { getStudentFeeInstallmentsPipelineService } from "../../services/studentFeeInstallment.service.js";
 
 //TODO kuldeep update Swagger Doc and remove, classId, sectionId  if not needed
 export async function schoolPaymentsController(req, res) {
@@ -299,29 +300,12 @@ export async function sessionStudentFeesController(req, res) {
 /* Class-Wise Reports */
 export async function classWiseSummaryController(req, res) {
   try {
-    let { sessionID: session } = req.query;
+    let { sessionID: session, school } = req.query;
     session = convertToMongoId(session);
     // const schoolID = convertToMongoId(req.adminId);
-    const schoolID = convertToMongoId("695e75ae1f25102b2ad2d5f4");  // only for testing
+    const schoolID = convertToMongoId(school); // only for testing
 
     const totalClasses = await countClassService({ admin: schoolID, session });
-    // TODO get highestCollection, lowestCollection, overallPaid from payment collection data using sessionID
-    let results = {
-      totalClasses,
-      highestCollection: {
-        class: "3rd",
-        amount: 500000,
-      },
-      lowestCollection: {
-        class: "Nursery",
-        amount: 80000,
-      },
-      overallPaid: {
-        totalExpected: 1000000,
-        totalCollected: 800000,
-        percentage: 80,
-      },
-    };
 
     const aggregatedData = await getPaymentTransactionPipelineService([
       {
@@ -433,7 +417,30 @@ export async function classWiseSummaryController(req, res) {
       },
     ]);
 
-    results.data = aggregatedData[0]
+    //11-01-2026
+    //calculating total expected by expected = totalPayable - amountPaid from studentfee installment
+    const totalPayable = await getStudentFeeInstallmentsPipelineService([
+      {
+        $match: {
+          school: schoolID,
+          session,
+        },
+      },
+      {
+        $group: {
+          _id: "null",
+          total: { $sum: "$totalPayable" },
+        },
+      },
+    ]);
+    if (aggregatedData[0]?.overallPaid) {
+      aggregatedData[0].overallPaid["totalExpected"] =
+        totalPayable[0]?.total || 0;
+    }
+    const results = {
+      totalClasses,
+      ...aggregatedData[0],
+    };
 
     return res.status(StatusCodes.OK).send(success(200, results));
   } catch (err) {
@@ -445,24 +452,58 @@ export async function classWiseSummaryController(req, res) {
 
 export async function classWiseChartController(req, res) {
   try {
-    const { sessionID } = req.query;
-    let results = [
-      { class: "Nursery", amount: 900000 },
-      { class: "LKG", amount: 800000 },
-      { class: "UKG", amount: 900000 },
-      { class: "1st Grade", amount: 500000 },
-      { class: "2nd Grade", amount: 400000 },
-      { class: "3rd Grade", amount: 300000 },
-      { class: "4th Grade", amount: 200000 },
-      { class: "5th Grade", amount: 100000 },
-      { class: "6th Grade", amount: 100000 },
-      { class: "7th Grade", amount: 100000 },
-      { class: "8th Grade", amount: 100000 },
-      { class: "9th Grade", amount: 100000 },
-      { class: "10th Grade", amount: 100000 },
-      { class: "11th Grade", amount: 100000 },
-      { class: "12th Grade", amount: 100000 },
-    ];
+    let { sessionID: session, school } = req.query;
+    session = convertToMongoId(session);
+    // const schoolID = convertToMongoId(req.adminId);
+    const schoolID = convertToMongoId(school); // only for testing
+
+    const results = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          session: session,
+          school: schoolID,
+          status: "paid",
+          amountPaid: { $gt: 0 },
+        },
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "classInfo",
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "sectionInfo",
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $unwind: "$classInfo" },
+      { $unwind: "$sectionInfo" },
+      {
+        $group: {
+          _id: { $concat: ["$classInfo.name", " ", "$sectionInfo.name"] },
+          amount: { $sum: "$amountPaid" },
+          classId: { $first: "$classInfo._id" },
+          sectionId: { $first: "$sectionInfo._id" },
+        },
+      },
+      {
+        $project: {
+          amount: 1,
+          classId: 1,
+          sectionId: 1,
+          class: "$_id",
+          _id: 0,
+        },
+      },
+    ]);
 
     return res.status(StatusCodes.OK).send(success(200, results));
   } catch (err) {
@@ -474,144 +515,54 @@ export async function classWiseChartController(req, res) {
 
 export async function classWiseTransactionsController(req, res) {
   try {
-    const { sessionID } = req.query;
-    let results = [
+    let { sessionID: session, school } = req.query;
+    session = convertToMongoId(session);
+    // const schoolID = convertToMongoId(req.adminId);
+    const schoolID = convertToMongoId(school);
+    let results = await getStudentFeeInstallmentsPipelineService([
       {
-        class: "Nursery",
-        totalFees: 200000,
-        paidFees: 150000,
-        pendingFees: 50000,
-        paidCount: 50,
-        unPaidCount: 10,
-        dueDate: "2024-06-30",
+        $match: {
+          school: schoolID,
+          session: session,
+        },
       },
       {
-        class: "LKG",
-        totalFees: 240000,
-        paidFees: 100000,
-        pendingFees: 51000,
-        paidCount: 50,
-        unPaidCount: 10,
-        dueDate: "2024-06-30",
+        $lookup: {
+          from: "classes", // assuming your class collection name
+          localField: "classId",
+          foreignField: "_id",
+          as: "classInfo",
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $unwind: "$classInfo" },
+      {
+        $group: {
+          _id: "$classInfo.name",
+          totalFees: { $sum: "$totalPayable" },
+          totalPaid: { $sum: "$amountPaid" },
+          totalPending: {
+            $sum: { $subtract: ["$totalPayable", "$amountPaid"] },
+          },
+          classId: { $first: "$classInfo._id" },
+          dueDate: { $first: "$dueDate" },
+          totalCount: { $sum: 1 },
+          paidCount: { $sum: { $cond: [{ $gt: ["$amountPaid", 0] }, 1, 0] } },
+        },
       },
       {
-        class: "UKG",
-        totalFees: 200500,
-        paidFees: 110000,
-        pendingFees: 70000,
-        paidCount: 50,
-        unPaidCount: 10,
-        dueDate: "2024-06-30",
+        $project: {
+          class: "$_id",
+          totalFees: 1,
+          classId: 1,
+          paidFees: "$totalPaid",
+          pendingFees: "$totalPending",
+          paidCount: 1,
+          unPaidCount: { $subtract: ["$totalCount", "$paidCount"] },
+          dueDate: { $dateToString: { format: "%d/%m/%Y", date: "$dueDate" } },
+        },
       },
-      {
-        class: "1st Grade",
-        totalFees: 300000,
-        paidFees: 250000,
-        pendingFees: 50000,
-        paidCount: 60,
-        unPaidCount: 5,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "2nd Grade",
-        totalFees: 250000,
-        paidFees: 200000,
-        pendingFees: 50000,
-        paidCount: 55,
-        unPaidCount: 8,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "3rd Grade",
-        totalFees: 220000,
-        paidFees: 180000,
-        pendingFees: 40000,
-        paidCount: 52,
-        unPaidCount: 12,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "4th Grade",
-        totalFees: 210000,
-        paidFees: 160000,
-        pendingFees: 50000,
-        paidCount: 50,
-        unPaidCount: 15,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "5th Grade",
-        totalFees: 200000,
-        paidFees: 150000,
-        pendingFees: 50000,
-        paidCount: 48,
-        unPaidCount: 18,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "6th Grade",
-        totalFees: 190000,
-        paidFees: 140000,
-        pendingFees: 50000,
-        paidCount: 45,
-        unPaidCount: 20,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "7th Grade",
-        totalFees: 180000,
-        paidFees: 130000,
-        pendingFees: 50000,
-        paidCount: 42,
-        unPaidCount: 22,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "8th Grade",
-        totalFees: 170000,
-        paidFees: 120000,
-        pendingFees: 50000,
-        paidCount: 40,
-        unPaidCount: 25,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "9th Grade",
-        totalFees: 160000,
-        paidFees: 110000,
-        pendingFees: 50000,
-        paidCount: 38,
-        unPaidCount: 28,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "10th Grade",
-        totalFees: 150000,
-        paidFees: 100000,
-        pendingFees: 50000,
-        paidCount: 35,
-        unPaidCount: 30,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "11th Grade",
-        totalFees: 140000,
-        paidFees: 90000,
-        pendingFees: 50000,
-        paidCount: 32,
-        unPaidCount: 33,
-        dueDate: "2024-06-30",
-      },
-      {
-        class: "12th Grade",
-        totalFees: 130000,
-        paidFees: 80000,
-        pendingFees: 50000,
-        paidCount: 30,
-        unPaidCount: 35,
-        dueDate: "2024-06-30",
-      },
-    ];
+    ]);
 
     return res.status(StatusCodes.OK).send(success(200, results));
   } catch (err) {

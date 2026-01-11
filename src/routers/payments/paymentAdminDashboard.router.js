@@ -13,7 +13,7 @@ paymentAdminDashboardRouter.post("/transactions", adminDashboardPaymentControlle
 /* Class-Wise Reports */
 paymentAdminDashboardRouter.get("/reports/class-wise/summary", classWiseSummaryValidation, adminDashboardPaymentController.classWiseSummaryController);
 paymentAdminDashboardRouter.get("/reports/class-wise/chart", classWiseSummaryValidation, adminDashboardPaymentController.classWiseChartController);
-paymentAdminDashboardRouter.get("/reports/class-wise/transactions", adminDashboardPaymentController.classWiseTransactionsController);
+paymentAdminDashboardRouter.get("/reports/class-wise/transactions", classWiseSummaryValidation, adminDashboardPaymentController.classWiseTransactionsController);
 
 /* Periodically Reports */
 paymentAdminDashboardRouter.get("/reports/periodically/summary", adminDashboardPaymentController.periodicallySummaryController);
