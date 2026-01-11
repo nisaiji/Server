@@ -243,7 +243,7 @@ export async function paymentTransactionsController(req, res) {
 
 export async function classMonthlyCollectionController(req, res) {
   try {
-    const { classId } = req.params;
+    const { classId } = req.body;
     const adminId = req.adminId;
 
     const data = await getPaymentTransactionPipelineService([
