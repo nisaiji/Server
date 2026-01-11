@@ -6,7 +6,8 @@ import { getPaymentTransactionService } from "../../services/paymentTransaction.
 import { config } from "../../config/config.js";
 import logger from "../../logger/index.js";
 import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
-import { createRefundService } from "../../services/refund.services.js";
+import { createRefundService, getRefundPipelineService } from "../../services/refund.services.js";
+import { convertToMongoId } from "../../services/mongoose.services.js";
 
 export async function createRefundController(req, res) {
   try {
@@ -50,7 +51,7 @@ export async function createRefundController(req, res) {
       paymentId,
       accountId: marchant.zohoAccountId,
       accessToken: marchant.zohoAccessToken,
-      amount: 100,
+      amount: amount,
       reason,
       type: "initiated_by_merchant",
       description,
@@ -87,6 +88,70 @@ export async function createRefundController(req, res) {
     return res.status(StatusCodes.OK).send(success(200, refundResponse));
   } catch (err) {
     logger.error("Error creating refund", {}, err);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getRefundController(req, res) {
+  try {
+    const {classId, sectionId, sessionStudentId, schoolId} = req.query;
+    
+    // Build aggregation pipeline
+    const pipeline = [];
+    
+    // Match refunds based on direct fields first
+    const matchStage = {};
+    if (sessionStudentId) matchStage.sessionStudent = convertToMongoId(sessionStudentId);
+    if (schoolId) matchStage.school = convertToMongoId(schoolId);
+    
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
+    }
+    
+    // Lookup sessionStudent data to access classId and section
+    pipeline.push({
+      $lookup: {
+        from: "sessionstudents",
+        localField: "sessionStudent",
+        foreignField: "_id",
+        as: "sessionStudentData"
+      }
+    });
+    
+    pipeline.push({
+      $unwind: "$sessionStudentData"
+    });
+
+    pipeline.push({
+      $lookup: {
+        from: "students",
+        localField: "student",
+        foreignField: "_id",
+        as: "studentData"
+      }
+    });
+    
+    pipeline.push({
+      $unwind: "$studentData"
+    });
+    
+    // Match based on classId and sectionId from sessionStudent
+    const sessionStudentMatch = {};
+    if (classId) sessionStudentMatch["sessionStudentData.classId"] = convertToMongoId(classId);
+    if (sectionId) sessionStudentMatch["sessionStudentData.section"] = convertToMongoId(sectionId);
+    
+    if (Object.keys(sessionStudentMatch).length > 0) {
+      pipeline.push({ $match: sessionStudentMatch });
+    }
+    
+    // Sort by creation date (newest first)
+    pipeline.push({ $sort: { createdAt: -1 } });
+    
+    const refunds = await getRefundPipelineService(pipeline);
+    
+    return res.status(StatusCodes.OK).send(success(200, refunds));
+  } catch (err) {
+    logger.error("Error fetching refunds", {}, err);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
