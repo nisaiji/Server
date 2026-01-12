@@ -18,6 +18,7 @@ import {
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { isLastDayOfMonth } from "../helpers/utils.helper.js";
 import { getAdminsService } from "./admin.services.js";
+import { getPaymentTransactionPipelineService } from "./paymentTransaction.service.js"
 import dayjs from "dayjs";
 
 // // Advance = sum(PaymentReceived) - sum(AdvanceAppliedToInstallment) - sum(RefundIssued);
@@ -332,6 +333,7 @@ export async function recalcDashboard(school, session) {
         },
         { $group: { _id: "$eventType", amount: { $sum: "$amount" } } },
       ]),
+      //OverDue Amount Queries
       getStudentFeeInstallmentsPipelineService([
         {
           $match: {
@@ -344,7 +346,7 @@ export async function recalcDashboard(school, session) {
             ],
           },
         },
-        { $group: { _id: "Overdue", amount: { $sum: "$amount" } } },
+        { $group: { _id: "Overdue", amount: { '$sum': {$subtract: ["$totalPayable","$amountPaid"] } } } },
       ]),
       getStudentFeeInstallmentsPipelineService([
         {
@@ -358,8 +360,9 @@ export async function recalcDashboard(school, session) {
             ],
           },
         },
-        { $group: { _id: "Overdue", amount: { $sum: "$amount" } } },
+        { $group: { _id: "Overdue", amount: { '$sum': {$subtract: ["$totalPayable","$amountPaid"] } } } },
       ]),
+      //Pending Amount Queries
       getStudentFeeInstallmentsPipelineService([
         {
           $match: {
@@ -372,7 +375,7 @@ export async function recalcDashboard(school, session) {
             ],
           },
         },
-        { $group: { _id: "Pending", amount: { $sum: "$amount" } } },
+        { '$group': { _id: 'Pending', amount: { '$sum': {$subtract: ["$totalPayable","$amountPaid"] } } }},
       ]),
       getStudentFeeInstallmentsPipelineService([
         {
@@ -386,7 +389,7 @@ export async function recalcDashboard(school, session) {
             ],
           },
         },
-        { $group: { _id: "Pending", amount: { $sum: "$amount" } } },
+        { '$group': { _id: 'Pending', amount: { '$sum': {$subtract: ["$totalPayable","$amountPaid"] } } }},
       ]),
     ]);
 
@@ -473,8 +476,8 @@ export async function recalcDashboard(school, session) {
         collectedChangePct: pct(curWeekData.collected, prevWeekData.collected),
         refundedChangePct: pct(curWeekData.refunded, prevWeekData.refunded),
         failedChangePct: pct(curWeekData.failed, prevWeekData.failed),
-        pendingChangePct: pct(curWeekData.pending.prev, prevWeekData.pending),
-        overdueChangePct: pct(curWeekData.overdue.prev, prevWeekData.overdue),
+        pendingChangePct: pct(curWeekData.pending, prevWeekData.pending),
+        overdueChangePct: pct(curWeekData.overdue, prevWeekData.overdue),
       },
       month: now.getMonth() + 1,
       isMonthEndRecord: isLastDayOfMonth(now),
@@ -559,7 +562,7 @@ export async function storeDailySnapshot(req, res) {
       { _id: -1 }
     );
     for (let school of remainingSchools) {
-      await recalcDashboard(school._id.toString(), session.toString());
+        await recalcDashboard(school._id.toString(), session.toString());
     }
     //remove after testing
     return res.status(200).json({

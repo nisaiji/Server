@@ -31,13 +31,15 @@ export async function getFeeDashboardSnapshotService(
 export async function getFeeDashboardSnapshotsService(
   filter,
   projection = {},
-  sortingLogic
+  sortingLogic,
+  limit = 0
 ) {
   try {
     const feeDashboardSnapshots = await feeDashboardSnapshotModel
       .find(filter)
       .select(projection)
       .sort(sortingLogic)
+      .limit(limit)
       .lean();
     return feeDashboardSnapshots;
   } catch (error) {

@@ -2,7 +2,7 @@ import express from "express";
 const paymentAdminDashboardRouter = express.Router();
 import * as adminDashboardPaymentController from "../../controllers/payments/paymentAdminDashboard.controller.js";
 import { classWiseSummaryValidation, paymentModeReportValidation, installmentReminderValidation } from "../../middlewares/validation/admin-dashboard.validation.middleware.js";
-// import { recalcDashboard, storeDailySnapshot } from "../../services/balance.service.js";
+import { recalcDashboard, storeDailySnapshot } from "../../services/balance.service.js";
 
 paymentAdminDashboardRouter.post("/fee-summary", adminDashboardPaymentController.schoolPaymentsController);
 paymentAdminDashboardRouter.post("/daywise-paid", adminDashboardPaymentController.daywisePaymentsSummaryController);
@@ -34,7 +34,7 @@ paymentAdminDashboardRouter.get("/reports/other/summary", classWiseSummaryValida
 paymentAdminDashboardRouter.get("/reports/other/chart", adminDashboardPaymentController.refundFailedChartController);
 paymentAdminDashboardRouter.get("/reports/other/transactions", adminDashboardPaymentController.refundFailedTransactionsController);
 
-// paymentAdminDashboardRouter.get("/test", storeDailySnapshot);
+paymentAdminDashboardRouter.get("/test", storeDailySnapshot);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/transactions", sessionStudentTransactionsController);
 // paymentAdminDashboardRouter.post("/:sessionStudentId/fee", sessionStudentTransactionsController);
 

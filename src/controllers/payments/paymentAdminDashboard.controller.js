@@ -22,6 +22,7 @@ export async function schoolPaymentsController(req, res) {
     if (sectionId) matchQuery.section = convertToMongoId(sectionId);
     matchQuery.status = "paid";
 
+    //todo kuldeep remove if not required, as data is coming from Fee snapshot model
     const collectedFee = await getPaymentTransactionPipelineService([
       {
         $match: matchQuery,
@@ -37,22 +38,18 @@ export async function schoolPaymentsController(req, res) {
     delete matchQuery.status;
     delete matchQuery.classId;
     delete matchQuery.section;
-    // Querying for 48 hours, for a safer side, if cron failed
     //todo: use redis to store snapshot data and retrieve from there
     const feeSnapShotData = await getFeeDashboardSnapshotsService(
       {
         ...matchQuery,
-        $or: [
-          { generatedAt: { $gte: new Date(Date.now() - 48 * 60 * 60 * 1000) } },
-          { createdAt: { $gte: new Date(Date.now() - 48 * 60 * 60 * 1000) } },
-        ],
       },
-      { totals: 1 },
-      { _id: -1 }
+      {},
+      { _id: -1 },
+      1
     );
 
     const data = {
-      collectedFee: collectedFee[0].totalAmount,
+      collectedFee: feeSnapShotData[0]?.totals?.collected || 0,
       collected: 0,
       pending: 0,
       overdue: 0,
