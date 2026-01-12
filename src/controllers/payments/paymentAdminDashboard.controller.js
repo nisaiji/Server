@@ -3,11 +3,18 @@ import { error, success } from "../../utills/responseWrapper.js";
 import {
   getPaymentTransactionPipelineService,
   getPaymentTransactionService,
+  getPaymentTransactionCountService
 } from "../../services/paymentTransaction.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { countClassService } from "../../services/class.sevices.js";
-import { getFeeDashboardSnapshotsService } from "../../services/feeDashboardSnapshot.service.js";
-import { getStudentFeeInstallmentsPipelineService } from "../../services/studentFeeInstallment.service.js";
+import {
+  getFeeDashboardSnapshotService,
+  getFeeDashboardSnapshotsService,
+} from "../../services/feeDashboardSnapshot.service.js";
+import {
+  getStudentFeeInstallmentsPipelineService,
+} from "../../services/studentFeeInstallment.service.js";
+import { getTotalFeesAndStudents } from "../../services/balance.service.js"
 
 //TODO kuldeep update Swagger Doc and remove, classId, sectionId  if not needed
 export async function schoolPaymentsController(req, res) {
@@ -577,13 +584,38 @@ export async function periodicallySummaryController(req, res) {
     classId: mongoID,
     periodType: yearly | monthly | weekly
     */
-    const { sessionID, classID, periodType } = req.query;
+    let { sessionId, classID, periodType } = req.query;
+
+    const schoolId = req.adminId;
+
+    const session = convertToMongoId(sessionId);
+    const school = convertToMongoId(schoolId);
+
+    const feeSnapShotData = await getFeeDashboardSnapshotsService(
+      { session, school },
+      {},
+      { _id: -1 },
+      1
+    );
+
+    const failedPaymentStudentCounts = await getPaymentTransactionCountService({session, school, status: "failed"});
+
+    const totalExpected = await getTotalFeesAndStudents(sessionId, schoolId, {}, true);
 
     let results = {
-      totalExpected: { amount: 1000000, students: 640 },
-      totalCollected: { amount: 800000, students: 500 },
-      pendingPayments: { amount: 80000, students: 100 },
-      refundedAmount: { amount: 80000, students: 40 },
+      totalExpected: {amount: totalExpected.amount, students: totalExpected.totalStudents },
+      totalCollected: {
+        amount: feeSnapShotData[0]?.totals?.collected || 0,
+        students: totalExpected.collectedStudentsCount,
+      },
+      pendingPayments: {
+        amount: feeSnapShotData[0]?.totals?.pending || 0,
+        students: totalExpected.pendingStudentsCount,
+      },
+      refundedAmount: {
+        amount: feeSnapShotData[0]?.totals?.refunded || 0,
+        students: failedPaymentStudentCounts,
+      },
     };
     return res.status(StatusCodes.OK).send(success(200, results));
   } catch (err) {

@@ -18,7 +18,7 @@ import {
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { isLastDayOfMonth } from "../helpers/utils.helper.js";
 import { getAdminsService } from "./admin.services.js";
-import { getPaymentTransactionPipelineService } from "./paymentTransaction.service.js"
+import { getPaymentTransactionPipelineService } from "./paymentTransaction.service.js";
 import dayjs from "dayjs";
 
 // // Advance = sum(PaymentReceived) - sum(AdvanceAppliedToInstallment) - sum(RefundIssued);
@@ -346,7 +346,12 @@ export async function recalcDashboard(school, session) {
             ],
           },
         },
-        { $group: { _id: "Overdue", amount: { '$sum': {$subtract: ["$totalPayable","$amountPaid"] } } } },
+        {
+          $group: {
+            _id: "Overdue",
+            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
+          },
+        },
       ]),
       getStudentFeeInstallmentsPipelineService([
         {
@@ -360,7 +365,12 @@ export async function recalcDashboard(school, session) {
             ],
           },
         },
-        { $group: { _id: "Overdue", amount: { '$sum': {$subtract: ["$totalPayable","$amountPaid"] } } } },
+        {
+          $group: {
+            _id: "Overdue",
+            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
+          },
+        },
       ]),
       //Pending Amount Queries
       getStudentFeeInstallmentsPipelineService([
@@ -375,7 +385,12 @@ export async function recalcDashboard(school, session) {
             ],
           },
         },
-        { '$group': { _id: 'Pending', amount: { '$sum': {$subtract: ["$totalPayable","$amountPaid"] } } }},
+        {
+          $group: {
+            _id: "Pending",
+            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
+          },
+        },
       ]),
       getStudentFeeInstallmentsPipelineService([
         {
@@ -389,7 +404,12 @@ export async function recalcDashboard(school, session) {
             ],
           },
         },
-        { '$group': { _id: 'Pending', amount: { '$sum': {$subtract: ["$totalPayable","$amountPaid"] } } }},
+        {
+          $group: {
+            _id: "Pending",
+            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
+          },
+        },
       ]),
     ]);
 
@@ -562,7 +582,7 @@ export async function storeDailySnapshot(req, res) {
       { _id: -1 }
     );
     for (let school of remainingSchools) {
-        await recalcDashboard(school._id.toString(), session.toString());
+      await recalcDashboard(school._id.toString(), session.toString());
     }
     //remove after testing
     return res.status(200).json({
@@ -578,3 +598,87 @@ export async function storeDailySnapshot(req, res) {
   }
 }
 // 3. payment process, when a payment is done/failed, update data in dashboard data
+
+export async function getTotalFeesAndStudents(
+  session,
+  school,
+  options = {},
+  studentCount = false
+) {
+  const matchQuery = {
+    school: convertToMongoId(school),
+    session: convertToMongoId(session),
+  };
+  if (options.classId) matchQuery.classId = convertToMongoId(options.classId);
+  if (options.sectionId)
+    matchQuery.section = convertToMongoId(options.sectionId);
+  if (options.studentId)
+    matchQuery.student = convertToMongoId(options.studentId);
+
+  let groupQuery = {
+    _id: "null",
+    amount: { $sum: "$totalPayable" },
+    //for future reference and need
+    // remainigAmount: { '$sum': { $subtract: ["$totalPayable","$amountPaid"]} },
+    // paidAmount: { $sum: "$amountPaid" },
+    // unpaidAmount: {
+    //   $sum: {
+    //     $cond: [
+    //       { $eq: ["$status", "unpaid"] },
+    //       { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
+    //       0,
+    //     ],
+    //   },
+    // },
+    // overdueAmount: {
+    //   $sum: {
+    //     $cond: [
+    //       { $eq: ["$status", "overdue"] },
+    //       { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
+    //       0,
+    //     ],
+    //   },
+    // },
+    // pendingAmount: {
+    //   $sum: {
+    //     $cond: [
+    //       { $in: ["$status", ["pending", "partial"]] },
+    //       { $subtract: ["$totalPayable", "$amountPaid"] },
+    //       0,
+    //     ],
+    //   },
+    // },
+  };
+
+  if (studentCount) {
+    groupQuery = {
+      ...groupQuery,
+      totalStudents: { $sum: 1 },
+      collectedStudentsCount: {
+        $sum: { $cond: [{ $gt: ["$amountPaid", 0] }, 1, 0] },
+      },
+      pendingStudentsCount: {
+        $sum: {
+          $cond: [{ $in: ["$status", ["pending", "partial"]] }, 1, 0],
+        },
+      },
+      // overdueStudents: {
+      //   $sum: { $cond: [{ $eq: ["$status", "overdue"] }, 1, 0] },
+      // },
+      // unpaidStudents: {
+      //   $sum: { $cond: [{ $eq: ["$status", "unpaid"] }, 1, 0] },
+      // },
+    };
+  }
+
+  const result = await getStudentFeeInstallmentsPipelineService([
+    {
+      $match: matchQuery,
+    },
+    {
+      $group: groupQuery,
+    },
+  ]);
+
+  return result[0];
+}

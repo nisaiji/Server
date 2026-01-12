@@ -3,8 +3,9 @@ const paymentAdminDashboardRouter = express.Router();
 import * as adminDashboardPaymentController from "../../controllers/payments/paymentAdminDashboard.controller.js";
 import { classWiseSummaryValidation, paymentModeReportValidation, installmentReminderValidation } from "../../middlewares/validation/admin-dashboard.validation.middleware.js";
 import { recalcDashboard, storeDailySnapshot } from "../../services/balance.service.js";
+import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 
-paymentAdminDashboardRouter.post("/fee-summary", adminDashboardPaymentController.schoolPaymentsController);
+paymentAdminDashboardRouter.post("/fee-summary", adminAuthenticate, adminDashboardPaymentController.schoolPaymentsController);
 paymentAdminDashboardRouter.post("/daywise-paid", adminDashboardPaymentController.daywisePaymentsSummaryController);
 paymentAdminDashboardRouter.post("/monthwise-paid", adminDashboardPaymentController.monthwisePaymentsSummaryController);
 paymentAdminDashboardRouter.post("/payment-modes", adminDashboardPaymentController.paymentsByPaymentModesController);
@@ -16,7 +17,7 @@ paymentAdminDashboardRouter.get("/reports/class-wise/chart", classWiseSummaryVal
 paymentAdminDashboardRouter.get("/reports/class-wise/transactions", classWiseSummaryValidation, adminDashboardPaymentController.classWiseTransactionsController);
 
 /* Periodically Reports */
-paymentAdminDashboardRouter.get("/reports/periodically/summary", adminDashboardPaymentController.periodicallySummaryController);
+paymentAdminDashboardRouter.get("/reports/periodically/summary", adminAuthenticate, adminDashboardPaymentController.periodicallySummaryController);
 paymentAdminDashboardRouter.get("/reports/periodically/chart", adminDashboardPaymentController.periodicallyChartController);
 paymentAdminDashboardRouter.get("/reports/periodically/transactions", adminDashboardPaymentController.periodicallyTransactionsController);
 

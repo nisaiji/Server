@@ -1,4 +1,5 @@
 import studentFeeInstallmentModel from "../models/feeStructure/studentFeeInstallment.model.js";
+import { convertToMongoId } from "./mongoose.services.js";
 
 export async function getStudentFeeInstallmentsPipelineService(pipeline) {
   try {
@@ -11,7 +12,11 @@ export async function getStudentFeeInstallmentsPipelineService(pipeline) {
   }
 }
 
-export async function getStudentFeeInstallmentService(filter, projection = {}, sortingLogic) {
+export async function getStudentFeeInstallmentService(
+  filter,
+  projection = {},
+  sortingLogic
+) {
   try {
     const studentFeeInstallment = await studentFeeInstallmentModel
       .findOne(filter)
@@ -50,9 +55,17 @@ export async function registerStudentFeeInstallmentService(paramObj) {
   }
 }
 
-export async function updateStudentFeeInstallmentService(filter, update, options = {}) {
+export async function updateStudentFeeInstallmentService(
+  filter,
+  update,
+  options = {}
+) {
   try {
-    const event = await studentFeeInstallmentModel.updateOne(filter, update, options);
+    const event = await studentFeeInstallmentModel.updateOne(
+      filter,
+      update,
+      options
+    );
     return event;
   } catch (error) {
     throw error;
