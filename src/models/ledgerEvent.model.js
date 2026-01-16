@@ -7,7 +7,8 @@ const EVENT_TYPES = [
     "LateFeeAccrued",
     "LateFeeWaived",
     "ConcessionGranted",
-    "RefundIssued"
+    "RefundIssued",
+    "PaymentFailed"
 ];
 
 const ledgerEventSchema = mongoose.Schema({
@@ -35,6 +36,12 @@ const ledgerEventSchema = mongoose.Schema({
     feeInstallmentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "feeInstallment",
+        index: true,
+        default: null
+    },
+    studentInstallmentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "studentFeeInstallment",
         index: true,
         default: null
     },

@@ -27,6 +27,7 @@ import {
 } from "../../controllers/payments/paymentAdminDashboard.controller.js";
 import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 import { classWiseSummaryValidation, installmentReminderValidation, paymentModeReportValidation } from "../../middlewares/validation/admin-dashboard.validation.middleware.js";
+import { storeDailySnapshot } from "../../services/balance.service.js";
 const paymentAdminDashboardRouter = express.Router();
 
 paymentAdminDashboardRouter.post("/fee-summary", adminAuthenticate, schoolPaymentsController);
@@ -43,13 +44,14 @@ paymentAdminDashboardRouter.post("/parent-reminder", adminAuthenticate, parentFe
 
 // paymentAdminDashboardRouter.post("/:sectionId/fee-summary", sectionFeeSummaryController);
 // paymentAdminDashboardRouter.post("/:sectionId/students", sectionStudentsWithPaymentController);
+
 /* Class-Wise Reports */
 paymentAdminDashboardRouter.get("/reports/class-wise/summary", classWiseSummaryValidation, classWiseSummaryController);
 paymentAdminDashboardRouter.get("/reports/class-wise/chart", classWiseSummaryValidation, classWiseChartController);
-paymentAdminDashboardRouter.get("/reports/class-wise/transactions", classWiseTransactionsController);
+paymentAdminDashboardRouter.get("/reports/class-wise/transactions", classWiseSummaryValidation, classWiseTransactionsController);
 
 /* Periodically Reports */
-paymentAdminDashboardRouter.get("/reports/periodically/summary", periodicallySummaryController);
+paymentAdminDashboardRouter.get("/reports/periodically/summary", adminAuthenticate, periodicallySummaryController);
 paymentAdminDashboardRouter.get("/reports/periodically/chart", periodicallyChartController);
 paymentAdminDashboardRouter.get("/reports/periodically/transactions", periodicallyTransactionsController);
 
@@ -60,13 +62,14 @@ paymentAdminDashboardRouter.get("/reports/payment-mode/transactions", paymentMod
 /* Fee Payment Reports */
 paymentAdminDashboardRouter.get("/reports/fee/summary", paymentModeReportValidation, feesSummaryController);
 paymentAdminDashboardRouter.get("/reports/fee/transactions", paymentModeReportValidation, feesTransactionsController);
-paymentAdminDashboardRouter.post("/reports/fee/reminder", installmentReminderValidation, sendReminderController);
+paymentAdminDashboardRouter.get("/reports/fee/reminder", installmentReminderValidation, sendReminderController);
 
 /* Refund and Failed Reports */
 paymentAdminDashboardRouter.get("/reports/other/summary", classWiseSummaryValidation, refundFailedSummaryController);
 paymentAdminDashboardRouter.get("/reports/other/chart", refundFailedChartController);
 paymentAdminDashboardRouter.get("/reports/other/transactions", refundFailedTransactionsController);
 
+paymentAdminDashboardRouter.get("/test", storeDailySnapshot);
 
 // paymentAdminDashboardRouter.post("/:sectionId/fee-summary", sectionFeeSummaryController);
 // paymentAdminDashboardRouter.post("/:sectionId/students", sectionStudentsWithPaymentController);

@@ -10,9 +10,9 @@ export async function createPaymentTransactionService(data) {
   }
 }
 
-export async function getPaymentTransactionService(filter) {
+export async function getPaymentTransactionService(filter, projection={}) {
   try {
-    const paymentSession = await paymentTransactionModel.findOne(filter).lean();
+    const paymentSession = await paymentTransactionModel.findOne(filter).select(projection).lean();
     return paymentSession;
   } catch (error) {
     throw error;
