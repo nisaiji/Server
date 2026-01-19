@@ -1,4 +1,4 @@
-import schoolFeeStructureModel from "../../models/feeStructure/SchoolFeeStructure.model.js";
+import schoolFeeStructureModel from "../../models/feeStructure/schoolFeeStructure.model.js";
 
 export async function getSchoolFeeStructureService(paramObj, projection = {}) {
   try {

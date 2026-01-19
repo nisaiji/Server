@@ -1,12 +1,5 @@
-import {
-  getPaymentTransactionService,
-  updatePaymentTransactionService,
-} from "../../services/paymentTransaction.service.js";
-import {
-  processPayment,
-  recalcDashboard,
-} from "../../services/balance.service.js";
-import { registerLedgerEventService } from "../../services/ledgerEvent.service.js";
+import { getPaymentTransactionService, updatePaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import { getRefundService, updateRefundService } from "../../services/refund.services.js";
 
 export async function paymentWebhookController(req, res) {
   try {
@@ -243,5 +236,49 @@ export async function paymentWebhookV3Controller(req, res) {
     return res
       .status(500)
       .json({ message: "Internal Server Error", error: error.message });
+  }
+}
+
+export async function refundWebhookController(req, res) {
+  try {
+    const body = req.body;
+    console.log({body: JSON.stringify(body)});
+    const { event_id, event_type, account_id, event_time, event_object } = body;
+    
+    if (!event_object?.refund) {
+      console.error("Invalid refund webhook format: missing event_object.refund");
+      return res.status(400).json({ message: "Invalid webhook format" });
+    }
+
+    const refund = event_object.refund;
+    const { refund_id, payment_id, status, date, failure_reason } = refund;
+
+    const updateData = {
+      status,
+      refundDate: new Date(date * 1000),
+      webhookId: event_id,
+      webhookType: event_type,
+      webhookAccountId: account_id,
+      webhookEventTime: new Date(event_time),
+      webhookProcessed: true
+    };
+
+    if (event_type === 'refund.failed') {
+      updateData.failureReason = failure_reason;
+    }
+
+    const existingRefund = await getRefundService({ refundId: refund_id });
+    if (!existingRefund) {
+      console.log("Refund not found for refundId:", refund_id);
+      return res.status(404).json({ message: "Refund not found" });
+    }
+
+    await updateRefundService({ refundId: refund_id }, updateData);
+    console.log("Refund updated successfully for refundId:", refund_id);
+    
+    return res.status(200).json({ message: "Refund webhook received successfully" });
+  } catch (error) {
+    console.error("Refund webhook error:", error);
+    return res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 }

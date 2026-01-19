@@ -8,13 +8,6 @@ export const classWiseSummarySchema = Joi.object({
       "string.base": "SessionID must be a valid string.",
       "string.pattern.base": "SessionID must be a valid  id.",
     }),
-  school: Joi.string()
-    .regex(/^[a-f\d]{24}$/i)
-    .required()
-    .messages({
-      "string.base": "school must be a valid string.",
-      "string.pattern.base": "school must be a valid  id.",
-    }),
 });
 
 export const paymentModeReportSchema = Joi.object({

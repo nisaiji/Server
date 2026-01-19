@@ -1,22 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 import { error, success } from "../../utills/responseWrapper.js";
-import {
-  getPaymentTransactionPipelineService,
-  getPaymentTransactionService,
-  getPaymentTransactionCountService
-} from "../../services/paymentTransaction.service.js";
+import { getPaymentTransactionPipelineService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { countClassService } from "../../services/class.sevices.js";
-import {
-  getFeeDashboardSnapshotService,
-  getFeeDashboardSnapshotsService,
-} from "../../services/feeDashboardSnapshot.service.js";
-import {
-  getStudentFeeInstallmentsPipelineService,
-} from "../../services/studentFeeInstallment.service.js";
-import { getTotalFeesAndStudents } from "../../services/balance.service.js"
+import { sendPushNotification } from "../../config/firebase.config.js";
+import { getSessionStudentsPipelineService } from "../../services/v2/sessionStudent.service.js";
 
-//TODO kuldeep update Swagger Doc and remove, classId, sectionId  if not needed
 export async function schoolPaymentsController(req, res) {
   try {
     const { sessionId, classId, sectionId } = req.query;
@@ -29,48 +18,23 @@ export async function schoolPaymentsController(req, res) {
     if (sectionId) matchQuery.section = convertToMongoId(sectionId);
     matchQuery.status = "paid";
 
-    //todo kuldeep remove if not required, as data is coming from Fee snapshot model
     const collectedFee = await getPaymentTransactionPipelineService([
       {
-        $match: matchQuery,
+        $match: matchQuery
       },
       {
         $group: {
           _id: null,
-          totalAmount: { $sum: "$amount" },
-        },
-      },
-    ]);
-
-    delete matchQuery.status;
-    delete matchQuery.classId;
-    delete matchQuery.section;
-    //todo: use redis to store snapshot data and retrieve from there
-    const feeSnapShotData = await getFeeDashboardSnapshotsService(
-      {
-        ...matchQuery,
-      },
-      {},
-      { _id: -1 },
-      1
-    );
-
+          totalAmount: { $sum: "$amount" }
+        }
+      }
+    ])
     const data = {
-      collectedFee: feeSnapShotData[0]?.totals?.collected || 0,
-      collected: 0,
-      pending: 0,
-      overdue: 0,
-      refunded: 0,
-      collectedChangePct: 0,
-      pendingChangePct: 0,
-      overdueChangePct: 0,
-      refundedChangePct: 0,
-      failedChangePct: 0,
+      collectedFee: collectedFee[0]?.totalAmount,
+      pending: 1000,
+      overdue: 1000,
+      refunded: 1000,
     };
-
-    for (let key in feeSnapShotData[0]?.totals) {
-      data[key] = feeSnapShotData[0]?.totals[key];
-    }
     return res.status(StatusCodes.OK).send(success(200, data));
   } catch (err) {
     return res
@@ -82,35 +46,35 @@ export async function schoolPaymentsController(req, res) {
 export async function daywisePaymentsSummaryController(req, res) {
   try {
     const { startDate, endDate } = req.body;
-    console.log({ startDate: new Date(startDate), endDate: new Date(endDate) });
+    console.log({ startDate: new Date(startDate), endDate: new Date(endDate) })
     const payments = await getPaymentTransactionPipelineService([
       {
         $match: {
           status: "paid",
           paidAt: {
             $gte: new Date(startDate),
-            $lte: new Date(endDate),
-          },
-        },
+            $lte: new Date(endDate)
+          }
+        }
       },
       {
         $group: {
           _id: {
             $dateToString: {
               format: "%Y-%m-%d",
-              date: "$paidAt",
-            },
+              date: "$paidAt"
+            }
           },
           totalAmount: { $sum: "$amount" },
-          TransactionCount: { $sum: 1 },
-        },
+          TransactionCount: { $sum: 1 }
+        }
       },
       {
         $sort: {
-          _id: 1,
-        },
-      },
-    ]);
+          _id: 1
+        }
+      }
+    ])
 
     return res.status(StatusCodes.OK).send(success(200, { payments }));
   } catch (err) {
@@ -120,7 +84,42 @@ export async function daywisePaymentsSummaryController(req, res) {
   }
 }
 
-export async function monthwisePaymentsSummaryController(req, res) {}
+export async function monthwisePaymentsSummaryController(req, res) {
+  try {
+    const { sessionId } = req.body;
+    const adminId = req.adminId;
+    const payments = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          status: "paid",
+          session: convertToMongoId(sessionId),
+          school: convertToMongoId(adminId)
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m",
+              date: "$paidAt"
+            }
+          },
+          totalAmount: { $sum: "$amount" },
+          transactionCount: { $sum: 1 }
+        }
+      },
+      {
+        $sort: {
+          _id: 1
+        }
+      }
+    ])
+
+    return res.status(StatusCodes.OK).send(success(200, { payments }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
 
 export async function paymentsByPaymentModesController(req, res) {
   try {
@@ -132,22 +131,22 @@ export async function paymentsByPaymentModesController(req, res) {
           paymentMethod: { $exists: true },
           paidAt: {
             $gte: new Date(startDate),
-            $lte: new Date(endDate),
-          },
-        },
+            $lte: new Date(endDate)
+          }
+        }
       },
       {
         $group: {
           _id: "$paymentMethod",
-          totalAmount: { $sum: "$amount" },
-        },
+          totalAmount: { $sum: "$amount" }
+        }
       },
       {
         $sort: {
-          _id: 1,
-        },
-      },
-    ]);
+          _id: 1
+        }
+      }
+    ])
     return res.status(StatusCodes.OK).send(success(200, payments));
   } catch (err) {
     return res
@@ -158,11 +157,82 @@ export async function paymentsByPaymentModesController(req, res) {
 
 export async function paymentTransactionsController(req, res) {
   try {
-    // return payment-transactions for
-    // section
-    // class
-    // school
-    const data = await getPaymentTransactionService({});
+    const { sessionId, classId, sectionId, sessionStudentId } = req.query;
+    const schoolId = req.adminId;
+
+    const matchQuery = {};
+    if (schoolId) matchQuery.school = convertToMongoId(schoolId);
+    if (sessionId) matchQuery.session = convertToMongoId(sessionId);
+    if (classId) matchQuery.classId = convertToMongoId(classId);
+    if (sectionId) matchQuery.section = convertToMongoId(sectionId);
+    if (sessionStudentId) matchQuery.sessionStudent = convertToMongoId(sessionStudentId);
+
+    const data = await getPaymentTransactionPipelineService([
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "class"
+        }
+      },
+      {
+        $lookup: {
+          from: "sessions",
+          localField: "session",
+          foreignField: "_id",
+          as: "session"
+        }
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $project: {
+          amount: 1,
+          status: 1,
+          paymentMethod: 1,
+          paidAt: 1,
+          createdAt: 1,
+          paymentReferenceId: 1,
+          paymentInvoiceId: 1,
+          transactionId: 1,
+          zohoPaymentId: 1,
+          paymentLinkId: 1,
+
+          sectionName: { $arrayElemAt: ["$section.name", 0] },
+          sectionId: { $arrayElemAt: ["$section._id", 0] },
+          className: { $arrayElemAt: ["$class.name", 0] },
+          classId: { $arrayElemAt: ["$class._id", 0] },
+          session: {
+            $concat: [
+              { $toString: { $arrayElemAt: ["$session.academicStartYear", 0] } },
+              "-",
+              { $toString: { $arrayElemAt: ["$session.academicEndYear", 0] } }
+            ]
+          },
+          sessionEndYear: { $arrayElemAt: ["$session.endYear", 0] },
+          sessionName: { $arrayElemAt: ["$session.name", 0] },
+          studentFirstname: { $arrayElemAt: ["$student.firstname", 0] },
+          studentLastname: { $arrayElemAt: ["$student.lastname", 0] }
+        }
+      }
+    ]);
+
     return res.status(StatusCodes.OK).send(success(200, data));
   } catch (err) {
     return res
@@ -171,17 +241,61 @@ export async function paymentTransactionsController(req, res) {
   }
 }
 
-export async function sectionFeeSummaryController(req, res) {
+export async function classMonthlyCollectionController(req, res) {
   try {
-    // return section fee summary
-    // 1. Collected fee
-    // 2. Expected fee
-    // 3. Pending fee
-    const data = {
-      collectedFee: 1000,
-      expectedFee: 1000,
-      pendingFee: 1000,
-    };
+    const { classId } = req.body;
+    const adminId = req.adminId;
+
+    const data = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          classId: convertToMongoId(classId),
+          school: convertToMongoId(adminId),
+          status: "paid"
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "sectionData"
+        }
+      },
+      {
+        $group: {
+          _id: {
+            section: "$section",
+            sectionName: { $arrayElemAt: ["$sectionData.name", 0] },
+            month: {
+              $dateToString: {
+                format: "%Y-%m",
+                date: "$paidAt"
+              }
+            }
+          },
+          totalAmount: { $sum: "$amount" },
+          transactionCount: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.section",
+          sectionName: { $first: "$_id.sectionName" },
+          monthlyData: {
+            $push: {
+              month: "$_id.month",
+              totalAmount: "$totalAmount",
+              transactionCount: "$transactionCount"
+            }
+          }
+        }
+      },
+      {
+        $sort: { sectionName: 1 }
+      }
+    ]);
+
     return res.status(StatusCodes.OK).send(success(200, data));
   } catch (err) {
     return res
@@ -199,7 +313,7 @@ export async function sectionFeeSummaryController(req, res) {
 //         $match: {
 //           // school: convertToMongoId(adminId),
 //           sessionStudent: convertToMongoId(sessionStudentId)
-//         }
+//         } 
 //       },
 //       {
 //         $lookup: {
@@ -276,22 +390,69 @@ export async function sessionStudentFeesController(req, res) {
       {
         $match: {
           // school: convertToMongoId(adminId),
-          sessionStudent: convertToMongoId(sessionStudentId),
-        },
+          sessionStudent: convertToMongoId(sessionStudentId)
+        }
       },
       {
         $lookup: {
           from: "sections",
           localField: "section",
           foreignField: "_id",
-          as: "section",
-        },
+          as: "section"
+        }
       },
       {
-        studentId: "string",
-        name: "string",
-        paymentStatus: "paid/pending/overdue",
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "class"
+        }
       },
+      {
+        $lookup: {
+          from: "sessions",
+          localField: "session",
+          foreignField: "_id",
+          as: "session"
+        }
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $project: {
+          amount: 1,
+          status: 1,
+          paymentMethod: 1,
+          paidAt: 1,
+          createdAt: 1,
+          paymentReferenceId: 1,
+          paymentInvoiceId: 1,
+          transactionId: 1,
+          zohoPaymentId: 1,
+          sectionName: { $arrayElemAt: ["$section.name", 0] },
+          sectionId: { $arrayElemAt: ["$section._id", 0] },
+          className: { $arrayElemAt: ["$class.name", 0] },
+          classId: { $arrayElemAt: ["$class._id", 0] },
+          session: {
+            $concat: [
+              { $toString: { $arrayElemAt: ["$session.academicStartYear", 0] } },
+              "-",
+              { $toString: { $arrayElemAt: ["$session.academicEndYear", 0] } }
+            ]
+          },
+          sessionEndYear: { $arrayElemAt: ["$session.endYear", 0] },
+          sessionName: { $arrayElemAt: ["$session.name", 0] },
+          studentFirstname: { $arrayElemAt: ["$student.firstname", 0] },
+          studentLastname: { $arrayElemAt: ["$student.lastname", 0] }
+        }
+      }
     ]);
     return res.status(StatusCodes.OK).send(success(200, data));
   } catch (err) {
@@ -301,149 +462,130 @@ export async function sessionStudentFeesController(req, res) {
   }
 }
 
-/* Class-Wise Reports */
-export async function classWiseSummaryController(req, res) {
+export async function parentFeeReminderController(req, res) {
   try {
-    let { sessionID: session, school } = req.query;
-    session = convertToMongoId(session);
-    // const schoolID = convertToMongoId(req.adminId);
-    const schoolID = convertToMongoId(school); // only for testing
+    const { sessionStudentId } = req.body;
+    const adminId = req.adminId;
 
-    const totalClasses = await countClassService({ admin: schoolID, session });
-
-    const aggregatedData = await getPaymentTransactionPipelineService([
+    const parentData = await getSessionStudentsPipelineService([
       {
         $match: {
-          session: session,
-          school: schoolID,
-          status: "paid",
-          amountPaid: { $gt: 0 },
-        },
+          _id: convertToMongoId(sessionStudentId),
+          school: convertToMongoId(adminId)
+        }
       },
       {
         $lookup: {
-          from: "classes",
-          localField: "classId",
+          from: "students",
+          localField: "student",
           foreignField: "_id",
-          as: "classInfo",
-          pipeline: [{ $project: { name: 1 } }],
-        },
+          as: "student"
+        }
       },
       {
         $lookup: {
-          from: "sections",
-          localField: "section",
+          from: "schoolparents",
+          localField: "student.schoolParent",
           foreignField: "_id",
-          as: "sectionInfo",
-          pipeline: [{ $project: { name: 1 } }],
-        },
-      },
-      { $unwind: "$classInfo" },
-      { $unwind: "$sectionInfo" },
-      {
-        $group: {
-          _id: { $concat: ["$classInfo.name", " ", "$sectionInfo.name"] },
-          totalCollected: { $sum: "$amountPaid" },
-          classId: { $first: "$classInfo._id" },
-          sectionId: { $first: "$sectionInfo._id" },
-        },
+          as: "schoolParent"
+        }
       },
       {
-        $facet: {
-          highestCollection: [
-            { $sort: { totalCollected: -1 } },
-            { $limit: 1 },
-            {
-              $project: {
-                class: "$_id",
-                amount: "$totalCollected",
-                _id: 0,
-              },
-            },
-          ],
-          lowestCollection: [
-            { $match: { totalCollected: { $gt: 0 } } },
-            { $sort: { totalCollected: 1 } },
-            { $limit: 1 },
-            {
-              $project: {
-                class: "$_id",
-                amount: "$totalCollected",
-                _id: 0,
-              },
-            },
-          ],
-          overallPaid: [
-            {
-              $group: {
-                _id: null,
-                totalCollected: { $sum: "$totalCollected" },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: "$highestCollection",
-      },
-      {
-        $unwind: "$lowestCollection",
-      },
-      {
-        $unwind: "$overallPaid",
+        $lookup: {
+          from: "parents",
+          localField: "schoolParent.parent",
+          foreignField: "_id",
+          as: "parent"
+        }
       },
       {
         $project: {
-          highestCollection: "$highestCollection",
-          lowestCollection: "$lowestCollection",
-          overallPaid: {
-            totalCollected: "$overallPaid.totalCollected",
-            percentage: {
-              $cond: {
-                if: { $gt: ["$overallPaid.totalCollected", 0] },
-                then: {
-                  $round: [
-                    {
-                      $multiply: [
-                        100,
-                        { $divide: ["$overallPaid.totalCollected", 1000000] },
-                      ],
-                    },
-                    2,
-                  ],
-                },
-                else: 0,
-              },
-            },
-          },
-          _id: 0,
-        },
-      },
+          fcmToken: { $arrayElemAt: ["$parent.fcmToken", 0] },
+          studentName: {
+            $concat: [
+              { $arrayElemAt: ["$student.firstname", 0] },
+              " ",
+              { $arrayElemAt: ["$student.lastname", 0] }
+            ]
+          }
+        }
+      }
     ]);
 
-    //11-01-2026
-    //calculating total expected by expected = totalPayable - amountPaid from studentfee installment
-    const totalPayable = await getStudentFeeInstallmentsPipelineService([
-      {
-        $match: {
-          school: schoolID,
-          session,
-        },
-      },
-      {
-        $group: {
-          _id: "null",
-          total: { $sum: "$totalPayable" },
-        },
-      },
-    ]);
-    if (aggregatedData[0]?.overallPaid) {
-      aggregatedData[0].overallPaid["totalExpected"] =
-        totalPayable[0]?.total || 0;
+    if (!parentData[0]?.fcmToken) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Bad Request"));
     }
-    const results = {
+
+    const { fcmToken, studentName } = parentData[0];
+    const title = "Fee Reminder";
+    const description = `Please pay the pending fees for ${studentName}`;
+
+    await sendPushNotification(fcmToken, title, description);
+
+    return res.status(StatusCodes.OK).send(success(200, "Fee reminder sent successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+
+// export async function sectionFeeSummaryController(req, res) {
+//   try {
+//       // return section fee summary
+//       // 1. Collected fee
+//       // 2. Expected fee
+//       // 3. Pending fee
+//       const data = {
+//         collectedFee: 1000,
+//         expectedFee: 1000,
+//         pendingFee: 1000
+//       }
+//     return res.status(StatusCodes.OK).send(success(200, data));
+//   } catch (err) {
+//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+//   }
+// }
+
+// export async function sectionStudentsWithPaymentController(req, res) {
+//   try {
+//     // return list of students with payment status
+//     const data = [
+//       {
+//         studentId: "string",
+//         name: "string",
+//         paymentStatus: "paid/pending/overdue"
+//       }
+//     ]
+//     return res.status(StatusCodes.OK).send(success(200, data));
+//   } catch (err) {
+//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+//   }
+// }
+
+// }
+
+/* Class-Wise Reports */
+export async function classWiseSummaryController(req, res) {
+  try {
+    const { sessionID } = req.query;
+
+    const totalClasses = await countClassService({ sessionID });
+    // TODO get highestCollection, lowestCollection, overallPaid from payment collection data using sessionID
+    let results = {
       totalClasses,
-      ...aggregatedData[0],
+      highestCollection: {
+        class: "3rd",
+        amount: 500000,
+      },
+      lowestCollection: {
+        class: "Nursery",
+        amount: 80000,
+      },
+      overallPaid: {
+        totalExpected: 1000000,
+        totalCollected: 800000,
+        percentage: 80,
+      },
     };
 
     return res.status(StatusCodes.OK).send(success(200, results));
@@ -456,58 +598,24 @@ export async function classWiseSummaryController(req, res) {
 
 export async function classWiseChartController(req, res) {
   try {
-    let { sessionID: session, school } = req.query;
-    session = convertToMongoId(session);
-    // const schoolID = convertToMongoId(req.adminId);
-    const schoolID = convertToMongoId(school); // only for testing
-
-    const results = await getPaymentTransactionPipelineService([
-      {
-        $match: {
-          session: session,
-          school: schoolID,
-          status: "paid",
-          amountPaid: { $gt: 0 },
-        },
-      },
-      {
-        $lookup: {
-          from: "classes",
-          localField: "classId",
-          foreignField: "_id",
-          as: "classInfo",
-          pipeline: [{ $project: { name: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "sections",
-          localField: "section",
-          foreignField: "_id",
-          as: "sectionInfo",
-          pipeline: [{ $project: { name: 1 } }],
-        },
-      },
-      { $unwind: "$classInfo" },
-      { $unwind: "$sectionInfo" },
-      {
-        $group: {
-          _id: { $concat: ["$classInfo.name", " ", "$sectionInfo.name"] },
-          amount: { $sum: "$amountPaid" },
-          classId: { $first: "$classInfo._id" },
-          sectionId: { $first: "$sectionInfo._id" },
-        },
-      },
-      {
-        $project: {
-          amount: 1,
-          classId: 1,
-          sectionId: 1,
-          class: "$_id",
-          _id: 0,
-        },
-      },
-    ]);
+    const { sessionID } = req.query;
+    let results = [
+      { class: "Nursery", amount: 900000 },
+      { class: "LKG", amount: 800000 },
+      { class: "UKG", amount: 900000 },
+      { class: "1st Grade", amount: 500000 },
+      { class: "2nd Grade", amount: 400000 },
+      { class: "3rd Grade", amount: 300000 },
+      { class: "4th Grade", amount: 200000 },
+      { class: "5th Grade", amount: 100000 },
+      { class: "6th Grade", amount: 100000 },
+      { class: "7th Grade", amount: 100000 },
+      { class: "8th Grade", amount: 100000 },
+      { class: "9th Grade", amount: 100000 },
+      { class: "10th Grade", amount: 100000 },
+      { class: "11th Grade", amount: 100000 },
+      { class: "12th Grade", amount: 100000 },
+    ];
 
     return res.status(StatusCodes.OK).send(success(200, results));
   } catch (err) {
@@ -519,54 +627,144 @@ export async function classWiseChartController(req, res) {
 
 export async function classWiseTransactionsController(req, res) {
   try {
-    let { sessionID: session, school } = req.query;
-    session = convertToMongoId(session);
-    // const schoolID = convertToMongoId(req.adminId);
-    const schoolID = convertToMongoId(school);
-    let results = await getStudentFeeInstallmentsPipelineService([
+    const { sessionID } = req.query;
+    let results = [
       {
-        $match: {
-          school: schoolID,
-          session: session,
-        },
+        class: "Nursery",
+        totalFees: 200000,
+        paidFees: 150000,
+        pendingFees: 50000,
+        paidCount: 50,
+        unPaidCount: 10,
+        dueDate: "2024-06-30",
       },
       {
-        $lookup: {
-          from: "classes", // assuming your class collection name
-          localField: "classId",
-          foreignField: "_id",
-          as: "classInfo",
-          pipeline: [{ $project: { name: 1 } }],
-        },
-      },
-      { $unwind: "$classInfo" },
-      {
-        $group: {
-          _id: "$classInfo.name",
-          totalFees: { $sum: "$totalPayable" },
-          totalPaid: { $sum: "$amountPaid" },
-          totalPending: {
-            $sum: { $subtract: ["$totalPayable", "$amountPaid"] },
-          },
-          classId: { $first: "$classInfo._id" },
-          dueDate: { $first: "$dueDate" },
-          totalCount: { $sum: 1 },
-          paidCount: { $sum: { $cond: [{ $gt: ["$amountPaid", 0] }, 1, 0] } },
-        },
+        class: "LKG",
+        totalFees: 240000,
+        paidFees: 100000,
+        pendingFees: 51000,
+        paidCount: 50,
+        unPaidCount: 10,
+        dueDate: "2024-06-30",
       },
       {
-        $project: {
-          class: "$_id",
-          totalFees: 1,
-          classId: 1,
-          paidFees: "$totalPaid",
-          pendingFees: "$totalPending",
-          paidCount: 1,
-          unPaidCount: { $subtract: ["$totalCount", "$paidCount"] },
-          dueDate: { $dateToString: { format: "%d/%m/%Y", date: "$dueDate" } },
-        },
+        class: "UKG",
+        totalFees: 200500,
+        paidFees: 110000,
+        pendingFees: 70000,
+        paidCount: 50,
+        unPaidCount: 10,
+        dueDate: "2024-06-30",
       },
-    ]);
+      {
+        class: "1st Grade",
+        totalFees: 300000,
+        paidFees: 250000,
+        pendingFees: 50000,
+        paidCount: 60,
+        unPaidCount: 5,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "2nd Grade",
+        totalFees: 250000,
+        paidFees: 200000,
+        pendingFees: 50000,
+        paidCount: 55,
+        unPaidCount: 8,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "3rd Grade",
+        totalFees: 220000,
+        paidFees: 180000,
+        pendingFees: 40000,
+        paidCount: 52,
+        unPaidCount: 12,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "4th Grade",
+        totalFees: 210000,
+        paidFees: 160000,
+        pendingFees: 50000,
+        paidCount: 50,
+        unPaidCount: 15,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "5th Grade",
+        totalFees: 200000,
+        paidFees: 150000,
+        pendingFees: 50000,
+        paidCount: 48,
+        unPaidCount: 18,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "6th Grade",
+        totalFees: 190000,
+        paidFees: 140000,
+        pendingFees: 50000,
+        paidCount: 45,
+        unPaidCount: 20,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "7th Grade",
+        totalFees: 180000,
+        paidFees: 130000,
+        pendingFees: 50000,
+        paidCount: 42,
+        unPaidCount: 22,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "8th Grade",
+        totalFees: 170000,
+        paidFees: 120000,
+        pendingFees: 50000,
+        paidCount: 40,
+        unPaidCount: 25,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "9th Grade",
+        totalFees: 160000,
+        paidFees: 110000,
+        pendingFees: 50000,
+        paidCount: 38,
+        unPaidCount: 28,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "10th Grade",
+        totalFees: 150000,
+        paidFees: 100000,
+        pendingFees: 50000,
+        paidCount: 35,
+        unPaidCount: 30,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "11th Grade",
+        totalFees: 140000,
+        paidFees: 90000,
+        pendingFees: 50000,
+        paidCount: 32,
+        unPaidCount: 33,
+        dueDate: "2024-06-30",
+      },
+      {
+        class: "12th Grade",
+        totalFees: 130000,
+        paidFees: 80000,
+        pendingFees: 50000,
+        paidCount: 30,
+        unPaidCount: 35,
+        dueDate: "2024-06-30",
+      },
+    ];
 
     return res.status(StatusCodes.OK).send(success(200, results));
   } catch (err) {
@@ -584,38 +782,13 @@ export async function periodicallySummaryController(req, res) {
     classId: mongoID,
     periodType: yearly | monthly | weekly
     */
-    let { sessionId, classID, periodType } = req.query;
-
-    const schoolId = req.adminId;
-
-    const session = convertToMongoId(sessionId);
-    const school = convertToMongoId(schoolId);
-
-    const feeSnapShotData = await getFeeDashboardSnapshotsService(
-      { session, school },
-      {},
-      { _id: -1 },
-      1
-    );
-
-    const failedPaymentStudentCounts = await getPaymentTransactionCountService({session, school, status: "failed"});
-
-    const totalExpected = await getTotalFeesAndStudents(sessionId, schoolId, {}, true);
+    const { sessionID, classID, periodType } = req.query;
 
     let results = {
-      totalExpected: {amount: totalExpected.amount, students: totalExpected.totalStudents },
-      totalCollected: {
-        amount: feeSnapShotData[0]?.totals?.collected || 0,
-        students: totalExpected.collectedStudentsCount,
-      },
-      pendingPayments: {
-        amount: feeSnapShotData[0]?.totals?.pending || 0,
-        students: totalExpected.pendingStudentsCount,
-      },
-      refundedAmount: {
-        amount: feeSnapShotData[0]?.totals?.refunded || 0,
-        students: failedPaymentStudentCounts,
-      },
+      totalExpected: { amount: 1000000, students: 640 },
+      totalCollected: { amount: 800000, students: 500 },
+      pendingPayments: { amount: 80000, students: 100 },
+      refundedAmount: { amount: 80000, students: 40 },
     };
     return res.status(StatusCodes.OK).send(success(200, results));
   } catch (err) {
@@ -1107,35 +1280,3 @@ export async function refundFailedTransactionsController(req, res) {
       .send(error(500, err.message));
   }
 }
-// export async function sectionFeeSummaryController(req, res) {
-//   try {
-//       // return section fee summary
-//       // 1. Collected fee
-//       // 2. Expected fee
-//       // 3. Pending fee
-//       const data = {
-//         collectedFee: 1000,
-//         expectedFee: 1000,
-//         pendingFee: 1000
-//       }
-//     return res.status(StatusCodes.OK).send(success(200, data));
-//   } catch (err) {
-//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-//   }
-// }
-
-// export async function sectionStudentsWithPaymentController(req, res) {
-//   try {
-//     // return list of students with payment status
-//     const data = [
-//       {
-//         studentId: "string",
-//         name: "string",
-//         paymentStatus: "paid/pending/overdue"
-//       }
-//     ]
-//     return res.status(StatusCodes.OK).send(success(200, data));
-//   } catch (err) {
-//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-//   }
-// }

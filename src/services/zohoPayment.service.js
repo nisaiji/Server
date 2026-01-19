@@ -147,3 +147,31 @@ export async function createPaymentLinkApiService({accountId, accessToken, amoun
     throw error;
   }
 }
+
+export async function createRefundApiService({paymentId, accountId, accessToken, amount, reason, type, description, isSandbox}) {
+  const refundPath = `/api/v1/payments/${paymentId}/refunds`;
+  const url = new URL(refundPath, isSandbox ? zohoSandBoxUrl : zohoPayUrl);
+  url.searchParams.append("account_id", accountId);
+
+  const payload = {
+    amount: 100,
+    reason,
+    type,
+    description
+  };
+  console.log({payload, url})
+
+  try {
+    const response = await axios.post(url.toString(), payload, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
+      }
+    });
+    console.log({response: JSON.stringify(response.data)});
+    return response.data;
+  } catch (error) {
+    console.log("Zoho Refund Error:", error.response?.data || error.message);
+    throw error;
+  }
+}
