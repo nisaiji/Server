@@ -357,3 +357,37 @@ export async function sectionStudentsFeeInstallmentsController(req, res) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+export async function getTotalRefundedAmountController(req, res) {
+  try {
+    const { startDate, endDate, sessionId, classId, sectionId, studentId } = req.query;
+    const adminId = req.adminId;
+    const filter = { status: 'refunded', school: convertToMongoId(adminId) };
+    filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+
+    if (sessionId) filter.session = sessionId;
+    if (classId) filter.classId = classId;
+    if (sectionId) filter.section = sectionId;
+    if (studentId) filter.student = studentId;
+
+    const paymentTransactions = await getPaymentTransactionPipelineService([
+      {
+        $match: filter
+      },
+      {
+        $group: {
+          _id: null,
+          totalRefundedAmount: { $sum: '$amount' },
+          totalRefundedTransactions: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const totalRefundedAmount = paymentTransactions[0]?.totalRefundedAmount || 0;
+    const totalRefundedTransactions = paymentTransactions[0]?.totalRefundedTransactions || 0;
+
+    return res.status(200).send(success(200, { totalRefundedAmount, totalRefundedTransactions }));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch payment admin dashboard data' });
+  }
+}
