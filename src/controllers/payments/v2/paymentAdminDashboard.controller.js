@@ -7,7 +7,7 @@ import { convertToMongoId } from "../../../services/mongoose.services.js";
 
 export async function getPaymentAdminDashboardData(req, res) {
   try {
-    const {startDate, endDate, sessionId, classId, sectionId, studentId} = req.query;
+    const { startDate, endDate, sessionId, classId, sectionId, studentId } = req.query;
     const adminId = req.adminId;
     const filter = { status: 'paid', school: convertToMongoId(adminId) };
     filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
@@ -33,7 +33,7 @@ export async function getPaymentAdminDashboardData(req, res) {
     const totalAmount = paymentTransactions[0]?.totalAmount || 0;
     const totalTransactions = paymentTransactions[0]?.totalTransactions || 0;
 
-    return res.status(200).send(success(200, {totalAmount, totalTransactions, pendingAmount}));
+    return res.status(200).send(success(200, { totalAmount, totalTransactions, pendingAmount }));
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch payment admin dashboard data' });
   }
@@ -41,17 +41,17 @@ export async function getPaymentAdminDashboardData(req, res) {
 
 export async function getTransactionsController(req, res) {
   try {
-    const {startDate, status, endDate, sessionId, classId, sectionId, studentId, page = 1, limit = 10 } = req.query;
+    const { startDate, status, endDate, sessionId, classId, sectionId, studentId, page = 1, limit = 10 } = req.query;
     const adminId = req.adminId;
 
     const filter = { school: convertToMongoId(adminId) };
     filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    
-    if(sessionId) filter.session = sessionId;
-    if(classId) filter.classId = classId;
-    if(sectionId) filter.section = sectionId;
-    if(studentId) filter.student = studentId;
-    if(status) filter.status = status;
+
+    if (sessionId) filter.session = sessionId;
+    if (classId) filter.classId = classId;
+    if (sectionId) filter.section = sectionId;
+    if (studentId) filter.student = studentId;
+    if (status) filter.status = status;
 
     const skip = (page - 1) * limit;
 
@@ -135,5 +135,41 @@ export async function daywisePaymentsSummaryController(req, res) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send(error(500, err.message));
+  }
+}
+
+export async function paymentsByPaymentModesController(req, res) {
+  try {
+    const { startDate, endDate, sessionId, classId, sectionId } = req.body;
+    const adminId = req.adminId;
+    const payments = await getPaymentTransactionPipelineService([
+      {
+        $match: {
+          status: "paid",
+          school: convertToMongoId(adminId),
+          ...(sessionId && { session: convertToMongoId(sessionId) }),
+          ...(classId && { classId: convertToMongoId(classId) }),
+          ...(sectionId && { section: convertToMongoId(sectionId) }),
+          paidAt: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$paymentMethod",
+          totalAmount: { $sum: "$amount" }
+        }
+      },
+      {
+        $sort: {
+          _id: 1
+        }
+      }
+    ])
+    return res.status(StatusCodes.OK).send(success(200, payments));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
