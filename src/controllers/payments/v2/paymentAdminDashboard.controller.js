@@ -3,6 +3,7 @@ import { getPaymentTransactionPipelineService } from "../../../services/paymentT
 import { error, success } from "../../../utills/responseWrapper.js";
 import { convertToMongoId } from "../../../services/mongoose.services.js";
 import { getSectionsPipelineService } from "../../../services/section.services.js";
+import { getSessionStudentsPipelineService } from "../../../services/v2/sessionStudent.service.js";
 
 
 
@@ -175,7 +176,6 @@ export async function paymentsByPaymentModesController(req, res) {
   }
 }
 
-
 export async function sectionsReportController(req, res) {
   try {
     const { sessionId } = req.query;
@@ -294,6 +294,65 @@ export async function sectionsReportController(req, res) {
     const sections = await getSectionsPipelineService(pipeline);
 
     return res.status(StatusCodes.OK).send(success(200, { sections }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function sectionStudentsFeeInstallmentsController(req, res) {
+  try {
+    const { sessionId, sectionId } = req.query;
+    const adminId = req.adminId;
+
+    const pipeline = [
+      {
+        $match: {
+          session: convertToMongoId(sessionId),
+          section: convertToMongoId("689ee11474d391f6f87fd2dc"),
+          school: convertToMongoId(adminId)
+        }
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $unwind: "$student"
+      },
+      {
+        $lookup: {
+          from: "studentfeeinstallments",
+          let: { sessionStudentId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$sessionStudent", "$$sessionStudentId"] }
+              }
+            },
+            {
+              $lookup: {
+                from: "feeinstallments",
+                localField: "feeInstallment",
+                foreignField: "_id",
+                as: "feeInstallment"
+              }
+            },
+            {
+              $unwind: "$feeInstallment"
+            }
+          ],
+          as: "studentFeeInstallments"
+        }
+      },
+    ];
+
+    const sessionStudents = await getSessionStudentsPipelineService(pipeline);
+
+    return res.status(StatusCodes.OK).send(success(200, sessionStudents ));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
