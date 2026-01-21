@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { getSchoolFeeStructureService } from "../../services/feeStructure/schoolFeeStructure.services.js";
+import { getSchoolFeeStructureService, getSchoolFeeStructuresPipelineService } from "../../services/feeStructure/schoolFeeStructure.services.js";
 import { getSessionService } from "../../services/session.services.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { getClassService } from "../../services/class.sevices.js";
@@ -236,6 +236,86 @@ export async function getSessionStudentFeeStructureController(req, res) {
     ]);
     
     return res.status(StatusCodes.OK).send(success(200, sectionFeeStructure));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getSessionFeeStructureController(req, res) {
+  try {
+    const { sessionId } = req.params;
+    const adminId = req.adminId;
+
+    const sessionFeeStructures = await getSchoolFeeStructuresPipelineService([
+      {
+        $match: {
+          session: convertToMongoId(sessionId),
+          school: convertToMongoId(adminId)
+        }
+      },
+      {
+        $lookup: {
+          from: 'sectionfeestructures',
+          localField: '_id',
+          foreignField: 'schoolFeeStructure',
+          as: 'sectionFeeStructures'
+        }
+      },
+      {
+        $unwind: {
+          path: '$sectionFeeStructures',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'classes',
+          localField: 'sectionFeeStructures.classId',
+          foreignField: '_id',
+          as: 'sectionFeeStructures.class'
+        }
+      },
+      {
+        $lookup: {
+          from: 'sections',
+          localField: 'sectionFeeStructures.section',
+          foreignField: '_id',
+          as: 'sectionFeeStructures.section'
+        }
+      },
+      {
+        $lookup: {
+          from: 'feeinstallments',
+          localField: 'sectionFeeStructures._id',
+          foreignField: 'sectionFeeStructure',
+          as: 'sectionFeeStructures.feeInstallments'
+        }
+      },
+      {
+        $unwind: {
+          path: '$sectionFeeStructures.class',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $unwind: {
+          path: '$sectionFeeStructures.section',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id: '$_id',
+          title: { $first: '$title' },
+          description: { $first: '$description' },
+          session: { $first: '$session' },
+          school: { $first: '$school' },
+          sectionFeeStructures: { $push: '$sectionFeeStructures' }
+        }
+      }
+    ]);
+
+    return res.status(StatusCodes.OK).send(success(200, sessionFeeStructures));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
