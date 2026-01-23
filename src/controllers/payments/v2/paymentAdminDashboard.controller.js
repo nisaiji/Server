@@ -31,6 +31,7 @@ export async function getPaymentAdminDashboardData(req, res) {
         }
       }
     ]);
+    const pendingAmount  = 1000;
 
     const totalAmount = paymentTransactions[0]?.totalAmount || 0;
     const totalTransactions = paymentTransactions[0]?.totalTransactions || 0;
@@ -308,7 +309,7 @@ export async function sectionStudentsFeeInstallmentsController(req, res) {
       {
         $match: {
           session: convertToMongoId(sessionId),
-          section: convertToMongoId("689ee11474d391f6f87fd2dc"),
+          section: convertToMongoId(sectionId),
           school: convertToMongoId(adminId)
         }
       },

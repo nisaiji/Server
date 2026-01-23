@@ -6,6 +6,7 @@ paymentIndexRouter.use("/payment-link", (await import("./paymentLink.router.js")
 paymentIndexRouter.use("/payment-session", (await import("./paymentSession.router.js")).default);
 paymentIndexRouter.use("/webhook", (await import("./webhook.router.js")).default);
 paymentIndexRouter.use("/dashboard", (await import("./paymentAdminDashboard.router.js")).default);
+paymentIndexRouter.use("/v2/dashboard", (await import("./v2/paymentAdminDashboard.router.js")).default);
 paymentIndexRouter.use("/transactions", (await import("./paymentTransaction.router.js")).default);
 paymentIndexRouter.use("/refund", (await import("./refund.router.js")).default);
 

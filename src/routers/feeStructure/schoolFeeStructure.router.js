@@ -7,6 +7,6 @@ const schoolFeeStructureRouter = express();
 
 schoolFeeStructureRouter.post("/", adminAuthenticate, createSchoolFeeStructureController);
 schoolFeeStructureRouter.post("/get-school-fee-structure", adminAuthenticate, getSchoolFeeStructureController);
-schoolFeeStructureRouter.get("/session/:sessionId", getSessionFeeStructureController);
+schoolFeeStructureRouter.get("/session/:sessionId", adminAuthenticate, getSessionFeeStructureController);
 
 export default schoolFeeStructureRouter;
