@@ -48,7 +48,7 @@ export async function getTransactionsController(req, res) {
     const adminId = req.adminId;
 
     const filter = { school: convertToMongoId(adminId) };
-    filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
 
     if (sessionId) filter.session = sessionId;
     if (classId) filter.classId = classId;
@@ -302,13 +302,12 @@ export async function sectionsReportController(req, res) {
 
 export async function sectionStudentsFeeInstallmentsController(req, res) {
   try {
-    const { sessionId, sectionId } = req.query;
+    const { sectionId } = req.query;
     const adminId = req.adminId;
 
     const pipeline = [
       {
         $match: {
-          session: convertToMongoId(sessionId),
           section: convertToMongoId(sectionId),
           school: convertToMongoId(adminId)
         }

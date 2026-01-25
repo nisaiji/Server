@@ -11,6 +11,12 @@ const StatusEnums = ["unpaid", "partial", "paid", "pending", "overdue"];
 
 const studentFeeInstallmentSchema = new mongoose.Schema(
   {
+    feeInstallment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "feeInstallment",
+      index: true,
+      required: true,
+    },
     sessionStudent: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "sessionStudent",
@@ -60,6 +66,7 @@ const studentFeeInstallmentSchema = new mongoose.Schema(
       default: "unpaid",
     },
     dueDate: { type: Date, required: true },
+    lastLateFeeCalculatedDate: { type: Date }
   },
   {
     timestamps: true,
@@ -74,5 +81,6 @@ const studentFeeInstallmentModel = mongoose.model(
 studentFeeInstallmentModel.createIndexes({ student: 1, session: 1 });
 studentFeeInstallmentModel.createIndexes({ dueDate: 1 });
 studentFeeInstallmentModel.createIndexes({ status: 1 });
+studentFeeInstallmentModel.createIndexes({ feeInstallment: 1 });
 
 export default studentFeeInstallmentModel;

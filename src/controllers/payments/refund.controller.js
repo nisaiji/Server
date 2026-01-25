@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { error, success } from "../../utills/responseWrapper.js";
 import { createRefundApiService, refreshTokenService } from "../../services/zohoPayment.service.js";
 import { getMarchantPaymentConfigService, updateMarchantPaymentConfigService } from "../../services/marchantPaymentConfig.service.js";
-import { getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import { getPaymentTransactionService, updatePaymentTransactionService } from "../../services/paymentTransaction.service.js";
 import { config } from "../../config/config.js";
 import logger from "../../logger/index.js";
 import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
@@ -82,6 +82,10 @@ export async function createRefundController(req, res) {
     }
 
     const refund = await createRefundService(refundData);
+    await updatePaymentTransactionService(
+      { _id: payment._id },
+      { status: "requestedForRefund" }
+    );
 
     console.log({refundResponse});
 

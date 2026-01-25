@@ -28,10 +28,18 @@ export async function createFeeInstallmentsService(data) {
   }
 }
 
-export async function getFeeInstallmentsService(paramObj, projection = {}, populateObj = "") {
+export async function getFeeInstallmentsService(
+  filter,
+  projection = {},
+  sortingLogic
+) {
   try {
-    const feeInstallments = await feeInstallmentModel.find(paramObj).select(projection).populate(populateObj);
-    return feeInstallments;
+    console.log("filter", filter);
+    const studentFeeInstallments = await feeInstallmentModel
+      .find(filter)
+      .select(projection)
+      .sort(sortingLogic);
+    return studentFeeInstallments;
   } catch (error) {
     throw error;
   }

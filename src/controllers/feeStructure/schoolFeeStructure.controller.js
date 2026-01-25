@@ -5,7 +5,7 @@ import { error, success } from "../../utills/responseWrapper.js";
 
 export async function createSchoolFeeStructureController(req, res) {
   try {
-    const { title, description, sessionId, installmentType, lateFeePercent, effectiveFrom } = req.body;
+    const { title, description, sessionId, installmentType, lateFeePercent, effectiveFromDate } = req.body;
     const adminId = req.adminId;
     const session = await getSessionService({ _id: sessionId });
     if (!session || session['status'] === 'completed') {
@@ -16,7 +16,7 @@ export async function createSchoolFeeStructureController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "School Fee Structure already exists!"));
     }
 
-    schoolFeeStructure = await createSchoolFeeStructureService({title, description, school: adminId, session: sessionId, installmentType, lateFeePercent, effectiveFrom});
+    schoolFeeStructure = await createSchoolFeeStructureService({title, description, school: adminId, session: sessionId, installmentType, lateFeePercent, effectiveFromDate});
 
     return res.status(StatusCodes.CREATED).send(success(201, { message: "Fee Structure created successfully", schoolFeeStructure }));
   } catch (err) {

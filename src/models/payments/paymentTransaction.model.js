@@ -97,7 +97,7 @@ const paymentTransactionSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "sessionInitiated", "paid", "failed"],
+      enum: ["active", "sessionInitiated", "paid", "failed", 'requestedForRefund', 'refunded'],
       default: "active",
     },
     paymentMethod: {

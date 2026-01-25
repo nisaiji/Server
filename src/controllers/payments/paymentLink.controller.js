@@ -14,7 +14,7 @@ import { getFormattedNewDateService } from "../../services/celender.service.js";
 
 export async function createPaymentLinkController(req, res) {
   try {
-    const { amount, sessionStudentId, description } = req.body;
+    const { amount, sessionStudentId } = req.body;
     logger.info("Creating payment link", { requestBody: req.body });
     const parentId = req.parentId;
     const sessionStudent = await getSessionStudentService({_id: sessionStudentId});

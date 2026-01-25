@@ -27,7 +27,7 @@ const ledgerEventSchema = mongoose.Schema({
         type: Number,
         required: true
     },
-    studentId: {
+    sessionStudentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "student",
         required: true

@@ -8,15 +8,19 @@ const feeInstallmentSchema = mongoose.Schema({
     type: Number
   },
   startDate: {
-    type: Number
+    type: Date
   },
   dueDate: {
-    type: Number
+    type: Date
   },
   sectionFeeStructure: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'sectionFeeStructure',
     required: true
+  },
+  section: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'section'
   },
   session: {
     type: mongoose.Schema.Types.ObjectId,
