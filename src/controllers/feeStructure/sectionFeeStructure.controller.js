@@ -8,6 +8,7 @@ import { createFeeInstallmentService, getFeeInstallmentService, updateFeeInstall
 import { getSectionService } from "../../services/section.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
+import { getSessionStudentWalletService } from "../../services/sessionStudentWallet.services.js";
 
 export async function createSectionFeeStructureController(req, res) {
   try {
@@ -234,8 +235,10 @@ export async function getSessionStudentFeeStructureController(req, res) {
         }
       }
     ]);
+
+    const wallet = await getSessionStudentWalletService({sessionStudent: sessionStudentId});
     
-    return res.status(StatusCodes.OK).send(success(200, sectionFeeStructure));
+    return res.status(StatusCodes.OK).send(success(200, {sectionFeeStructure, wallet}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

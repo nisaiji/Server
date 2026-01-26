@@ -32,6 +32,7 @@ import marchantPaymentRouter from "./marchantPaymentConfig.router.js";
 import paymentIndexRouter from "./payments/index.router.js";
 import feeStructureRouter from "./feeStructure/index.router.js";
 import sessionStudentWalletRouter from "./sessionStudentWallet.router.js";
+import cronRouter from "./cronJob.router.js";
 const router = express();
 
 router.use("/v2", v2Router);
@@ -67,5 +68,6 @@ router.use("/payment", paymentIndexRouter);
 router.use('/marchant', marchantPaymentRouter);
 router.use('/fee-structure', feeStructureRouter);
 router.use('/wallet', sessionStudentWalletRouter);
+router.use('/cron', cronRouter);
 
 export default router;

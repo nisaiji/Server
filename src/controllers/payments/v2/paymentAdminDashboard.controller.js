@@ -50,10 +50,10 @@ export async function getTransactionsController(req, res) {
     const filter = { school: convertToMongoId(adminId) };
     filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
 
-    if (sessionId) filter.session = sessionId;
-    if (classId) filter.classId = classId;
-    if (sectionId) filter.section = sectionId;
-    if (sessionStudentId) filter.sessionStudent = sessionStudentId;
+    if (sessionId) filter.session = convertToMongoId(sessionId);
+    if (classId) filter.classId = convertToMongoId(classId);
+    if (sectionId) filter.section = convertToMongoId(sectionId);
+    if (sessionStudentId) filter.sessionStudent = convertToMongoId(sessionStudentId);
     if (status) filter.status = status;
 
     const skip = (page - 1) * limit;
@@ -63,7 +63,7 @@ export async function getTransactionsController(req, res) {
         $match: filter
       },
       {
-        $sort: { date: -1 }
+        $sort: { createdAt: -1 }
       },
       {
         $skip: skip
@@ -322,6 +322,17 @@ export async function sectionStudentsFeeInstallmentsController(req, res) {
       },
       {
         $unwind: "$student"
+      },
+      {
+        $lookup: {
+          from: "sessionstudentwallets",
+          localField: "_id",
+          foreignField: "sessionStudent",
+          as: "wallet"
+        }
+      },
+      {
+        $unwind: "$wallet"
       },
       {
         $lookup: {
