@@ -108,6 +108,7 @@ export async function paymentWebhookV3Controller(req, res) {
   let retryCount = 0;
   const body = req.body;
   const { event_id, event_type, account_id, event_time, event_object } = body;
+  console.log("Received webhook event: event_type: ", event_type, " for account: ", account_id);
   try {
     if (!event_object?.payment) {
       console.error("Invalid webhook format: missing event_object.payment");
