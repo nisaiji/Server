@@ -44,7 +44,7 @@ export async function getPaymentAdminDashboardData(req, res) {
 
 export async function getTransactionsController(req, res) {
   try {
-    const { startDate, status, endDate, sessionId, classId, sectionId, sessionStudentId, page = 1, limit = 10 } = req.query;
+    const { startDate, status, endDate, sessionId, classId, sectionId, sessionStudentId, page = 1, limit = 10, paymentMethod } = req.query;
     const adminId = req.adminId;
 
     const filter = { school: convertToMongoId(adminId) };
@@ -55,6 +55,7 @@ export async function getTransactionsController(req, res) {
     if (sectionId) filter.section = convertToMongoId(sectionId);
     if (sessionStudentId) filter.sessionStudent = convertToMongoId(sessionStudentId);
     if (status) filter.status = status;
+    if(paymentMethod) filter.paymentMethod = paymentMethod;
 
     const skip = (page - 1) * limit;
 
@@ -332,7 +333,10 @@ export async function sectionStudentsFeeInstallmentsController(req, res) {
         }
       },
       {
-        $unwind: "$wallet"
+      $unwind: {
+        path: "$wallet",
+        preserveNullAndEmptyArrays: true
+        }
       },
       {
         $lookup: {
@@ -358,7 +362,7 @@ export async function sectionStudentsFeeInstallmentsController(req, res) {
           ],
           as: "studentFeeInstallments"
         }
-      },
+      }
     ];
 
     const sessionStudents = await getSessionStudentsPipelineService(pipeline);
