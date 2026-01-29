@@ -1,7 +1,3 @@
-import { processRefund } from "../../services/balance.service.js";
-import { calculateDaysBetweenDates } from "../../services/celender.service.js";
-import { getFeeInstallmentService, getFeeInstallmentsPipelineService, getFeeInstallmentsService } from "../../services/feeStructure/feeInstallment.service.js";
-import { getSchoolFeeStructureService } from "../../services/feeStructure/schoolFeeStructure.services.js";
 import { registerLedgerEventService } from "../../services/ledgerEvent.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getPaymentTransactionService, updatePaymentTransactionService } from "../../services/paymentTransaction.service.js";
@@ -303,6 +299,33 @@ async function processPayment(paymentTransaction) {
         session: paymentTransaction.session,
         balance: parseFloat(paymentTransaction.amount),
         totalCredits: parseFloat(paymentTransaction.amount)
+      });
+    }
+  } catch (error) {
+    console.error('Error processing payment for wallet:', error);
+  }
+}
+
+async function processRefund(paymentTransaction) {
+  try {
+    const existingWallet = await getSessionStudentWalletService({
+      sessionStudent: paymentTransaction.sessionStudent
+    });
+
+    if (existingWallet) {
+      await updateSessionStudentWalletService(
+        { sessionStudent: paymentTransaction.sessionStudent },
+        { 
+          refundableBalance: existingWallet.refundableBalance + parseFloat(paymentTransaction.amount),
+        }
+      );
+    } else {
+      await registerSessionStudentWalletService({
+        sessionStudent: paymentTransaction.sessionStudent,
+        student: paymentTransaction.student,
+        school: paymentTransaction.school,
+        session: paymentTransaction.session,
+        refundableBalance: parseFloat(paymentTransaction.amount),
       });
     }
   } catch (error) {

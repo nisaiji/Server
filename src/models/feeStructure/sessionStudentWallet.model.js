@@ -36,6 +36,11 @@ const sessionStudentWalletSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    refundableBalance: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     totalDebits: {
       type: Number,
       default: 0,

@@ -6,13 +6,263 @@ import { getPaymentTransactionService, updatePaymentTransactionService } from ".
 import { config } from "../../config/config.js";
 import logger from "../../logger/index.js";
 import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
-import { createRefundService, getRefundPipelineService } from "../../services/refund.services.js";
+import { createRefundService, getRefundPipelineService, getRefundService, updateRefundService } from "../../services/refund.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 
-export async function createRefundController(req, res) {
+export async function applyForRefundController(req, res) {
   try {
-    const {sessionStudentId, paymentId, amount, reason = "requested_by_customer", description } = req.body;
+    const { sessionStudentId, paymentId, amount, reason="requested_by_customer", description } = req.body;
+    console.log({sessionStudentId, paymentId});
     const parentId = req.parentId;
+    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId});
+    if(!sessionStudent) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
+    }
+    const payment = await getPaymentTransactionService({ zohoPaymentId: paymentId, status: "paid" });
+    if (!payment) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Payment not found"));
+    }
+
+    const refundData = {
+      paymentTransaction: payment._id,
+      feeInstallment: payment.feeInstallment,
+      sessionStudent: sessionStudent._id,
+      parent: parentId,
+      student: sessionStudent.student,
+      school: sessionStudent.school,
+      session: sessionStudent.session,
+      type: "initiated_by_customer",
+      reason,
+      description,
+      status: "requested",
+      amount: payment.amount,
+      paymentId
+    }
+
+    const refund = await createRefundService(refundData);
+    return res.status(StatusCodes.OK).send(success(200, "Refund request submitted successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getRefundRequestsController(req, res) {
+  try {
+    const {sessionId, status} = req.query;
+    const adminId = req.adminId;
+
+    const filter = {
+      session: convertToMongoId(sessionId),
+      school: convertToMongoId(adminId)
+    };
+    if(status) {
+      filter.status = status;
+    }
+
+    const refunds = await getRefundPipelineService([
+      {
+        $match: filter
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $unwind: {
+          path: "$student",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sessionstudents",
+          localField: "sessionStudent",
+          foreignField: "_id",
+          as: "sessionstudent"
+        }
+      },
+      {
+        $unwind: {
+          path: "$sessionstudent",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "sessionstudent.classId",
+          foreignField: "_id",
+          as: "class"
+        }
+      },
+      {
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "sessionstudent.section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+        $unwind: {
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          refundId: 1,
+          paymentId: 1,
+          amount: 1,
+          status: 1,
+          type: 1,
+          reason: 1,
+          refundDate: 1,
+          createdAt: 1,
+          studentName: { $concat: ["$student.firstname", " ", "$student.lastname"] },
+          className: "$class.name",
+          sectionName: "$section.name"
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
+
+    return res.status(StatusCodes.OK).send(success(200, refunds));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getRefundRequestsForParentController(req, res) {
+  try {
+    const {sessionStudentId} = req.query;
+    const parentId = req.adminId;
+
+    const filter = {
+      sessionStudent: convertToMongoId(sessionStudentId),
+    };
+
+    const refunds = await getRefundPipelineService([
+      {
+        $match: filter
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
+      },
+      {
+        $unwind: {
+          path: "$student",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sessionstudents",
+          localField: "sessionStudent",
+          foreignField: "_id",
+          as: "sessionstudent"
+        }
+      },
+      {
+        $unwind: {
+          path: "$sessionstudent",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "sessionstudent.classId",
+          foreignField: "_id",
+          as: "class"
+        }
+      },
+      {
+        $unwind: {
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "sessionstudent.section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+        $unwind: {
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          refundId: 1,
+          paymentId: 1,
+          amount: 1,
+          status: 1,
+          type: 1,
+          reason: 1,
+          refundDate: 1,
+          createdAt: 1,
+          studentName: { $concat: ["$student.firstname", " ", "$student.lastname"] },
+          className: "$class.name",
+          sectionName: "$section.name"
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
+
+    return res.status(StatusCodes.OK).send(success(200, refunds));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function updateRefundController(req, res) {
+  try {
+    const {refundId, status} = req.body;
+
+    const existingRefund = await getRefundService({_id: refundId });
+    if (!existingRefund) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Refund not found"));
+    }
+    if (existingRefund.status !== "requested") {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Refund already processed"));
+    }
+
+    if(status === "rejected_by_admin") {
+      const updatedRefund = await updateRefundService(
+        { _id: existingRefund._id },
+        { status: "rejected_by_admin" }
+      );
+      return res.status(StatusCodes.OK).send(success(200, "Refund request rejected"));
+    }
+    const sessionStudentId = existingRefund.sessionStudent;
+    const paymentId = existingRefund.paymentId;
 
     const sessionStudent = await getSessionStudentService({ _id: sessionStudentId});
     if(!sessionStudent) {
@@ -51,10 +301,10 @@ export async function createRefundController(req, res) {
       paymentId,
       accountId: marchant.zohoAccountId,
       accessToken: marchant.zohoAccessToken,
-      amount: amount,
-      reason,
+      amount: 100, //payment.amount,
+      reason: existingRefund.reason,
+      description: existingRefund.description,
       type: "initiated_by_merchant",
-      description,
       isSandbox: config.isSandbox
     });
 
@@ -75,7 +325,7 @@ export async function createRefundController(req, res) {
       paymentTransaction: payment._id,
       feeInstallment: payment.feeInstallment,
       sessionStudent: sessionStudent._id,
-      parent: parentId,
+      parent: payment.parent,
       student: sessionStudent.student,
       school: sessionStudent.school,
       session: sessionStudent.session

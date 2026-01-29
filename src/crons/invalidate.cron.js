@@ -5,6 +5,7 @@ import changePasswordRequestExpireJob from './jobs/changePasswordRequestExpire.j
 import SessionCreateJob from './jobs/sessionCreate.job.js';
 import { payFeeFromWalletJob } from './jobs/dailyPayFeeFromWallet.job.js';
 import { dailyFeeCalculatorJob } from './jobs/dailyFeeCalculator.job.js';
+import { refundJob } from './jobs/dailyRefundProcess.job.js';
 
 
 const invalidationCronJob = new CronJob('0/10 * * * * *', async () => {
@@ -12,7 +13,7 @@ const invalidationCronJob = new CronJob('0/10 * * * * *', async () => {
     await GuestTeacherStopJob();
     await changePasswordRequestExpireJob();
     await GuestTeacherStartJob();
-    await SessionCreateJob();
+    // await SessionCreateJob();
   } catch (error) {
     console.log(error.message)
   }
@@ -28,6 +29,16 @@ const payFeeFromWalletCron = new CronJob('0 0 0 * * *', async () => {
   }
 });
 
+// Daily Refund Job - runs at 12:00 AM (midnight)
+const refundCron = new CronJob('0 0 0 * * *', async () => {
+  try {
+    console.log('Starting Daily Refund cron at:', new Date());
+    await refundJob();
+  } catch (error) {
+    console.error('Error in refund cron:', error.message);
+  }
+});
+
 // Daily Fee Calculator Job - runs at 1:00 AM
 const dailyFeeCalculatorCron = new CronJob('0 0 1 * * *', async () => {
   try {
@@ -39,5 +50,5 @@ const dailyFeeCalculatorCron = new CronJob('0 0 1 * * *', async () => {
 });
 
 
-export { payFeeFromWalletCron, dailyFeeCalculatorCron, invalidationCronJob };
+export { payFeeFromWalletCron, dailyFeeCalculatorCron, invalidationCronJob, refundCron };
 

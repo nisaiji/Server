@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const refundSchema = mongoose.Schema({
   refundId: {
     type: String,
-    required: true,
     unique: true
   },
   paymentId: {
@@ -36,7 +35,7 @@ const refundSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['initiated', 'succeeded', 'failed', 'cancelled', 'pending'],
+    enum: ['requested', 'rejected_by_admin', 'request_approved', 'succeeded', 'failed', 'cancelled', 'pending'],
     required: true
   },
   networkReferenceNumber: {

@@ -48,6 +48,11 @@ export async function createSectionFeeStructureController(req, res) {
         schoolFeeStructure: schoolFeeStructureId
       };
 
+      const existingSectionFeeStructure = await getSectionFeeStructureService({ section: sectionFeeObj.sectionId });
+      if (existingSectionFeeStructure) {
+        continue;
+      }
+
       const newFeeStructure = await createSectionFeeStructureService(feeStructurePayload);
 
       let installmentNumber = 1;
