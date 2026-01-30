@@ -97,6 +97,59 @@ export async function getTransactionsController(req, res) {
   }
 }
 
+export async function getParentTransactionsController(req, res) {
+  try {
+    const {startDate, endDate, status, sessionStudentId, page = 1, limit = 10, paymentMethod } = req.query;
+    const parentId = req.parentId;
+
+    const filter = { };
+    if(startDate && endDate) filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+
+    if (sessionStudentId) filter.sessionStudent = convertToMongoId(sessionStudentId);
+    if (status) filter.status = status;
+    if(paymentMethod) filter.paymentMethod = paymentMethod;
+
+    const skip = (page - 1) * limit;
+
+    console.log({filter})
+    const paymentTransactions = await getPaymentTransactionPipelineService([
+      {
+        $match: filter
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $skip: skip
+      },
+      {
+        $limit: parseInt(limit)
+      }
+    ]);
+
+    const totalCount = await getPaymentTransactionPipelineService([
+      { $match: filter },
+      { $count: "total" }
+    ]);
+
+    const total = totalCount[0]?.total || 0;
+    const totalPages = Math.ceil(total / parseInt(limit));
+
+    return res.status(StatusCodes.OK).send(success(200, {
+      transactions: paymentTransactions,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalCount: total,
+        pageLimit: parseInt(limit)
+      }
+    }));
+
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
 export async function daywisePaymentsSummaryController(req, res) {
   try {
     const { startDate, endDate, sessionId, classId, sectionId } = req.body;
