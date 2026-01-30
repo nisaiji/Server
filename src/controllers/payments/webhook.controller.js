@@ -151,7 +151,7 @@ export async function paymentWebhookV3Controller(req, res) {
       webhookEventTime: new Date(event_time),
       amount: parseFloat(amount),
       currency: paymentTransaction.currency,
-      paymentMethod: paymentTransaction.payment_method?.type,
+      paymentMethod: payment.payment_method?.type,
       // Processed confirmation
       processed: true,
     };
