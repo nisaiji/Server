@@ -297,9 +297,24 @@ async function processFeeInstallments(sessionStudentId) {
 
   for (const installment of unpaidInstallments) {
     if (walletBalance <= 0) break;
-    
-    const remainingAmount = installment.totalPayable - (installment.amountPaid || 0);
-    if (remainingAmount <= 0) continue;
+
+    console.log('Processing installment:', {
+      id: installment._id,
+      totalPayable: installment.totalPayable,
+      baseAmount: installment.baseAmount,
+      amountPaid: installment.amountPaid,
+      month: installment.month
+    });
+
+    const totalAmount = installment.totalPayable || installment.baseAmount || 0;
+    const remainingAmount = totalAmount - (installment.amountPaid || 0);
+
+    console.log('Calculated amounts:', { totalAmount, remainingAmount });
+
+    if (remainingAmount <= 0) {
+      console.log('Skipping installment - no remaining amount');
+      continue;
+    }
     
     const amountToPay = Math.min(walletBalance, remainingAmount);
     const newAmountPaid = (installment.amountPaid || 0) + amountToPay;
