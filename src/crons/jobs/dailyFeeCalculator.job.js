@@ -49,7 +49,8 @@ export async function dailyFeeCalculatorJob() {
                   section: sectionSessionStudent.section,
                   month: installment.installmentNumber,
                   baseAmount: installment.amount,
-                  dueDate: installment.dueDate
+                  dueDate: installment.dueDate,
+                  totalPayable: installment.amount
                 });
               }
                                                     
