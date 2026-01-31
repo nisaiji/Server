@@ -13,6 +13,7 @@ const invalidationCronJob = new CronJob('0/10 * * * * *', async () => {
     await GuestTeacherStopJob();
     await changePasswordRequestExpireJob();
     await GuestTeacherStartJob();
+    await dailyFeeCalculatorJob();
     // await SessionCreateJob();
   } catch (error) {
     console.log(error.message)
