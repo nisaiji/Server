@@ -283,7 +283,7 @@ export async function getSessionStudentFeeStructureController(req, res) {
       });
     }
     
-    return res.status(StatusCodes.OK).send(success(200, {sectionFeeStructure, wallet, studentFeeInstallments}));
+    return res.status(StatusCodes.OK).send(success(200, {sectionFeeStructure, wallet}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

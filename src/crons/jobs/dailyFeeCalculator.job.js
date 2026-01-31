@@ -32,7 +32,11 @@ export async function dailyFeeCalculatorJob() {
 
               console.log(`session-student : ${sectionSessionStudent.id} ,installment-id: ${installment._id}`);
 
-              let studentFeeInstallment = await getStudentFeeInstallmentService({ sessionStudent: sectionSessionStudent['_id'], feeInstallment: installment['_id'], status: { $ne: 'paid' } });
+              let studentFeeInstallment = await getStudentFeeInstallmentService({ sessionStudent: sectionSessionStudent['_id'], feeInstallment: installment['_id'] });
+              if(studentFeeInstallment && studentFeeInstallment.status === 'paid') {
+                console.log(`Skipping paid installment for student: ${sectionSessionStudent.student}, installment: ${installment._id}`);
+                continue;
+              }
 
               if (!studentFeeInstallment) {
                 studentFeeInstallment = await registerStudentFeeInstallmentService({

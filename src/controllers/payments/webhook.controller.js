@@ -3,7 +3,8 @@ import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getPaymentTransactionService, updatePaymentTransactionService } from "../../services/paymentTransaction.service.js";
 import { getRefundService, updateRefundService } from "../../services/refund.services.js";
 import { getSessionStudentWalletService, registerSessionStudentWalletService, updateSessionStudentWalletService } from "../../services/sessionStudentWallet.services.js";
-import { getStudentFeeInstallmentService, getStudentFeeInstallmentsPipelineService, registerStudentFeeInstallmentService, updateStudentFeeInstallmentService } from "../../services/studentFeeInstallment.service.js";
+import { getStudentFeeInstallmentService, getStudentFeeInstallmentsPipelineService, getStudentFeeInstallmentsService, registerStudentFeeInstallmentService, updateStudentFeeInstallmentService } from "../../services/studentFeeInstallment.service.js";
+import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 
 export async function paymentWebhookController(req, res) {
   try {
@@ -170,7 +171,7 @@ export async function paymentWebhookV3Controller(req, res) {
       await registerLedgerEventService({
         eventType: "PaymentFailed",
         amount: parseFloat(amount),
-        sessionStudentId: paymentTransaction.sessionStudentId,
+        sessionStudentId: paymentTransaction.sessionStudent,
         actorType: "gateway",
         actorId: paymentTransaction.parent,
         externalRef: paymentTransaction.paymentReferenceId,
@@ -277,6 +278,52 @@ export async function refundWebhookController(req, res) {
   }
 }
 
+async function processFeeInstallments(sessionStudentId) {
+  console.log("Processing fee installments for sessionStudentId:", sessionStudentId);
+  const sessionStudent = await getSessionStudentService({_id: sessionStudentId });
+  if (!sessionStudent) return;
+
+  const sessionStudentWallet = await getSessionStudentWalletService({ sessionStudent: sessionStudent._id });
+  let walletBalance = sessionStudentWallet?.balance || 0;
+  if (walletBalance <= 0) return;
+
+  const unpaidInstallments = await getStudentFeeInstallmentsService(
+    { sessionStudent: sessionStudent._id, status: { $ne: 'paid' } },
+    {},
+    { dueDate: 1 }
+  );
+
+  console.log(`unpaid installments count: ${unpaidInstallments.length}`);
+
+  for (const installment of unpaidInstallments) {
+    if (walletBalance <= 0) break;
+    
+    const remainingAmount = installment.totalPayable - (installment.amountPaid || 0);
+    if (remainingAmount <= 0) continue;
+    
+    const amountToPay = Math.min(walletBalance, remainingAmount);
+    const newAmountPaid = (installment.amountPaid || 0) + amountToPay;
+    const isFullyPaid = newAmountPaid >= installment.totalPayable;
+
+    const updatedStudentFeeInstallment = await updateStudentFeeInstallmentService(
+      { _id: installment._id },
+      {
+        status: isFullyPaid ? 'paid' : 'partial',
+        paidDate: isFullyPaid ? new Date() : installment.paidDate,
+        amountPaid: newAmountPaid
+      }
+    );
+
+    walletBalance -= amountToPay;
+    console.log({updatedStudentFeeInstallment, amountToPay, walletBalance, newAmountPaid, isFullyPaid});
+  }
+
+  await updateSessionStudentWalletService(
+    { sessionStudent: sessionStudent._id },
+    { balance: walletBalance }
+  );
+}
+
 async function processPayment(paymentTransaction) {
   try {
     const existingWallet = await getSessionStudentWalletService({
@@ -301,6 +348,7 @@ async function processPayment(paymentTransaction) {
         totalCredits: parseFloat(paymentTransaction.amount)
       });
     }
+    processFeeInstallments(paymentTransaction.sessionStudent);
   } catch (error) {
     console.error('Error processing payment for wallet:', error);
   }
@@ -332,320 +380,3 @@ async function processRefund(paymentTransaction) {
     console.error('Error processing payment for wallet:', error);
   }
 }
-
-// async function processPayment(paymentTransaction) {
-//   try {
-//     // 1. Create ledger event for payment transaction
-//     await registerLedgerEventService({
-//       eventType: "PaymentReceived",
-//       amount: parseFloat(paymentTransaction.amount),
-//       sessionStudentId: paymentTransaction.sessionStudent,
-//       actorType: "gateway",
-//       actorId: paymentTransaction.parent,
-//       externalRef: paymentTransaction.paymentReferenceId,
-//       metaData: {
-//         school: convertToMongoId(paymentTransaction.school),
-//         session: convertToMongoId(paymentTransaction.session),
-//         transactionId: paymentTransaction._id
-//       },
-//     });
-
-//     const studentFeeInstallments = await getStudentFeeInstallmentsPipelineService([
-//       {
-//         $match: {
-//           sessionStudent: paymentTransaction.sessionStudent,
-//           status: {
-//             $in: ["partial"]
-//           }
-//         }
-//       },
-//       {
-//         $sort: {
-//           dueDate: 1
-//         }
-//       }
-//     ])
-
-//     console.log(`studentFeeInstallments`, studentFeeInstallments);
-
-//     const feeInstallments = await getFeeInstallmentsPipelineService([
-//       {
-//         $match: {
-//           section: paymentTransaction.section,
-//           isActive: true,
-//           dueDate: { $lte: new Date() },
-//           ...(studentFeeInstallments.length > 0 && { dueDate: { $gt: studentFeeInstallments[0].dueDate } })
-//         }
-//       },
-//       {
-//         $sort: {
-//           dueDate: 1
-//         }
-//       }
-//     ])
-
-//     console.log(`feeInstallments : `, feeInstallments);
-
-//     const schoolFeeStructure = await getSchoolFeeStructureService({ school: paymentTransaction.school });
-
-//     let paidAmount = parseFloat(paymentTransaction.amount);
-//     const studentFeeInstallment = studentFeeInstallments[0];
-//     if (studentFeeInstallment) {
-//       const currentDate = new Date();
-//       const dueDate = new Date(studentFeeInstallment.dueDate);
-//       const isOverdue = currentDate > dueDate;
-
-//       let lateFee = 0;
-//       if (isOverdue) {
-//         const days = calculateDaysBetweenDates(dueDate, currentDate);
-//         const lateFeePercentPerDay = schoolFeeStructure.lateFeePercent / 365; // Assuming lateFeePercent is annual
-//         lateFee = Math.round((studentFeeInstallment.baseAmount - studentFeeInstallment.amountPaid) * lateFeePercentPerDay * days);
-//         console.log(`No of days for late fee: `, days);
-//         console.log(`Late fee percentage per day: `, lateFeePercentPerDay);
-//         console.log(`Late fee calculated: `, lateFee);
-//       }
-
-//       const totalPayable = studentFeeInstallment.baseAmount + lateFee;
-//       const newAmountPaid = studentFeeInstallment.amountPaid + paidAmount;
-//       console.log(`LateFee: `, lateFee);
-//       console.log(`total payable: `, totalPayable);
-//       console.log(`new amount paid: `, newAmountPaid);
-//       let newStatus;
-//       if (newAmountPaid >= totalPayable) {
-//         newStatus = "paid";
-//         paidAmount = newAmountPaid - totalPayable;
-//       } else {
-//         newStatus = "partial";
-//         paidAmount = 0;
-//       }
-
-//       await updateStudentFeeInstallmentService(
-//         { _id: studentFeeInstallment._id },
-//         {
-//           amountPaid: Math.min(newAmountPaid, totalPayable),
-//           lateFeeApplied: lateFee,
-//           totalPayable: totalPayable,
-//           status: newStatus
-//         }
-//       );
-//     }
-
-//     console.log(`Remaining paidAmount after existing installment: `, paidAmount);
-//     while (paidAmount > 0 && feeInstallments.length > 0) {
-//       let feeInstallment = feeInstallments[0];
-//       const currentDate = new Date();
-//       const dueDate = new Date(feeInstallment.dueDate);
-//       const isOverdue = currentDate > dueDate;
-
-//       console.log(`Processing fee installment: `, feeInstallment);
-//       let lateFee = 0;
-//       if (isOverdue) {
-//         const days = calculateDaysBetweenDates(dueDate, currentDate);
-//         const lateFeePercentPerDay = schoolFeeStructure.lateFeePercent / 365; // Assuming lateFeePercent is annual
-//         lateFee = Math.round(feeInstallment.amount * lateFeePercentPerDay * days);
-//         console.log(`No of days for late fee: `, days);
-//         console.log(`Late fee percentage per day: `, lateFeePercentPerDay);
-//         console.log(`Late fee calculated: `, lateFee);
-//       }
-
-//       const totalPayable = feeInstallment.amount + lateFee;
-
-//       console.log(`Total Payable amount: `, totalPayable);
-
-//       let status;
-//       let amountPaid;
-//       if (paidAmount >= totalPayable) {
-//         status = "paid";
-//         amountPaid = totalPayable;
-//         paidAmount = paidAmount - totalPayable;
-//       } else {
-//         status = "partial";
-//         amountPaid = paidAmount;
-//         paidAmount = 0;
-//       }
-//       await registerStudentFeeInstallmentService({
-//         feeInstallment: feeInstallment._id,
-//         sessionStudent: paymentTransaction.sessionStudent,
-//         student: paymentTransaction.student,
-//         school: paymentTransaction.school,
-//         session: paymentTransaction.session,
-//         classId: paymentTransaction.classId,
-//         section: paymentTransaction.section,
-//         month: feeInstallment.installmentNumber,
-//         baseAmount: feeInstallment.amount,
-//         lateFeeApplied: lateFee,
-//         totalPayable: totalPayable,
-//         amountPaid,
-//         status,
-//         dueDate: feeInstallment.dueDate
-//       });
-//     }
-
-//     if (paidAmount > 0) {
-//       // advance payment handling
-//     }
-
-//     // 2. Get student's oldest unpaid fee installment
-//     // let studentInstallment = await getStudentFeeInstallmentService(
-//     //   {
-//     //     sessionStudent: paymentTransaction.sessionStudent,
-//     //     status: { $in: ["pending", "partial", "overdue"] }
-//     //   },
-//     //   {},
-//     //   { dueDate: 1 } // Sort by oldest due date first
-//     // );
-
-//     // // 3. If no pending/partial installment found, get next unpaid installment
-//     // if (!studentInstallment) {
-//     //   const nextFeeInstallments = await getFeeInstallmentsService({
-//     //     section: paymentTransaction.section,
-//     //     isActive: true
-//     //   }, {}, { dueDate: 1 });
-
-//     //   const nextFeeInstallment = nextFeeInstallments[0];
-
-//     //   if (nextFeeInstallment) {
-//     //     // Create new student fee installment record
-//     //     const currentDate = new Date();
-//     //     const dueDate = new Date(nextFeeInstallment.dueDate);
-//     //     const isOverdue = currentDate > dueDate;
-
-//     //     let lateFee = 0;
-//     //     if (isOverdue) {
-//     //       lateFee = Math.round(nextFeeInstallment.amount * 0.12); // Todo: use percent from sectionFeeStructure
-//     //     }
-
-//     //     const totalPayable = nextFeeInstallment.amount + lateFee;
-
-//     // studentInstallment = await registerStudentFeeInstallmentService({
-//     //   feeInstallment: nextFeeInstallment._id,
-//     //   sessionStudent: paymentTransaction.sessionStudent,
-//     //   student: paymentTransaction.student,
-//     //   school: paymentTransaction.school,
-//     //   session: paymentTransaction.session,
-//     //   classId: paymentTransaction.classId,
-//     //   section: paymentTransaction.section,
-//     //   month: nextFeeInstallment.installmentNumber,
-//     //   baseAmount: nextFeeInstallment.amount,
-//     //   lateFeeApplied: lateFee,
-//     //   totalPayable: totalPayable,
-//     //   amountPaid: 0,
-//     //   status: isOverdue ? "overdue" : "pending",
-//     //   dueDate: dueDate
-//     // });
-//     //   }
-//     // }
-
-//     // // 4. Process payment against installment
-//     // if (studentInstallment) {
-//     // const currentDate = new Date();
-//     // const dueDate = new Date(studentInstallment.dueDate);
-//     // const isOverdue = currentDate > dueDate;
-
-//     // // Calculate late fee if payment is after due date and not already applied
-//     // let additionalLateFee = 0;
-//     // if (isOverdue && studentInstallment.lateFeeApplied === 0) {
-//     //   additionalLateFee = Math.round(studentInstallment.baseAmount * 0.12);
-//     // }
-
-//     // const totalPayable = studentInstallment.baseAmount + studentInstallment.lateFeeApplied + additionalLateFee;
-//     // const newAmountPaid = studentInstallment.amountPaid + remainingAmount;
-
-//     // let newStatus;
-//     // if (newAmountPaid >= totalPayable) {
-//     //   newStatus = "paid";
-//     //   remainingAmount = newAmountPaid - totalPayable;
-//     // } else {
-//     //   newStatus = "partial";
-//     //   remainingAmount = 0;
-//     // }
-
-//     // // Update student fee installment
-//     // await updateStudentFeeInstallmentService(
-//     //   { _id: studentInstallment._id },
-//     //   {
-//     //     amountPaid: Math.min(newAmountPaid, totalPayable),
-//     //     lateFeeApplied: studentInstallment.lateFeeApplied + additionalLateFee,
-//     //     totalPayable: totalPayable,
-//     //     status: newStatus
-//     //   }
-//     // );
-
-//     //   // 5. Handle excess payment for next installment
-//     //   console.log({ remainingAmount });
-//     //   if (remainingAmount > 0) {
-//     //     // Get next unpaid installment
-//     //     const nextInstallments = await getFeeInstallmentsService({
-//     //       section: convertToMongoId(paymentTransaction.section),
-//     //       isActive: true,
-//     //       dueDate: { $gt: new Date(studentInstallment.dueDate) }
-//     //     }, {}, { dueDate: 1 });
-
-//     //     console.log({ nextInstallments, date: new Date(studentInstallment.dueDate), section: paymentTransaction.section });
-//     //     if (nextInstallments.length > 0) {
-//     //       const nextFeeInstallment = nextInstallments[0];
-//     //       console.log({ nextFeeInstallment });
-
-//     //       // Check if student installment already exists for next fee installment
-//     //       let nextStudentInstallment = await getStudentFeeInstallmentService({
-//     //         sessionStudent: paymentTransaction.sessionStudent,
-//     //         feeInstallment: nextFeeInstallment._id
-//     //       });
-
-//     //       // Create next student installment if doesn't exist
-//     //       if (!nextStudentInstallment) {
-//     //         const currentDate = new Date();
-//     //         const nextDueDate = new Date(nextFeeInstallment.dueDate);
-//     //         const isNextOverdue = currentDate > nextDueDate;
-
-//     //         let nextLateFee = 0;
-//     //         if (isNextOverdue) {
-//     //           nextLateFee = Math.round(nextFeeInstallment.amount * 0.12);
-//     //         }
-
-//     //         nextStudentInstallment = await registerStudentFeeInstallmentService({
-//     //           feeInstallment: nextFeeInstallment._id,
-//     //           sessionStudent: paymentTransaction.sessionStudent,
-//     //           student: paymentTransaction.student,
-//     //           school: paymentTransaction.school,
-//     //           session: paymentTransaction.session,
-//     //           classId: paymentTransaction.classId,
-//     //           section: paymentTransaction.section,
-//     //           month: nextFeeInstallment.installmentNumber,
-//     //           baseAmount: nextFeeInstallment.amount,
-//     //           lateFeeApplied: nextLateFee,
-//     //           totalPayable: nextFeeInstallment.amount + nextLateFee,
-//     //           amountPaid: 0,
-//     //           status: isNextOverdue ? "overdue" : "pending",
-//     //           dueDate: nextDueDate
-//     //         });
-//     //       }
-
-//     //       // Apply remaining amount to next installment
-//     //       const nextTotalPayable = nextStudentInstallment.totalPayable;
-//     //       const nextNewAmountPaid = nextStudentInstallment.amountPaid + remainingAmount;
-
-//     //       let nextNewStatus;
-//     //       if (nextNewAmountPaid >= nextTotalPayable) {
-//     //         nextNewStatus = "paid";
-//     //       } else {
-//     //         nextNewStatus = "partial";
-//     //       }
-
-//     //       await updateStudentFeeInstallmentService(
-//     //         { _id: nextStudentInstallment._id },
-//     //         {
-//     //           amountPaid: Math.min(nextNewAmountPaid, nextTotalPayable),
-//     //           status: nextNewStatus
-//     //         }
-//     //       );
-//     //     }
-//     //   }
-
-//     // }
-//     console.log("Payment processed successfully for sessionStudentId:", paymentTransaction.sessionStudentId);
-//   } catch (error) {
-//     console.error("Error processing payment:", error);
-//     throw error;
-//   }
-// }
