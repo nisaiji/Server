@@ -9,6 +9,7 @@ import { getSectionService } from "../../services/section.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 import { getSessionStudentWalletService } from "../../services/sessionStudentWallet.services.js";
+import { getStudentFeeInstallmentsPipelineService } from "../../services/studentFeeInstallment.service.js";
 
 export async function createSectionFeeStructureController(req, res) {
   try {
@@ -241,9 +242,48 @@ export async function getSessionStudentFeeStructureController(req, res) {
       }
     ]);
 
+    const studentFeeInstallments = await getStudentFeeInstallmentsPipelineService([
+      {
+        $match: {
+          sessionStudent: convertToMongoId(sessionStudentId)
+        }
+      }
+    ]);
+
     const wallet = await getSessionStudentWalletService({sessionStudent: sessionStudentId});
     
-    return res.status(StatusCodes.OK).send(success(200, {sectionFeeStructure, wallet}));
+    // Combine feeInstallments with studentFeeInstallments
+    if (sectionFeeStructure.length > 0) {
+      const studentFeeMap = new Map(studentFeeInstallments.map(sfi => [sfi.feeInstallment.toString(), sfi]));
+      
+      sectionFeeStructure[0].feeInstallments = sectionFeeStructure[0].feeInstallments.map(installment => {
+        const studentFee = studentFeeMap.get(installment._id.toString());
+        
+        if (studentFee) {
+          return {
+            ...installment,
+            baseAmount: studentFee.baseAmount,
+            lateFeeApplied: studentFee.lateFeeApplied || 0,
+            amountPaid: studentFee.amountPaid || 0,
+            status: studentFee.status,
+            totalPayable: studentFee.totalPayable || studentFee.baseAmount,
+            lastLateFeeCalculatedDate: studentFee.lastLateFeeCalculatedDate
+          };
+        } else {
+          return {
+            ...installment,
+            baseAmount: installment.amount,
+            lateFeeApplied: 0,
+            amountPaid: 0,
+            status: 'unpaid',
+            totalPayable: installment.amount,
+            lastLateFeeCalculatedDate: null
+          };
+        }
+      });
+    }
+    
+    return res.status(StatusCodes.OK).send(success(200, {sectionFeeStructure, wallet, studentFeeInstallments}));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
