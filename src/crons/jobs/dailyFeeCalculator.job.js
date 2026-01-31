@@ -21,7 +21,7 @@ export async function dailyFeeCalculatorJob() {
 
         for (const sectionFeeStructure of sectionFeeStructures) {
 
-          const sectionFeeInstallments = await getFeeInstallmentsService({ sectionFeeStructure: sectionFeeStructure['_id'], dueDate: { $lte: new Date() } });
+          const sectionFeeInstallments = await getFeeInstallmentsService({ sectionFeeStructure: sectionFeeStructure['_id'], startDate: { $lte: new Date() } });
           const sectionSessionStudents = await getSessionStudentsService({ school: school['_id'], session: currentSession['_id'], section: sectionFeeStructure['section'] });
           
           console.log(`sectionFeeInstallments: ${sectionFeeInstallments}`)
