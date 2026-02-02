@@ -4,6 +4,7 @@ import { error, success } from "../../../utills/responseWrapper.js";
 import { convertToMongoId } from "../../../services/mongoose.services.js";
 import { getSectionsPipelineService } from "../../../services/section.services.js";
 import { getSessionStudentsPipelineService } from "../../../services/v2/sessionStudent.service.js";
+import { getStudentFeeInstallmentsPipelineService } from "../../../services/studentFeeInstallment.service.js";
 
 
 
@@ -12,7 +13,7 @@ export async function getPaymentAdminDashboardData(req, res) {
     const { startDate, endDate, sessionId, classId, sectionId, studentId } = req.query;
     const adminId = req.adminId;
     const filter = { status: 'paid', school: convertToMongoId(adminId) };
-    filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    // filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
 
     if (sessionId) filter.session = sessionId;
     if (classId) filter.classId = classId;
@@ -31,12 +32,36 @@ export async function getPaymentAdminDashboardData(req, res) {
         }
       }
     ]);
-    const pendingAmount  = 1000;
 
-    const totalAmount = paymentTransactions[0]?.totalAmount || 0;
+    // Calculate total remaining amount from studentFeeInstallments
+    const feeFilter = { school: convertToMongoId(adminId) };
+    if (sessionId) feeFilter.session = convertToMongoId(sessionId);
+    if (classId) feeFilter.classId = convertToMongoId(classId);
+    if (sectionId) feeFilter.section = convertToMongoId(sectionId);
+    if (studentId) feeFilter.student = convertToMongoId(studentId);
+
+    const remainingAmountResult = await getStudentFeeInstallmentsPipelineService([
+      {
+        $match: feeFilter
+      },
+      {
+        $group: {
+          _id: null,
+          totalRemainingAmount: {
+            $sum: {
+              $subtract: ['$totalPayable', '$amountPaid']
+            }
+          }
+        }
+      }
+    ]);
+
+    const pendingAmount = remainingAmountResult[0]?.totalRemainingAmount || 0;
+
+    const totalPaidAmount = paymentTransactions[0]?.totalAmount || 0;
     const totalTransactions = paymentTransactions[0]?.totalTransactions || 0;
 
-    return res.status(200).send(success(200, { totalAmount, totalTransactions, pendingAmount }));
+    return res.status(200).send(success(200, { totalPaidAmount, totalTransactions, pendingAmount }));
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch payment admin dashboard data' });
   }
