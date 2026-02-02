@@ -64,6 +64,40 @@ export async function getTransactionsController(req, res) {
         $match: filter
       },
       {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "studentData"
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "classData"
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "sectionData"
+        }
+      },
+      {
+        $addFields: {
+          studentName: { $concat: [{ $arrayElemAt: ["$studentData.firstname", 0] }, " ", { $arrayElemAt: ["$studentData.lastname", 0] }] },
+          className: { $arrayElemAt: ["$classData.name", 0] },
+          sectionName: { $arrayElemAt: ["$sectionData.name", 0] }
+        }
+      },
+      {
+        $unset: ["studentData", "classData", "sectionData"]
+      },
+      {
         $sort: { createdAt: -1 }
       },
       {
@@ -115,6 +149,40 @@ export async function getParentTransactionsController(req, res) {
     const paymentTransactions = await getPaymentTransactionPipelineService([
       {
         $match: filter
+      },
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "studentData"
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "classData"
+        }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "sectionData"
+        }
+      },
+      {
+        $addFields: {
+          studentName: { $concat: [{ $arrayElemAt: ["$studentData.firstname", 0] }, " ", { $arrayElemAt: ["$studentData.lastname", 0] }] },
+          className: { $arrayElemAt: ["$classData.name", 0] },
+          sectionName: { $arrayElemAt: ["$sectionData.name", 0] }
+        }
+      },
+      {
+        $unset: ["studentData", "classData", "sectionData"]
       },
       {
         $sort: { createdAt: -1 }
