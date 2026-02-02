@@ -73,6 +73,14 @@ export async function getTransactionsController(req, res) {
       },
       {
         $lookup: {
+          from: "parents",
+          localField: "parent",
+          foreignField: "_id",
+          as: "parentData"
+        }
+      },
+      {
+        $lookup: {
           from: "classes",
           localField: "classId",
           foreignField: "_id",
@@ -91,11 +99,12 @@ export async function getTransactionsController(req, res) {
         $addFields: {
           studentName: { $concat: [{ $arrayElemAt: ["$studentData.firstname", 0] }, " ", { $arrayElemAt: ["$studentData.lastname", 0] }] },
           className: { $arrayElemAt: ["$classData.name", 0] },
-          sectionName: { $arrayElemAt: ["$sectionData.name", 0] }
+          sectionName: { $arrayElemAt: ["$sectionData.name", 0] },
+          parentPhone: { $arrayElemAt: ["$parentData.phone", 0] }
         }
       },
       {
-        $unset: ["studentData", "classData", "sectionData"]
+        $unset: ["studentData", "classData", "sectionData", "parentData"]
       },
       {
         $sort: { createdAt: -1 }
@@ -160,6 +169,14 @@ export async function getParentTransactionsController(req, res) {
       },
       {
         $lookup: {
+          from: "parents",
+          localField: "parent",
+          foreignField: "_id",
+          as: "parentData"
+        }
+      },
+      {
+        $lookup: {
           from: "classes",
           localField: "classId",
           foreignField: "_id",
@@ -178,11 +195,12 @@ export async function getParentTransactionsController(req, res) {
         $addFields: {
           studentName: { $concat: [{ $arrayElemAt: ["$studentData.firstname", 0] }, " ", { $arrayElemAt: ["$studentData.lastname", 0] }] },
           className: { $arrayElemAt: ["$classData.name", 0] },
-          sectionName: { $arrayElemAt: ["$sectionData.name", 0] }
+          sectionName: { $arrayElemAt: ["$sectionData.name", 0] },
+          parentPhone: { $arrayElemAt: ["$parentData.phone", 0] }
         }
       },
       {
-        $unset: ["studentData", "classData", "sectionData"]
+        $unset: ["studentData", "classData", "sectionData", "parentData"]
       },
       {
         $sort: { createdAt: -1 }
