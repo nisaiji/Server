@@ -73,7 +73,7 @@ export async function getTransactionsController(req, res) {
     const adminId = req.adminId;
 
     const filter = { school: convertToMongoId(adminId) };
-    filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    if(startDate && endDate) filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
 
     if (sessionId) filter.session = convertToMongoId(sessionId);
     if (classId) filter.classId = convertToMongoId(classId);
