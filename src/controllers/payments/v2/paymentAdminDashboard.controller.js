@@ -15,10 +15,10 @@ export async function getPaymentAdminDashboardData(req, res) {
     const filter = { status: 'paid', school: convertToMongoId(adminId) };
     // filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
 
-    if (sessionId) filter.session = sessionId;
-    if (classId) filter.classId = classId;
-    if (sectionId) filter.section = sectionId;
-    if (studentId) filter.student = studentId;
+    if (sessionId) filter.session = convertToMongoId(sessionId);
+    if (classId) filter.classId = convertToMongoId(classId);
+    if (sectionId) filter.section = convertToMongoId(sectionId);
+    if (studentId) filter.student = convertToMongoId(studentId);
 
     const paymentTransactions = await getPaymentTransactionPipelineService([
       {
