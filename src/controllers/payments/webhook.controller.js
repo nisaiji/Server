@@ -232,7 +232,7 @@ export async function refundWebhookController(req, res) {
     }
 
     const refund = event_object.refund;
-    const { refund_id, payment_id, status, date, failure_reason } = refund;
+    const { refund_id, payment_id, status, date, failure_reason, amount } = refund;
 
     const updateData = {
       status,
@@ -263,13 +263,25 @@ export async function refundWebhookController(req, res) {
     }
 
     await updateRefundService({ refundId: refund_id }, updateData);
-    await updatePaymentTransactionService({ _id: paymentTransaction._id }, { status: "refunded", refundedAt: new Date(date * 1000) });
+
+    let paymentTransactionStatus = 'partialRefunded';
+    let totalRefundedAmount = (paymentTransaction.refundedAmount ? paymentTransaction.refundedAmount : 0) + parseFloat(amount);
+    if( totalRefundedAmount >= paymentTransaction.amount) {
+      paymentTransactionStatus = 'refunded';
+    }
+
+    console.log({totalRefundedAmount, paymentTransactionStatus, oldRefundAmount:paymentTransaction.refundedAmount })
+
+    await updatePaymentTransactionService(
+      { _id: paymentTransaction._id },
+      { status: "refunded", refundedAt: new Date(date * 1000), status: paymentTransactionStatus, refundedAmount:totalRefundedAmount });
+   
     console.log("Refund updated successfully for refundId:", refund_id);
 
-    const refundedPaymentTransaction = await getPaymentTransactionService({ _id: paymentTransaction._id });
+    // const refundedPaymentTransaction = await getPaymentTransactionService({ _id: paymentTransaction._id });
 
     //Processing background ledger update for refund
-    await processRefund(refundedPaymentTransaction);
+    // await processRefund(refundedPaymentTransaction);
 
     return res.status(200).json({ message: "Refund webhook received successfully" });
   } catch (error) {

@@ -88,6 +88,10 @@ const paymentTransactionSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
+    refundedAmount: {
+      type: Number,
+      default: 0,
+    },
     amountPaid: {
       type: Number,
     },
@@ -97,7 +101,7 @@ const paymentTransactionSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "sessionInitiated", "paid", "failed", 'requestedForRefund', 'refunded'],
+      enum: ["active", "sessionInitiated", "paid", "failed", 'requestedForRefund', 'partialRefunded', 'refunded'],
       default: "active",
     },
     paymentMethod: {
@@ -113,7 +117,7 @@ const paymentTransactionSchema = mongoose.Schema(
     failureTip: {
       type: String,
     },
-    failureReason: {
+    failureReason : {
       type: String,
     },
     paidAt: {

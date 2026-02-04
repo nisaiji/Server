@@ -9,38 +9,86 @@ import { getSessionStudentService } from "../../services/v2/sessionStudent.servi
 import { createRefundService, getRefundPipelineService, getRefundService, updateRefundService } from "../../services/refund.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 
-export async function applyForRefundController(req, res) {
+export async function refundPaymentController(req, res) {
   try {
     const { sessionStudentId, paymentId, amount, reason="requested_by_customer", description } = req.body;
-    console.log({sessionStudentId, paymentId});
-    const parentId = req.parentId;
+    const adminId = req.adminId;
     const sessionStudent = await getSessionStudentService({ _id: sessionStudentId});
     if(!sessionStudent) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
     }
-    const payment = await getPaymentTransactionService({ zohoPaymentId: paymentId, status: "paid" });
+    const payment = await getPaymentTransactionService({ zohoPaymentId: paymentId, status:{$in:[ "paid", "partialRefunded"]} });
     if (!payment) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Payment not found"));
     }
 
+    if(amount > payment.amount) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Refund amount cannot be greater than paid amount"));
+    }
+
+    let marchant = await getMarchantPaymentConfigService({ school: sessionStudent['school']});
+    if (!marchant) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Merchant config not found"));
+    }
+
+    if (marchant.accessTokenExpiresAt < new Date()) {
+      const response = await refreshTokenService({
+        refreshToken: marchant.zohoRefreshToken,
+        clientId: marchant.zohoClientId,
+        clientSecret: marchant.zohoClientSecret
+      });
+
+      const expiresAt = new Date();
+      expiresAt.setSeconds(expiresAt.getSeconds() + parseInt(response.expires_in, 10));
+      await updateMarchantPaymentConfigService(
+        { _id: marchant._id },
+        {
+          accessTokenExpiresAt: expiresAt,
+          zohoAccessToken: response.access_token,
+        }
+      );
+      marchant = await getMarchantPaymentConfigService({ _id: marchant._id });
+    }
+
+    const refundResponse = await createRefundApiService({
+      paymentId,
+      accountId: marchant.zohoAccountId,
+      accessToken: marchant.zohoAccessToken,
+      amount,
+      reason:reason,
+      description: description,
+      type: "initiated_by_merchant",
+      isSandbox: config.isSandbox
+    });
+
+    const refundInfo = refundResponse.refund;
+
     const refundData = {
+      refundId: refundInfo.refund_id,
+      paymentId: refundInfo.payment_id,
+      referenceNumber: refundInfo.reference_number,
+      amount: refundInfo.amount,
+      type: refundInfo.type,
+      reason: refundInfo.reason,
+      description: refundInfo.description,
+      status: refundInfo.status,
+      networkReferenceNumber: refundInfo.network_reference_number,
+      failureReason: refundInfo.failure_reason,
+      refundDate: new Date(refundInfo.date * 1000),
       paymentTransaction: payment._id,
       feeInstallment: payment.feeInstallment,
       sessionStudent: sessionStudent._id,
-      parent: parentId,
+      parent: payment.parent,
       student: sessionStudent.student,
       school: sessionStudent.school,
-      session: sessionStudent.session,
-      type: "initiated_by_customer",
-      reason,
-      description,
-      status: "requested",
-      amount: payment.amount,
-      paymentId
+      session: sessionStudent.session
     }
 
-    const refund = await createRefundService(refundData);
-    return res.status(StatusCodes.OK).send(success(200, "Refund request submitted successfully"));
+    await createRefundService(refundData);
+
+    console.log({refundResponse});
+
+    return res.status(StatusCodes.OK).send(success(200, refundResponse));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
