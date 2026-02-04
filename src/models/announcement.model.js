@@ -42,7 +42,7 @@ const announcementSchema = new mongoose.Schema({
   },
   school: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:"section"
+    ref:"school"
   }
 },
 {

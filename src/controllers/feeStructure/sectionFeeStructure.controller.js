@@ -33,11 +33,21 @@ export async function createSectionFeeStructureController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(400, "School fee structure not found"));
     }
 
-    for (const sectionFeeObj of sectionsFee) {
-      const section = await getSectionService({_id: sectionFeeObj.sectionId, admin: adminId, classId: classId});
-      if(!section) {
-        continue;
+    for(const sectionFeeObj of sectionsFee) {
+      const [section, sectionFeeStructure] = await Promise.all([
+        getSectionService({_id: sectionFeeObj.sectionId, admin: adminId, classId: classId}),
+        getSectionFeeStructureService({ section: sectionFeeObj.sectionId })
+      ]);
+
+      if(!section){
+        return res.status(StatusCodes.BAD_REQUEST).send(error(400, `Section not found!`));
       }
+      if(sectionFeeStructure) {
+        return res.status(StatusCodes.BAD_REQUEST).send(error(400, `Fee structure already exists for section: ${section.name}`));
+      }
+    }
+
+    for (const sectionFeeObj of sectionsFee) {
       const feeStructurePayload = {
         title: title ? title : `FEE STRUCTURE:- Section: ${section.name}, Class: ${classInfo.name}, Session: ${session.academicStartYear}-${session.academicEndYear}`,
         description,
@@ -48,11 +58,6 @@ export async function createSectionFeeStructureController(req, res) {
         school: adminId,
         schoolFeeStructure: schoolFeeStructureId
       };
-
-      const existingSectionFeeStructure = await getSectionFeeStructureService({ section: sectionFeeObj.sectionId });
-      if (existingSectionFeeStructure) {
-        continue;
-      }
 
       const newFeeStructure = await createSectionFeeStructureService(feeStructurePayload);
 
