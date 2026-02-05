@@ -5,12 +5,13 @@ import { convertToMongoId } from "../../../services/mongoose.services.js";
 import { getSectionsPipelineService } from "../../../services/section.services.js";
 import { getSessionStudentsPipelineService } from "../../../services/v2/sessionStudent.service.js";
 import { getStudentFeeInstallmentsPipelineService } from "../../../services/studentFeeInstallment.service.js";
+import { getSessionStudentWalletsPipelineService } from "../../../services/sessionStudentWallet.services.js";
 
 
 
 export async function getPaymentAdminDashboardData(req, res) {
   try {
-    const { startDate, endDate, sessionId, classId, sectionId, studentId } = req.query;
+    const { startDate, endDate, sessionId, classId, sectionId, sessionStudentId } = req.query;
     const adminId = req.adminId;
     const filter = { status: 'paid', school: convertToMongoId(adminId) };
     // filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
@@ -18,7 +19,7 @@ export async function getPaymentAdminDashboardData(req, res) {
     if (sessionId) filter.session = convertToMongoId(sessionId);
     if (classId) filter.classId = convertToMongoId(classId);
     if (sectionId) filter.section = convertToMongoId(sectionId);
-    if (studentId) filter.student = convertToMongoId(studentId);
+    if (sessionStudentId) filter.sessionStudent = convertToMongoId(sessionStudentId);
 
     const paymentTransactions = await getPaymentTransactionPipelineService([
       {
@@ -38,7 +39,7 @@ export async function getPaymentAdminDashboardData(req, res) {
     if (sessionId) feeFilter.session = convertToMongoId(sessionId);
     if (classId) feeFilter.classId = convertToMongoId(classId);
     if (sectionId) feeFilter.section = convertToMongoId(sectionId);
-    if (studentId) feeFilter.student = convertToMongoId(studentId);
+    if (sessionStudentId) feeFilter.sessionStudent = convertToMongoId(sessionStudentId);
 
     const remainingAmountResult = await getStudentFeeInstallmentsPipelineService([
       {
@@ -61,8 +62,29 @@ export async function getPaymentAdminDashboardData(req, res) {
     const totalPaidAmount = paymentTransactions[0]?.totalAmount || 0;
     const totalTransactions = paymentTransactions[0]?.totalTransactions || 0;
 
-    return res.status(200).send(success(200, { totalPaidAmount, totalTransactions, pendingAmount }));
+    const walletFilter = { school: convertToMongoId(adminId) };
+    if (sessionId) walletFilter.session = convertToMongoId(sessionId);
+    if (sectionId) walletFilter.section = convertToMongoId(sectionId);
+    if (sessionStudentId) walletFilter.sessionStudent = convertToMongoId(sessionStudentId);
+
+    const advanceAmount = await getSessionStudentWalletsPipelineService([
+      {
+        $match: walletFilter
+      },
+      {
+        $group: {
+          _id: null,
+          totalAdvancedAmount: { $sum: '$balance' },
+          totalWallets: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const totalAdvancedAmount = advanceAmount[0]?.totalAdvancedAmount || 0;
+
+    return res.status(200).send(success(200, { totalPaidAmount, totalTransactions, pendingAmount, totalAdvancedAmount }));
   } catch (error) {
+    console.error('Error fetching payment admin dashboard data:', error);
     res.status(500).json({ error: 'Failed to fetch payment admin dashboard data' });
   }
 }
