@@ -65,6 +65,7 @@ export async function getPaymentAdminDashboardData(req, res) {
     const walletFilter = { school: convertToMongoId(adminId) };
     if (sessionId) walletFilter.session = convertToMongoId(sessionId);
     if (sectionId) walletFilter.section = convertToMongoId(sectionId);
+    if (classId) walletFilter.classId = convertToMongoId(classId);
     if (sessionStudentId) walletFilter.sessionStudent = convertToMongoId(sessionStudentId);
 
     const advanceAmount = await getSessionStudentWalletsPipelineService([

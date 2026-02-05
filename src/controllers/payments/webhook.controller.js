@@ -369,6 +369,7 @@ async function processPayment(paymentTransaction) {
       await registerSessionStudentWalletService({
         sessionStudent: paymentTransaction.sessionStudent,
         student: paymentTransaction.student,
+        classId: paymentTransaction.classId,
         school: paymentTransaction.school,
         session: paymentTransaction.session,
         balance: parseFloat(paymentTransaction.amount),
@@ -398,6 +399,7 @@ async function processRefund(paymentTransaction) {
       await registerSessionStudentWalletService({
         sessionStudent: paymentTransaction.sessionStudent,
         student: paymentTransaction.student,
+        classId: paymentTransaction.classId,
         school: paymentTransaction.school,
         session: paymentTransaction.session,
         refundableBalance: parseFloat(paymentTransaction.amount),
