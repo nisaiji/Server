@@ -154,7 +154,7 @@ export async function createRefundApiService({paymentId, accountId, accessToken,
   url.searchParams.append("account_id", accountId);
 
   const payload = {
-    amount: 100,
+    amount,
     reason,
     type,
     description
