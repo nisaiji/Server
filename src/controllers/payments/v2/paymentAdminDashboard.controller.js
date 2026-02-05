@@ -79,7 +79,7 @@ export async function getTransactionsController(req, res) {
     if (classId) filter.classId = convertToMongoId(classId);
     if (sectionId) filter.section = convertToMongoId(sectionId);
     if (sessionStudentId) filter.sessionStudent = convertToMongoId(sessionStudentId);
-    if (status) filter.status = status;
+    if (status) filter.status = { $in: status.split(',') };
     if(paymentMethod) filter.paymentMethod = paymentMethod;
 
     const skip = (page - 1) * limit;
