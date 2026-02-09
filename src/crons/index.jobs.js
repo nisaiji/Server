@@ -8,12 +8,13 @@ import { dailyFeeCalculatorJob } from './jobs/dailyFeeCalculator.job.js';
 import { refundJob } from './jobs/dailyRefundProcess.job.js';
 
 
-const invalidationCronJob = new CronJob('0/10 * * * * *', async () => {
+// Guest Teacher Start/Stop Job - runs at 2:00 AM every day
+const invalidationCronJob = new CronJob('0 0 2 * * *', async () => {
   try {
     await GuestTeacherStopJob();
     await changePasswordRequestExpireJob();
     await GuestTeacherStartJob();
-    await dailyFeeCalculatorJob();
+    // await dailyFeeCalculatorJob();
     // await SessionCreateJob();
   } catch (error) {
     console.log(error.message)

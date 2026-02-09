@@ -1,4 +1,4 @@
-import {dailyFeeCalculatorCron, invalidationCronJob, payFeeFromWalletCron} from "./invalidate.cron.js";
+import {dailyFeeCalculatorCron, invalidationCronJob, payFeeFromWalletCron} from "./index.jobs.js";
 import { config } from "../config/config.js"
 
 
