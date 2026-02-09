@@ -110,6 +110,11 @@ export async function attendanceByTeacherController(req, res) {
 export async function undoAttendanceByTeacherController(req, res) {
   const { sectionId } = req.body;
   let date = new Date();
+  const section = await getSectionService({ _id: sectionId });
+  const session = await getSessionService({_id:section["session"]});
+  if(!session || session['status']==='completed') { 
+    return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! Can't undo attendance")); 
+  }
   const { startTime, endTime } = getStartAndEndTimeService(date, date);
   const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}})
   if(!sectionAttendance){
