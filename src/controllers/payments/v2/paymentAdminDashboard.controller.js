@@ -6,6 +6,8 @@ import { getSectionsPipelineService } from "../../../services/section.services.j
 import { getSessionStudentsPipelineService } from "../../../services/v2/sessionStudent.service.js";
 import { getStudentFeeInstallmentsPipelineService } from "../../../services/studentFeeInstallment.service.js";
 import { getSessionStudentWalletsPipelineService } from "../../../services/sessionStudentWallet.services.js";
+import { getFeeInstallmentsPipelineService } from "../../../services/feeStructure/feeInstallment.service.js";
+import { getSectionFeeStructureService } from "../../../services/feeStructure/sectionFeeStructure.services.js";
 
 
 
@@ -493,11 +495,11 @@ export async function sectionStudentsFeeInstallmentsController(req, res) {
     const { sectionId } = req.query;
     const adminId = req.adminId;
 
-    const pipeline = [
+    // Step 1: Get all session students of particular section with wallet and student lookup
+    const sessionStudents = await getSessionStudentsPipelineService([
       {
         $match: {
-          section: convertToMongoId(sectionId),
-          school: convertToMongoId(adminId)
+          section: convertToMongoId(sectionId)
         }
       },
       {
@@ -520,41 +522,59 @@ export async function sectionStudentsFeeInstallmentsController(req, res) {
         }
       },
       {
-      $unwind: {
-        path: "$wallet",
-        preserveNullAndEmptyArrays: true
+        $unwind: {
+          path: "$wallet",
+          preserveNullAndEmptyArrays: true
+        }
+      }
+    ]);
+
+    const sessionStudentIds = sessionStudents.map(ss => convertToMongoId(ss._id));
+    const sectionFeeStructure = await getSectionFeeStructureService({ section: convertToMongoId(sectionId) });
+
+    // Step 2: Fetch all fee installments of that section
+    const sectionFeeInstallments = await getFeeInstallmentsPipelineService([
+      {
+        $match: {
+          sectionFeeStructure: convertToMongoId(sectionFeeStructure._id)
+        }
+      }
+    ]);
+
+    // Step 3: Fetch all student fee installments
+    const allStudentFeeInstallments = await getStudentFeeInstallmentsPipelineService([
+      {
+        $match: {
+          sessionStudent: { $in: sessionStudentIds },
+          section: convertToMongoId(sectionId)
         }
       },
       {
         $lookup: {
-          from: "studentfeeinstallments",
-          let: { sessionStudentId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ["$sessionStudent", "$$sessionStudentId"] }
-              }
-            },
-            {
-              $lookup: {
-                from: "feeinstallments",
-                localField: "feeInstallment",
-                foreignField: "_id",
-                as: "feeInstallment"
-              }
-            },
-            {
-              $unwind: "$feeInstallment"
-            }
-          ],
-          as: "studentFeeInstallments"
+          from: "feeinstallments",
+          localField: "feeInstallment",
+          foreignField: "_id",
+          as: "feeInstallmentDetails"
         }
+      },
+      {
+        $unwind: "$feeInstallmentDetails"
       }
-    ];
+    ]);
 
-    const sessionStudents = await getSessionStudentsPipelineService(pipeline);
 
-    return res.status(StatusCodes.OK).send(success(200, sessionStudents ));
+    // Step 4: Add installments to each session student
+    const result = sessionStudents.map(sessionStudent => {
+      let sessionStudentFeeInstallments = allStudentFeeInstallments.filter(sfi => sfi.sessionStudent.toString() === sessionStudent._id.toString());
+      sessionStudentFeeInstallments = sectionFeeInstallments.map(sfi => {
+        const studentInstallment = sessionStudentFeeInstallments.find(ssfi => ssfi.feeInstallment.toString() === sfi._id.toString());
+        return studentInstallment ? studentInstallment : sfi;
+      });
+      sessionStudent.feeInstallments = sessionStudentFeeInstallments;
+      return sessionStudent;
+    });
+
+    return res.status(StatusCodes.OK).send(success(200, result));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
