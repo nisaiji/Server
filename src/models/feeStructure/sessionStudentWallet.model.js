@@ -15,6 +15,12 @@ const sessionStudentWalletSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    section: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "section",
+      required: true,
+      index: true,
+    },
     classId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "class",

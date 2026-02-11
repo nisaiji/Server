@@ -82,7 +82,7 @@ export async function attendanceStatusOfSectionController(req, res) {
 
 export async function attendanceStatusController(req, res) {
   try {
-    const { startTime, endTime } = req.body;
+    const { startTime, endTime, sessionId } = req.body;
     const adminId = req.adminId ? req.adminId : req.params.adminId;
     const pipeline = [
       {
@@ -94,7 +94,11 @@ export async function attendanceStatusController(req, res) {
         },
       },
       { $unwind: "$sectionDetails" },
-      { $match: { "sectionDetails.admin": convertToMongoId(adminId) } },
+      { $match: { 
+        "sectionDetails.admin": convertToMongoId(adminId),
+        "sectionDetails.session": convertToMongoId(sessionId)
+         } 
+      },
       {
         $match: {
           date: { $gte: startTime, $lte: endTime },
