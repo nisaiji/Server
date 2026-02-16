@@ -7,10 +7,14 @@ import { config } from "../../config/config.js";
 import { getMarchantPaymentConfigService, updateMarchantPaymentConfigService } from "../../services/marchantPaymentConfig.service.js";
 import { getStudentService } from "../../services/student.service.js";
 import { getAdminService } from "../../services/admin.services.js";
-import { createPaymentTransactionService, getPaymentTransactionService } from "../../services/paymentTransaction.service.js";
+import { createPaymentTransactionService, getPaymentTransactionService, getPaymentTransactionsService } from "../../services/paymentTransaction.service.js";
 import { getParentService } from "../../services/v2/parent.services.js";
 import logger from "../../logger/index.js";
 import { getFormattedNewDateService } from "../../services/celender.service.js";
+import { getStudentFeeInstallmentsService } from "../../services/studentFeeInstallment.service.js";
+import { getFeeInstallmentsService } from "../../services/feeStructure/feeInstallment.service.js";
+import { convertToMongoId } from "../../services/mongoose.services.js";
+import { getSectionFeeStructureService } from "../../services/feeStructure/sectionFeeStructure.services.js";
 
 export async function createPaymentLinkController(req, res) {
   try {
@@ -32,6 +36,14 @@ export async function createPaymentLinkController(req, res) {
     if(!school || !marchant) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "School not found"));
     }
+
+   const totalPayable = await getTotalPayableAmount(sessionStudentId);
+   const totalPaid = await getTotalPaidAmount(sessionStudentId);
+   console.log({ totalPayable, totalPaid });
+
+   if(totalPaid >= totalPayable) {
+    return res.status(StatusCodes.BAD_REQUEST).send(error(400, "No dues pending for this student"));
+   }
 
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 15);
@@ -156,4 +168,57 @@ function generateInvoiceNumber({ sessionStudentId }) {
 function generateReferenceNumber({ sessionStudentId }) {
   const d = new Date();
   return `REF-${d.getTime()}-${sessionStudentId}-${Math.floor(Math.random() * 90000000) + 10000000}`;
+}
+
+async function getTotalPayableAmount(sessionStudentId) {
+  try {
+    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
+    if (!sessionStudent) {
+      throw new Error('Session student not found');
+    }
+
+    const studentFeeInstallments = await getStudentFeeInstallmentsService({
+      sessionStudent: sessionStudentId
+    });
+
+    const feeInstallmentIds = studentFeeInstallments.map(sfi => convertToMongoId(sfi.feeInstallment));
+
+    const studentFeeInstallmentsTotal = studentFeeInstallments.reduce((sum, installment) => {
+      return sum + (installment.totalPayable || 0);
+    }, 0);
+
+    const sectionFeeStructure = await getSectionFeeStructureService({
+      section: sessionStudent.section
+    });
+
+    if(!sectionFeeStructure) {
+      throw new Error('Section fee structure not found');
+    }
+
+    const feeInstallments = await getFeeInstallmentsService({
+      sectionFeeStructure: sectionFeeStructure._id,
+      _id: { $nin: feeInstallmentIds }
+    });
+
+    const feeInstallmentsTotal = feeInstallments.reduce((sum, installment) => {
+      return sum + (installment.amount || 0);
+    }, 0);
+
+    return studentFeeInstallmentsTotal + feeInstallmentsTotal;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getTotalPaidAmount(sessionStudentId) {
+  try {
+    const payments = await getPaymentTransactionsService({ sessionStudent: sessionStudentId, status: "paid" });
+    console.log({payments});
+    const totalPaid = payments.reduce((sum, payment) => {
+      return sum + (payment.amount || 0);
+    }, 0);
+    return totalPaid;
+  } catch (error) {
+    throw error;
+  }
 }
