@@ -11,7 +11,7 @@ import { getSessionStudentsService } from "../../services/v2/sessionStudent.serv
 export async function dailyFeeCalculatorJob() {
   try {
     console.log("Starting Daily Fee Calculator Job at:", new Date());
-    await sendEmailService('kuldeeppanwar460@gmail.com', `Daily Fee Calculator Job Started. The daily fee calculator job has started at ${new Date()}.`);
+    // await sendEmailService('kuldeeppanwar460@gmail.com', `Daily Fee Calculator Job Started. The daily fee calculator job has started at ${new Date()}.`);
     const schools = await getAdminsService({});
     for (const school of schools) {
       const currentSession = await getSessionService({ school: school['_id'] });
@@ -74,7 +74,7 @@ export async function dailyFeeCalculatorJob() {
         }
       }
     }
-    await sendEmailService('kuldeeppanwar460@gmail.com', `Daily Fee Calculator Job Ended. The daily fee calculator job has ended at ${new Date()}.`);
+    // await sendEmailService('kuldeeppanwar460@gmail.com', `Daily Fee Calculator Job Ended. The daily fee calculator job has ended at ${new Date()}.`);
     console.log("Daily Fee Calculator Job completed at:", new Date());
   } catch (err) {
     console.error('Daily fee calculator job failed:', err); 

@@ -34,7 +34,6 @@ export async function getFeeInstallmentsService(
   sortingLogic
 ) {
   try {
-    console.log("filter", filter);
     const studentFeeInstallments = await feeInstallmentModel
       .find(filter)
       .select(projection)

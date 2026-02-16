@@ -9,8 +9,6 @@ import { getSessionStudentWalletsPipelineService } from "../../../services/sessi
 import { getFeeInstallmentsPipelineService } from "../../../services/feeStructure/feeInstallment.service.js";
 import { getSectionFeeStructureService } from "../../../services/feeStructure/sectionFeeStructure.services.js";
 
-
-
 export async function getPaymentAdminDashboardData(req, res) {
   try {
     const { startDate, endDate, sessionId, classId, sectionId, sessionStudentId } = req.query;

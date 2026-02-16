@@ -34,6 +34,10 @@ export async function attendanceByTeacherController(req, res) {
     let date = new Date();
     const { startTime, endTime } = getStartAndEndTimeService(date, date);
 
+    if(date < session.startDate || date > session.endDate){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Can't mark attendance outside session duration"));
+    }
+
     if(present.length==0 && absent.length==0){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, attendanceControllerResponse.attendanceByTeacherController.noStudents));
     }
@@ -226,6 +230,10 @@ export async function bulkAttendanceMarkController(req, res) {
       const holiday = await getHolidayService({ date: { $gte: startTime, $lte: endTime }, admin: adminId });
       if (holiday || attendanceTimestamp > new Date().getTime()) {
         continue;
+      }
+
+      if(formattedDate < session.startDate || formattedDate > session.endDate){
+        return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Attendance can not be marked beyond session duration"));
       }
 
       if(dayName==='Sunday') {

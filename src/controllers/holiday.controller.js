@@ -72,6 +72,10 @@ export async function registerHolidaysController(req, res) {
     let startIstDate = timestampToIstDate(startTime);
     let endIstDate = timestampToIstDate(endTime);
 
+    if(startIstDate < session.startDate || endIstDate > session.endDate) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Holiday dates must be within session dates"));
+    }
+
     const{startTime:tempStartTimestamp, endTime:tempEndTimestamp} = getStartAndEndTimeService(startIstDate, endIstDate);
   
     startIstDate = timestampToIstDate(tempStartTimestamp);
@@ -168,6 +172,11 @@ export async function deleteHolidayController(req, res) {
     if(session && session['status'] === 'completed') {  
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "You can't delete holiday of completed session"));
     }
+
+    if(holiday.date < Date.now()) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "You can't delete past holiday"));
+    }
+
     await deleteHolidayService({ _id: id });
     return res.status(StatusCodes.OK).send(success(200, "Holiday deleted successfully"));
   } catch (err) {

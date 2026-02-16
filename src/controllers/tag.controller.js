@@ -15,6 +15,17 @@ export async function createTagController(req, res) {
         const schoolId = req.adminId;
         startDate = parseInt(startDate);
         endDate = parseInt(endDate);
+
+        if(startDate > endDate) {
+            return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Start date must be less than end date"));
+        }
+
+        const session = await getSessionService({_id: sessionId});
+
+        if(!session || session['status'] === 'completed') {
+          return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session is completed. You cannot create tag"));
+        }
+
         const subject = await getSubjectService({_id: subjectId});
         if(!subject) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject not found"));

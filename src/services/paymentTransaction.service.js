@@ -19,6 +19,15 @@ export async function getPaymentTransactionService(filter, projection={}) {
   }
 }
 
+export async function getPaymentTransactionsService(filter, projection={}) {
+  try {
+    const paymentSessions = await paymentTransactionModel.find(filter).select(projection).lean();
+    return paymentSessions;
+  } catch (error) {
+    throw error;
+  }
+}
+
 export async function getPaymentTransactionCountService(filter) {
   try {
     const count = await paymentTransactionModel.countDocuments(filter);

@@ -24,6 +24,9 @@ export async function createAnnouncementByAdminController(req, res) {
     if (session['status'] === 'completed') {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
     }
+    if(new Date() < session.startDate || new Date() > session.endDate) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Announcement date must be within session dates"));
+    }
     const announcement = await createAnnouncementService({
       title,
       description,
@@ -70,6 +73,9 @@ export async function createAnnouncementByTeacherController(req, res) {
     }
     if (session['status'] === 'completed') {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+    }
+    if(new Date() < session.startDate || new Date() > session.endDate) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Announcement date must be within session dates"));
     }
     const announcement = await createAnnouncementService({
       title,
