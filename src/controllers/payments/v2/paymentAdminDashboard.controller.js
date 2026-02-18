@@ -490,15 +490,17 @@ export async function sectionsReportController(req, res) {
 
 export async function sectionStudentsFeeInstallmentsController(req, res) {
   try {
-    const { sectionId } = req.query;
+    const { sectionId, sessionStudentId } = req.query;
     const adminId = req.adminId;
+
+    const filter = {school: convertToMongoId(adminId)};
+    if(sectionId) filter.section = convertToMongoId(sectionId);
+    if(sessionStudentId) filter._id = convertToMongoId(sessionStudentId);
 
     // Step 1: Get all session students of particular section with wallet and student lookup
     const sessionStudents = await getSessionStudentsPipelineService([
       {
-        $match: {
-          section: convertToMongoId(sectionId)
-        }
+        $match: filter
       },
       {
         $lookup: {
