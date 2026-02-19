@@ -48,6 +48,8 @@ export async function createSectionFeeStructureController(req, res) {
     }
 
     for (const sectionFeeObj of sectionsFee) {
+      const section = await getSectionService({_id: sectionFeeObj.sectionId, admin: adminId, classId: classId});
+      
       const feeStructurePayload = {
         title: title ? title : `FEE STRUCTURE:- Section: ${section.name}, Class: ${classInfo.name}, Session: ${session.academicStartYear}-${session.academicEndYear}`,
         description,
