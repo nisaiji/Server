@@ -37,6 +37,10 @@ export async function createPaymentLinkController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "School not found"));
     }
 
+    if(!student) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
+    }
+
    const totalPayable = await getTotalPayableAmount(sessionStudentId);
    const totalPaid = await getTotalPaidAmount(sessionStudentId);
    console.log({ totalPayable, totalPaid });

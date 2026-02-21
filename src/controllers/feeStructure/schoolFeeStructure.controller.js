@@ -11,6 +11,10 @@ export async function createSchoolFeeStructureController(req, res) {
     if (!session || session['status'] === 'completed') {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed!"));
     }
+
+    if(session.startDate > effectiveFromDate || session.endDate < effectiveFromDate){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Effective from date must be within the session dates!"));
+    }
     let schoolFeeStructure = await getSchoolFeeStructureService({ session: sessionId, school: adminId });
     if (schoolFeeStructure) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "School Fee Structure already exists!"));

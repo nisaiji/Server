@@ -8,25 +8,34 @@ import logger from "../../logger/index.js";
 import { getSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 import { createRefundService, getRefundPipelineService, getRefundService, updateRefundService } from "../../services/refund.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
+import { getSessionStudentWalletService } from "../../services/sessionStudentWallet.services.js";
 
 export async function refundPaymentController(req, res) {
   try {
-    const { sessionStudentId, paymentId, amount, reason="requested_by_customer", description } = req.body;
+    const { sessionStudentId, paymentId, amount, reason = "requested_by_customer", description } = req.body;
     const adminId = req.adminId;
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId});
-    if(!sessionStudent) {
+    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    if (!sessionStudent) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
     }
-    const payment = await getPaymentTransactionService({ zohoPaymentId: paymentId, status:{$in:[ "paid", "partialRefunded"]} });
+
+    const studentWallet = await getSessionStudentWalletService({ sessionStudent: sessionStudent['_id'] });
+    if (!studentWallet) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "student wallet not found"));
+    }
+    if (amount >= studentWallet.balance) {
+      return res.Status(StatusCodes.BAD_REQUEST).send(error(400, "Refund amount cannot be greater than wallet balance"));
+    }
+    const payment = await getPaymentTransactionService({ zohoPaymentId: paymentId, status: { $in: ["paid", "partialRefunded"] } });
     if (!payment) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Payment not found"));
     }
 
-    if(amount > payment.amount) {
+    if (amount > payment.amount) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Refund amount cannot be greater than paid amount"));
     }
 
-    let marchant = await getMarchantPaymentConfigService({ school: sessionStudent['school']});
+    let marchant = await getMarchantPaymentConfigService({ school: sessionStudent['school'] });
     if (!marchant) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Merchant config not found"));
     }
@@ -55,7 +64,7 @@ export async function refundPaymentController(req, res) {
       accountId: marchant.zohoAccountId,
       accessToken: marchant.zohoAccessToken,
       amount,
-      reason:reason,
+      reason: reason,
       description: description,
       type: "initiated_by_merchant",
       isSandbox: config.isSandbox
@@ -86,8 +95,6 @@ export async function refundPaymentController(req, res) {
 
     await createRefundService(refundData);
 
-    console.log({refundResponse});
-
     return res.status(StatusCodes.OK).send(success(200, refundResponse));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -96,14 +103,14 @@ export async function refundPaymentController(req, res) {
 
 export async function getRefundRequestsController(req, res) {
   try {
-    const {sessionId, status} = req.query;
+    const { sessionId, status } = req.query;
     const adminId = req.adminId;
 
     const filter = {
       session: convertToMongoId(sessionId),
       school: convertToMongoId(adminId)
     };
-    if(status) {
+    if (status) {
       filter.status = status;
     }
 
@@ -196,7 +203,7 @@ export async function getRefundRequestsController(req, res) {
 
 export async function getRefundRequestsForParentController(req, res) {
   try {
-    const {sessionStudentId} = req.query;
+    const { sessionStudentId } = req.query;
     const parentId = req.adminId;
 
     const filter = {
@@ -292,9 +299,9 @@ export async function getRefundRequestsForParentController(req, res) {
 
 export async function updateRefundController(req, res) {
   try {
-    const {refundId, status} = req.body;
+    const { refundId, status } = req.body;
 
-    const existingRefund = await getRefundService({_id: refundId });
+    const existingRefund = await getRefundService({ _id: refundId });
     if (!existingRefund) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Refund not found"));
     }
@@ -302,7 +309,7 @@ export async function updateRefundController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Refund already processed"));
     }
 
-    if(status === "rejected_by_admin") {
+    if (status === "rejected_by_admin") {
       const updatedRefund = await updateRefundService(
         { _id: existingRefund._id },
         { status: "rejected_by_admin" }
@@ -312,8 +319,8 @@ export async function updateRefundController(req, res) {
     const sessionStudentId = existingRefund.sessionStudent;
     const paymentId = existingRefund.paymentId;
 
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId});
-    if(!sessionStudent) {
+    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    if (!sessionStudent) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
     }
     const payment = await getPaymentTransactionService({ zohoPaymentId: paymentId, status: "paid" });
@@ -321,7 +328,7 @@ export async function updateRefundController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Payment not found"));
     }
 
-    let marchant = await getMarchantPaymentConfigService({ school: sessionStudent['school']});
+    let marchant = await getMarchantPaymentConfigService({ school: sessionStudent['school'] });
     if (!marchant) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Merchant config not found"));
     }
@@ -385,8 +392,6 @@ export async function updateRefundController(req, res) {
       { status: "requestedForRefund" }
     );
 
-    console.log({refundResponse});
-
     return res.status(StatusCodes.OK).send(success(200, refundResponse));
   } catch (err) {
     logger.error("Error creating refund", {}, err);
@@ -396,20 +401,20 @@ export async function updateRefundController(req, res) {
 
 export async function getRefundController(req, res) {
   try {
-    const {classId, sectionId, sessionStudentId, schoolId} = req.query;
-    
+    const { classId, sectionId, sessionStudentId, schoolId } = req.query;
+
     // Build aggregation pipeline
     const pipeline = [];
-    
+
     // Match refunds based on direct fields first
     const matchStage = {};
     if (sessionStudentId) matchStage.sessionStudent = convertToMongoId(sessionStudentId);
     if (schoolId) matchStage.school = convertToMongoId(schoolId);
-    
+
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
     }
-    
+
     // Lookup sessionStudent data to access classId and section
     pipeline.push({
       $lookup: {
@@ -419,7 +424,7 @@ export async function getRefundController(req, res) {
         as: "sessionStudentData"
       }
     });
-    
+
     pipeline.push({
       $unwind: "$sessionStudentData"
     });
@@ -432,25 +437,25 @@ export async function getRefundController(req, res) {
         as: "studentData"
       }
     });
-    
+
     pipeline.push({
       $unwind: "$studentData"
     });
-    
+
     // Match based on classId and sectionId from sessionStudent
     const sessionStudentMatch = {};
     if (classId) sessionStudentMatch["sessionStudentData.classId"] = convertToMongoId(classId);
     if (sectionId) sessionStudentMatch["sessionStudentData.section"] = convertToMongoId(sectionId);
-    
+
     if (Object.keys(sessionStudentMatch).length > 0) {
       pipeline.push({ $match: sessionStudentMatch });
     }
-    
+
     // Sort by creation date (newest first)
     pipeline.push({ $sort: { createdAt: -1 } });
-    
+
     const refunds = await getRefundPipelineService(pipeline);
-    
+
     return res.status(StatusCodes.OK).send(success(200, refunds));
   } catch (err) {
     logger.error("Error fetching refunds", {}, err);
