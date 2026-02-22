@@ -530,7 +530,7 @@ export async function sectionStudentsFeeInstallmentsController(req, res) {
     ]);
 
     const sessionStudentIds = sessionStudents.map(ss => convertToMongoId(ss._id));
-    const sectionFeeStructure = await getSectionFeeStructureService({ section: convertToMongoId(sectionId) });
+    const sectionFeeStructure = await getSectionFeeStructureService({ section: convertToMongoId(sessionStudents[0]?.section) });
     if(!sectionFeeStructure) return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section fee structure not found"));
 
     // Step 2: Fetch all fee installments of that section
