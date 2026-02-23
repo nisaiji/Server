@@ -78,9 +78,11 @@ const studentFeeInstallmentModel = mongoose.model(
   studentFeeInstallmentSchema
 );
 
-studentFeeInstallmentModel.createIndexes({ student: 1, session: 1 });
-studentFeeInstallmentModel.createIndexes({ dueDate: 1 });
-studentFeeInstallmentModel.createIndexes({ status: 1 });
-studentFeeInstallmentModel.createIndexes({ feeInstallment: 1 });
+// studentFeeInstallmentModel.createIndexes({ student: 1, session: 1 });
+// studentFeeInstallmentModel.createIndexes({ dueDate: 1 });
+// studentFeeInstallmentModel.createIndexes({ status: 1 });
+// studentFeeInstallmentModel.createIndexes({ feeInstallment: 1 });
+studentFeeInstallmentSchema.index({ sessionStudent: 1, feeInstallment: 1 }, { unique: true });
+
 
 export default studentFeeInstallmentModel;
