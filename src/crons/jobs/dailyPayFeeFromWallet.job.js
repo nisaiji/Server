@@ -42,9 +42,9 @@ export async function payFeeFromWalletJob() {
         let studentPaidCount = 0;
         for (const installment of unpaidInstallments) {
           if (walletBalance > 0) {
-            const amountToPay = Math.min(walletBalance, installment.totalPayable);
-            const currentPaid = installment.amountPaid || 0;
-            const newAmountPaid = currentPaid + amountToPay;
+            const remainingDue = installment.totalPayable - (installment.amountPaid || 0);
+            const amountToPay = Math.min(walletBalance, remainingDue);
+            const newAmountPaid = (installment.amountPaid || 0) + amountToPay;
             const isFullyPaid = newAmountPaid >= installment.totalPayable;
             
             await updateStudentFeeInstallmentService(
