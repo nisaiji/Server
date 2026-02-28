@@ -8,6 +8,7 @@ const EVENT_TYPES = [
     "LateFeeWaived",
     "ConcessionGranted",
     "RefundIssued",
+    "RefundFailed",
     "PaymentFailed"
 ];
 
@@ -27,9 +28,9 @@ const ledgerEventSchema = mongoose.Schema({
         type: Number,
         required: true
     },
-    sessionStudentId: {
+    sessionStudent: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "student",
+        ref: "sessionStudent",
         required: true
     },
     // Nullable because some events (PaymentReceived, RefundReceived) may not be tied to a specific installment

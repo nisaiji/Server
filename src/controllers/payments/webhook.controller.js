@@ -76,7 +76,7 @@ export async function paymentWebhookController(req, res) {
       await registerLedgerEventService({
         eventType: "PaymentFailed",
         amount: parseFloat(amount),
-        sessionStudentId: paymentTransaction.sessionStudent,
+        sessionStudent: paymentTransaction.sessionStudent,
         actorType: "gateway",
         actorId: paymentTransaction.parent,
         externalRef: paymentTransaction.paymentReferenceId,
@@ -97,6 +97,18 @@ export async function paymentWebhookController(req, res) {
     if (event_type !== "payment.failed") {
       //Processing background ledger update
       await processPayment(updatedPaymentTransaction);
+      await registerLedgerEventService({
+        eventType: "PaymentReceived",
+        amount: parseFloat(amount),
+        sessionStudent: paymentTransaction.sessionStudent,
+        actorType: "gateway",
+        actorId: paymentTransaction.parent,
+        externalRef: paymentTransaction.paymentReferenceId,
+        metaData: {
+          school: convertToMongoId(paymentTransaction.school),
+          session: convertToMongoId(paymentTransaction.session),
+        },
+      });
     }
 
     return res.status(200).json({ message: "Webhook received successfully" });
@@ -149,10 +161,6 @@ export async function refundWebhookController(req, res) {
       webhookProcessed: true
     };
 
-    if (event_type === 'refund.failed') {
-      updateData.failureReason = failure_reason;
-    }
-
     const [existingRefund, paymentTransaction] = await Promise.all([
       getRefundService({ refundId: refund_id }),
       getPaymentTransactionService({ zohoPaymentId: payment_id })
@@ -165,6 +173,22 @@ export async function refundWebhookController(req, res) {
     if (!paymentTransaction) {
       console.log("paymentTransaction not found for zohoPaymentId:", payment_id);
       return res.status(404).json({ message: "paymentTransaction not found" });
+    }
+
+    if (event_type === 'refund.failed') {
+      updateData.failureReason = failure_reason;
+      await registerLedgerEventService({
+        eventType: "RefundFailed",
+        amount: parseFloat(amount),
+        sessionStudent: paymentTransaction.sessionStudent,
+        actorType: "gateway",
+        actorId: paymentTransaction.parent,
+        externalRef: paymentTransaction.paymentReferenceId,
+        metaData: {
+          school: convertToMongoId(paymentTransaction.school),
+          session: convertToMongoId(paymentTransaction.session),
+        },
+      });
     }
 
     await updateRefundService({ refundId: refund_id }, updateData);
@@ -181,6 +205,21 @@ export async function refundWebhookController(req, res) {
       { _id: paymentTransaction._id },
       { status: "refunded", refundedAt: new Date(date * 1000), status: paymentTransactionStatus, refundedAmount:totalRefundedAmount });
    
+    if (event_type !== 'refund.failed') {
+      await registerLedgerEventService({
+        eventType: "RefundIssued",
+        amount: parseFloat(amount),
+        sessionStudent: paymentTransaction.sessionStudent,
+        actorType: "gateway",
+        actorId: paymentTransaction.parent,
+        externalRef: paymentTransaction.paymentReferenceId,
+        metaData: {
+          school: convertToMongoId(paymentTransaction.school),
+          session: convertToMongoId(paymentTransaction.session),
+        },
+      });
+    }
+
     console.log("Refund updated successfully for refundId:", refund_id);
 
     // const refundedPaymentTransaction = await getPaymentTransactionService({ _id: paymentTransaction._id });

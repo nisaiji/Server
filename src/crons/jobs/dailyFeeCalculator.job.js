@@ -14,7 +14,7 @@ export async function dailyFeeCalculatorJob() {
     // await sendEmailService('kuldeeppanwar460@gmail.com', `Daily Fee Calculator Job Started. The daily fee calculator job has started at ${new Date()}.`);
     const schools = await getAdminsService({});
     for (const school of schools) {
-      const currentSession = await getSessionService({ school: school['_id'] });
+      const currentSession = await getSessionService({ school: school['_id'], status: 'active' });
       const schoolFeeStructure = await getSchoolFeeStructureService({ school: school['_id'], session: currentSession['_id'] });
       if (schoolFeeStructure) {
         const lateFeePercent = schoolFeeStructure?.lateFeePercent;
