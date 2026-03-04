@@ -4,6 +4,7 @@ import { deleteSectionService, getAllSection,getClassSections, getSectionService
 import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { getSessionService } from "../services/session.services.js";
+import { getTeacherSectionSessionService, registerTeacherSectionSessionService } from "../services/teacherSectionSession.service.js";
 
 export async function registerSectionController(req, res) {
   try {
@@ -24,14 +25,17 @@ export async function registerSectionController(req, res) {
     if (section) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Section already exists"));
     }
-    const teacher = await getTeacherService({_id:teacherId, isActive:true});
+    const teacher = await getTeacherService({_id:teacherId, isActive:true, admin:adminId});
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
-    if(teacher["section"]){
+
+    const teacherSectionSession = await getTeacherSectionSessionService({teacher:teacherId, session:sessionId});
+    if(teacherSectionSession){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher already assigned to section"));
     }
     section = await registerSectionService({name, startTime, teacher:teacherId, classId, admin:adminId, session});
+    await registerTeacherSectionSessionService({teacher:teacherId, section:section["_id"], classInfo: classInfo["_id"], session:sessionId, school:adminId});
     teacher.section = section["_id"];
     await teacher.save();
     classInfo["section"]?.push(section["_id"]);

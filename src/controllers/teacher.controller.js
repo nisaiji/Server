@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { getTeacherService, registerTeacherService, getAllTeacherOfAdminService, updateTeacherService, getTeachersService, getTeachersPipelineService } from "../services/teacher.services.js";
+import { getTeacherSectionSessionService, getTeacherSectionSessionsService } from "../services/teacherSectionSession.service.js";
 import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
@@ -8,6 +9,7 @@ import { getClassService } from "../services/class.sevices.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getGuestTeacherService } from "../services/guestTeacher.service.js";
 import { getAdminService } from "../services/admin.services.js";
+import { getSessionService } from "../services/session.services.js";
 
 export async function registerTeacherController(req, res) {
   try {
@@ -59,14 +61,20 @@ export async function loginTeacherController(req, res) {
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Invalid credentials. Please try again"));
     }
+
+    const session = await getSessionService({school: admin['_id'], status: "active"});
+    if (!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
     if (guestTeacher && platform === "web") {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Guest teacher does not support on web"));
     }
     let section;
     let Class;
-    if(currentTeacher['section']){
-      section = await getSectionService({_id: currentTeacher['section']}); 
-      Class = await getClassService({ _id: section["classId"] });
+    const teacherSectionSession = await getTeacherSectionSessionService({ teacher: currentTeacher['_id'], session: session['_id'] });
+    if (teacherSectionSession) {
+      section = teacherSectionSession.section;
+      Class = teacherSectionSession.classInfo;
     }
     // if (!section) {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
@@ -77,7 +85,7 @@ export async function loginTeacherController(req, res) {
     }
 
     const accessToken = getAccessTokenService({
-        role: teacher ? (teacher['section'] ? "classTeacher" : "teacher") : "guestTeacher",
+      role: teacher ? (teacher['section'] ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
       sectionId: section? section["_id"]:"",
@@ -612,9 +620,17 @@ export async function getTeacherController(req, res) {
 
 export async function getAllNonSectionTeacherController(req, res) {
   try {
+    const sessionId = req.params.sessionId;
     const adminId = req.adminId;
-    const teachers = await getTeachersService({ admin: adminId, section: null, isActive: true });
-    return res.send(success(200, teachers));
+    const session = await getSectionService({_id: sessionId});
+    if (!session) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid session Id"));
+    }
+    const teachers = await getTeachersService({ admin: adminId, isActive: true });
+    const assignedTeachers = await getTeacherSectionSessionsService({ session: sessionId }, { teacher: 1 });
+    const assignedTeacherIds = assignedTeachers.map(t => t.teacher.toString());
+    const nonSectionTeachers = teachers.filter(teacher => !assignedTeacherIds.includes(teacher._id.toString()));
+    return res.send(success(200, nonSectionTeachers));
   } catch (err) {
     return res.send(error(500, err.message));
   }
