@@ -7,7 +7,7 @@ import {
   loginTeacherController,
   getAllTeacherOfAdminController,
   getTeacherController,
-  getAllNonSectionTeacherContropller,
+  getAllNonSectionTeacherController,
   refreshAccessTokenController,
 } from "../controllers/teacher.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";

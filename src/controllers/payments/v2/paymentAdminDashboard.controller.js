@@ -83,7 +83,28 @@ export async function getPaymentAdminDashboardData(req, res) {
 
     const totalAdvancedAmount = advanceAmount[0]?.totalAdvancedAmount || 0;
 
-    return res.status(200).send(success(200, { totalPaidAmount, totalTransactions, pendingAmount, totalAdvancedAmount }));
+    const lateFeeFilter = { school: convertToMongoId(adminId) };
+    if (sessionId) lateFeeFilter.session = convertToMongoId(sessionId);
+    if (classId) lateFeeFilter.classId = convertToMongoId(classId);
+    if (sectionId) lateFeeFilter.section = convertToMongoId(sectionId);
+    if (sessionStudentId) lateFeeFilter.sessionStudent = convertToMongoId(sessionStudentId);
+
+    // Calculate total late fee from studentFeeInstallments
+    const lateFeeResult = await getStudentFeeInstallmentsPipelineService([
+      {
+        $match: lateFeeFilter
+      },
+      {
+        $group: {
+          _id: null,
+          totalLateFee: { $sum: '$lateFeeApplied' }
+        }
+      }
+    ]);
+
+    const totalLateFee = lateFeeResult[0]?.totalLateFee || 0;
+
+    return res.status(200).send(success(200, { totalPaidAmount, totalTransactions, pendingAmount, totalAdvancedAmount, totalLateFee }));
   } catch (error) {
     console.error('Error fetching payment admin dashboard data:', error);
     res.status(500).json({ error: 'Failed to fetch payment admin dashboard data' });
