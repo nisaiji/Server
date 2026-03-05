@@ -7,7 +7,7 @@ import {
   loginTeacherController,
   getAllTeacherOfAdminController,
   getTeacherController,
-  getAllNonSectionTeacherController,
+  getAllNonSectionTeacherContropller,
   refreshAccessTokenController,
 } from "../controllers/teacher.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
@@ -57,7 +57,7 @@ teacherRouter.get(
 );
 
 teacherRouter.get(
-  "/unassigned",
+  "/unassigned/:sessionId",
   adminAuthenticate,
   getAllNonSectionTeacherController
 );

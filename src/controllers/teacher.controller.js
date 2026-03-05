@@ -622,7 +622,7 @@ export async function getAllNonSectionTeacherController(req, res) {
   try {
     const sessionId = req.params.sessionId;
     const adminId = req.adminId;
-    const session = await getSectionService({_id: sessionId});
+    const session = await getSessionService({_id: sessionId});
     if (!session) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid session Id"));
     }
