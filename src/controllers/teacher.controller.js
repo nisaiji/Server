@@ -73,8 +73,10 @@ export async function loginTeacherController(req, res) {
     let Class;
     const teacherSectionSession = await getTeacherSectionSessionService({ teacher: currentTeacher['_id'], session: session['_id'] });
     if (teacherSectionSession) {
-      section = teacherSectionSession.section;
-      Class = teacherSectionSession.classInfo;
+      [section, Class] = await Promise.all([
+        getSectionService({ _id: teacherSectionSession.section}),
+        getClassService({ _id: teacherSectionSession.classInfo})
+      ]);
     }
     // if (!section) {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
@@ -85,7 +87,7 @@ export async function loginTeacherController(req, res) {
     }
 
     const accessToken = getAccessTokenService({
-      role: teacher ? (teacher['section'] ? "classTeacher" : "teacher") : "guestTeacher",
+      role: teacher ? (teacherSectionSession ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
       sectionId: section? section["_id"]:"",
@@ -102,7 +104,7 @@ export async function loginTeacherController(req, res) {
       username: currentTeacher["username"] ? currentTeacher["username"] : "",
     });
     const refreshToken = getRefreshTokenService({
-      role: teacher ? (teacher['section'] ? "classTeacher" : "teacher") : "guestTeacher",
+      role: teacher ? (teacherSectionSession ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
       sectionId: section?section["_id"]:"",
