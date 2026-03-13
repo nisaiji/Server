@@ -50,7 +50,7 @@ teacherRouter.get(
   getTeacherController
 );
 
-teacherRouter.get(
+teacherRouter.post(
   "/all", 
   adminAuthenticate, 
   getAllTeacherOfAdminController

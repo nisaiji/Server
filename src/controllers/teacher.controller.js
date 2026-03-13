@@ -142,35 +142,61 @@ export async function refreshAccessTokenController(req, res) {
 export async function getAllTeacherOfAdminController(req, res) {
   try {
     const adminId = req.adminId;
+    const {sessionId} = req.body;
     const teachers = await getTeachersPipelineService([
       {
         $match: { admin: convertToMongoId(adminId) }
       },
       {
         $lookup: {
-          from: "sections",
-          localField: "section",
-          foreignField: "_id",
-          as: "section"
-        }
-      },
-      {
-         $unwind: {
-           path: "$section", 
-           preserveNullAndEmptyArrays: true
-         }
-      },
-      {
-        $lookup: {
-          from: "classes",
-          localField: "section.classId",
-          foreignField: "_id",
-          as:"class"
+          from: "teachersectionsessions",
+          let: { teacherId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$teacher", "$$teacherId"] },
+                    { $eq: ["$session", convertToMongoId(sessionId)] }
+                  ]
+                }
+              }
+            },
+            {
+              $lookup: {
+                from: "sections",
+                localField: "section",
+                foreignField: "_id",
+                as: "sectionInfo"
+              }
+            },
+            {
+              $unwind: {
+                path: "$sectionInfo",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: "classes",
+                localField: "classInfo",
+                foreignField: "_id",
+                as: "classInfo"
+              }
+            },
+            {
+              $unwind: {
+                path: "$classInfo",
+                preserveNullAndEmptyArrays: true
+              }
+            }
+          ],
+          as: "teacherSectionSession"
         }
       },
       {
         $unwind: {
-          path: "$class",
+          path: "$teacherSectionSession",
           preserveNullAndEmptyArrays: true
         }
       },
@@ -265,23 +291,23 @@ export async function getAllTeacherOfAdminController(req, res) {
           photo: "$photo",
           forgetPasswordCount: "$forgetPasswordCount",
           leaveRequestCount: "$leaveRequestCount",
-          section: "$section",
+          section: "$teacherSectionSession.sectionInfo",
           admin: "$admin",
           createdAt: "$createdAt",
           updatedAt: "$updatedAt",
-          sectionId: "$section._id",
-          sectionName: "$section.name",
-          sectionStudentCount: "$section.studentCount",
-          sectionStartTime: "$section.startTime",
-          classId: "$class._id",
-          className: "$class.name",
-          sectionCountInClass: { $size: { $ifNull: ["$class.section", []] } },
+          sectionId: "$teacherSectionSession.sectionInfo._id",
+          sectionName: "$teacherSectionSession.sectionInfo.name",
+          sectionStudentCount: "$teacherSectionSession.sectionInfo.studentCount",
+          sectionStartTime: "$teacherSectionSession.sectionInfo.startTime",
+          classId: "$teacherSectionSession.classInfo._id",
+          className: "$teacherSectionSession.classInfo.name",
+          sectionCountInClass: { $size: { $ifNull: ["$teacherSectionSession.classInfo.section", []] } },
           sectionSubjects: "$sectionSubjects",
         }
       },
       {
         $project: {
-          section: 0,
+          teacherSectionSession: 0,
           _id: 0
         }
       }
