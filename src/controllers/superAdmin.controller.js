@@ -4,7 +4,7 @@ import { matchPasswordService, hashPasswordService } from "../services/password.
 import { StatusCodes } from "http-status-codes";
 import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
 import { error, success } from "../utills/responseWrapper.js";
-import { getAdminCountService, getAdminService, getAdminsService, updateAdminService } from "../services/admin.services.js";
+import { getAdminCountService, getAdminService, getAdminsPipelineService, getAdminsService, updateAdminService } from "../services/admin.services.js";
 import { getCustomerSupportQueriesService } from "../services/customerSupport.services.js";
 
 export async function registerSuperAdminController(req, res) {
@@ -104,7 +104,44 @@ export async function getAdminsController(req, res){
     const limitNum = parseInt(limit);
     const skipNum = (pageNum-1)*limitNum;
     
-    const admins = await getAdminsService(filter, {username:1}, skipNum, limitNum);
+    // const admins = await getAdminsService(filter, {username:1}, skipNum, limitNum);
+    const admins = await getAdminsPipelineService([
+      {
+        $match: filter
+      },
+      {
+        $lookup: {
+          from: 'marchantpaymentconfigs',
+          localField: 'marchantPaymentConfig',
+          foreignField: '_id',
+          as: 'marchantPaymentConfig',
+          pipeline: [{
+            $project: {
+              zohoClientId: 1,
+              zohoAccountId: 1,
+              accessTokenExpiresAt: 1
+            }
+          }]
+        }
+      },
+      {
+        $unwind: {
+          path: '$marchantPaymentConfig',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+      {
+        $skip: skipNum,
+      },
+      {
+        $limit: parseInt(limitNum),
+      },
+    ])
     const totalAdmins = await getAdminCountService(filter);
     const totalPages = Math.ceil(totalAdmins / limitNum);
 
