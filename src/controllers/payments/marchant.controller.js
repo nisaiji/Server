@@ -3,11 +3,11 @@ import { createMarchantPaymentConfigService, getMarchantPaymentConfigService, up
 
 export async function createOrUpdateMarchantController(req, res) {
   try {
-    const { schoolId, zohoClientId, zohoClientSecret, zohoAccountId } = req.body;
+    const { schoolId, zohoClientId, zohoClientSecret, zohoAccountId, accessToken, refreshToken, tokenExpiresAt } = req.body;
     const adminId = req.adminId;
     const marchant = await getMarchantPaymentConfigService({ school: schoolId });
     if (!marchant) {
-      await createMarchantPaymentConfigService({ school: schoolId, zohoClientId, zohoClientSecret, zohoAccountId });
+      await createMarchantPaymentConfigService({ school: schoolId, zohoClientId, zohoClientSecret, zohoAccountId, zohoAccessToken: accessToken, zohoRefreshToken: refreshToken, accessTokenExpiresAt: tokenExpiresAt });
       return res.status(StatusCodes.OK).json({ message: "Marchant payment config created successfully" });
     }
 
@@ -15,6 +15,9 @@ export async function createOrUpdateMarchantController(req, res) {
     if(zohoClientId) params.zohoClientId = zohoClientId;
     if(zohoClientSecret) params.zohoClientSecret = zohoClientSecret;
     if(zohoAccountId) params.zohoAccountId = zohoAccountId;
+    if(accessToken) params.zohoAccessToken = accessToken;
+    if(refreshToken) params.zohoRefreshToken = refreshToken;
+    if(tokenExpiresAt) params.accessTokenExpiresAt = tokenExpiresAt;
 
     await updateMarchantPaymentConfigService({_id: marchant['_id']}, params);
     return res.status(StatusCodes.OK).json({ message: "Marchant payment config updated successfully" });
