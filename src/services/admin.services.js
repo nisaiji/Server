@@ -46,3 +46,11 @@ export async function updateAdminService(filter, update){
   }
 }
 
+export async function getAdminsPipelineService(pipeline){
+  try {
+    const admins = await adminModel.aggregate(pipeline).exec();
+    return admins;
+  } catch (error) {
+    throw error;    
+  }
+}
