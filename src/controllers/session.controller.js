@@ -9,9 +9,9 @@ export async function createSessionController(req, res) {
     const adminId = req.adminId;
     const march31UTC = new Date(Date.UTC(academicStartYear + 1, 2, 31, 0, 0, 0));
     const april1UTC = new Date(Date.UTC(academicStartYear, 3, 1, 0, 0, 0));
-    if(april1UTC <= new Date() ) {
-      await updateSessionsService({ school: convertToMongoId(adminId), status: "active" }, { isCurrent: false, status: 'completed' });
-    }
+    // if(april1UTC <= new Date() ) {
+    //   await updateSessionsService({ school: convertToMongoId(adminId), status: "active" }, { isCurrent: false, status: 'completed' });
+    // }
 
     const sessionData = {
       startDate: april1UTC,
@@ -19,7 +19,8 @@ export async function createSessionController(req, res) {
       academicStartYear,
       academicEndYear,
       school: adminId,
-      status: (april1UTC <= new Date()) ? "active" : "upcoming"
+      // status: (april1UTC <= new Date()) ? "active" : "upcoming"
+      status:  "upcoming"
     };
 
     const session = await getSessionService({school: adminId, academicStartYear, academicEndYear});
