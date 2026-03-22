@@ -497,30 +497,59 @@ export async function getSectionStudentsExamMarksController(req, res) {
       {
         $lookup: {
           from: "exams",
-          let: { examId: convertToMongoId(examId) },
+          let: { examId: convertToMongoId(examId), sectionId: convertToMongoId(sectionId) },
           pipeline: [
             {
               $match: {
                 $expr: { $eq: ["$_id", "$$examId"] }
               }
             },
-            // {
-            //   $unwind: "$subjects"
-            // },
-            // {
-            //   $lookup: {
-            //     from: "subjects",
-            //     localField: "subjects.subject",
-            //     foreignField: "_id",
-            //     as: "subject"
-            //   }
-            // },
             {
-              $project: {
-                examId: '$_id',
-                examName: '$name',
-                examType: '$type',
-                subjects: '$subjects'
+              $unwind: "$subjects"
+            },
+            {
+              $lookup: {
+                from: "teachersubjectsections",
+                let: { subjectId: "$subjects.subject", sectionId: "$$sectionId" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$subject", "$$subjectId"] },
+                          { $eq: ["$section", "$$sectionId"] }
+                        ]
+                      }
+                    }
+                  }
+                ],
+                as: "teacherSubjectSection"
+              }
+            },
+            {
+              $unwind: {
+                path: "$teacherSubjectSection",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $addFields: {
+                "subjects.isMainSubject": {
+                  $cond: {
+                    if: { $ifNull: ["$teacherSubjectSection.isMainSubject", false] },
+                    then: true,
+                    else: false
+                  }
+                }
+              }
+            },
+            {
+              $group: {
+                _id: "$_id",
+                examId: { $first: "$_id" },
+                examName: { $first: "$name" },
+                examType: { $first: "$type" },
+                subjects: { $push: "$subjects" }
               }
             }
           ],
