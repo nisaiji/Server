@@ -13,6 +13,12 @@ import { updateSchoolParentsService } from "../../services/v2/schoolParent.servi
 import { getHolidayPipelineService } from "../../services/holiday.service.js";
 import { getWorkdayPipelineService } from "../../services/workDay.services.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
+import {
+  registerParentPasswordChangeRequestService,
+  getParentPasswordChangeRequestService,
+  getParentPasswordChangeRequestsService,
+  updateParentPasswordChangeRequestService
+} from "../../services/parentPasswordChangeRequest.service.js";
 
 export async function parentSendOtpToPhoneController (req, res) {
   try {
@@ -1073,5 +1079,114 @@ export async function refreshParentAccessTokenController(req, res) {
     return res.status(StatusCodes.OK).send(success(200, { accessToken }));
   } catch (err) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function requestParentPasswordChangeController(req, res) {
+  try {
+    const { phone } = req.body;
+
+    const parent = await getParentService({ phone, isActive: true });
+    if (!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+    }
+
+    // Check for existing pending request
+    const existingRequest = await getParentPasswordChangeRequestService({
+      parent: parent._id,
+      status: 'pending'
+    });
+
+    if (existingRequest) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Password change request already exists"));
+    }
+
+    const requestObj = {
+      parentId: parent._id
+    };
+
+    const passwordChangeRequest = await registerParentPasswordChangeRequestService(requestObj);
+
+    return res.status(StatusCodes.OK).send(success(200, {
+      message: "Password change request created successfully",
+      requestId: passwordChangeRequest._id
+    }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function verifyAndChangePasswordController(req, res) {
+  try {
+    const { requestId, token, newPassword } = req.body;
+
+    const passwordChangeRequest = await getParentPasswordChangeRequestService({
+      _id: requestId,
+      status: 'pending'
+    });
+
+    if (!passwordChangeRequest) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid or expired password change request"));
+    }
+
+    // Verify token with MSG91
+    try {
+      const response = await verifyMsg91Token(token);
+      if(response?.type !== 'success') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    }
+    } catch (verifyError) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Token verification failed"));
+    }
+
+    // Hash new password
+    const hashedPassword = await hashPasswordService(newPassword);
+
+    // Update parent password
+    await updateParentService(
+      { _id: passwordChangeRequest.parent },
+      { password: hashedPassword }
+    );
+
+    // Mark request as used
+    await updateParentPasswordChangeRequestService(
+      { _id: requestId },
+      { status: 'completed' }
+    );
+
+    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getParentPasswordChangeRequestsController(req, res) {
+  try {
+    const parentId = req.parentId;
+    const { page = 1, limit = 10 } = req.query;
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+
+    const requests = await getParentPasswordChangeRequestsService(
+      { parentId }
+    );
+
+    const totalRequests = requests.length;
+    const startIndex = (pageNum - 1) * limitNum;
+    const endIndex = startIndex + limitNum;
+    const paginatedRequests = requests.slice(startIndex, endIndex);
+
+    const totalPages = Math.ceil(totalRequests / limitNum);
+
+    return res.status(StatusCodes.OK).send(success(200, {
+      requests: paginatedRequests,
+      currentPage: pageNum,
+      totalPages,
+      totalRequests,
+      pageSize: limitNum
+    }));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
