@@ -10,6 +10,8 @@ import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.
 import { getGuestTeacherService } from "../services/guestTeacher.service.js";
 import { getAdminService } from "../services/admin.services.js";
 import { getSessionService } from "../services/session.services.js";
+import xlsx from 'xlsx';
+import fs from 'fs/promises';
 
 export async function registerTeacherController(req, res) {
   try {
@@ -689,6 +691,82 @@ export async function changePasswordTeacherController(req, res) {
 export async function assignTeacherAsGuestTeacherToSectionController(req, res) {
   try {
     const {teacherId, sectionId} = req.body;
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function registerTeachersFromExcelController(req, res) {
+  try {
+    const file = req.file;
+    const adminId = req.adminId;
+
+    if (!file) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Excel file is required"));
+    }
+
+    // Expected Excel columns based on teacher model:
+    // firstname (required), lastname, phone (required), email, gender, dob, bloodGroup, 
+    // university, degree, address, city, district, state, country, pincode
+    
+    const workbook = xlsx.readFile(file.path);
+    const sheetName = workbook.SheetNames[0];
+    const teachers = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    let registeredCount = 0;
+    const errors = [];
+
+    for (const teacherData of teachers) {
+      try {
+        const { firstname, lastname, phone, email, gender, dob, bloodGroup, university, degree, address, city, district, state, country, pincode } = teacherData;
+
+        if (!firstname || !phone) {
+          errors.push(`Row with firstname: ${firstname || 'N/A'} - Missing required fields (firstname, phone)`);
+          continue;
+        }
+
+        const existingTeacher = await getTeacherService({ phone, isActive: true });
+        if (existingTeacher) {
+          errors.push(`Teacher with phone ${phone} already exists`);
+          continue;
+        }
+
+        const password = firstname + "@" + phone;
+        const hashedPassword = await hashPasswordService(password);
+
+        const teacherObj = {
+          firstname,
+          lastname: lastname || '',
+          phone,
+          email: email || '',
+          gender: gender || '',
+          dob: dob || '',
+          bloodGroup: bloodGroup || '',
+          university: university || '',
+          degree: degree || '',
+          address: address || '',
+          city: city || '',
+          district: district || '',
+          state: state || '',
+          country: country || '',
+          pincode: pincode || '',
+          password: hashedPassword,
+          admin: adminId
+        };
+
+        await registerTeacherService(teacherObj);
+        registeredCount++;
+      } catch (err) {
+        errors.push(`Error registering teacher ${teacherData.firstname || 'Unknown'}: ${err.message}`);
+      }
+    }
+
+    await fs.unlink(file.path);
+
+    const message = `${registeredCount} teachers registered successfully`;
+    const response = { message, registeredCount, errors };
+
+    return res.status(StatusCodes.OK).send(success(201, response));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

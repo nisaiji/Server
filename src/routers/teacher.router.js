@@ -9,6 +9,7 @@ import {
   getTeacherController,
   getAllNonSectionTeacherController,
   refreshAccessTokenController,
+  registerTeachersFromExcelController,
 } from "../controllers/teacher.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import {
@@ -27,6 +28,7 @@ import {
 } from "../middlewares/validation/teacher.validation.middleware.js";
 import { validateImageSizeMiddleware } from "../middlewares/teacher.middleware.js";
 import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
+import upload from "../middlewares/multer.middleware.js";
 
 const teacherRouter = express.Router();
 
@@ -35,6 +37,13 @@ teacherRouter.post(
   adminAuthenticate,
   registerTeacherValidation,
   registerTeacherController
+);
+
+teacherRouter.post(
+  "/bulk",
+  adminAuthenticate,
+  upload,
+  registerTeachersFromExcelController
 );
 
 teacherRouter.post(
