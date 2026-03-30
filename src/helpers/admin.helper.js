@@ -44,3 +44,46 @@ export function constructStudentXlsxTemplate() {
   worksheet.insertRow(2, row);
   return workbook;
 }
+
+export function constructTeacherXlsxTemplate() {
+  let workbook = new exceljs.Workbook();
+  let worksheet = workbook.addWorksheet("Teachers");
+
+  let columns = [
+    "firstname",
+    "lastname",
+    "phone",
+    "email",
+    "gender",
+    "dob",
+    "bloodGroup",
+    "university",
+    "degree",
+    "address",
+    "city",
+    "district",
+    "state",
+    "country",
+    "pincode"
+  ];
+  let row = [
+    "(Required)",
+    "(Optional)",
+    "(Required)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)",
+    "(Optional)"
+  ];
+  worksheet.columns = columns.map((el) => ({ header: el, key: el, width: 20 }));
+  worksheet.insertRow(2, row);
+  return workbook;
+}

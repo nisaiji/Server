@@ -1,5 +1,5 @@
 import express from "express";
-import {getAdminController, getStudentDemoExcelSheetController, loginAdminController, refreshAccessTokenController, registerAdminController, updateAdminController} from "../controllers/admin.controller.js";
+import {getAdminController, getStudentDemoExcelSheetController, getTeacherDemoExcelSheetController, loginAdminController, refreshAccessTokenController, registerAdminController, updateAdminController} from "../controllers/admin.controller.js";
 import { adminAuthenticate, deactivatedAdminAuthenticate, refreshTokenAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import {adminAddressValidation, adminDetailsValidation, adminFcmTokenValidation, adminLoginValidation, adminProfileUpdateValidation,adminRegisterValidation, adminSocialProfileUpdateValidation, photoUpdateAdminValidation } from "../middlewares/validation/admin.validation.middleware.js"; 
 import { validateImageSizeMiddleware } from "../middlewares/teacher.middleware.js";
@@ -16,5 +16,6 @@ adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation
 adminRouter.put("/photo-upload", adminAuthenticate,photoUpdateAdminValidation, validateImageSizeMiddleware, updateAdminController);
 adminRouter.get("/", deactivatedAdminAuthenticate, getAdminController);
 adminRouter.get("/students-excelsheet", adminAuthenticate, getStudentDemoExcelSheetController);
+adminRouter.get("/teachers-excelsheet", adminAuthenticate, getTeacherDemoExcelSheetController);
 
 export default adminRouter;
