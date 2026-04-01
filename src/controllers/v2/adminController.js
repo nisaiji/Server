@@ -372,7 +372,8 @@ export async function adminPhoneVerifyController(req, res) {
       isActive: admin['isActive'],
       phoneVerified: admin['status'] !== 'unVerified',
       emailVerified: admin['status'] === 'verified',
-      passwordUpdated: admin['password'] ? true : false
+      passwordUpdated: admin['password'] ? true : false,
+      isSessionCreated: false
     })
 
     res.status(StatusCodes.OK).send(success(200,  { msg: "OTP verified successfully", token: jwttoken}));
@@ -408,25 +409,26 @@ export async function adminEmailVerifyController(req, res) {
       active: admin["isActive"],
       pincode: admin['pincode'] ? admin['pincode'] : '',
       isLoginAlready: admin['isLoginAlready'],
+      isSessionCreated: false
     });
 
-    // create session
-    const currentYear = new Date().getFullYear();
-    const march31UTC = new Date(Date.UTC(currentYear + 1, 2, 31, 0, 0, 0));
-    const april1UTC = new Date(Date.UTC(currentYear, 3, 1, 0, 0, 0));
+    // // create session
+    // const currentYear = new Date().getFullYear();
+    // const march31UTC = new Date(Date.UTC(currentYear + 1, 2, 31, 0, 0, 0));
+    // const april1UTC = new Date(Date.UTC(currentYear, 3, 1, 0, 0, 0));
 
-    const session = await getSessionService({ school: admin['_id'], academicStartYear: currentYear, academicEndYear: currentYear + 1 });
-    if(!session) {
-      await registerSessionService({
-        school: admin['_id'],
-        isCurrent: true, 
-        status: "active", 
-        endDate: march31UTC,
-        startDate: april1UTC,
-        academicStartYear: currentYear,
-        academicEndYear: currentYear + 1
-      });
-    }
+    // const session = await getSessionService({ school: admin['_id'], academicStartYear: currentYear, academicEndYear: currentYear + 1 });
+    // if(!session) {
+    //   await registerSessionService({
+    //     school: admin['_id'],
+    //     isCurrent: true, 
+    //     status: "active", 
+    //     endDate: march31UTC,
+    //     startDate: april1UTC,
+    //     academicStartYear: currentYear,
+    //     academicEndYear: currentYear + 1
+    //   });
+    // }
 
     return res.status(StatusCodes.OK).send(success(200, {message: "Email updated successfully", token: jwtToken}));
   } catch (err) {

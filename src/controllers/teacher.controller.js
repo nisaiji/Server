@@ -716,6 +716,7 @@ export async function registerTeachersFromExcelController(req, res) {
     let registeredCount = 0;
     const errors = [];
 
+    teachers.shift();
     for (const teacherData of teachers) {
       try {
         const { firstname, lastname, phone, email, gender, dob, bloodGroup, university, degree, address, city, district, state, country, pincode } = teacherData;
