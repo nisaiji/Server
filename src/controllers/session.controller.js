@@ -5,13 +5,10 @@ import { convertToMongoId } from "../services/mongoose.services.js";
 
 export async function createSessionController(req, res) {
   try {
-    const { academicStartYear, academicEndYear } = req.body;
+    const { academicStartYear, academicEndYear, status } = req.body;
     const adminId = req.adminId;
     const march31UTC = new Date(Date.UTC(academicStartYear + 1, 2, 31, 0, 0, 0));
     const april1UTC = new Date(Date.UTC(academicStartYear, 3, 1, 0, 0, 0));
-    // if(april1UTC <= new Date() ) {
-    //   await updateSessionsService({ school: convertToMongoId(adminId), status: "active" }, { isCurrent: false, status: 'completed' });
-    // }
 
     const sessionData = {
       startDate: april1UTC,
@@ -19,11 +16,10 @@ export async function createSessionController(req, res) {
       academicStartYear,
       academicEndYear,
       school: adminId,
-      // status: (april1UTC <= new Date()) ? "active" : "upcoming"
-      status:  "upcoming"
+      status
     };
 
-    const session = await getSessionService({school: adminId, academicStartYear, academicEndYear});
+    const session = await getSessionService({school: adminId, status});
     if(session) {
     return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Session already created"));
     }

@@ -147,7 +147,7 @@ export async function getAllTeacherOfAdminController(req, res) {
     const {sessionId} = req.body;
     const teachers = await getTeachersPipelineService([
       {
-        $match: { admin: convertToMongoId(adminId) }
+        $match: { admin: convertToMongoId(adminId), isActive: true }
       },
       {
         $lookup: {

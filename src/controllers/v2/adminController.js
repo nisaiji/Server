@@ -322,6 +322,8 @@ export async function adminLoginController(req, res) {
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
     }
+
+    const session = await getSessionService({ school: admin['_id'], status: "active" });
     const accessToken = getAccessTokenService({
       role: "admin",
       username: admin["username"] ? admin['username'] : '',
@@ -331,7 +333,8 @@ export async function adminLoginController(req, res) {
       phone: admin["phone"],
       status: admin["status"],
       active: admin["isActive"],
-      pincode: admin['pincode'] ? admin['pincode'] : ''
+      pincode: admin['pincode'] ? admin['pincode'] : '',
+      isSessionCreated: !!session
     });
 
     const refreshToken = getRefreshTokenService({
@@ -342,7 +345,8 @@ export async function adminLoginController(req, res) {
       adminId: admin["_id"],
       phone: admin["phone"],
       active: admin["isActive"],
-      pincode: admin['pincode'] ? admin['pincode'] : ''
+      pincode: admin['pincode'] ? admin['pincode'] : '',
+      isSessionCreated: !!session
     });
     return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, username: admin.username }));
   } catch (err) {
