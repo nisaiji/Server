@@ -1084,7 +1084,7 @@ export async function refreshParentAccessTokenController(req, res) {
 
 export async function requestParentPasswordChangeController(req, res) {
   try {
-    const { phone } = req.body;
+    const { phone, reason = "forgetPassword", description } = req.body;
 
     const parent = await getParentService({ phone, isActive: true });
     if (!parent) {
@@ -1102,7 +1102,9 @@ export async function requestParentPasswordChangeController(req, res) {
     }
 
     const requestObj = {
-      parentId: parent._id
+      parent: parent._id,
+      reason,
+      ...(description && { description })
     };
 
     const passwordChangeRequest = await registerParentPasswordChangeRequestService(requestObj);
