@@ -15,7 +15,7 @@ const transferCertificateRequestRouter = express.Router();
 // Teacher Routes
 transferCertificateRequestRouter.post(
   "/teacher/apply",
-  teacherAuthenticate,
+  adminAuthenticate,
   applyTransferCertificateController
 );
 

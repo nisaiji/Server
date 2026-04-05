@@ -14,7 +14,7 @@ import { getParentService } from "../services/v2/parent.services.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 
-// Teacher API - Apply for Transfer Certificate
+// Admin API - Apply for Transfer Certificate
 export async function applyTransferCertificateController(req, res) {
   try {
     const {
@@ -33,7 +33,7 @@ export async function applyTransferCertificateController(req, res) {
       nocClearance,
     } = req.body;
 
-    const teacherId = req.teacherId;
+    // const teacherId = req.teacherId;
     const adminId = req.adminId;
 
     // Validate student
