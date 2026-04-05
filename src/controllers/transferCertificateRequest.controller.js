@@ -25,12 +25,7 @@ export async function applyTransferCertificateController(req, res) {
       lastAttendanceDate,
       conduct,
       promotionStatus,
-      libraryClearance,
-      feeClearance,
-      transportClearance,
-      labClearance,
-      sportsClearance,
-      nocClearance,
+      clearanceStatus
     } = req.body;
 
     // const teacherId = req.teacherId;
@@ -84,12 +79,9 @@ export async function applyTransferCertificateController(req, res) {
       reason,
       reasonDescription,
       lastAttendanceDate: new Date(lastAttendanceDate),
-      feeStatus: feeClearance ? 'cleared' : 'pending',
-      libraryStatus: libraryClearance ? 'cleared' : 'pending',
-      transportStatus: transportClearance ? 'cleared' : 'pending',
-      labStatus: labClearance ? 'cleared' : 'pending',
-      sportsStatus: sportsClearance ? 'cleared' : 'pending',
-      nocStatus: nocClearance ? 'cleared' : 'pending',
+      conduct,
+      promotionStatus,
+      clearanceStatus
     };
 
     const tcRequest = await registerTransferCertificateRequestService(requestData);

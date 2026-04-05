@@ -108,70 +108,16 @@ const transferCertificateRequestSchema = new mongoose.Schema({
     enum: ['excellent', 'verygood', 'good', 'satisfactory', 'needsImprovement'],
     default: 'good'
   },
-  
-  // Fee Status
-  feeStatus: {
-    type: String,
-    enum: ['cleared', 'pending', 'partial'],
-    required: true,
-    default: 'pending'
-  },
-  pendingFeeAmount: {
-    type: Number,
-    default: 0
-  },
-  feeRemarks: {
-    type: String
-  },
-
-  // Library Clearances
-  libraryStatus: {
-    type: String,
-    enum: ['cleared', 'pending', 'booksNotReturned'],
-    default: 'pending'
-  },
-  libraryRemarks: {
-    type: String
-  },
-
-  // Transport Clearances
-  transportFeeStatus: {
-    type: String,
-    enum: ['cleared', 'pending', 'partial'],
-    default: 'pending'
-  },
-  transportFeeRemarks: {
-    type: String
-  },
-
-  // Sports Clearances
-  sportsStatus: {
-    type: String,
-    enum: ['cleared', 'pending', 'partial'],
-    default: 'pending'
-  },
-  sportsRemarks: {
-    type: String
-  },
-  // Lab Clearances
-  labStatus: {
-    type: String,
-    enum: ['cleared', 'pending', 'partial'],
-    default: 'pending'
-  },
-  labRemarks: {
-    type: String
-  },
-
-  // NOC Clearances
-  nocStatus: {
-    type: String,
-    enum: ['cleared', 'pending', 'partial'],
-    default: 'pending'
-  },
-  nocRemarks: {
-    type: String
-  },
+  clearanceStatus: [{
+    name: {
+      type: String,
+      required: true
+    },
+    status: {
+      type: Boolean,
+      default: false
+    }
+  }],
 
   // Request Status and Workflow
   status: {

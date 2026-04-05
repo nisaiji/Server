@@ -12,9 +12,9 @@ import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles
 
 const transferCertificateRequestRouter = express.Router();
 
-// Teacher Routes
+// Admin Routes
 transferCertificateRequestRouter.post(
-  "/teacher/apply",
+  "/admin/apply",
   adminAuthenticate,
   applyTransferCertificateController
 );
