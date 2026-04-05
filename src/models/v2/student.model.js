@@ -10,6 +10,9 @@ const studentSchema = mongoose.Schema({
     type: String,
     required: true
   },
+  guardianName: {
+    type: String
+  },
   studentId: {
     type: String
   },

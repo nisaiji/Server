@@ -20,7 +20,7 @@ import path from "path";
 
 export async function registerStudentAndSessionStudentController(req, res) {
   try {
-    const { firstname, lastname, gender, parentName, phone, email, qualification, occupation, address, age, parentAddress, parentGender, dob,  sectionId } = req.body;
+    const { firstname, lastname, gender, guardianName, parentName, phone, email, qualification, occupation, address, age, parentAddress, parentGender, dob,  sectionId } = req.body;
     const adminId = req.adminId;
 
     const section = await getSectionService({ _id:sectionId });
@@ -66,7 +66,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
     if (student) {
       return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
     }
-    const studentObj = { firstname, lastname, gender, schoolParent: schoolParent["_id"], section:sectionId, classId:classInfo["_id"], parent: parent['_id'], admin:adminId, ...(address && {address}), ...(dob && {dob}) };
+    const studentObj = { firstname, lastname, gender, guardianName, schoolParent: schoolParent["_id"], section:sectionId, classId:classInfo["_id"], parent: parent['_id'], admin:adminId, ...(address && {address}), ...(dob && {dob}) };
 
     student = await registerStudentService(studentObj);
     const sessionStudentObj = { section:sectionId, classId:classInfo["_id"], session: session['_id'], school:adminId, student: student['_id']};
@@ -354,6 +354,7 @@ export async function getSessionStudentSController(req,res) {
           studentId: "$student.studentId",
           firstname: "$student.firstname",
           lastname: "$student.lastname",
+          guardianName: "$student.guardianName",
           dob: "$student.dob",
           gender: "$student.gender",
           bloodGroup: "$student.bloodGroup",
