@@ -165,6 +165,7 @@ export async function updateStudentBySchoolController(req, res){
     if(req.body["state"]){ studentUpdate.state = req.body["state"]; }
     if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
     if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
+    if(req.body["guardianName"]){ studentUpdate.guardianName = req.body["guardianName"]; }
 
     if(req.body["phone"] && schoolParent['phone']!==req.body['phone']){
       const phone = req.body['phone'];
@@ -239,6 +240,7 @@ export async function updateStudentByParentController(req, res) {
     if(req.body["state"]){ studentUpdate.state = req.body["state"]; }
     if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
     if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
+    if(req.body["guardianName"]){ studentUpdate.guardianName = req.body["guardianName"]; }
 
     await updateStudentService({ _id:studentId }, studentUpdate);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    

@@ -46,7 +46,7 @@ export async function applyTransferCertificateController(req, res) {
     const [section, classInfo, session] = await Promise.all([
       getSectionService({ _id: sessionStudent.section }),
       getClassService({ _id: sessionStudent.classId }),
-      getSessionService({ school: adminId, session: sessionStudent.session })
+      getSessionService({ school: adminId, _id: sessionStudent.session })
     ]);
 
     if (!section || !classInfo || !session) {
@@ -150,8 +150,7 @@ export async function approveParentConsentController(req, res) {
     // Get TC request
     const tcRequest = await getTransferCertificateRequestService({ 
       _id: requestId, 
-      parent: parentId,
-      isActive: true 
+      parent: parentId
     });
 
     if (!tcRequest) {
@@ -174,7 +173,7 @@ export async function approveParentConsentController(req, res) {
 export async function getAdminTCRequestsController(req, res) {
   try {
     const adminId = req.adminId;
-    const { page = 1, limit = 10, sessionId, classId, sectionId, sessionStudentId } = req.query;
+    const { page = 1, limit = 10, sessionId, classId, sectionId, sessionStudentId, status } = req.query;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -197,6 +196,10 @@ export async function getAdminTCRequestsController(req, res) {
     }
     if (sessionStudentId) {
       matchFilter.sessionStudent = convertToMongoId(sessionStudentId);
+    }
+
+    if (status) {
+      matchFilter.status = status;
     }
 
     // Build aggregation pipeline
@@ -536,4 +539,3 @@ export async function getAdminTCRequestsController(req, res) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
-
