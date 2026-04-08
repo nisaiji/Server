@@ -181,8 +181,7 @@ export async function getAdminTCRequestsController(req, res) {
 
     // Build match filter
     const matchFilter = {
-      school: convertToMongoId(adminId),
-      isActive: true
+      school: convertToMongoId(adminId)
     };
 
     if (sessionId) {
