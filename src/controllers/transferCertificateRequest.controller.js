@@ -199,7 +199,8 @@ export async function getAdminTCRequestsController(req, res) {
     }
 
     if (status) {
-      matchFilter.status = status;
+      const statusArray = status.split(',').map(s => s.trim());
+      matchFilter.status = { $in: statusArray };
     }
 
     // Build aggregation pipeline
@@ -359,51 +360,6 @@ export async function getAdminTCRequestsController(req, res) {
       {
         $unwind: {
           path: '$sessionStudentInfo',
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $lookup: {
-          from: 'teachers',
-          localField: 'classTeacherApproval.approvedBy',
-          foreignField: '_id',
-          as: 'classTeacherInfo',
-          pipeline: [
-            {
-              $project: {
-                firstname: 1,
-                lastname: 1,
-                teacherId: 1
-              }
-            }
-          ]
-        }
-      },
-      {
-        $unwind: {
-          path: '$classTeacherInfo',
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $lookup: {
-          from: 'admins',
-          localField: 'principalApproval.approvedBy',
-          foreignField: '_id',
-          as: 'principalInfo',
-          pipeline: [
-            {
-              $project: {
-                username: 1,
-                schoolName: 1
-              }
-            }
-          ]
-        }
-      },
-      {
-        $unwind: {
-          path: '$principalInfo',
           preserveNullAndEmptyArrays: true
         }
       },
