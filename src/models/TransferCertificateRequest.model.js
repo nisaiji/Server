@@ -171,34 +171,6 @@ const transferCertificateRequestSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save middleware to generate certificate number
-transferCertificateRequestSchema.pre('save', async function(next) {
-  if (this.status === 'certificateGenerated' && !this.certificateNumber) {
-    const year = new Date().getFullYear();
-    let tcNumber;
-    let isUnique = false;
-    
-    // Generate unique random TC number
-    while (!isUnique) {
-      const randomString = Math.random().toString(36).substring(2, 6).toUpperCase();
-      tcNumber = `TC-${year}-${randomString}`;
-      
-      // Check if this TC number already exists
-      const existingTC = await this.constructor.findOne({
-        certificateNumber: tcNumber
-      });
-      
-      if (!existingTC) {
-        isUnique = true;
-      }
-    }
-    
-    this.certificateNumber = tcNumber;
-  }
-  next();
-});
-
-
 const TransferCertificateRequestModel = mongoose.model('TransferCertificateRequest', transferCertificateRequestSchema);
 
 export default TransferCertificateRequestModel;

@@ -14,6 +14,13 @@ import { getParentService } from "../services/v2/parent.services.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 
+// Generate unique TC number
+function generateUniqueTCNumber() {
+  const year = new Date().getFullYear();
+  const randomId = new mongoose.Types.ObjectId().toString().slice(-8).toUpperCase();
+  return `TC-${year}-${randomId}`;
+}
+
 // Admin API - Apply for Transfer Certificate
 export async function applyTransferCertificateController(req, res) {
   try {
@@ -65,6 +72,9 @@ export async function applyTransferCertificateController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Transfer certificate request already exists for this student"));
     }
 
+    // Generate unique TC number
+    const certificateNumber = generateUniqueTCNumber();
+
     // Create transfer certificate request
     const requestData = {
       student: studentId,
@@ -81,7 +91,8 @@ export async function applyTransferCertificateController(req, res) {
       lastAttendanceDate: new Date(lastAttendanceDate),
       conduct,
       promotionStatus,
-      clearanceStatus
+      clearanceStatus,
+      certificateNumber
     };
 
     const tcRequest = await registerTransferCertificateRequestService(requestData);
