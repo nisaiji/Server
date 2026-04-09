@@ -828,6 +828,7 @@ export async function searchStudentsController(req, res){
             state: "$student.state",
             country: "$student.country",
             pincode: "$student.pincode",
+            guardianName: "$student.guardianName",
 
             // schoolParent
             parentId: "$schoolParent._id",

@@ -100,7 +100,7 @@ export async function applyTransferCertificateController(req, res) {
 export async function getChildrenTCRequestsController(req, res) {
   try {
     const parentId = req.parentId;
-    const { page = 1, limit = 10, status } = req.query;
+    const { page = 1, limit = 10, status, studentId } = req.query;
 
     // Validate parent
     const parent = await getParentService({ _id: parentId, isActive: true });
@@ -112,7 +112,9 @@ export async function getChildrenTCRequestsController(req, res) {
     const result = await getTransferCertificateRequestsPipelineService([
       {
         $match: {
-          parent: convertToMongoId(parentId)
+          parent: convertToMongoId(parentId),
+          ...(studentId && { student: convertToMongoId(studentId) }),
+          ...(status && { status })
         }
       },
       {
@@ -161,7 +163,7 @@ export async function approveParentConsentController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Cannot modify completed or rejected request"));
     }
 
-    await updateRequestStatusService({_id: requestId}, {status: consent, parentApproved: consent === 'approvedByParent', parentNotified: true});
+    await updateTransferCertificateRequestService({_id: requestId}, {status: consent, parentApproved: consent === 'approvedByParent', parentNotified: true});
     return res.status(StatusCodes.OK).send(success(200, "TC request updated successfully"));
 
   } catch (err) {
