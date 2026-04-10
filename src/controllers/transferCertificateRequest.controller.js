@@ -13,6 +13,7 @@ import { getSessionService } from "../services/session.services.js";
 import { getParentService } from "../services/v2/parent.services.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
+import mongoose from "mongoose";
 
 // Generate unique TC number
 function generateUniqueTCNumber() {
