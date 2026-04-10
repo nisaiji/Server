@@ -102,29 +102,35 @@ export async function replaceTeacherController(req, res) {
   try {
     const adminId = req.adminId;
     const { sectionId, teacherId } = req.body;
-    const section = await getSectionService({_id:sectionId});
-    const session = await getSessionService({_id:section["session"]});
-    if(!session || session['status']==='completed') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! can't change section teacher")); 
-    }
-    if(!section) {
+    
+    const section = await getSectionService({_id: sectionId});
+    if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
     
-    const[teacher] = await Promise.all([
-      getTeacherService({_id:teacherId})
-    ]);
-    if(!teacher) {
+    const session = await getSessionService({_id: section["session"]});
+    if (!session || session['status'] === 'completed') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! can't change section teacher")); 
+    }
+    
+    const teacher = await getTeacherService({_id: teacherId});
+    if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
-    const teacherSession = await getTeacherSectionSessionService({teacher:teacherId, session:session["_id"]});
-    const sectionSession = await getTeacherSectionSessionService({section:sectionId, session:session["_id"]});
+    
+    const teacherSession = await getTeacherSectionSessionService({teacher: teacherId, session: session["_id"]});
+    const sectionSession = await getTeacherSectionSessionService({section: sectionId, session: session["_id"]});
 
-    if(teacherSession){
+    if (teacherSession) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher already assigned to section"));
     }
-   await updateTeacherSectionSessionService({_id: sectionSession["_id"]}, {teacher: teacherId});
-   await updateSectionService({_id: sectionId}, {teacher: teacherId});
+    
+    if (!sectionSession) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section session not found"));
+    }
+    
+    await updateTeacherSectionSessionService({_id: sectionSession["_id"]}, {teacher: teacherId});
+    await updateSectionService({_id: sectionId}, {teacher: teacherId});
    
     return res.status(StatusCodes.OK).send(success(200, "Teacher changed successfully"));
   } catch (err) {
