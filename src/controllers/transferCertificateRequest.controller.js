@@ -6,13 +6,13 @@ import {
   updateTransferCertificateRequestService,
   getTransferCertificateRequestsPipelineService,
 } from "../services/transferCertificateRequest.service.js";
-import { getStudentService } from "../services/student.service.js";
+import { getStudentService, updateStudentService } from "../services/student.service.js";
 import { getSectionService } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";
 import { getSessionService } from "../services/session.services.js";
 import { getParentService } from "../services/v2/parent.services.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
-import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
+import { getSessionStudentService, updateSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import mongoose from "mongoose";
 
 // Generate unique TC number
@@ -174,6 +174,15 @@ export async function approveParentConsentController(req, res) {
     if (tcRequest.status === 'completed' || tcRequest.status === 'rejected') {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Cannot modify completed or rejected request"));
     }
+    const student = await getStudentService({_id: tcRequest.student});
+    const sessionStudent = await getSessionStudentService({_id: tcRequest.sessionStudent});
+
+    if(!student || !sessionStudent){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student information not found"));
+    }
+
+    await updateStudentService({_id: tcRequest.student}, {isActive: consent === 'approvedByParent' ? false : true});
+    await updateSessionStudentService({_id: tcRequest.sessionStudent}, {isActive: consent === 'approvedByParent' ? false : true});
 
     await updateTransferCertificateRequestService({_id: requestId}, {status: consent, parentApproved: consent === 'approvedByParent', parentNotified: true});
     return res.status(StatusCodes.OK).send(success(200, "TC request updated successfully"));

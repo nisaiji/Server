@@ -4,7 +4,7 @@ import { deleteSectionService, getAllSection,getClassSections, getSectionService
 import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { getSessionService } from "../services/session.services.js";
-import { getTeacherSectionSessionService, registerTeacherSectionSessionService } from "../services/teacherSectionSession.service.js";
+import { getTeacherSectionSessionService, registerTeacherSectionSessionService, updateTeacherSectionSessionService } from "../services/teacherSectionSession.service.js";
 
 export async function registerSectionController(req, res) {
   try {
@@ -111,26 +111,21 @@ export async function replaceTeacherController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
     
-    const[prevTeacher, teacher] = await Promise.all([
-      getTeacherService({_id:section["teacher"]}),
+    const[teacher] = await Promise.all([
       getTeacherService({_id:teacherId})
-    ])
+    ]);
     if(!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
-    if(teacher["section"]){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(409, "Teacher already occupied"));
+    const teacherSession = await getTeacherSectionSessionService({teacher:teacherId, session:session["_id"]});
+    const sectionSession = await getTeacherSectionSessionService({section:sectionId, session:session["_id"]});
+
+    if(teacherSession){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher already assigned to section"));
     }
-
-    section["teacher"] = teacherId;
-    teacher["section"] = sectionId;
-    prevTeacher["section"] = null;
-
-    await Promise.all([
-      section.save(),
-      teacher.save(),
-      prevTeacher.save()
-    ])
+   await updateTeacherSectionSessionService({_id: sectionSession["_id"]}, {teacher: teacherId});
+   await updateSectionService({_id: sectionId}, {teacher: teacherId});
+   
     return res.status(StatusCodes.OK).send(success(200, "Teacher changed successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

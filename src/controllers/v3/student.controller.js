@@ -551,7 +551,7 @@ export async function getAttendancesController(req, res){
 export async function getStudentWithAllSessionStudentsController(req, res) {
   try { 
     const studentId = req.params.studentId;
-    const student = await getStudentService({_id: studentId});
+    const student = await getStudentService({_id: studentId, isActive: true});
     if(!student) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
@@ -560,6 +560,7 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
       {
         $match: {
           _id: convertToMongoId(studentId),
+          isActive: true
         }
       },
       {
@@ -946,7 +947,6 @@ export async function registerStudentsFromExcelController(req, res){
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
   }
 }
-
 
 export async function getSubjectsForStudentSectionController(req, res) {
   try {
