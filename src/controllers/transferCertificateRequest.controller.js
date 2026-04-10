@@ -405,6 +405,7 @@ export async function getAdminTCRequestsController(req, res) {
           reasonDescription: 1,
           requestType: 1,
           priority: 1,
+          promotionStatus : 1,
           certificateNumber: 1,
           lastAttendanceDate: 1,
           expectedLeavingDate: 1,
