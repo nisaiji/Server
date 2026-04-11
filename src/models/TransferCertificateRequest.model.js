@@ -82,6 +82,9 @@ const transferCertificateRequestSchema = new mongoose.Schema({
   expectedLeavingDate: {
     type: Date
   },
+  promotionStatus:{
+    type: String
+  },
   
   // New School Information (if transferring)
   newSchoolName: {
