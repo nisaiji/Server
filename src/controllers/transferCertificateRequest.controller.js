@@ -10,7 +10,7 @@ import { getStudentService, updateStudentService } from "../services/student.ser
 import { getSectionService } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";
 import { getSessionService } from "../services/session.services.js";
-import { getParentService } from "../services/v2/parent.services.js";
+import { getParentService, updateParentService } from "../services/v2/parent.services.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getSessionStudentService, updateSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import mongoose from "mongoose";
@@ -183,6 +183,10 @@ export async function approveParentConsentController(req, res) {
 
     await updateStudentService({_id: tcRequest.student}, {isActive: consent === 'approvedByParent' ? false : true});
     await updateSessionStudentService({_id: tcRequest.sessionStudent}, {isActive: consent === 'approvedByParent' ? false : true});
+
+    if (consent === 'approvedByParent') {
+      await updateParentService({_id: parentId}, {$pull: {students: tcRequest.student}});
+    }
 
     await updateTransferCertificateRequestService({_id: requestId}, {status: consent, parentApproved: consent === 'approvedByParent', parentNotified: true});
     return res.status(StatusCodes.OK).send(success(200, "TC request updated successfully"));
