@@ -144,7 +144,7 @@ export async function updateStudentBySchoolController(req, res){
     const parentUpdate = {};
     const adminId = req.adminId;
 
-    const student = await getStudentService({ _id:studentId });
+    const student = await getStudentService({ _id:studentId, isActive: true });
     if(!student){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
@@ -215,7 +215,7 @@ export async function updateStudentByParentController(req, res) {
     const parentId = req.parentId;
     const studentUpdate = {};
     
-    const student = await getStudentService({ _id:studentId });
+    const student = await getStudentService({ _id:studentId, isActive: true });
     if(!student){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
