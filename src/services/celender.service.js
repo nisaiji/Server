@@ -68,7 +68,7 @@ export function calculateDaysBetweenDates(startTime, endTime) {
   const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
   const differenceInDays = Math.floor((endOfDay - startOfDay) / millisecondsPerDay);
-  return differenceInDays === 0 ? 1 : differenceInDays;
+  return differenceInDays+1;
 }
 
 export const excelDateToJSDate = (date) => {
