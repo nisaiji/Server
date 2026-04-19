@@ -1,7 +1,7 @@
 import express from "express";
 import adminRouter from "./admin.router.js";
 import parentRouter from "./parent.router.js";
-import studentRouter from "./student.router.js";
+// import studentRouter from "./student.router.js";
 import teacherRouter from "./teacher.router.js";
 import sectionRouter from "./section.router.js";
 import attendanceRouter from "./attendance.router.js";
@@ -41,7 +41,7 @@ router.use("/v3", v3Router);
 router.use("/admin", adminRouter);
 router.use("/parent", parentRouter);
 router.use("/teacher", teacherRouter);
-router.use("/student", studentRouter);
+// router.use("/student", studentRouter);
 router.use("/class", classRouter);
 router.use("/leave", leaveRouter);
 router.use("/section", sectionRouter);

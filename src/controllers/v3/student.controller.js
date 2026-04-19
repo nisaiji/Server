@@ -891,6 +891,9 @@ export async function searchStudentsController(req, res){
     const students = await getSessionStudentsPipelineService(pipeline);
     const totalStudents = students.length;
     const totalPages = Math.ceil(totalStudents / limitNum);
+    for (let student of students) {
+      student.attendancePercentage = await calculateAttendancePercentage(student._id, student.sessionId);
+    }
 
     return res.status(StatusCodes.OK).send(
       success(200, {
