@@ -72,12 +72,33 @@ export async function getExamsForSectionController(req, res) {
         }
       },
       {
-    
         $lookup: {
           from: "subjects",
           localField: "subjects.subject",
           foreignField: "_id",
           as: "subjectDocs"
+        }
+      },
+      {
+        $lookup: {
+          from: "teachersubjectsections",
+          let: { 
+            subjectId: "$subjects.subject",
+            sectionId: "$section"
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $in: ["$subject", "$$subjectId"] },
+                    { $eq: ["$section", "$$sectionId"] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: "teacherSubjectSectionDocs"
         }
       },
       {
@@ -100,6 +121,18 @@ export async function getExamsForSectionController(req, res) {
                     },
                     0
                   ]
+                },
+                teacherSubjectSection: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$teacherSubjectSectionDocs",
+                        as: "tss",
+                        cond: { $eq: ["$$tss.subject", "$$s.subject"] }
+                      }
+                    },
+                    0
+                  ]
                 }
               }
             }
@@ -108,7 +141,8 @@ export async function getExamsForSectionController(req, res) {
       },
       {
         $project: {
-          subjectDocs: 0
+          subjectDocs: 0,
+          teacherSubjectSectionDocs: 0
         }
       }
     ];

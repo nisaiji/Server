@@ -11,7 +11,7 @@ import { deleteHolidayController, getHolidaysController, registerHolidayControll
 
 const holidayRouter = express.Router();
 
-holidayRouter.post("/register", adminAuthenticate, createHolidayValidation, registerHolidayController );
+// holidayRouter.post("/register", adminAuthenticate, createHolidayValidation, registerHolidayController );
 holidayRouter.post("/v2/register", adminAuthenticate, createHolidaysValidation, registerHolidaysController);
 holidayRouter.post("/", adminAuthenticate, getHolidayValidation, getHolidaysController );
 holidayRouter.post("/teacher", teacherAuthenticate, getHolidayValidation, getHolidaysController );
