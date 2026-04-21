@@ -292,6 +292,20 @@ export async function getSessionStudentSController(req,res) {
       },
       {
         $lookup: {
+          from: 'parents',
+          localField: 'student.parent',
+          foreignField: '_id',
+          as: 'parent'
+        }
+      },
+      {
+        $unwind: {
+          path: '$parent',
+          preserveNullAndEmptyArrays: true,
+        }
+      },
+      {
+        $lookup: {
           from: 'sessions',
           localField: 'session',
           foreignField: '_id',
@@ -354,6 +368,7 @@ export async function getSessionStudentSController(req,res) {
         $addFields: {
           id: "$student._id",
           studentId: "$student.studentId",
+          rollNumber: "$student.rollNumber",
           firstname: "$student.firstname",
           lastname: "$student.lastname",
           guardianName: "$student.guardianName",
@@ -367,20 +382,53 @@ export async function getSessionStudentSController(req,res) {
           state: "$student.state",
           country: "$student.country",
           pincode: "$student.pincode",
+          studentCreatedAt: "$student.createdAt",
+          studentUpdatedAt: "$student.updatedAt",
 
           // schoolParent
           parentId: "$schoolParent._id",
           parentFullName: "$schoolParent.fullname",
+          parentUsername: "$schoolParent.username",
           parentGender: "$schoolParent.gender",
+          parentAge: "$schoolParent.age",
           parentAddress: "$schoolParent.address",
           parentCity: "$schoolParent.city",
-          parentDistrict: "$schoolParent.disctrict",
+          parentDistrict: "$schoolParent.district",
+          parentState: "$schoolParent.state",
+          parentCountry: "$schoolParent.country",
+          parentPincode: "$schoolParent.pincode",
           parentStatus: "$schoolParent.status",
           parentQualification: "$schoolParent.qualification",
           parentOccupation: "$schoolParent.occupation",
           parentPhone: "$schoolParent.phone",
           parentEmail: "$schoolParent.email",
-          parentAge: "$schoolParent.age",
+          parentIsLoginAlready: "$schoolParent.isLoginAlready",
+          parentCreatedAt: "$schoolParent.createdAt",
+          parentUpdatedAt: "$schoolParent.updatedAt",
+
+          // parent (main parent record)
+          mainParentId: "$parent._id",
+          mainParentFullName: "$parent.fullname",
+          mainParentUsername: "$parent.username",
+          mainParentGender: "$parent.gender",
+          mainParentAge: "$parent.age",
+          mainParentAddress: "$parent.address",
+          mainParentCity: "$parent.city",
+          mainParentDistrict: "$parent.district",
+          mainParentState: "$parent.state",
+          mainParentCountry: "$parent.country",
+          mainParentPincode: "$parent.pincode",
+          mainParentStatus: "$parent.status",
+          mainParentQualification: "$parent.qualification",
+          mainParentOccupation: "$parent.occupation",
+          mainParentPhone: "$parent.phone",
+          mainParentEmail: "$parent.email",
+          mainParentPhoto: "$parent.photo",
+          mainParentFcmToken: "$parent.fcmToken",
+          mainParentIsLoginAlready: "$parent.isLoginAlready",
+          mainParentStudents: "$parent.students",
+          mainParentCreatedAt: "$parent.createdAt",
+          mainParentUpdatedAt: "$parent.updatedAt",
 
           // session
           sessionId: "$session._id",
@@ -407,6 +455,7 @@ export async function getSessionStudentSController(req,res) {
         $project: {
           student: 0,
           schoolParent: 0,
+          parent: 0,
           section: 0,
           session: 0,
           classInfo: 0,
@@ -748,6 +797,20 @@ export async function searchStudentsController(req, res){
           },
         },
         {
+          $lookup: {
+            from: "parents",
+            localField: "student.parent",
+            foreignField: "_id",
+            as: "parent"
+          }
+        },
+        {
+          $unwind: {
+            path: "$parent",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
           $match: filter,
         },
         {
@@ -817,6 +880,7 @@ export async function searchStudentsController(req, res){
           $addFields: {
             id: "$student._id",
             studentId: "$student.studentId",
+            rollNumber: "$student.rollNumber",
             firstname: "$student.firstname",
             lastname: "$student.lastname",
             dob: "$student.dob",
@@ -830,20 +894,53 @@ export async function searchStudentsController(req, res){
             country: "$student.country",
             pincode: "$student.pincode",
             guardianName: "$student.guardianName",
+            studentCreatedAt: "$student.createdAt",
+            studentUpdatedAt: "$student.updatedAt",
 
             // schoolParent
             parentId: "$schoolParent._id",
             parentFullName: "$schoolParent.fullname",
+            parentUsername: "$schoolParent.username",
             parentGender: "$schoolParent.gender",
+            parentAge: "$schoolParent.age",
             parentAddress: "$schoolParent.address",
             parentCity: "$schoolParent.city",
-            parentDistrict: "$schoolParent.disctrict",
+            parentDistrict: "$schoolParent.district",
+            parentState: "$schoolParent.state",
+            parentCountry: "$schoolParent.country",
+            parentPincode: "$schoolParent.pincode",
             parentStatus: "$schoolParent.status",
             parentQualification: "$schoolParent.qualification",
             parentOccupation: "$schoolParent.occupation",
             parentPhone: "$schoolParent.phone",
             parentEmail: "$schoolParent.email",
-            parentAge: "$schoolParent.age",
+            parentIsLoginAlready: "$schoolParent.isLoginAlready",
+            parentCreatedAt: "$schoolParent.createdAt",
+            parentUpdatedAt: "$schoolParent.updatedAt",
+
+            // parent (main parent record)
+            mainParentId: "$parent._id",
+            mainParentFullName: "$parent.fullname",
+            mainParentUsername: "$parent.username",
+            mainParentGender: "$parent.gender",
+            mainParentAge: "$parent.age",
+            mainParentAddress: "$parent.address",
+            mainParentCity: "$parent.city",
+            mainParentDistrict: "$parent.district",
+            mainParentState: "$parent.state",
+            mainParentCountry: "$parent.country",
+            mainParentPincode: "$parent.pincode",
+            mainParentStatus: "$parent.status",
+            mainParentQualification: "$parent.qualification",
+            mainParentOccupation: "$parent.occupation",
+            mainParentPhone: "$parent.phone",
+            mainParentEmail: "$parent.email",
+            mainParentPhoto: "$parent.photo",
+            mainParentFcmToken: "$parent.fcmToken",
+            mainParentIsLoginAlready: "$parent.isLoginAlready",
+            mainParentStudents: "$parent.students",
+            mainParentCreatedAt: "$parent.createdAt",
+            mainParentUpdatedAt: "$parent.updatedAt",
 
             // session
             sessionId: "$session._id",
@@ -870,6 +967,7 @@ export async function searchStudentsController(req, res){
           $project: {
             student: 0,
             schoolParent: 0,
+            parent: 0,
             section: 0,
             classInfo: 0,
             session: 0,

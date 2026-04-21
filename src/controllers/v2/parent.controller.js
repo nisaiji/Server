@@ -821,6 +821,7 @@ export async function getParentWithStudentsController(req, res) {
                 studentLastName: '$lastname',
                 studentGender: '$gender',
                 studentbloodGroup: '$bloodGroup',
+                studentGuardian: '$guardianName',
                 studentDOB: '$dob',
                 studentPhoto: '$photo',
                 studentAddress: '$address',
