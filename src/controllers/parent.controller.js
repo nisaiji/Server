@@ -54,7 +54,7 @@ export async function getParentController(req, res) {
 export async function updateParentController(req, res){
   try {
     const id = req.parentId;
-    const{username, fullname, age, gender, address, city, district, state, country, pincode, qualification, occupation, phone, email, password} = req.body;
+    const{username, fullname, dob, gender, address, city, district, state, country, pincode, qualification, occupation, phone, email, password} = req.body;
     const fieldsToBeUpdated = {};
 
     if(username){
@@ -80,7 +80,7 @@ export async function updateParentController(req, res){
     }
 
     if(fullname){ fieldsToBeUpdated["fullname"] = fullname; }
-    if(age){ fieldsToBeUpdated["age"] = age; }
+    if(dob){ fieldsToBeUpdated["dob"] = dob; }
     if(gender){ fieldsToBeUpdated["gender"] = gender; }
     if(address){ fieldsToBeUpdated["address"] = address; }
     if(city){ fieldsToBeUpdated["city"] = city; }
