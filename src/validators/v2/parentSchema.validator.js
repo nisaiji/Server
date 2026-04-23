@@ -60,8 +60,8 @@ const parentUpdateValidator = Joi.object({
        "any.required": "full name is required."
     }),
 
-  age: Joi.number().optional().messages({
-      'number.base': 'Age must be a number'
+  dob: Joi.date().optional().messages({
+      'date.base': 'Date of birth must be a valid date'
     }),
 
   gender: Joi.string().valid('Male', 'Female', 'Other').optional().messages({
