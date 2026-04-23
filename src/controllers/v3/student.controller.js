@@ -20,7 +20,7 @@ import path from "path";
 
 export async function registerStudentAndSessionStudentController(req, res) {
   try {
-    const { firstname, lastname, gender, guardianName, parentName, phone, email, qualification, occupation, address, age, parentAddress, parentGender, dob,  sectionId } = req.body;
+    const { firstname, lastname, gender, guardianName, parentName, phone, email, qualification, occupation, address, age, parentAddress, parentGender, dob,  sectionId, aadharNumber } = req.body;
     const adminId = req.adminId;
 
     const section = await getSectionService({ _id:sectionId });
@@ -39,6 +39,10 @@ export async function registerStudentAndSessionStudentController(req, res) {
 
     if(session['status']==='completed'){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session is already completed"));
+    }
+    const studentWithAadhar = await getStudentService({ aadharNumber: aadharNumber, isActive: true });
+    if(studentWithAadhar) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
     }
 
     let parent = await getParentService({phone, isActive: true});
@@ -66,7 +70,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
     if (student) {
       return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
     }
-    const studentObj = { firstname, lastname, gender, guardianName, schoolParent: schoolParent["_id"], section:sectionId, classId:classInfo["_id"], parent: parent['_id'], admin:adminId, ...(address && {address}), ...(dob && {dob}) };
+    const studentObj = { firstname, lastname, gender, aadharNumber, guardianName, schoolParent: schoolParent["_id"], section:sectionId, classId:classInfo["_id"], parent: parent['_id'], admin:adminId, ...(address && {address}), ...(dob && {dob}) };
 
     student = await registerStudentService(studentObj);
     const sessionStudentObj = { section:sectionId, classId:classInfo["_id"], session: session['_id'], school:adminId, student: student['_id']};
@@ -81,7 +85,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
 
 export async function registerSessionStudentController(req, res) {
   try {
-    const { enrollmentStatus, studentId, sectionId, classId, sessionId } = req.body;
+    const { enrollmentStatus, studentId, sectionId, classId, sessionId,aadharNumber } = req.body;
     const adminId = req.adminId;
 
     const section = await getSectionService({ _id:sectionId });
@@ -115,7 +119,10 @@ export async function registerSessionStudentController(req, res) {
      ) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid class or section"));
     }
-
+    const studentWithAadhar = await getStudentService({ aadharNumber: aadharNumber, isActive: true });
+    if(studentWithAadhar) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
+    }
     let parent = await getParentService({_id: student['parent']});
     let schoolParent = await getSchoolParentService({_id: student['schoolParent']});
 
@@ -127,7 +134,7 @@ export async function registerSessionStudentController(req, res) {
     if(sessionStudent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student already registered for this session"));
     }
-    const sessionStudentObj = { section:section['_id'], classId:classInfo["_id"], session: session['_id'], school:adminId, student: student['_id']};
+    const sessionStudentObj = { section:section['_id'], classId:classInfo["_id"], session: session['_id'], school:adminId, student: student['_id'], aadharNumber: aadharNumber };
     sessionStudent = await registerSessionStudentService(sessionStudentObj);
 
     await updateSectionService({_id:sectionId}, {studentCount:section["studentCount"]+1});
@@ -166,7 +173,11 @@ export async function updateStudentBySchoolController(req, res){
     if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
     if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
     if(req.body["guardianName"]){ studentUpdate.guardianName = req.body["guardianName"]; }
-
+    if(req.body["aadharNumber"]){ studentUpdate.aadharNumber = req.body["aadharNumber"]; }
+    const studentWithAadhar = await getStudentService({ aadharNumber: studentUpdate.aadharNumber, isActive: true });
+    if(studentWithAadhar) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
+    }
     if(req.body["phone"] && schoolParent['phone']!==req.body['phone']){
       const phone = req.body['phone'];
       let parent = await getParentService({_id: schoolParent['parent']});
@@ -371,6 +382,7 @@ export async function getSessionStudentSController(req,res) {
           rollNumber: "$student.rollNumber",
           firstname: "$student.firstname",
           lastname: "$student.lastname",
+          aadharNumber: "$student.aadharNumber",
           guardianName: "$student.guardianName",
           dob: "$student.dob",
           gender: "$student.gender",
@@ -883,6 +895,7 @@ export async function searchStudentsController(req, res){
             rollNumber: "$student.rollNumber",
             firstname: "$student.firstname",
             lastname: "$student.lastname",
+            aadharNumber: "$student.aadharNumber",
             dob: "$student.dob",
             gender: "$student.gender",
             bloodGroup: "$student.bloodGroup",
