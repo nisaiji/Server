@@ -1,5 +1,5 @@
 import express from "express";
-import { getAttendancesController, registerStudentsFromExcelController, getSessionStudentSController, getStudentWithAllSessionStudentsController, registerSessionStudentController, registerStudentAndSessionStudentController, searchStudentsController, updateStudentByParentController, updateStudentBySchoolController, getSubjectsForStudentSectionController, deleteStudentController } from "../../controllers/v3/student.controller.js";
+import { getAdminStudentDetailController, getAttendancesController, registerStudentsFromExcelController, getSessionStudentSController, getStudentWithAllSessionStudentsController, registerSessionStudentController, registerStudentAndSessionStudentController, searchStudentsController, updateStudentByParentController, updateStudentBySchoolController, getSubjectsForStudentSectionController, deleteStudentController } from "../../controllers/v3/student.controller.js";
 import { adminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../../middlewares/authentication/teacher.authentication.middleware.js";
 import { uploadStudentPhotoValidation } from "../../middlewares/validation/student.validation.middleware.js";
@@ -29,6 +29,7 @@ studentRouter.post("/parent/get-attendance", parentAuthenticate, getAttendancesC
 
 studentRouter.get("/session-students/:studentId", getStudentWithAllSessionStudentsController);
 
+studentRouter.get("/admin/detail/:sessionStudentId", adminAuthenticate, getAdminStudentDetailController);
 studentRouter.get("/admin", adminAuthenticate, searchStudentsController);
 studentRouter.get("/teacher", teacherAuthenticate, searchStudentsController);
 studentRouter.post('/excel', adminAuthenticate, upload, registerStudentsFromExcelController);

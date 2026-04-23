@@ -8,14 +8,18 @@ import { getParentService, registerParentService } from "../../services/v2/paren
 import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
 import { getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
-import { getHolidayCountService } from "../../services/holiday.service.js";
-import { getWorkDayCountService } from "../../services/workDay.services.js";
-import { calculateDaysBetweenDates, calculateSundays, getStartAndEndTimeService } from "../../services/celender.service.js";
-import { getAttendanceCountService } from "../../services/attendance.service.js";
+import { getStartAndEndTimeService } from "../../services/celender.service.js";
 import xlsx from 'xlsx';
 import fs from 'fs/promises'
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
+import {
+  buildAttendanceSummaryForSessionStudent,
+  buildExamSummaryForSessionStudent,
+  buildLeaveSummaryForSessionStudent,
+  buildSubjectSummaryForContext,
+  calculateAttendancePercentageForSessionStudent,
+} from "../../services/studentDetailSummary.service.js";
 import path from "path";
 
 export async function registerStudentAndSessionStudentController(req, res) {
@@ -260,226 +264,287 @@ export async function updateStudentByParentController(req, res) {
   }
 }
 
+function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
+  return [
+    {
+      $match: filter,
+    },
+    {
+      $lookup: {
+        from: "students",
+        localField: "student",
+        foreignField: "_id",
+        as: "student",
+      },
+    },
+    {
+      $unwind: {
+        path: "$student",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "schoolparents",
+        localField: "student.schoolParent",
+        foreignField: "_id",
+        as: "schoolParent",
+      },
+    },
+    {
+      $unwind: {
+        path: "$schoolParent",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "parents",
+        localField: "student.parent",
+        foreignField: "_id",
+        as: "parent",
+      },
+    },
+    {
+      $unwind: {
+        path: "$parent",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "sessions",
+        localField: "session",
+        foreignField: "_id",
+        as: "session",
+      },
+    },
+    {
+      $unwind: {
+        path: "$session",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "classes",
+        localField: "classId",
+        foreignField: "_id",
+        as: "classInfo",
+      },
+    },
+    {
+      $unwind: {
+        path: "$classInfo",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "sections",
+        localField: "section",
+        foreignField: "_id",
+        as: "section",
+      },
+    },
+    {
+      $unwind: {
+        path: "$section",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "attendances",
+        localField: "_id",
+        foreignField: "sessionStudent",
+        as: "attendances",
+        pipeline: [
+          { $match: { date: { $gte: startTime, $lte: endTime } } },
+          { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } },
+        ],
+      },
+    },
+    {
+      $unwind: {
+        path: "$attendances",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $addFields: {
+        id: "$student._id",
+        studentId: "$student.studentId",
+        rollNumber: "$student.rollNumber",
+        firstname: "$student.firstname",
+        lastname: "$student.lastname",
+        aadharNumber: "$student.aadharNumber",
+        guardianName: "$student.guardianName",
+        dob: "$student.dob",
+        gender: "$student.gender",
+        bloodGroup: "$student.bloodGroup",
+        photo: "$student.photo",
+        address: "$student.address",
+        city: "$student.city",
+        district: "$student.district",
+        state: "$student.state",
+        country: "$student.country",
+        pincode: "$student.pincode",
+        studentCreatedAt: "$student.createdAt",
+        studentUpdatedAt: "$student.updatedAt",
+
+        parentId: "$schoolParent._id",
+        parentFullName: "$schoolParent.fullname",
+        parentUsername: "$schoolParent.username",
+        parentGender: "$schoolParent.gender",
+        parentAge: "$schoolParent.age",
+        parentAddress: "$schoolParent.address",
+        parentCity: "$schoolParent.city",
+        parentDistrict: "$schoolParent.district",
+        parentState: "$schoolParent.state",
+        parentCountry: "$schoolParent.country",
+        parentPincode: "$schoolParent.pincode",
+        parentStatus: "$schoolParent.status",
+        parentQualification: "$schoolParent.qualification",
+        parentOccupation: "$schoolParent.occupation",
+        parentPhone: "$schoolParent.phone",
+        parentEmail: "$schoolParent.email",
+        parentIsLoginAlready: "$schoolParent.isLoginAlready",
+        parentCreatedAt: "$schoolParent.createdAt",
+        parentUpdatedAt: "$schoolParent.updatedAt",
+
+        mainParentId: "$parent._id",
+        mainParentFullName: "$parent.fullname",
+        mainParentUsername: "$parent.username",
+        mainParentGender: "$parent.gender",
+        mainParentAge: "$parent.age",
+        mainParentAddress: "$parent.address",
+        mainParentCity: "$parent.city",
+        mainParentDistrict: "$parent.district",
+        mainParentState: "$parent.state",
+        mainParentCountry: "$parent.country",
+        mainParentPincode: "$parent.pincode",
+        mainParentStatus: "$parent.status",
+        mainParentQualification: "$parent.qualification",
+        mainParentOccupation: "$parent.occupation",
+        mainParentPhone: "$parent.phone",
+        mainParentEmail: "$parent.email",
+        mainParentPhoto: "$parent.photo",
+        mainParentFcmToken: "$parent.fcmToken",
+        mainParentIsLoginAlready: "$parent.isLoginAlready",
+        mainParentStudents: "$parent.students",
+        mainParentCreatedAt: "$parent.createdAt",
+        mainParentUpdatedAt: "$parent.updatedAt",
+
+        sessionId: "$session._id",
+        sessionName: "$session.name",
+        sessionStartDate: "$session.startDate",
+        sessionEndDate: "$session.endDate",
+        sessionStatus: "$session.status",
+        sessionStartYear: "$session.academicStartYear",
+        sessionEndYear: "$session.academicEndYear",
+
+        classId: "$classInfo._id",
+        className: "$classInfo.name",
+
+        sectionId: "$section._id",
+        sectionName: "$section.name",
+
+        todayAttendance: "$attendances.teacherAttendance",
+      },
+    },
+    {
+      $project: {
+        student: 0,
+        schoolParent: 0,
+        parent: 0,
+        section: 0,
+        session: 0,
+        classInfo: 0,
+        attendances: 0,
+      },
+    },
+  ];
+}
+
 export async function getSessionStudentSController(req,res) {
   try {
-    let {school, session, classId, section, sessionStudentId, startDate, endDate, include, page = 1, limit } = req.query;
+    let {school, session, classId, section, sessionStudentId } = req.query;
     const filter = {school: convertToMongoId(school), session: convertToMongoId(session), isActive: true};
     if(classId) filter['classId']= convertToMongoId(classId);
     if(section) filter['section']= convertToMongoId(section);
     if(sessionStudentId) filter['_id'] = convertToMongoId(sessionStudentId);
     const {startTime, endTime} = getStartAndEndTimeService(new Date(), new Date());
 
-    const pipeline = [
-      {
-        $match: filter
-      },
-      {
-        $lookup: {
-          from: 'students',
-          localField: 'student',
-          foreignField: '_id',
-          as: 'student'
-        }
-      },
-      {
-        $unwind: {
-          path: '$student',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: 'schoolparents',
-          localField: 'student.schoolParent',
-          foreignField: '_id',
-          as: 'schoolParent'
-        }
-      },
-      {
-        $unwind: {
-          path: '$schoolParent',
-          preserveNullAndEmptyArrays: true,
-        }
-      },
-      {
-        $lookup: {
-          from: 'parents',
-          localField: 'student.parent',
-          foreignField: '_id',
-          as: 'parent'
-        }
-      },
-      {
-        $unwind: {
-          path: '$parent',
-          preserveNullAndEmptyArrays: true,
-        }
-      },
-      {
-        $lookup: {
-          from: 'sessions',
-          localField: 'session',
-          foreignField: '_id',
-          as: 'session'
-        }
-      },
-      {
-        $unwind: {
-          path: '$session',
-          preserveNullAndEmptyArrays: true,
-        }
-      },
-      {
-        $lookup: {
-          from: 'classes',
-          localField: 'classId',
-          foreignField: '_id',
-          as: 'classInfo'
-        }
-      },
-      {
-        $unwind: {
-          path: '$classInfo',
-          preserveNullAndEmptyArrays: true,
-        }
-      },
-      {
-        $lookup: {
-          from: 'sections',
-          localField: 'section',
-          foreignField: '_id',
-          as: 'section'
-        }
-      },
-      {
-        $unwind: {
-          path: '$section',
-          preserveNullAndEmptyArrays: true,
-        }
-      },
-      {
-        $lookup: {
-          from: 'attendances',
-          localField: '_id',
-          foreignField: 'sessionStudent',
-          as: 'attendances',
-          pipeline: [
-            { $match: { date: { $gte: startTime, $lte: endTime } } },
-            { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } }
-          ]
-        }
-      },
-      {
-        $unwind: {
-          path: '$attendances',
-          preserveNullAndEmptyArrays: true,
-        }
-      },
-      {
-        $addFields: {
-          id: "$student._id",
-          studentId: "$student.studentId",
-          rollNumber: "$student.rollNumber",
-          firstname: "$student.firstname",
-          lastname: "$student.lastname",
-          aadharNumber: "$student.aadharNumber",
-          guardianName: "$student.guardianName",
-          dob: "$student.dob",
-          gender: "$student.gender",
-          bloodGroup: "$student.bloodGroup",
-          photo: "$student.photo",
-          address: "$student.address",
-          city: "$student.city",
-          district: "$student.district",
-          state: "$student.state",
-          country: "$student.country",
-          pincode: "$student.pincode",
-          studentCreatedAt: "$student.createdAt",
-          studentUpdatedAt: "$student.updatedAt",
-
-          // schoolParent
-          parentId: "$schoolParent._id",
-          parentFullName: "$schoolParent.fullname",
-          parentUsername: "$schoolParent.username",
-          parentGender: "$schoolParent.gender",
-          parentAge: "$schoolParent.age",
-          parentAddress: "$schoolParent.address",
-          parentCity: "$schoolParent.city",
-          parentDistrict: "$schoolParent.district",
-          parentState: "$schoolParent.state",
-          parentCountry: "$schoolParent.country",
-          parentPincode: "$schoolParent.pincode",
-          parentStatus: "$schoolParent.status",
-          parentQualification: "$schoolParent.qualification",
-          parentOccupation: "$schoolParent.occupation",
-          parentPhone: "$schoolParent.phone",
-          parentEmail: "$schoolParent.email",
-          parentIsLoginAlready: "$schoolParent.isLoginAlready",
-          parentCreatedAt: "$schoolParent.createdAt",
-          parentUpdatedAt: "$schoolParent.updatedAt",
-
-          // parent (main parent record)
-          mainParentId: "$parent._id",
-          mainParentFullName: "$parent.fullname",
-          mainParentUsername: "$parent.username",
-          mainParentGender: "$parent.gender",
-          mainParentAge: "$parent.age",
-          mainParentAddress: "$parent.address",
-          mainParentCity: "$parent.city",
-          mainParentDistrict: "$parent.district",
-          mainParentState: "$parent.state",
-          mainParentCountry: "$parent.country",
-          mainParentPincode: "$parent.pincode",
-          mainParentStatus: "$parent.status",
-          mainParentQualification: "$parent.qualification",
-          mainParentOccupation: "$parent.occupation",
-          mainParentPhone: "$parent.phone",
-          mainParentEmail: "$parent.email",
-          mainParentPhoto: "$parent.photo",
-          mainParentFcmToken: "$parent.fcmToken",
-          mainParentIsLoginAlready: "$parent.isLoginAlready",
-          mainParentStudents: "$parent.students",
-          mainParentCreatedAt: "$parent.createdAt",
-          mainParentUpdatedAt: "$parent.updatedAt",
-
-          // session
-          sessionId: "$session._id",
-          sessionName: "$session.name",
-          sessionStartDate: "$session.startDate",
-          sessionEndDate: "$session.endDate",
-          sessionStatus: "$session.status",
-          sessionStartYear: "$session.academicStartYear",
-          sessionEndYear: "$session.academicEndYear",
-
-          // class
-          classId: "$classInfo._id",
-          className: "$classInfo.name",
-
-          // section
-          sectionId: "$section._id",
-          sectionName: "$section.name",
-
-          // attendance
-          todayAttendance: "$attendances.teacherAttendance",
-        }
-      },
-      {
-        $project: {
-          student: 0,
-          schoolParent: 0,
-          parent: 0,
-          section: 0,
-          session: 0,
-          classInfo: 0,
-          attendances: 0,
-        }
-      }
-    ]
-    const sessionStudents = await getSessionStudentsPipelineService(pipeline);
+    const sessionStudents = await getSessionStudentsPipelineService(
+      buildSessionStudentDetailPipeline(filter, startTime, endTime)
+    );
     for (let student of sessionStudents) {
-      student.attendancePercentage = await calculateAttendancePercentage(student._id, student.sessionId);
+      student.attendancePercentage = await calculateAttendancePercentageForSessionStudent(
+        student._id,
+        student.sessionId
+      );
     }
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function getAdminStudentDetailController(req, res) {
+  try {
+    const sessionStudentId = req.params.sessionStudentId;
+
+    if (!sessionStudentId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "sessionStudentId is required"));
+    }
+
+    const filter = {
+      _id: convertToMongoId(sessionStudentId),
+      school: convertToMongoId(req.adminId),
+      isActive: true,
+    };
+    const { startTime, endTime } = getStartAndEndTimeService(new Date(), new Date());
+    const sessionStudents = await getSessionStudentsPipelineService(
+      buildSessionStudentDetailPipeline(filter, startTime, endTime)
+    );
+    const student = sessionStudents[0];
+
+    if (!student) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+    }
+
+    const [
+      attendanceSummary,
+      subjectSummary,
+      leaveSummary,
+      examSummary,
+    ] = await Promise.all([
+      buildAttendanceSummaryForSessionStudent(student._id, student.sessionId),
+      buildSubjectSummaryForContext({
+        schoolId: req.adminId,
+        sessionId: student.sessionId,
+        classId: student.classId,
+        sectionId: student.sectionId,
+      }),
+      buildLeaveSummaryForSessionStudent(student._id),
+      buildExamSummaryForSessionStudent({
+        schoolId: req.adminId,
+        sessionId: student.sessionId,
+        sectionId: student.sectionId,
+        sessionStudentId: student._id,
+      }),
+    ]);
+
+    student.attendanceSummary = attendanceSummary;
+    student.attendancePercentage = attendanceSummary.currentSessionPercentage;
+    student.subjectSummary = subjectSummary;
+    student.leaveSummary = leaveSummary;
+    student.examSummary = examSummary;
+
+    return res.status(StatusCodes.OK).send(success(200, student));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -709,26 +774,6 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
     return res.status(StatusCodes.OK).send(success(200, students));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-  }
-}
-
-async function calculateAttendancePercentage(sessionStudentId, sessionId) {
-  try {
-    const session = await getSessionService({_id: convertToMongoId(sessionId)})
-
-    const startTime = session['startDate'].getTime();
-    const endTime = session['endDate'].getTime();
-
-    const currentDate = new Date().getTime();
-    const holidaysCount = await getHolidayCountService({ admin: session['school'], date: { $gte: startTime, $lte: currentDate } });
-    const sundayCount = calculateSundays(startTime, currentDate);
-    const sundayAsWorkDayCount = await getWorkDayCountService({ admin: session['school'], date: { $gte: startTime, $lte: currentDate } });
-    const dayscount = calculateDaysBetweenDates(startTime, currentDate);
-    const attendancableDays = dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
-    const presentDaysCount = await getAttendanceCountService({sessionStudent: convertToMongoId(sessionStudentId), teacherAttendance: "present", date: { $gte: startTime, $lte: currentDate }});
-    return (presentDaysCount/attendancableDays)*100;
-  } catch (error) {
-    throw error;
   }
 }
 
@@ -1003,7 +1048,10 @@ export async function searchStudentsController(req, res){
     const totalStudents = students.length;
     const totalPages = Math.ceil(totalStudents / limitNum);
     for (let student of students) {
-      student.attendancePercentage = await calculateAttendancePercentage(student._id, student.sessionId);
+      student.attendancePercentage = await calculateAttendancePercentageForSessionStudent(
+        student._id,
+        student.sessionId
+      );
     }
 
     return res.status(StatusCodes.OK).send(
