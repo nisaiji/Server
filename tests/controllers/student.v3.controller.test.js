@@ -4,6 +4,17 @@ import { StatusCodes } from "http-status-codes";
 const mockGetSessionStudentsPipelineService = jest.fn();
 const mockGetStartAndEndTimeService = jest.fn();
 const mockConvertToMongoId = jest.fn();
+const mockGetParentService = jest.fn();
+const mockRegisterParentService = jest.fn();
+const mockUpdateParentService = jest.fn();
+const mockGetSchoolParentService = jest.fn();
+const mockRegisterSchoolParentService = jest.fn();
+const mockUpdateSchoolParentService = jest.fn();
+const mockGetStudentService = jest.fn();
+const mockGetStudentsPipelineService = jest.fn();
+const mockGetStudentsService = jest.fn();
+const mockRegisterStudentService = jest.fn();
+const mockUpdateStudentService = jest.fn();
 const mockBuildAttendanceSummaryForSessionStudent = jest.fn();
 const mockBuildSubjectSummaryForContext = jest.fn();
 const mockBuildLeaveSummaryForSessionStudent = jest.fn();
@@ -25,6 +36,23 @@ await jest.unstable_mockModule("../../src/services/celender.service.js", () => (
 await jest.unstable_mockModule("../../src/services/mongoose.services.js", () => ({
   convertToMongoId: mockConvertToMongoId,
 }));
+await jest.unstable_mockModule("../../src/services/v2/parent.services.js", () => ({
+  getParentService: mockGetParentService,
+  registerParentService: mockRegisterParentService,
+  updateParentService: mockUpdateParentService,
+}));
+await jest.unstable_mockModule("../../src/services/v2/schoolParent.services.js", () => ({
+  getSchoolParentService: mockGetSchoolParentService,
+  registerSchoolParentService: mockRegisterSchoolParentService,
+  updateSchoolParentService: mockUpdateSchoolParentService,
+}));
+await jest.unstable_mockModule("../../src/services/student.service.js", () => ({
+  getStudentService: mockGetStudentService,
+  getStudentsPipelineService: mockGetStudentsPipelineService,
+  getStudentsService: mockGetStudentsService,
+  registerStudentService: mockRegisterStudentService,
+  updateStudentService: mockUpdateStudentService,
+}));
 await jest.unstable_mockModule("../../src/services/studentDetailSummary.service.js", () => ({
   buildAttendanceSummaryForSessionStudent: mockBuildAttendanceSummaryForSessionStudent,
   buildSubjectSummaryForContext: mockBuildSubjectSummaryForContext,
@@ -40,6 +68,7 @@ await jest.unstable_mockModule("../../src/utills/responseWrapper.js", () => ({
 const {
   getAdminStudentDetailController,
   searchStudentsController,
+  updateStudentBySchoolController,
 } = await import("../../src/controllers/v3/student.controller.js");
 
 describe("getAdminStudentDetailController", () => {
@@ -58,7 +87,7 @@ describe("getAdminStudentDetailController", () => {
   beforeEach(() => {
     req = {
       adminId,
-      query: {
+      params: {
         sessionStudentId: studentRow._id,
       },
     };
@@ -159,7 +188,7 @@ describe("getAdminStudentDetailController", () => {
   });
 
   test("returns 400 when sessionStudentId is missing", async () => {
-    req.query = {};
+    req.params = {};
 
     await getAdminStudentDetailController(req, res);
 
@@ -235,5 +264,69 @@ describe("searchStudentsController", () => {
     expect(student.leaveSummary).toBeUndefined();
     expect(student.examSummary).toBeUndefined();
     expect(mockBuildAttendanceSummaryForSessionStudent).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateStudentBySchoolController", () => {
+  let req;
+  let res;
+
+  beforeEach(() => {
+    req = {
+      adminId: "65d92f2b5e5c110010d10d93",
+      params: {
+        studentId: "65d92f2b5e5c110010d10d80",
+      },
+      body: {
+        parentDob: "1988-04-01",
+      },
+    };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    jest.clearAllMocks();
+    mockSuccess.mockImplementation((code, data) => ({ code, data }));
+    mockError.mockImplementation((code, message) => ({ code, message }));
+  });
+
+  test("updates parent dob on the canonical parent record", async () => {
+    mockGetStudentService
+      .mockResolvedValueOnce({
+        _id: req.params.studentId,
+        parent: "65d92f2b5e5c110010d10d81",
+        schoolParent: "65d92f2b5e5c110010d10d82",
+      })
+      .mockResolvedValueOnce(null);
+    mockGetSchoolParentService.mockResolvedValue({
+      _id: "65d92f2b5e5c110010d10d82",
+      parent: "65d92f2b5e5c110010d10d81",
+      phone: "9876543210",
+    });
+    mockGetParentService.mockResolvedValue({
+      _id: "65d92f2b5e5c110010d10d81",
+      phone: "9876543210",
+      students: [],
+    });
+    mockUpdateStudentService.mockResolvedValue({ acknowledged: true });
+    mockUpdateSchoolParentService.mockResolvedValue({ acknowledged: true });
+    mockUpdateParentService.mockResolvedValue({ acknowledged: true });
+
+    await updateStudentBySchoolController(req, res);
+
+    expect(mockUpdateParentService).toHaveBeenCalledWith(
+      { _id: "65d92f2b5e5c110010d10d81" },
+      { dob: "1988-04-01" }
+    );
+    expect(mockUpdateSchoolParentService).toHaveBeenCalledWith(
+      { _id: "65d92f2b5e5c110010d10d82" },
+      {}
+    );
+    expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
+    expect(res.send).toHaveBeenCalledWith({
+      code: 200,
+      data: "Student updated successfully",
+    });
   });
 });

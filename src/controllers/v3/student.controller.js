@@ -4,7 +4,7 @@ import { getSessionService } from "../../services/session.services.js";
 import { getSessionStudentService, getSessionStudentsPipelineService, registerSessionStudentService, updateSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { getClassService } from "../../services/class.sevices.js";
-import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
+import { getParentService, registerParentService, updateParentService } from "../../services/v2/parent.services.js";
 import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
 import { getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
@@ -152,7 +152,8 @@ export async function updateStudentBySchoolController(req, res){
   try {
     const studentId = req.params.studentId;
     const studentUpdate = {};
-    const parentUpdate = {};
+    const schoolParentUpdate = {};
+    const parentProfileUpdate = {};
     const adminId = req.adminId;
 
     const student = await getStudentService({ _id:studentId, isActive: true });
@@ -161,6 +162,16 @@ export async function updateStudentBySchoolController(req, res){
     }
     let schoolParent = await getSchoolParentService({ _id: student["schoolParent"] });
     if(!schoolParent){
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+    }
+    let parent = await getParentService({ _id: student["parent"], isActive: true });
+    if(!parent && schoolParent["parent"]) {
+      parent = await getParentService({ _id: schoolParent["parent"], isActive: true });
+      if(parent) {
+        studentUpdate.parent = parent["_id"];
+      }
+    }
+    if(!parent){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
@@ -178,45 +189,52 @@ export async function updateStudentBySchoolController(req, res){
     if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
     if(req.body["guardianName"]){ studentUpdate.guardianName = req.body["guardianName"]; }
     if(req.body["aadharNumber"]){ studentUpdate.aadharNumber = req.body["aadharNumber"]; }
-    const studentWithAadhar = await getStudentService({ aadharNumber: studentUpdate.aadharNumber, isActive: true });
-    if(studentWithAadhar) {
+
+    const studentWithAadhar = await getStudentService({aadharNumber: studentUpdate.aadharNumber, isActive: true,});
+    // If a student with same Aadhar exists AND it's not the same student
+    if (studentWithAadhar && studentWithAadhar._id.toString() !== studentId) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
     }
     if(req.body["phone"] && schoolParent['phone']!==req.body['phone']){
       const phone = req.body['phone'];
-      let parent = await getParentService({_id: schoolParent['parent']});
       if (parent && parent['students']?.includes(studentId)) {
         return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Phone number can not be updated'));
       }
       const schoolParentWithPhone = await getSchoolParentService({ phone, school: student['adminId'], isActive:true, _id: { $ne: schoolParent["_id"] } });
-      const parentWithPhone = await getParentService({ phone, isActive:true, _id: {$ne: schoolParent['parent']}});
+      const parentWithPhone = await getParentService({ phone, isActive:true, _id: {$ne: parent["_id"]}});
       if(parentWithPhone || schoolParentWithPhone){
         return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
       }
       if(phone!==schoolParent['phone']) {
         parent = await registerParentService({phone, status: 'unVerified'});
         schoolParent = await registerSchoolParentService({phone, school: adminId, parent: parent['_id']});
-       studentUpdate['schoolParent'] = schoolParent['_id'];
+        studentUpdate['schoolParent'] = schoolParent['_id'];
+        studentUpdate['parent'] = parent['_id'];
       }
     }
-    if(req.body["parentName"]){ parentUpdate.fullname = req.body["parentName"]; }
-    if(req.body["parentGender"]){ parentUpdate.gender = req.body["parentGender"]; }
-    if(req.body["parentAge"]){ parentUpdate.age = req.body["parentAge"]; }
-    if(req.body["parentEmail"]){ parentUpdate.email = req.body["parentEmail"]; }
-    if(req.body["parentQualification"]){ parentUpdate.qualification = req.body["parentQualification"]; }
-    if(req.body["parentOccupation"]){ parentUpdate.occupation = req.body["parentOccupation"]; }
-    if(req.body["parentAddress"]){ parentUpdate.address = req.body["parentAddress"]; }
-    if(req.body["parentCity"]){ parentUpdate.city = req.body["parentCity"]; }
-    if(req.body["parentDistrict"]){ parentUpdate.district = req.body["parentDistrict"]; }
-    if(req.body["parentState"]){ parentUpdate.state = req.body["parentState"]; }
-    if(req.body["parentCountry"]){ parentUpdate.country = req.body["parentCountry"]; }
-    if(req.body["parentPincode"]){ parentUpdate.pincode = req.body["parentPincode"]; }
+    if(req.body["parentName"]){ schoolParentUpdate.fullname = req.body["parentName"]; }
+    if(req.body["parentGender"]){ schoolParentUpdate.gender = req.body["parentGender"]; }
+    if(req.body["parentAge"]){ schoolParentUpdate.age = req.body["parentAge"]; }
+    if(req.body["parentEmail"]){ schoolParentUpdate.email = req.body["parentEmail"]; }
+    if(req.body["parentQualification"]){ schoolParentUpdate.qualification = req.body["parentQualification"]; }
+    if(req.body["parentOccupation"]){ schoolParentUpdate.occupation = req.body["parentOccupation"]; }
+    if(req.body["parentAddress"]){ schoolParentUpdate.address = req.body["parentAddress"]; }
+    if(req.body["parentCity"]){ schoolParentUpdate.city = req.body["parentCity"]; }
+    if(req.body["parentDistrict"]){ schoolParentUpdate.district = req.body["parentDistrict"]; }
+    if(req.body["parentState"]){ schoolParentUpdate.state = req.body["parentState"]; }
+    if(req.body["parentCountry"]){ schoolParentUpdate.country = req.body["parentCountry"]; }
+    if(req.body["parentPincode"]){ schoolParentUpdate.pincode = req.body["parentPincode"]; }
+    if(req.body["parentDob"]){ parentProfileUpdate.dob = req.body["parentDob"]; }
 
-
-    await Promise.all([
+    const updatePromises = [
       updateStudentService({ _id:studentId }, studentUpdate),
-      updateSchoolParentService({ _id: schoolParent["_id"] }, parentUpdate)
-    ]);
+      updateSchoolParentService({ _id: schoolParent["_id"] }, schoolParentUpdate),
+    ];
+    if(Object.keys(parentProfileUpdate).length){
+      updatePromises.push(updateParentService({ _id: parent["_id"] }, parentProfileUpdate));
+    }
+
+    await Promise.all(updatePromises);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));
 
   } catch (err) {
@@ -417,7 +435,7 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         mainParentFullName: "$parent.fullname",
         mainParentUsername: "$parent.username",
         mainParentGender: "$parent.gender",
-        mainParentAge: "$parent.age",
+        mainParentDob: "$parent.dob",
         mainParentAddress: "$parent.address",
         mainParentCity: "$parent.city",
         mainParentDistrict: "$parent.district",
@@ -981,7 +999,7 @@ export async function searchStudentsController(req, res){
             mainParentFullName: "$parent.fullname",
             mainParentUsername: "$parent.username",
             mainParentGender: "$parent.gender",
-            mainParentAge: "$parent.age",
+            mainParentDob: "$parent.dob",
             mainParentAddress: "$parent.address",
             mainParentCity: "$parent.city",
             mainParentDistrict: "$parent.district",

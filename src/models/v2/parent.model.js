@@ -8,7 +8,7 @@ const parentSchema = mongoose.Schema({
     type: String
   },
   dob:{
-    type:Date
+    type:String
   },
   gender:{
     type:String
