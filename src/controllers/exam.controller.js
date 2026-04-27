@@ -1,5 +1,5 @@
 import { createExamService, getExamService, getExamsPipelineService, updateExamService } from '../services/exam.services.js';
-import { NOT_FOUND, StatusCodes } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import { error, success } from '../utills/responseWrapper.js';
 import { convertToMongoId } from '../services/mongoose.services.js';
 import { getSessionStudentService } from '../services/v2/sessionStudent.service.js';
@@ -7,6 +7,38 @@ import { getSectionService } from '../services/section.services.js';
 import { getSessionService } from '../services/session.services.js';
 import { getClassService } from '../services/class.sevices.js';
 import { getTeacherSubjectSectionsService } from '../services/teacherSubjectSection.service.js';
+import { sendPushNotification } from '../config/firebase.config.js';
+import {
+  dedupeNotificationRecipientsService,
+  getExamTeacherNotificationRecipientsService,
+  getSectionParentNotificationRecipientsService,
+} from '../services/notificationRecipient.service.js';
+
+function parseBooleanFlag(value) {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const normalizedValue = value.trim().toLowerCase();
+
+    if (normalizedValue === 'true') {
+      return true;
+    }
+
+    if (normalizedValue === 'false') {
+      return false;
+    }
+  }
+
+  return undefined;
+}
+
+function extractExamSubjectIds(subjects = []) {
+  return subjects
+    .map((subjectInfo) => subjectInfo?.subject?.toString?.() ?? subjectInfo?.subject)
+    .filter(Boolean);
+}
 
 export async function createExambyAdminController(req, res) {
   try {
@@ -292,17 +324,68 @@ export async function updateExamController(req, res) {
   try {
     const examId = req.params.examId;
     let {name, description, type, resultPublished, status, subjects} = req.body;
-    let exam = await getExamService({_id: examId});
+    const exam = await getExamService({_id: examId});
     if(!exam) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
     }
+
+    const hasResultPublished = Object.prototype.hasOwnProperty.call(req.body, 'resultPublished');
+    const parsedResultPublished = hasResultPublished ? parseBooleanFlag(resultPublished) : undefined;
+    const shouldPublishResults = parsedResultPublished === true && !exam.resultPublished;
+    const shouldUnpublishResults = parsedResultPublished === false;
+    const schoolId = exam.school?.toString?.() ?? exam.school;
+    const sessionId = exam.session?.toString?.() ?? exam.session;
+    const sectionId = exam.section?.toString?.() ?? exam.section;
     let params = {}
+
     if(name) params.name = name;
     if(description) params.description = description;
     if(type) params.type = type;
-    if(resultPublished="true") params.resultPublished = (resultPublished==="true");
+    if(status) params.status = status;
+    if(parsedResultPublished !== undefined) {
+      params.resultPublished = parsedResultPublished;
+      if (shouldPublishResults) {
+        params.resultPublishedAt = new Date();
+      }
+      if (shouldUnpublishResults) {
+        params.resultPublishedAt = null;
+      }
+    }
     if(subjects) params.subjects = subjects;
+
     await updateExamService({_id: examId}, params);
+
+    if (shouldPublishResults) {
+      const examName = params.name ?? exam.name;
+      const examSubjects = extractExamSubjectIds(params.subjects ?? exam.subjects);
+      const [parentRecipients, teacherRecipients] = await Promise.all([
+        getSectionParentNotificationRecipientsService({
+          sectionId,
+          sessionId,
+          schoolId,
+        }),
+        getExamTeacherNotificationRecipientsService({
+          sectionId,
+          sessionId,
+          schoolId,
+          subjectIds: examSubjects,
+        }),
+      ]);
+
+      const recipients = dedupeNotificationRecipientsService([
+        ...parentRecipients,
+        ...teacherRecipients,
+      ]);
+
+      const notificationBody = `Results for ${examName} are now available.`;
+
+      await Promise.allSettled(
+        recipients.map((recipient) =>
+          sendPushNotification(recipient.fcmToken, 'Exam Result Published', notificationBody, 'exam', examId),
+        ),
+      );
+    }
+
     return res.status(StatusCodes.OK).send(success(200, "Exam updated successfully"));    
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

@@ -52,6 +52,7 @@ export async function registerLeaveRequestController(req, res){
     startTime,
     endTime
   }
+  await sendPushNotification(req.fcmToken, "Leave Request", `Your leave request from ${getFormattedDateService(new Date(startTime))} to ${getFormattedDateService(new Date(endTime))} has been sent successfully`, "leaveRequest")
   await registerLeaveRequestService(leaveRequestObj);
   return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
 

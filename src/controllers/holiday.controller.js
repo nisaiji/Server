@@ -37,7 +37,7 @@ export async function registerHolidayController(req, res) {
 
     for(const parent of parents) {
       try {
-        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription);
+        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription, "holiday" );
       } catch (error) {
         throw error;
       }
@@ -45,7 +45,7 @@ export async function registerHolidayController(req, res) {
 
     for(const teacher of teachers) {
       try {
-        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription);
+        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription, "holiday");
       } catch (error) {
         throw error;
       }
