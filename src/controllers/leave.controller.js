@@ -52,7 +52,7 @@ export async function registerLeaveRequestController(req, res){
     startTime,
     endTime
   }
-  await sendPushNotification(req.fcmToken, "Leave Request", `Your leave request from ${getFormattedDateService(new Date(startTime))} to ${getFormattedDateService(new Date(endTime))} has been sent successfully`, "leaveRequest")
+  await sendPushNotification(req.fcmToken, "Leave Request", `Your leave request from ${getFormattedDateService(new Date(startTime))} to ${getFormattedDateService(new Date(endTime))} has been sent successfully`, "leaveRequest",req?.teacherId)
   await registerLeaveRequestService(leaveRequestObj);
   return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
 
@@ -270,7 +270,7 @@ export async function updateTeacherLeavRequestByAdminController(req, res){
     }
     
     await updateLeaveRequestService({_id: leaveRequestId}, {status});
-    await sendPushNotification(teacher['fcmToken'], `Your Leave Request is ${status==='accept' ? 'Accepted' : 'Rejected'}`, '');
+    await sendPushNotification(teacher['fcmToken'], `Your Leave Request is ${status==='accept' ? 'Accepted' : 'Rejected'}`, 'leaveRequest', teacher['_id']);
     const successMessage = status === 'accept' ? "Leave Request Accepted Successfully" : "Leave Request Rejected Successfully";
     return res.status(StatusCodes.OK).send(success(200, successMessage))
   } catch (err) {

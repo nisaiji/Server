@@ -75,7 +75,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([storedSessionStudent['student']]);
-        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}`,"attendance" )
+        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}`,"attendance",studentWithParent[0]?.parent?._id)
       } catch (error) {
         throw error;
       }
@@ -96,7 +96,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([storedSessionStudent['student']]);
-        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}`,"attendance" )
+        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}`,"attendance",studentWithParent[0]?.parent?._id)
       } catch (error) {
         throw error;
       }
