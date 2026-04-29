@@ -11,8 +11,8 @@ adminRouter.get("/refresh", refreshTokenAuthenticate, refreshAccessTokenControll
 adminRouter.put("/address", deactivatedAdminAuthenticate, adminAddressValidation, updateAdminController);
 adminRouter.put("/details", deactivatedAdminAuthenticate, adminDetailsValidation, updateAdminController);
 adminRouter.put("/fcm-token", deactivatedAdminAuthenticate, adminFcmTokenValidation, updateAdminController);
-// adminRouter.put("/", adminAuthenticate, adminProfileUpdateValidation, updateAdminController);
-// adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation, updateAdminController);
+adminRouter.put("/", adminAuthenticate, adminProfileUpdateValidation, updateAdminController);
+adminRouter.put("/social", adminAuthenticate, adminSocialProfileUpdateValidation, updateAdminController);
 adminRouter.put("/photo-upload", adminAuthenticate,photoUpdateAdminValidation, validateImageSizeMiddleware, updateAdminController);
 adminRouter.get("/", deactivatedAdminAuthenticate, getAdminController);
 adminRouter.get("/students-excelsheet", adminAuthenticate, getStudentDemoExcelSheetController);
