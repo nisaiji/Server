@@ -45,8 +45,8 @@ const parentProfileInfoUpdateSchema = Joi.object({
   fullname: Joi.string().required().messages({
     "any.required": "full name is required."
   }),
-  age: Joi.number().required().messages({
-    "any.required": "age is required."
+  dob: Joi.date().required().messages({
+    "any.required": "date of birth is required."
   }),
   gender: Joi.string().required().messages({
     "any.required": "gender is required."

@@ -376,6 +376,7 @@ export async function updateParentController(req, res) {
     if(req.body['qualification']) { fieldsToBeUpdated['qualification'] = req.body['qualification'] }
     if(req.body['occupation']) { fieldsToBeUpdated['occupation'] = req.body['occupation'] }
     if(req.body['fcmToken']) { fieldsToBeUpdated['fcmToken'] = req.body['fcmToken'] }
+    if(req.body['dob']) { fieldsToBeUpdated['dob'] = req.body['dob'] }
     if (req.body["password"]) {
       const hashedPassword = await hashPasswordService(req.body["password"]);
       fieldsToBeUpdated.password = hashedPassword;
@@ -819,9 +820,10 @@ export async function getParentWithStudentsController(req, res) {
                 studentId: '$_id',
                 studentFirstName: '$firstname',
                 studentLastName: '$lastname',
+                guardianName: '$guardianName',
                 studentGender: '$gender',
                 studentbloodGroup: '$bloodGroup',
-                studentGuardian: '$guardianName',
+                studentGuardianName: '$guardianName',
                 studentDOB: '$dob',
                 studentPhoto: '$photo',
                 studentAddress: '$address',
@@ -853,7 +855,7 @@ export async function getParentWithStudentsController(req, res) {
       {
         $project: {
           parentFullName: '$fullname',
-          parentAge: '$age',
+          parentDob: '$dob',
           parentGender: '$gender',
           parentAddress: '$address',
           parentPhoto: '$photo',

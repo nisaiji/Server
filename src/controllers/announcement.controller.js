@@ -43,14 +43,14 @@ export async function createAnnouncementByAdminController(req, res) {
     if (targetAudience.includes("teacher")) {
       const teachers = await getTeachersByAdminIdService(adminId);
       for (const teacher of teachers) {
-        await sendPushNotification(teacher['fcmToken'], pushTitle, description);
+        await sendPushNotification(teacher['fcmToken'], pushTitle, description, "announcement");
       }
     }
 
     if (targetAudience.includes("parent")) {
       const parents = await getParentsByAdminIdService(adminId);
       for (const parent of parents) {
-        await sendPushNotification(parent['fcmToken'], pushTitle, title);
+        await sendPushNotification(parent['fcmToken'], pushTitle, title, "announcement");
       }
     }
     return res.status(StatusCodes.CREATED).json(success(201, "Announcement created successfully!"));

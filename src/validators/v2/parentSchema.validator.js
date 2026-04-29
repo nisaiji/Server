@@ -50,9 +50,8 @@ const parentPhoneAndOtpValidator = Joi.object({
 });
 
 const parentUpdateValidator = Joi.object({
-  username: Joi.string().required().messages({
+  username: Joi.string().optional().messages({
       'string.base': 'Username must be a string',
-       "any.required": "username is required."
     }),
 
   fullname: Joi.string().required().messages({
@@ -60,8 +59,8 @@ const parentUpdateValidator = Joi.object({
        "any.required": "full name is required."
     }),
 
-  age: Joi.number().optional().messages({
-      'number.base': 'Age must be a number'
+  dob: Joi.string().optional().messages({
+      'string.base': 'Date of birth must be a string'
     }),
 
   gender: Joi.string().valid('Male', 'Female', 'Other').optional().messages({
