@@ -1,8 +1,12 @@
 import { createWorkDayService, deleteWorkDayService, getWorkDayService, getWorkDaysService, updateWorkDayService } from "../services/workDay.services.js";
-import { getDayNameService, getStartAndEndTimeService } from "../services/celender.service.js";
+import { getDayNameService, getFormattedDateService, getStartAndEndTimeService } from "../services/celender.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSessionService } from "../services/session.services.js";
+import { getAdminService } from "../services/admin.services.js";
+import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
+import { getTeachersByAdminIdService } from "../services/teacher.services.js";
+import { sendPushNotification } from "../config/firebase.config.js";
 
 
 export async function registerWorkDayController(req, res) {
@@ -32,6 +36,28 @@ export async function registerWorkDayController(req, res) {
     }
     const data = { date, day, title, description, admin: adminId, session: sessionId };
     await createWorkDayService(data);
+
+    const school = await getAdminService({_id: adminId});
+    const parents =  await getParentsByAdminIdService(adminId);
+    const teachers = await getTeachersByAdminIdService(adminId);
+    const pushTitle = `${school?.schoolName}: Upcoming Workday`;
+    const pushDescription = `From ${getFormattedDateService(new Date(startTime))} to ${getFormattedDateService(new Date(endTime))}`;
+
+    for(const parent of parents) {
+      try {
+        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription, "holiday",parent?._id);
+      } catch (error) {
+        throw error;
+      }
+    }
+    
+    for(const teacher of teachers) {
+      try {
+        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription, "holiday",teacher?._id);
+      } catch (error) {
+        throw error;
+      }
+    }
     return res.status(StatusCodes.OK).send(success(200, "Marked as working day successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
