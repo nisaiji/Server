@@ -1,6 +1,5 @@
 import express from "express";
 import adminRouter from "./admin.router.js";
-import parentRouter from "./parent.router.js";
 // import studentRouter from "./student.router.js";
 import teacherRouter from "./teacher.router.js";
 import sectionRouter from "./section.router.js";
@@ -15,7 +14,7 @@ import superAdminRouter from "./superAdmin.router.js";
 import leaveRouter from "./leave.router.js";
 import guestTeacherRouter from './guestTeacher.router.js'
 import customerSupportRouter from "./customerSupport.router.js";
-import workDayRouter from "./workDay.router.js";
+import workDayRouter from "./workDay.router.js"; 
 import v2Router from "./v2/index.router.js";
 import announcementRouter from "./announcement.router.js";
 import notificationRouter from "./notification.router.js";
@@ -28,18 +27,12 @@ import studentLeaveRequestRouter from "./studentLeaveRequest.router.js";
 import teacherSubjectSectionRouter from "./teacherSubjectSection.router.js";
 import examRouter from "./exam.router.js";
 import studentExamResultRouter from "./studentExamResult.router.js";
-import marchantPaymentRouter from "./marchantPaymentConfig.router.js";
-import paymentIndexRouter from "./payments/index.router.js";
-import feeStructureRouter from "./feeStructure/index.router.js";
-import sessionStudentWalletRouter from "./sessionStudentWallet.router.js";
-import cronRouter from "./cronJob.router.js";
 import transferCertificateRequestRouter from "./transferCertificateRequest.router.js";
 const router = express();
 
 router.use("/v2", v2Router);
 router.use("/v3", v3Router);
 router.use("/admin", adminRouter);
-router.use("/parent", parentRouter);
 router.use("/teacher", teacherRouter);
 // router.use("/student", studentRouter);
 router.use("/class", classRouter);
@@ -65,11 +58,6 @@ router.use("/student-leave", studentLeaveRequestRouter);
 router.use("/teacher-subject-section", teacherSubjectSectionRouter);
 router.use("/exam", examRouter);
 router.use("/student-exam-result", studentExamResultRouter);
-router.use("/payment", paymentIndexRouter);
-router.use('/marchant', marchantPaymentRouter);
-router.use('/fee-structure', feeStructureRouter);
-router.use('/wallet', sessionStudentWalletRouter);
 router.use('/transfer-certificate', transferCertificateRequestRouter);
-router.use('/cron', cronRouter);
 
 export default router;

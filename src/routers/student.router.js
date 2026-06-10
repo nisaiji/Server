@@ -2,7 +2,7 @@
 // import {  deleteStudentController, getStudentsController, registerStudentController, registerStudentsFromExcelController, updateStudentController } from "../controllers/student.controller.js";
 // import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 // import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
-// import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
+// import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
 // import {deleteStudentValidation, getStudentValidation, registerStudentValidation, updateStudentByAdminValidation, updateStudentByParentValidation, updateStudentByTeacherValidation, updateStudentParentByAdminValidation, uploadStudentPhotoValidation } from "../middlewares/validation/student.validation.middleware.js";
 // import { validateImageSizeMiddleware } from "../middlewares/teacher.middleware.js";
 // import upload from "../middlewares/multer.middleware.js";

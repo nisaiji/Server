@@ -4,7 +4,7 @@ import { error, success } from "../utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionAttendanceStatusService, getSectionAttendancesPipelineService } from "../services/sectionAttendance.services.js";
 import { getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
-import { getParentCountService } from "../services/parent.services.js";
+import { getParentCountService } from "../services/v2/parent.services.js";
 import { getTeacherCountService } from "../services/teacher.services.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSessionService } from "../services/session.services.js";
