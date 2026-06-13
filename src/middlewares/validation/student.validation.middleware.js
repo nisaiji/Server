@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 import {deleteStudentSchema, getStudentsSchema, registerStudentSchema, updateStudentByAdminSchema,updateStudentByParentSchema,updateStudentByTeacherSchema, updateStudentParentByAdminSchema, uploadStudentPhotoSchema} from "../../validators/studentSchema.validator.js";
 
 

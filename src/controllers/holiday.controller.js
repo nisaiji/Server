@@ -1,7 +1,7 @@
 import { deleteWorkDayService, getWorkDayService } from "../services/workDay.services.js";
 import {getDayNameService, getFormattedDateService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
 import { createHolidayService, deleteHolidayService, getHolidaysService, updateHolidayService, getHolidayService } from "../services/holiday.service.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";

@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 import { attendancesStatusSchema, presentStudentsOfSchoolSchema } from "../../validators/dashboardAdminSchema.validator.js";
 
 export async function presentStudentsOfSchoolValidation(req, res, next) {

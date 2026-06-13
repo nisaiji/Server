@@ -1,6 +1,6 @@
 import { changePasswordByVerifiedTeacherSchema, getChangePasswordRequestsForAdminSchema, registerChangePasswordRequestSchema, updateChangePasswordRequestByAdminSchema, verifyTeacherChangePasswordSchema } from "../../validators/changePasswordSchema.validator.js";
 import { StatusCodes } from "http-status-codes";
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 
 export async function registerChangePasswordRequestValidation(req, res, next) {
   try {

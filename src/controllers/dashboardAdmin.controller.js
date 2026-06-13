@@ -1,6 +1,6 @@
 import { getSectionService } from "../services/section.services.js";
 import { getAttendanceCountService } from "../services/attendance.service.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionAttendanceStatusService, getSectionAttendancesPipelineService } from "../services/sectionAttendance.services.js";
 import { getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";

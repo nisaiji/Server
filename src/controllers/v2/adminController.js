@@ -2,7 +2,7 @@ import otpGenerator from "otp-generator";
 import { getAdminService, registerAdminService, updateAdminService } from "../../services/admin.services.js";
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
 import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
-import { error, success } from "../../utills/responseWrapper.js";
+import { error, success } from "../../utils/responseWrapper.js";
 import { adminControllerResponse } from "../../config/httpResponse.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { StatusCodes } from "http-status-codes";

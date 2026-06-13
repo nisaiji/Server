@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 import {adminAddressSchema, adminDetailsSchema, adminFcmTokenSchema, adminPhotoUpdateSchema, loginAdminSchema, registerAdminSchema,updateAdminProfileSchema, updateAdminSocialProfileSchema} from "../../validators/adminSchema.validator.js";
 
 export async function adminRegisterValidation(req, res, next) {

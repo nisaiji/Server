@@ -1,4 +1,4 @@
-import { error } from "../utills/responseWrapper.js";
+import { error } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 
 const IMAGE_SIZE_LIMIT = 1 * 1024 * 1024;

@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { createAnnouncementService, deleteAnnouncementService, getAnnouncementCountService, getAnnouncementService, getAnnouncementsPipelineService, updateAnnouncementService } from "../services/announcement.services.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getStudentService } from "../services/student.service.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";

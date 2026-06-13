@@ -1,6 +1,6 @@
 import {getAdminService, registerAdminService} from "../services/admin.services.js";
 import {StatusCodes} from "http-status-codes";
-import {error, success} from "../utills/responseWrapper.js";
+import {error, success} from "../utils/responseWrapper.js";
 import {getSectionService} from "../services/section.services.js";
 import {getClassService} from "../services/class.sevices.js";
 import {getTeacherService} from "../services/teacher.services.js";

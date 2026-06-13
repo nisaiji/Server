@@ -1,4 +1,4 @@
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 import Jwt from "jsonwebtoken";
 import { config } from "../../config/config.js";
 import { getAdminService } from "../../services/admin.services.js";

@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
 import { getSessionStudentService, getSessionStudentsPipelineService, registerSessionStudentService, updateSessionStudentService } from "../../services/v2/sessionStudent.service.js";
-import { error, success } from "../../utills/responseWrapper.js";
+import { error, success } from "../../utils/responseWrapper.js";
 import { getClassService } from "../../services/class.sevices.js";
 import { getParentService, registerParentService, updateParentService } from "../../services/v2/parent.services.js";
 import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";

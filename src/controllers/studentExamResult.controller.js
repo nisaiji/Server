@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
-import { error, success } from '../utills/responseWrapper.js';
+import { error, success } from '../utils/responseWrapper.js';
 import { createStudentExamResultService, getStudentExamResultService, getStudentExamResultsPipelineService, updateStudentExamResultService } from '../services/studentExamResult.service.js';
 import { getSectionService } from '../services/section.services.js';
 import { getExamService } from '../services/exam.services.js';

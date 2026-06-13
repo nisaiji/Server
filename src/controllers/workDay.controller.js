@@ -1,6 +1,6 @@
 import { createWorkDayService, deleteWorkDayService, getWorkDayService, getWorkDaysService, updateWorkDayService } from "../services/workDay.services.js";
 import { getDayNameService, getFormattedDateService, getStartAndEndTimeService } from "../services/celender.service.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSessionService } from "../services/session.services.js";
 import { getAdminService } from "../services/admin.services.js";

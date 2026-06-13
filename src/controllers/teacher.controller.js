@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import { getTeacherService, registerTeacherService, getAllTeacherOfAdminService, updateTeacherService, getTeachersService, getTeachersPipelineService } from "../services/teacher.services.js";
 import { getTeacherSectionSessionService, getTeacherSectionSessionsService } from "../services/teacherSectionSession.service.js";
 import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
 import { getSectionService } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";

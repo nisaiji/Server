@@ -1,6 +1,6 @@
 import { createExamService, getExamService, getExamsPipelineService, updateExamService } from '../services/exam.services.js';
 import { StatusCodes } from 'http-status-codes';
-import { error, success } from '../utills/responseWrapper.js';
+import { error, success } from '../utils/responseWrapper.js';
 import { convertToMongoId } from '../services/mongoose.services.js';
 import { getSessionStudentService } from '../services/v2/sessionStudent.service.js';
 import { getSectionService } from '../services/section.services.js';

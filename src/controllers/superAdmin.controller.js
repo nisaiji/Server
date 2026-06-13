@@ -3,7 +3,7 @@ import { getAccessTokenService } from "../services/JWTToken.service.js";
 import { matchPasswordService, hashPasswordService } from "../services/password.service.js"
 import { StatusCodes } from "http-status-codes";
 import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { getAdminCountService, getAdminService, getAdminsPipelineService, getAdminsService, updateAdminService } from "../services/admin.services.js";
 import { getCustomerSupportQueriesService } from "../services/customerSupport.services.js";
 

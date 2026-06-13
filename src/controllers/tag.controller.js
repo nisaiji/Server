@@ -1,5 +1,5 @@
 import {StatusCodes} from "http-status-codes";
-import {error, success} from "../utills/responseWrapper.js";
+import {error, success} from "../utils/responseWrapper.js";
 import {getSubjectService} from "../services/subject.service.js";
 import {getTeacherSubjectSectionService} from "../services/teacherSubjectSection.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";

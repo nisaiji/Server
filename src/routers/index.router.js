@@ -28,6 +28,7 @@ import teacherSubjectSectionRouter from "./teacherSubjectSection.router.js";
 import examRouter from "./exam.router.js";
 import studentExamResultRouter from "./studentExamResult.router.js";
 import transferCertificateRequestRouter from "./transferCertificateRequest.router.js";
+import feeSetupRouter from "./feeSetup.router.js";
 const router = express();
 
 router.use("/v2", v2Router);
@@ -59,5 +60,6 @@ router.use("/teacher-subject-section", teacherSubjectSectionRouter);
 router.use("/exam", examRouter);
 router.use("/student-exam-result", studentExamResultRouter);
 router.use('/transfer-certificate', transferCertificateRequestRouter);
+router.use("/fee-setup", feeSetupRouter);
 
 export default router;

@@ -8,7 +8,7 @@ import {
   registerChangePasswordRequestService,
   updateChangePasswordRequestService
 } from "../services/changePassword.services.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { hashPasswordService } from "../services/password.service.js";

@@ -1,6 +1,6 @@
 import { getLeaveRequestsCountService, getLeaveRequestService, getLeaveRequestsPipelineService, registerLeaveRequestService, updateLeaveRequestService } from "../services/leave.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getGuestTeacherService, registerGuestTeacherService } from "../services/guestTeacher.service.js";
 import { hashPasswordService } from "../services/password.service.js";

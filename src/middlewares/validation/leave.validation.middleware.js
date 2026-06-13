@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 import { getLeaveRequestsForAdminSchema, registerLeaveSchema, updateLeaveRequestSchema, updateTeacherLeaveSchema } from "../../validators/leaveSchema.validator.js";
 
 export async function registerLeaveRequestValidation(req, res, next) {

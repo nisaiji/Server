@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { getSessionService, getSessionsPipelineService, registerSessionService, updateSessionService, updateSessionsService } from "../services/session.services.js";
-import { success } from "../utills/responseWrapper.js";
+import { success } from "../utils/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 
 export async function createSessionController(req, res) {

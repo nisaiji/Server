@@ -1,6 +1,6 @@
 import otpGenerator from "otp-generator";
 import { StatusCodes } from "http-status-codes";
-import { error, success } from "../../utills/responseWrapper.js";
+import { error, success } from "../../utils/responseWrapper.js";
 import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
 import { getParentService, getParentsPipelineService, updateParentService } from "../../services/v2/parent.services.js";

@@ -1,4 +1,4 @@
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 import {
   registerSuperAdminSchema,
   loginSuperAdminSchema,
