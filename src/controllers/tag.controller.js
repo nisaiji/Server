@@ -1,12 +1,28 @@
 import {StatusCodes} from "http-status-codes";
-import {error, success} from "../utills/responseWrapper.js";
+import {error, success} from "../utils/responseWrapper.js";
 import {getSubjectService} from "../services/subject.service.js";
 import {getTeacherSubjectSectionService} from "../services/teacherSubjectSection.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSessionService } from "../services/session.services.js";
-import { getDayNameService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
-import { getWorkDayService } from "../services/workDay.services.js";
+import { getFormattedDateService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
 import { createTagService, deleteTagService, getTagService, getTagsPipelineService, updateTagService } from "../services/tag.service.js";
+import { sendPushNotification } from "../config/firebase.config.js";
+import {
+    dedupeNotificationRecipientsService,
+    getSectionParentNotificationRecipientsService,
+    getTagTeacherNotificationRecipientsService,
+} from "../services/notificationRecipient.service.js";
+
+function getTagNotificationRangeLabel(startDate, endDate) {
+    const startLabel = getFormattedDateService(startDate);
+    const endLabel = getFormattedDateService(endDate);
+
+    if (startLabel === endLabel) {
+        return startLabel;
+    }
+
+    return `${startLabel} to ${endLabel}`;
+}
 
 export async function createTagController(req, res) {
     try {
@@ -15,6 +31,17 @@ export async function createTagController(req, res) {
         const schoolId = req.adminId;
         startDate = parseInt(startDate);
         endDate = parseInt(endDate);
+
+        if(startDate > endDate) {
+            return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Start date must be less than end date"));
+        }
+
+        const session = await getSessionService({_id: sessionId});
+
+        if(!session || session['status'] === 'completed') {
+          return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session is completed. You cannot create tag"));
+        }
+
         const subject = await getSubjectService({_id: subjectId});
         if(!subject) {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject not found"));
@@ -30,13 +57,39 @@ export async function createTagController(req, res) {
 
         startIstDate = timestampToIstDate(tempStartTimestamp);
         endIstDate = timestampToIstDate(tempEndTimestamp);
+        const notificationStartDate = new Date(startIstDate);
+        const notificationEndDate = new Date(endIstDate);
 
         let currIstDate = startIstDate;
         while (currIstDate <= endIstDate) {
-            const { startTime: currIstDateStartTimestamp, endTime: currIstDateEndTimestamp } = getStartAndEndTimeService(currIstDate, currIstDate);
-            const teachingEvent = await createTagService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, date: currIstDate, school: schoolId});
+            await createTagService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, date: currIstDate, school: schoolId});
             currIstDate.setDate(currIstDate.getDate() + 1)
         }
+
+        const [parentRecipients, teacherRecipients] = await Promise.all([
+            getSectionParentNotificationRecipientsService({ sectionId, sessionId, schoolId }),
+            getTagTeacherNotificationRecipientsService({
+                sectionId,
+                subjectId,
+                sessionId,
+                schoolId,
+                excludeTeacherId: teacherId,
+            }),
+        ]);
+
+        const recipients = dedupeNotificationRecipientsService([
+            ...parentRecipients,
+            ...teacherRecipients,
+        ]);
+
+        const notificationBody = `${title} has been added for ${subject?.name ?? "the subject"} from ${getTagNotificationRangeLabel(notificationStartDate, notificationEndDate)}.`;
+
+        await Promise.allSettled(
+            recipients.map((recipient) =>
+                sendPushNotification(recipient.fcmToken, "New Tag Added", notificationBody, "tag"),
+            ),
+        );
+        
         return res.status(StatusCodes.CREATED).send(success(201, "Tag created successfully"));
     } catch (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

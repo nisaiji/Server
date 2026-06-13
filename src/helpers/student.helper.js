@@ -1,29 +1,29 @@
 import { getSectionService, updateSectionService } from "../services/section.services.js";
 import { getStudentService, registerStudentService } from "../services/student.service.js";
-import { getParentService, registerParentService } from "../services/parent.services.js";
+import { getParentService, registerParentService } from "../services/v2/parent.services.js";
 import { registerStudentFromExcelSchema } from "../validators/studentSchema.validator.js";
 import { hashPasswordService } from "../services/password.service.js";
 import { excelDateToStringDateFormat } from "../services/celender.service.js";
 
-export async function registerStudentsFromExcelHelper(students, sectionId, classId, adminId){
+export async function registerStudentsFromExcelHelper(students, sectionId, classId, adminId) {
   try {
-     // validate each student from excel file
-     students.shift();
-    for(const student of students){
-      console.log({student})
-    const studentValidation =  registerStudentFromExcelSchema.validate(student);
-    if(studentValidation.error){
-      throw new Error(JSON.stringify({
-        status: "Failed",
-        student: student['First Name'],
-        reason: studentValidation.error.message
-      }));      
-    }
+    // validate each student from excel file
+    students.shift();
+    for (const student of students) {
+      console.log({ student })
+      const studentValidation = registerStudentFromExcelSchema.validate(student);
+      if (studentValidation.error) {
+        throw new Error(JSON.stringify({
+          status: "Failed",
+          student: student['First Name'],
+          reason: studentValidation.error.message
+        }));
+      }
     }
 
     // insert each student from excel file
     let insertedStudentCount = 0;
-    for(const student of students){
+    for (const student of students) {
       const normalizedStudent = {
         firstname: student['First Name'],
         lastname: student['Last Name'],
@@ -44,24 +44,24 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
       };
 
       const { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode, parentName, phone, email, qualification, occupation } = normalizedStudent;
-      const parentObj = {fullname: parentName, phone, email,qualification, occupation}
-      const studentObj = {firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode}
-      let parent = await getParentService({ phone, isActive:true });
-      if(!parent){
+      const parentObj = { fullname: parentName, phone, email, qualification, occupation }
+      const studentObj = { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode }
+      let parent = await getParentService({ phone, isActive: true });
+      if (!parent) {
         const parentNames = parentName.split(" ");
         const password = parentNames[0] + "@" + phone;
         parentObj['password'] = await hashPasswordService(password);
         parent = await registerParentService(parentObj);
       }
       let studentInfo = await getStudentService({ firstname, parent: parent["_id"] });
-      if(!studentInfo){
+      if (!studentInfo) {
         studentObj['parent'] = parent['_id']
         studentObj['section'] = sectionId
         studentObj['classId'] = classId
         studentObj['admin'] = adminId
         await registerStudentService(studentObj)
-        const section = await getSectionService({_id:sectionId})
-        await updateSectionService({_id:sectionId}, {studentCount: section["studentCount"]+1})
+        const section = await getSectionService({ _id: sectionId })
+        await updateSectionService({ _id: sectionId }, { studentCount: section["studentCount"] + 1 })
         insertedStudentCount++
       }
     }

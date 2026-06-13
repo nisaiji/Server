@@ -1,4 +1,4 @@
-import { error } from "../../../utills/responseWrapper.js";
+import { error } from "../../../utils/responseWrapper.js";
 import { adminDetailsValidator, adminEmailOtpValidator, adminEmailValidator, adminPasswordUpdateValidator, adminPhoneAndOtpValidator, adminPhoneValidator } from "../../../validators/v2/adminSchema.validator.js";
 import { StatusCodes } from "http-status-codes";
 

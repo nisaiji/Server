@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 import { createHolidaySchema, createHolidaysSchema, getHolidaySchema, updateHolidaySchema } from "../../validators/holidaySchema.validator.js";
 
 export async function createHolidayValidation(req,res,next){

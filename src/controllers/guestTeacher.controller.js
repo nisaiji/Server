@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { getGuestTeacherService, updateGuestTeacherService } from "../services/guestTeacher.service.js";
 import { hashPasswordService } from "../services/password.service.js";
 

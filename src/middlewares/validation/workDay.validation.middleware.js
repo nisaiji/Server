@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { error } from "../../utills/responseWrapper.js";
+import { error } from "../../utils/responseWrapper.js";
 import { createWorkDaySchema, getWorkDaySchema, updateWorkDaySchema } from "../../validators/workDaySchema.validator.js";
 
 export async function createWorkDayValidation(req,res,next){

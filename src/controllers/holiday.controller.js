@@ -1,7 +1,7 @@
 import { deleteWorkDayService, getWorkDayService } from "../services/workDay.services.js";
 import {getDayNameService, getFormattedDateService, getStartAndEndTimeService, timestampToIstDate } from "../services/celender.service.js";
 import { createHolidayService, deleteHolidayService, getHolidaysService, updateHolidayService, getHolidayService } from "../services/holiday.service.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
@@ -37,7 +37,7 @@ export async function registerHolidayController(req, res) {
 
     for(const parent of parents) {
       try {
-        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription);
+        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription, "holiday",parent?._id );
       } catch (error) {
         throw error;
       }
@@ -45,7 +45,7 @@ export async function registerHolidayController(req, res) {
 
     for(const teacher of teachers) {
       try {
-        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription);
+        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription, "holiday",teacher?._id);
       } catch (error) {
         throw error;
       }
@@ -71,6 +71,10 @@ export async function registerHolidaysController(req, res) {
 
     let startIstDate = timestampToIstDate(startTime);
     let endIstDate = timestampToIstDate(endTime);
+
+    if(startIstDate < session.startDate || endIstDate > session.endDate) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Holiday dates must be within session dates"));
+    }
 
     const{startTime:tempStartTimestamp, endTime:tempEndTimestamp} = getStartAndEndTimeService(startIstDate, endIstDate);
   
@@ -103,7 +107,7 @@ export async function registerHolidaysController(req, res) {
 
     for(const parent of parents) {
       try {
-        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription);
+        await sendPushNotification(parent['fcmToken'], pushTitle, pushDescription, "holiday",parent?._id);
       } catch (error) {
         throw error;
       }
@@ -111,7 +115,7 @@ export async function registerHolidaysController(req, res) {
 
     for(const teacher of teachers) {
       try {
-        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription);
+        await sendPushNotification(teacher['fcmToken'], pushTitle, pushDescription, "holiday",teacher?._id);
       } catch (error) {
         throw error;
       }
@@ -168,6 +172,11 @@ export async function deleteHolidayController(req, res) {
     if(session && session['status'] === 'completed') {  
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "You can't delete holiday of completed session"));
     }
+
+    if(holiday.date < Date.now()) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "You can't delete past holiday"));
+    }
+
     await deleteHolidayService({ _id: id });
     return res.status(StatusCodes.OK).send(success(200, "Holiday deleted successfully"));
   } catch (err) {

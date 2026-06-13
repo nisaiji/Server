@@ -1,4 +1,4 @@
-import invalidationCronJob from "./invalidate.cron.js";
+import {invalidationCronJob} from "./index.jobs.js";
 import { config } from "../config/config.js"
 
 

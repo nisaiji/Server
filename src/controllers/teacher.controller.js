@@ -1,13 +1,17 @@
 import { StatusCodes } from "http-status-codes";
 import { getTeacherService, registerTeacherService, getAllTeacherOfAdminService, updateTeacherService, getTeachersService, getTeachersPipelineService } from "../services/teacher.services.js";
+import { getTeacherSectionSessionService, getTeacherSectionSessionsService } from "../services/teacherSectionSession.service.js";
 import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
 import { getSectionService } from "../services/section.services.js";
 import { getClassService } from "../services/class.sevices.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getGuestTeacherService } from "../services/guestTeacher.service.js";
 import { getAdminService } from "../services/admin.services.js";
+import { getSessionService } from "../services/session.services.js";
+import xlsx from 'xlsx';
+import fs from 'fs/promises';
 
 export async function registerTeacherController(req, res) {
   try {
@@ -59,14 +63,22 @@ export async function loginTeacherController(req, res) {
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Invalid credentials. Please try again"));
     }
+
+    const session = await getSessionService({school: admin['_id'], status: "active"});
+    if (!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+    }
     if (guestTeacher && platform === "web") {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Guest teacher does not support on web"));
     }
     let section;
     let Class;
-    if(currentTeacher['section']){
-      section = await getSectionService({_id: currentTeacher['section']}); 
-      Class = await getClassService({ _id: section["classId"] });
+    const teacherSectionSession = await getTeacherSectionSessionService({ teacher: currentTeacher['_id'], session: session['_id'] });
+    if (teacherSectionSession) {
+      [section, Class] = await Promise.all([
+        getSectionService({ _id: teacherSectionSession.section}),
+        getClassService({ _id: teacherSectionSession.classInfo})
+      ]);
     }
     // if (!section) {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
@@ -77,7 +89,7 @@ export async function loginTeacherController(req, res) {
     }
 
     const accessToken = getAccessTokenService({
-        role: teacher ? (teacher['section'] ? "classTeacher" : "teacher") : "guestTeacher",
+      role: teacher ? (teacherSectionSession ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
       sectionId: section? section["_id"]:"",
@@ -94,7 +106,7 @@ export async function loginTeacherController(req, res) {
       username: currentTeacher["username"] ? currentTeacher["username"] : "",
     });
     const refreshToken = getRefreshTokenService({
-      role: teacher ? (teacher['section'] ? "classTeacher" : "teacher") : "guestTeacher",
+      role: teacher ? (teacherSectionSession ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
       sectionId: section?section["_id"]:"",
@@ -132,35 +144,61 @@ export async function refreshAccessTokenController(req, res) {
 export async function getAllTeacherOfAdminController(req, res) {
   try {
     const adminId = req.adminId;
+    const {sessionId} = req.body;
     const teachers = await getTeachersPipelineService([
       {
-        $match: { admin: convertToMongoId(adminId) }
+        $match: { admin: convertToMongoId(adminId), isActive: true }
       },
       {
         $lookup: {
-          from: "sections",
-          localField: "section",
-          foreignField: "_id",
-          as: "section"
-        }
-      },
-      {
-         $unwind: {
-           path: "$section", 
-           preserveNullAndEmptyArrays: true
-         }
-      },
-      {
-        $lookup: {
-          from: "classes",
-          localField: "section.classId",
-          foreignField: "_id",
-          as:"class"
+          from: "teachersectionsessions",
+          let: { teacherId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$teacher", "$$teacherId"] },
+                    { $eq: ["$session", convertToMongoId(sessionId)] }
+                  ]
+                }
+              }
+            },
+            {
+              $lookup: {
+                from: "sections",
+                localField: "section",
+                foreignField: "_id",
+                as: "sectionInfo"
+              }
+            },
+            {
+              $unwind: {
+                path: "$sectionInfo",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: "classes",
+                localField: "classInfo",
+                foreignField: "_id",
+                as: "classInfo"
+              }
+            },
+            {
+              $unwind: {
+                path: "$classInfo",
+                preserveNullAndEmptyArrays: true
+              }
+            }
+          ],
+          as: "teacherSectionSession"
         }
       },
       {
         $unwind: {
-          path: "$class",
+          path: "$teacherSectionSession",
           preserveNullAndEmptyArrays: true
         }
       },
@@ -255,23 +293,23 @@ export async function getAllTeacherOfAdminController(req, res) {
           photo: "$photo",
           forgetPasswordCount: "$forgetPasswordCount",
           leaveRequestCount: "$leaveRequestCount",
-          section: "$section",
+          section: "$teacherSectionSession.sectionInfo",
           admin: "$admin",
           createdAt: "$createdAt",
           updatedAt: "$updatedAt",
-          sectionId: "$section._id",
-          sectionName: "$section.name",
-          sectionStudentCount: "$section.studentCount",
-          sectionStartTime: "$section.startTime",
-          classId: "$class._id",
-          className: "$class.name",
-          sectionCountInClass: { $size: { $ifNull: ["$class.section", []] } },
+          sectionId: "$teacherSectionSession.sectionInfo._id",
+          sectionName: "$teacherSectionSession.sectionInfo.name",
+          sectionStudentCount: "$teacherSectionSession.sectionInfo.studentCount",
+          sectionStartTime: "$teacherSectionSession.sectionInfo.startTime",
+          classId: "$teacherSectionSession.classInfo._id",
+          className: "$teacherSectionSession.classInfo.name",
+          sectionCountInClass: { $size: { $ifNull: ["$teacherSectionSession.classInfo.section", []] } },
           sectionSubjects: "$sectionSubjects",
         }
       },
       {
         $project: {
-          section: 0,
+          teacherSectionSession: 0,
           _id: 0
         }
       }
@@ -612,9 +650,17 @@ export async function getTeacherController(req, res) {
 
 export async function getAllNonSectionTeacherController(req, res) {
   try {
+    const sessionId = req.params.sessionId;
     const adminId = req.adminId;
-    const teachers = await getTeachersService({ admin: adminId, section: null, isActive: true });
-    return res.send(success(200, teachers));
+    const session = await getSessionService({_id: sessionId});
+    if (!session) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid session Id"));
+    }
+    const teachers = await getTeachersService({ admin: adminId, isActive: true });
+    const assignedTeachers = await getTeacherSectionSessionsService({ session: sessionId }, { teacher: 1 });
+    const assignedTeacherIds = assignedTeachers.map(t => t.teacher.toString());
+    const nonSectionTeachers = teachers.filter(teacher => !assignedTeacherIds.includes(teacher._id.toString()));
+    return res.send(success(200, nonSectionTeachers));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -645,6 +691,83 @@ export async function changePasswordTeacherController(req, res) {
 export async function assignTeacherAsGuestTeacherToSectionController(req, res) {
   try {
     const {teacherId, sectionId} = req.body;
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function registerTeachersFromExcelController(req, res) {
+  try {
+    const file = req.file;
+    const adminId = req.adminId;
+
+    if (!file) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Excel file is required"));
+    }
+
+    // Expected Excel columns based on teacher model:
+    // firstname (required), lastname, phone (required), email, gender, dob, bloodGroup, 
+    // university, degree, address, city, district, state, country, pincode
+    
+    const workbook = xlsx.readFile(file.path);
+    const sheetName = workbook.SheetNames[0];
+    const teachers = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    let registeredCount = 0;
+    const errors = [];
+
+    teachers.shift();
+    for (const teacherData of teachers) {
+      try {
+        const { firstname, lastname, phone, email, gender, dob, bloodGroup, university, degree, address, city, district, state, country, pincode } = teacherData;
+
+        if (!firstname || !phone) {
+          errors.push(`Row with firstname: ${firstname || 'N/A'} - Missing required fields (firstname, phone)`);
+          continue;
+        }
+
+        const existingTeacher = await getTeacherService({ phone, isActive: true });
+        if (existingTeacher) {
+          errors.push(`Teacher with phone ${phone} already exists`);
+          continue;
+        }
+
+        const password = firstname + "@" + phone;
+        const hashedPassword = await hashPasswordService(password);
+
+        const teacherObj = {
+          firstname,
+          lastname: lastname || '',
+          phone,
+          email: email || '',
+          gender: gender || '',
+          dob: dob || '',
+          bloodGroup: bloodGroup || '',
+          university: university || '',
+          degree: degree || '',
+          address: address || '',
+          city: city || '',
+          district: district || '',
+          state: state || '',
+          country: country || '',
+          pincode: pincode || '',
+          password: hashedPassword,
+          admin: adminId
+        };
+
+        await registerTeacherService(teacherObj);
+        registeredCount++;
+      } catch (err) {
+        errors.push(`Error registering teacher ${teacherData.firstname || 'Unknown'}: ${err.message}`);
+      }
+    }
+
+    await fs.unlink(file.path);
+
+    const message = `${registeredCount} teachers registered successfully`;
+    const response = { message, registeredCount, errors };
+
+    return res.status(StatusCodes.OK).send(success(201, response));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

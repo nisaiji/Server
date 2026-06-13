@@ -1,7 +1,7 @@
 import { createSectionAttendanceService, deleteSectionAttendanceService, getSectionAttendanceService, getSectionAttendancesService, getSectionAttendanceStatusService, updateSectionAttendanceService } from "../services/sectionAttendance.services.js";
 import {createAttendanceService,getAttendanceService, getAttendancesService, updateAttendanceService, getMisMatchAttendanceService, getAttendancePipelineService, deleteAttendancesService} from "../services/attendance.service.js";
 import {getParentsByStudentId, getStudentService, getStudentsPipelineService} from "../services/student.service.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionByIdService, getSectionService } from "../services/section.services.js";
 import { getTeacherService } from "../services/teacher.services.js";
@@ -33,6 +33,10 @@ export async function attendanceByTeacherController(req, res) {
     }
     let date = new Date();
     const { startTime, endTime } = getStartAndEndTimeService(date, date);
+
+    if(date < session.startDate || date > session.endDate){
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Can't mark attendance outside session duration"));
+    }
 
     if(present.length==0 && absent.length==0){
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, attendanceControllerResponse.attendanceByTeacherController.noStudents));
@@ -71,7 +75,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([storedSessionStudent['student']]);
-        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}` )
+        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}`,"attendance",studentWithParent[0]?.parent?._id)
       } catch (error) {
         throw error;
       }
@@ -92,7 +96,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([storedSessionStudent['student']]);
-        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}` )
+        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}`,"attendance",studentWithParent[0]?.parent?._id)
       } catch (error) {
         throw error;
       }
@@ -110,6 +114,11 @@ export async function attendanceByTeacherController(req, res) {
 export async function undoAttendanceByTeacherController(req, res) {
   const { sectionId } = req.body;
   let date = new Date();
+  const section = await getSectionService({ _id: sectionId });
+  const session = await getSessionService({_id:section["session"]});
+  if(!session || session['status']==='completed') { 
+    return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! Can't undo attendance")); 
+  }
   const { startTime, endTime } = getStartAndEndTimeService(date, date);
   const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}})
   if(!sectionAttendance){
@@ -221,6 +230,10 @@ export async function bulkAttendanceMarkController(req, res) {
       const holiday = await getHolidayService({ date: { $gte: startTime, $lte: endTime }, admin: adminId });
       if (holiday || attendanceTimestamp > new Date().getTime()) {
         continue;
+      }
+
+      if(formattedDate < session.startDate || formattedDate > session.endDate){
+        return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Attendance can not be marked beyond session duration"));
       }
 
       if(dayName==='Sunday') {

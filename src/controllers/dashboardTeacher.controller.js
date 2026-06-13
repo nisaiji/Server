@@ -1,4 +1,4 @@
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionAttendanceStatusService } from "../services/sectionAttendance.services.js";
 import { getSectionService } from "../services/section.services.js";
