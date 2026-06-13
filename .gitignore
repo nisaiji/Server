@@ -3,6 +3,8 @@ node_modules/
 
 # Environment File
 .env
+.slingshot
+.vscode
 
 # config files
 firebase.json
