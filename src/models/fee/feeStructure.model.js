@@ -50,6 +50,7 @@ const feeStructureSchema = new mongoose.Schema(
 
         feeHeads: [
           {
+            _id: false,
             feeHeadId: {
               type: mongoose.Schema.Types.ObjectId,
               ref: "feeHead",

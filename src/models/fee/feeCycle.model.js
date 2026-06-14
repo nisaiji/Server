@@ -17,7 +17,7 @@ const FeeCycleSchema = new mongoose.Schema({
 
   frequency: {
     type: String,
-    enum: ["MONTHLY", "QUARTERLY", "HALF_YEARLY", "YEARLY"],
+    enum: ["MONTHLY", "QUARTERLY","BY_MONTHLY","HALF_YEARLY", "YEARLY"],
     required: true
   },
 

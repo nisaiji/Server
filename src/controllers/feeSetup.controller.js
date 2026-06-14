@@ -114,7 +114,7 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
   };
 }
 
-function buildFeeStructureDetails({ feeStructure, classInfo, session, feeCycle, feeHeadGroup }) {
+function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
   const feeStructureObj = feeStructure.toObject();
   const feeHeadMap = new Map(
     (feeHeadGroup?.feeHeads || []).map((feeHead) => {
@@ -179,6 +179,7 @@ function buildFeeStructureDetails({ feeStructure, classInfo, session, feeCycle, 
           name: classInfo.name,
         }
       : null,
+      applicableSections,
     // sessionDetails: session
     //   ? {
     //       _id: session._id,
@@ -198,7 +199,6 @@ function buildFeeStructureDetails({ feeStructure, classInfo, session, feeCycle, 
     //   : null,
     // sectionFeeType: feeStructureObj.amountForAllSections ? "SAME_FEE_AMOUNT" : "DIFFERENT_FEE_AMOUNT",
     // sections: applicableSections.map((applicableSection) => applicableSection.section),
-    applicableSections,
    // feeBreakdown: Array.from(feeBreakdownMap.values()),
     //grandTotalBySection,
   };
@@ -571,7 +571,7 @@ export async function getFeeStructureController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee structure not found"));
     }
 
-    const [classInfo, session, feeCycle, feeHeadGroup] = await Promise.all([
+    const [classInfo, feeHeadGroup] = await Promise.all([
       getClassService({
         _id: feeStructure.classId,
         admin: adminId,
@@ -593,8 +593,6 @@ export async function getFeeStructureController(req, res) {
     const feeStructureDetails = buildFeeStructureDetails({
       feeStructure,
       classInfo,
-      session,
-      feeCycle,
       feeHeadGroup,
     });
 

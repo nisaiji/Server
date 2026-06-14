@@ -35,10 +35,10 @@ const createFeeCycleSchema = Joi.object({
     "string.base": "Session Id must be a string.",
   }),
   frequency: Joi.string()
-    .valid("MONTHLY", "QUARTERLY", "HALF_YEARLY", "YEARLY")
+    .valid("MONTHLY", "QUARTERLY", "BY_MONTHLY", "HALF_YEARLY", "YEARLY")
     .required()
     .messages({
-      "any.only": "Frequency must be one of MONTHLY, QUARTERLY, HALF_YEARLY, YEARLY.",
+      "any.only": "Frequency must be one of MONTHLY, QUARTERLY, BY_MONTHLY, HALF_YEARLY, YEARLY.",
       "any.required": "Frequency is required.",
       "string.base": "Frequency must be a string.",
     }),
@@ -53,10 +53,10 @@ const createFeeCycleSchema = Joi.object({
 
 const updateFeeCycleSchema = Joi.object({
   frequency: Joi.string()
-    .valid("MONTHLY", "QUARTERLY", "HALF_YEARLY", "YEARLY")
+    .valid("MONTHLY", "QUARTERLY", "BY_MONTHLY", "HALF_YEARLY", "YEARLY")
     .required()
     .messages({
-      "any.only": "Frequency must be one of MONTHLY, QUARTERLY, HALF_YEARLY, YEARLY.",
+      "any.only": "Frequency must be one of MONTHLY, QUARTERLY, BY_MONTHLY, HALF_YEARLY, YEARLY.",
       "any.required": "Frequency is required.",
       "string.base": "Frequency must be a string.",
     }),
