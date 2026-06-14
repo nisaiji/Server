@@ -12,9 +12,9 @@ import teacherDashboardRouter from "./dashBoardTeacher.router.js";
 import changePasswordRouter from "./changePassword.router.js";
 import superAdminRouter from "./superAdmin.router.js";
 import leaveRouter from "./leave.router.js";
-import guestTeacherRouter from './guestTeacher.router.js'
+import guestTeacherRouter from "./guestTeacher.router.js";
 import customerSupportRouter from "./customerSupport.router.js";
-import workDayRouter from "./workDay.router.js"; 
+import workDayRouter from "./workDay.router.js";
 import v2Router from "./v2/index.router.js";
 import announcementRouter from "./announcement.router.js";
 import notificationRouter from "./notification.router.js";
@@ -31,6 +31,25 @@ import transferCertificateRequestRouter from "./transferCertificateRequest.route
 import feeSetupRouter from "./feeSetup.router.js";
 const router = express();
 
+router.use("/", (req, res, next) => {
+  console.log("");
+  console.log(
+    "*************************REQUEST START*****************************",
+  );
+  console.log(`NEW REQUEST ---> ${req.method} ${req.originalUrl}`);
+  console.log("req Type=======>", req.method.toUpperCase());
+  console.log("req Path=======>", req.path);
+  console.log("req Body=======>", req.body);
+  console.log("req Params=====>", req.params);
+  console.log("req Query======>", req.query);
+  console.log("Authorization======>", req.headers.authorization);
+  console.log(
+    "*********************REQUEST ENDS********************************",
+  );
+
+  next();
+});
+
 router.use("/v2", v2Router);
 router.use("/v3", v3Router);
 router.use("/admin", adminRouter);
@@ -42,16 +61,16 @@ router.use("/section", sectionRouter);
 router.use("/change-password", changePasswordRouter);
 router.use("/attendance", attendanceRouter);
 router.use("/holiday-event", holidayRouter);
-router.use("/admin-dashboard",adminDashboardRouter);
-router.use("/parent-dashboard",parentDashboardRouter);
-router.use("/teacher-dashboard",teacherDashboardRouter);
-router.use('/super-admin', superAdminRouter);
-router.use('/guest-teacher', guestTeacherRouter);
-router.use('/customer-support', customerSupportRouter);
-router.use('/workdays', workDayRouter);
-router.use('/announcement', announcementRouter);
-router.use('/announcement-read', announcementReadStatusRouter);
-router.use('/notification', notificationRouter);
+router.use("/admin-dashboard", adminDashboardRouter);
+router.use("/parent-dashboard", parentDashboardRouter);
+router.use("/teacher-dashboard", teacherDashboardRouter);
+router.use("/super-admin", superAdminRouter);
+router.use("/guest-teacher", guestTeacherRouter);
+router.use("/customer-support", customerSupportRouter);
+router.use("/workdays", workDayRouter);
+router.use("/announcement", announcementRouter);
+router.use("/announcement-read", announcementReadStatusRouter);
+router.use("/notification", notificationRouter);
 router.use("/session", sessionRouter);
 router.use("/tag", tagRouter);
 router.use("/subject", subjectRouter);
@@ -59,7 +78,7 @@ router.use("/student-leave", studentLeaveRequestRouter);
 router.use("/teacher-subject-section", teacherSubjectSectionRouter);
 router.use("/exam", examRouter);
 router.use("/student-exam-result", studentExamResultRouter);
-router.use('/transfer-certificate', transferCertificateRequestRouter);
+router.use("/transfer-certificate", transferCertificateRequestRouter);
 router.use("/fee-setup", feeSetupRouter);
 
 export default router;

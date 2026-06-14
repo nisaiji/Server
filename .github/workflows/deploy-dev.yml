@@ -1,0 +1,61 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code,
+# run security scans with Trivy, and deploy the application.
+
+name: Node.js CI DEV
+
+on:
+    push:
+        branches: ['dev']
+
+jobs:
+    build:
+        runs-on: [self-hosted, dev]
+
+        strategy:
+            matrix:
+                node-version: [22.x]
+
+        steps:
+            # Step 1: Checkout the code
+            - uses: actions/checkout@v4
+
+            # Step 2: Setup Node.js environment
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'npm'
+                  cache-dependency-path: package-lock.json
+                  
+
+            # Step 3: Install dependencies
+            - name: Install dependencies
+              run: npm ci
+
+            # Step 4: Set environment variables
+            - name: Set Environment
+              run: |
+                  mkdir bin
+                  echo "${{ secrets.DEV }}" > bin/.env.dev
+
+            # Step 6: Security scan with Trivy
+            - name: Run Trivy Security Scan
+              uses: aquasecurity/trivy-action@v0.33.1
+              with:
+                  scan-type: 'fs'          # Scans the filesystem
+                  scan-ref: .         # Path to scan (project root)
+                  format: 'table'          # Human-readable output
+                  ignore-unfixed: true     # Ignore vulnerabilities without fixes
+                  severity: 'HIGH,CRITICAL' # Scan for high-severity vulnerabilities only
+
+            # Step 7: Deploy application
+            - name: Deploy application
+              run: |
+                  if pm2 describe SIKSHA_BACKEND_DEV > /dev/null; then
+                    echo "PM2 instance found. Reloading..."
+                    NODE_ENV=dev pm2 reload SIKSHA_BACKEND_DEV
+                  else
+                    echo "Starting new PM2 instance..."
+                    NODE_ENV=dev pm2 start index.js --name "SIKSHA_BACKEND_DEV" --watch
+                  fi
+                  pm2 save
