@@ -7,9 +7,12 @@ on:
     push:
         branches: ['dev']
 
+permissions:
+    contents: read
+
 jobs:
-    build:
-        runs-on: [self-hosted, dev]
+    deploy:
+        runs-on: ubuntu-latest
 
         strategy:
             matrix:
@@ -25,22 +28,10 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: 'npm'
-                  cache-dependency-path: package-lock.json
-                  
-
-            # Step 3: Install dependencies
-            - name: Install dependencies
-              run: npm ci
-
-            # Step 4: Set environment variables
-            - name: Set Environment
-              run: |
-                  mkdir bin
-                  echo "${{ secrets.DEV }}" > bin/.env.dev
-
+                  cache-dependency-path: package-lock.json                  
             # Step 6: Security scan with Trivy
             - name: Run Trivy Security Scan
-              uses: aquasecurity/trivy-action@v0.33.1
+              uses: aquasecurity/trivy-action@master
               with:
                   scan-type: 'fs'          # Scans the filesystem
                   scan-ref: .         # Path to scan (project root)
@@ -48,14 +39,35 @@ jobs:
                   ignore-unfixed: true     # Ignore vulnerabilities without fixes
                   severity: 'HIGH,CRITICAL' # Scan for high-severity vulnerabilities only
 
-            # Step 7: Deploy application
-            - name: Deploy application
-              run: |
-                  if pm2 describe SIKSHA_BACKEND_DEV > /dev/null; then
-                    echo "PM2 instance found. Reloading..."
-                    NODE_ENV=dev pm2 reload SIKSHA_BACKEND_DEV
-                  else
-                    echo "Starting new PM2 instance..."
-                    NODE_ENV=dev pm2 start index.js --name "SIKSHA_BACKEND_DEV" --watch
-                  fi
-                  pm2 save
+            # Step 7: Deploy to Hostinger VPS
+            - name: Deploy to Hostinger VPS 
+              uses: appleboy/ssh-action@v1.2.0 
+              with: 
+                host: ${{ secrets.HOST }} 
+                username: ${{ secrets.USERNAME }} 
+                key: ${{ secrets.SSH_KEY }}
+                script: | 
+                  cd /root/var/www/dev/server 
+
+                  echo "Fetching latest code..." 
+                  git fetch origin 
+
+                  echo "Switching to dev branch..." 
+                  git checkout dev
+
+                  echo "Updating repository..." 
+                  git reset --hard origin/dev
+
+                  echo "${{ secrets.DEV }}" > .env
+
+                  echo "Installing dependencies..." 
+                  npm ci
+
+                  echo "Reloading PM2..." 
+                  if pm2 describe index > /dev/null; then 
+                      pm2 reload index 
+                  else 
+                      pm2 start index.js --name index 
+                  fi 
+                  pm2 save 
+                  pm2 status
