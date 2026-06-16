@@ -65,7 +65,7 @@ export async function createOrUpdateDuesForFeeStructure(
   // so all students will be mapped to that entry.
 
 
-  // what will happen when we onboard the schools in middle of session? start from the upcomming month
+  // what will happen when we onboard the schools in middle of session? start from the upcoming month
   if (feeStructure.amountForAllSections) {
     const sectionMap = new Map();
     (feeStructure.applicableSections || []).forEach((appSec) => {
@@ -81,7 +81,7 @@ export async function createOrUpdateDuesForFeeStructure(
     const sid = String(student._id);
     const secId = String(student.sectionId || student.section || "");
 
-    const feeHeadsForSection = sectionMap.get(secId) || [];
+    const feeHeadsForSection = sectionMap.get(secId) || feeStructure.applicableSections[0].feeHeads;
 
     const feeBreakup = feeHeadsForSection.map((fh) => ({
       feeHeadId: fh.feeHeadId,
@@ -115,10 +115,8 @@ export async function createOrUpdateDuesForFeeStructure(
   try {
     let result;
     await transaction.withTransaction(async () => {
-      result = await studentFeeDueModel.bulkWrite(operations, { session });
+      await studentFeeDueModel.bulkWrite(operations, { session });
     });
-
-    return result;
   } finally {
     transaction.endSession();
   }
