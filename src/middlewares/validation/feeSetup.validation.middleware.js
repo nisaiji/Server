@@ -10,6 +10,7 @@ import {
   updateFeeCycleSchema,
   updateFeeHeadSchema,
   updateFeeStructureSchema,
+  feeSetupVerifySchema,
 } from "../../validators/feeSetupSchema.validator.js";
 
 function validateParams(schema, req, res, next) {
@@ -129,6 +130,21 @@ export async function feeHeadIdParamValidation(req, res, next) {
 export async function feeStructureIdParamValidation(req, res, next) {
   try {
     validateParams(feeStructureIdParamSchema, req, res, next);
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function feeSetupVerifyValidation(req, res, next) {
+  try {
+    const { error: schemaError, value } = feeSetupVerifySchema.validate(req.body);
+
+    if (schemaError) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
+    }
+
+    req.body = value;
+    next();
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

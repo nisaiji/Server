@@ -4,6 +4,7 @@ import { getSessionService } from "../services/session.services.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getClassService } from "../services/class.sevices.js";
 import { getSectionsService } from "../services/section.services.js";
+import { config } from "../config/config.js";
 import {
   addFeeHeadService,
   createFeeCycleService,
@@ -19,7 +20,9 @@ import {
   updateFeeCycleService,
   updateFeeHeadService,
   updateFeeStructureService,
+  updateFeeHeadVerifyStatusService,
 } from "../services/feeSetup.service.js";
+import { createOrUpdateDuesForFeeStructure } from "../services/studentFeeDue.service.js";
 
 function hasInvalidMongoIds(ids) {
   return ids.some((id) => !isValidMongoId(id));
@@ -98,6 +101,10 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
     return { statusCode: StatusCodes.NOT_FOUND, message: "Fee heads not found" };
   }
 
+  if (!feeHeadGroup.isVerified) {
+    return { statusCode: StatusCodes.BAD_REQUEST, message: "Fee heads is not verified" };
+  }
+
   const existingFeeHeadIds = new Set(feeHeadGroup.feeHeads.map((feeHead) => feeHead._id.toString()));
   const hasInvalidFeeHead = feeHeadIds.some((feeHeadId) => !existingFeeHeadIds.has(feeHeadId));
 
@@ -106,6 +113,11 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
   }
 
   return {
+    session,
+    feeCycle,
+    classInfo,
+    feeHeadGroup,
+    sections,
     data: {
       ...feeStructureData,
       adminId,
@@ -136,7 +148,7 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
   });
 
   const feeBreakdownMap = new Map();
-   const grandTotalBySection = applicableSections.map((applicableSection) => {
+  const grandTotalBySection = applicableSections.map((applicableSection) => {
     //let total = 0;
 
     applicableSection.feeHeads.forEach((feeHead) => {
@@ -148,7 +160,7 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
           feeHeadId,
           feeHeadDetails,
           amountsBySection: [],
-       //   total: 0,
+          //   total: 0,
         });
       }
 
@@ -161,13 +173,13 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
         sectionName: applicableSection.section.name,
         amount,
       });
-    //  feeBreakdown.total += amount;
+      //  feeBreakdown.total += amount;
     });
 
     return {
       sectionId: applicableSection.section.sectionId,
       sectionName: applicableSection.section.name,
-     // total,
+      // total,
     };
   });
 
@@ -175,11 +187,11 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
     ...feeStructureObj,
     classDetails: classInfo
       ? {
-          _id: classInfo._id,
-          name: classInfo.name,
-        }
+        _id: classInfo._id,
+        name: classInfo.name,
+      }
       : null,
-      applicableSections,
+    applicableSections,
     // sessionDetails: session
     //   ? {
     //       _id: session._id,
@@ -199,7 +211,7 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
     //   : null,
     // sectionFeeType: feeStructureObj.amountForAllSections ? "SAME_FEE_AMOUNT" : "DIFFERENT_FEE_AMOUNT",
     // sections: applicableSections.map((applicableSection) => applicableSection.section),
-   // feeBreakdown: Array.from(feeBreakdownMap.values()),
+    // feeBreakdown: Array.from(feeBreakdownMap.values()),
     //grandTotalBySection,
   };
 }
@@ -293,6 +305,10 @@ export async function updateFeeCycleController(req, res) {
 
     if (!feeCycle) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee cycle not found"));
+    }
+
+    if (feeCycle.isVerified) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee cycle already verified"));
     }
 
     const session = await getSessionService({
@@ -410,6 +426,10 @@ export async function updateFeeHeadController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee head not found"));
     }
 
+    if (feeHeadGroup.isVerified) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee head already verified"));
+    }
+
     const session = await getSessionService({
       _id: feeHeadGroup.sessionId,
       school: adminId,
@@ -490,6 +510,10 @@ export async function deleteFeeHeadController(req, res) {
 
     if (!feeHeadGroup) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee head not found"));
+    }
+
+    if (feeHeadGroup.isVerified) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee head already verified"));
     }
 
     const session = await getSessionService({
@@ -679,6 +703,10 @@ export async function updateFeeStructureController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee structure not found"));
     }
 
+    if (existingFeeStructure.isVerified) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee structure already verified"));
+    }
+
     const validation = await validateFeeStructureData({
       adminId,
       feeStructureData: req.body,
@@ -724,6 +752,10 @@ export async function deleteFeeStructureController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee structure not found"));
     }
 
+    if (feeStructure.isVerified) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee structure already verified"));
+    }
+
     const session = await getSessionService({
       _id: feeStructure.sessionId,
       school: adminId,
@@ -744,6 +776,101 @@ export async function deleteFeeStructureController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200));
   } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
+
+export async function verifyFeeSetupController(req, res) {
+  try {
+    const { id, token, type } = req.body;
+    const adminId = req.adminId;
+
+    if (!isValidMongoId(id)) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Mongo Id"));
+    }
+
+    if(!config.bypassToken) {
+    const response = await verifyMsg91Token(token);
+    if (response?.type !== 'success') {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    }
+  }
+
+    if (type === "VERIFY_FEE_STRUCTURE") {
+      const feeStructure = await getFeeStructureService({
+        _id: id,
+        adminId,
+      });
+
+      if (!feeStructure) {
+        return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee structure not found"));
+      }
+
+      if (feeStructure.isVerified) {
+        return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee structure already verified"));
+      }
+
+      const updatedFeeStructure = await updateFeeStructureService(
+        {
+          _id: id
+        },
+        {
+          isVerified: true,
+          status: "ACTIVE"
+        });
+
+      if (updatedFeeStructure) {
+        try {
+          const [session, feeCycle] = await Promise.all([
+            getSessionService({
+              _id: updatedFeeStructure.sessionId,
+            }),
+            getFeeCycleService({
+              _id: updatedFeeStructure.feeCycleId
+            }),
+          ]);
+
+          await createOrUpdateDuesForFeeStructure(updatedFeeStructure, feeCycle, session);
+        } catch (err) {
+          return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+        }
+      }
+    } else if (type === "VERIFY_FEE_HEAD") {
+      const feeHead = await getFeeHeadService({
+        _id: id
+      });
+
+      if (!feeHead) {
+        return res.status(StatusCodes.NOT_FOUND).send(error(404, "Fee head not found"));
+      }
+
+      if (feeHead.isVerified) {
+        return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee head already verified"));
+      }
+
+      await Promise.all([
+        updateFeeHeadVerifyStatusService(
+          {
+            _id: id,
+          },
+          {
+            isVerified: true,
+          },
+        ),
+        updateFeeCycleService(
+          {
+            sessionId: feeHead.sessionId,
+          },
+          {
+            isVerified: true,
+          },
+        ),
+      ]);
+    }
+
+    return res.status(StatusCodes.OK).send(success(200));
+  }
+  catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

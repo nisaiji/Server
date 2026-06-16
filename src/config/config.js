@@ -24,7 +24,8 @@ const _config = {
     currency: 'INR',
     zohoWebhookAuthSecret: process.env.ZOHO_WEBHOOK_AUTH_SECRET,
     zohoWebhookRefundAuthSecret: process.env.ZOHO_WEBHOOK_REFUND_AUTH_SECRET,
-    isSandbox: process.env.ZOHO_IS_SANDBOX === 'true'
+    isSandbox: process.env.ZOHO_IS_SANDBOX === 'true',
+    bypassToken: process.env.BYPASS_TOKEN,
 }
 
 export const config =   Object.freeze(_config);

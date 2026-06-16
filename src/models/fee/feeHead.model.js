@@ -16,6 +16,11 @@ const FeeHeadSchema = new mongoose.Schema(
       index: true,
     },
 
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
     feeHeads: [
       {
         name: {

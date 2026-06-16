@@ -12,6 +12,7 @@ import {
   updateFeeCycleController,
   updateFeeHeadController,
   updateFeeStructureController,
+  verifyFeeSetupController,
 } from "../controllers/feeSetup.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import {
@@ -24,6 +25,7 @@ import {
   feeStructureCreateValidation,
   feeStructureUpdateValidation,
   sessionIdParamValidation,
+  feeSetupVerifyValidation,
 } from "../middlewares/validation/feeSetup.validation.middleware.js";
 
 const feeSetupRouter = express.Router();
@@ -42,5 +44,6 @@ feeSetupRouter.get("/fee-structure/list", getFeeStructureListingController);
 feeSetupRouter.get("/fee-structure/:feeStructureId", feeStructureIdParamValidation, getFeeStructureController);
 feeSetupRouter.put("/fee-structure/:feeStructureId", feeStructureUpdateValidation, updateFeeStructureController);
 feeSetupRouter.delete("/fee-structure/:feeStructureId", feeStructureIdParamValidation, deleteFeeStructureController);
+feeSetupRouter.put("/verify", feeSetupVerifyValidation, verifyFeeSetupController);
 
 export default feeSetupRouter;

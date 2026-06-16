@@ -30,7 +30,12 @@ const feeStructureSchema = new mongoose.Schema(
       index: true,
     },
 
-    amountForAllSections:{
+    amountForAllSections: {
+      type: Boolean,
+      default: false,
+    },
+
+    isVerified: {
       type: Boolean,
       default: false,
     },

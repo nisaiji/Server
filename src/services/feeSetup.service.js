@@ -45,6 +45,14 @@ export async function updateFeeHeadService(filter, feeHead) {
   );
 }
 
+export async function updateFeeHeadVerifyStatusService(filter, feeHead) {
+  return await feeHeadModel.findOneAndUpdate(
+    filter,
+    feeHead,
+    { new: true },
+  );
+}
+
 export async function deleteFeeHeadService(filter, feeHeadId) {
   return await feeHeadModel.findOneAndUpdate(
     filter,

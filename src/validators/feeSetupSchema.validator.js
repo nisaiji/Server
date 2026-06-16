@@ -153,12 +153,26 @@ const feeStructurePayloadSchema = {
   applicableSections: Joi.array().items(feeStructureSectionSchema).min(1).required().messages({
     "array.min": "At least one section is required.",
     "any.required": "Applicable sections are required.",
-  }),
-  status: Joi.string().valid("DRAFT", "ACTIVE").default("DRAFT").messages({
-    "any.only": "Status must be one of DRAFT, ACTIVE.",
-    "string.base": "Status must be a string.",
-  }),
+  })
 };
+
+const feeSetupVerifySchema = Joi.object({
+  id: mongoIdSchema.required().messages({
+    "any.required": "Id is required.",
+    "string.base": "Id must be a string.",
+    "string.hex": "Id must be a valid Mongo Id.",
+    "string.length": "Id must be a valid Mongo Id.",
+  }),
+  token: Joi.string().required().messages({
+    "any.required": "Token is required.",
+    "string.base": "Token must be a string.",
+  }),
+  type: Joi.string().valid("VERIFY_FEE_STRUCTURE", "VERIFY_FEE_HEAD").required().messages({
+    "any.only": "Type must be VERIFY_FEE_STRUCTURE or VERIFY_FEE_HEAD.",
+    "any.required": "Type is required.",
+    "string.base": "Type must be a string.",
+  }),
+});
 
 const createFeeStructureSchema = Joi.object(feeStructurePayloadSchema);
 const updateFeeStructureSchema = Joi.object(feeStructurePayloadSchema);
@@ -173,4 +187,5 @@ export {
   sessionIdParamSchema,
   feeHeadIdParamSchema,
   feeStructureIdParamSchema,
+  feeSetupVerifySchema,
 };

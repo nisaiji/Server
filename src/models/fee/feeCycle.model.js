@@ -26,6 +26,11 @@ const FeeCycleSchema = new mongoose.Schema({
     required: true,
     min: 1,
     max: 28
+  },
+
+  isVerified: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true,
