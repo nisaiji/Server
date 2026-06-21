@@ -3,7 +3,7 @@ import { getSectionService, updateSectionService } from "../../services/section.
 import { getSessionService } from "../../services/session.services.js";
 import { getSessionStudentService, getSessionStudentsPipelineService, registerSessionStudentService, updateSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 import { error, success } from "../../utils/responseWrapper.js";
-import { getClassService } from "../../services/class.sevices.js";
+import { getClassService } from "../../services/class.services.js";
 import { getParentService, registerParentService, updateParentService } from "../../services/v2/parent.services.js";
 import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
 import { getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
@@ -22,66 +22,110 @@ import {
 } from "../../services/studentDetailSummary.service.js";
 import path from "path";
 
+const addFieldsIfPresent = (target, source, fields) => {
+  fields.forEach((field) => {
+    if (source[field] !== undefined) {
+      target[field] = source[field];
+    }
+  });
+};
+
+const isSameId = (first, second) => String(first) === String(second);
+
 export async function registerStudentAndSessionStudentController(req, res) {
   try {
-    const { firstname, lastname, gender, guardianName, parentName, phone, email, qualification, occupation, address, age, parentAddress, parentGender, dob,  sectionId, aadharNumber } = req.body;
+    const studentData = req.body;
     const adminId = req.adminId;
 
-    const section = await getSectionService({ _id:sectionId });
-    if(!section){
+    if (!sectionId) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "sectionId is required"));
+    }
+
+    const section = await getSectionService({ _id: sectionId });
+    if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
-    const classInfo = await getClassService({ _id:section["classId"] });
-    if(!classInfo){
+
+    const [classInfo, session, studentWithAadhar, parent, schoolParentFromDb] = await Promise.all([
+      getClassService({ _id: section.classId }),
+      getSessionService({ _id: section.session }),
+      getStudentService({ aadharNumber: studentData.aadharNumber, isActive: true }),
+      getParentService({ phone: studentData.phone, isActive: true }),
+      getSchoolParentService({ phone: studentData.phone, school: adminId, isActive: true }),
+    ]);
+
+    if (!classInfo) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
     }
 
-    const session = await getSessionService({ _id:section["session"] });
-    if(!session){
+    if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
 
-    if(session['status']==='completed'){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session is already completed"));
+    if (session.status === "completed") {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session is already completed"));
     }
-    const studentWithAadhar = await getStudentService({ aadharNumber: aadharNumber, isActive: true });
-    if(studentWithAadhar) {
+
+    if (studentWithAadhar) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
     }
 
-    let parent = await getParentService({phone, isActive: true});
-    let schoolParent = await getSchoolParentService({phone, school:adminId, isActive:true});
+    let parentObj = parent;
+    let schoolParent = schoolParentFromDb;
 
-    if(!schoolParent) {
-      if(!parent) {
-        parent = await registerParentService({phone, status: 'unVerified'});
-      }
+    if (!schoolParentFromDb) {
+        parentObj = parentObj ? parentObj : await registerParentService({ phone: studentData.phone, status: "unVerified" });
+      
       schoolParent = await registerSchoolParentService({
-        fullname: parentName, 
-        phone, 
-        school: adminId, 
-        parent: parent['_id'],
-        ...(qualification && { qualification }),
-        ...(occupation && { occupation }),
-        ...(parentAddress && { address: parentAddress }),
-        ...(parentGender && { gender: parentGender }),
-        ...(age && { age }),
-        ...(email && { email })
+        fullname: studentData.parentName,
+        phone: studentData.phone,
+        school: adminId,
+        parent: parentObj._id,
+        ...(studentData.qualification && { qualification:studentData.qualification }),
+        ...(studentData.occupation && { occupation:studentData.occupation }),
+        ...(studentData.parentAddress && { address: studentData.parentAddress }),
+        ...(studentData.parentGender && { gender: studentData.parentGender }),
+        ...(studentData.age && { age:studentData.age }),
+        ...(studentData.email && { email:studentData.email }),
       });
     }
 
-    let student = await getStudentService({ firstname, schoolParent: schoolParent["_id"] });
-    if (student) {
-      return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
+    const existingStudent = await getStudentService({ firstname, schoolParent: schoolParent._id });
+    if (existingStudent) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Student already exists"));
     }
-    const studentObj = { firstname, lastname, gender, aadharNumber, guardianName, schoolParent: schoolParent["_id"], section:sectionId, classId:classInfo["_id"], parent: parent['_id'], admin:adminId, ...(address && {address}), ...(dob && {dob}) };
 
-    student = await registerStudentService(studentObj);
-    const sessionStudentObj = { section:sectionId, classId:classInfo["_id"], session: session['_id'], school:adminId, student: student['_id']};
-    const sessionStudent = await registerSessionStudentService(sessionStudentObj);
+    const studentObj = {
+      firstname:studentData.firstname,
+      lastname: studentData.lastname,
+      gender: studentData.gender,
+      aadharNumber: studentData.aadharNumber,
+      guardianName: studentData.guardianName,
+      schoolParent: schoolParent._id,
+      section: sectionId,
+      classId: classInfo._id,
+      parent: parentObj?._id,
+      admin: adminId,
+      ...(studentData.address && { address: studentData.address }),
+      ...(studentData.dob && { dob: studentData.dob }),
+    };
 
-    await updateSectionService({_id:sectionId}, {studentCount:section["studentCount"]+1});
-    return res.status(StatusCodes.OK).send(success(201, "Student registered successfully!"));
+    const student = await registerStudentService(studentObj);
+
+    const sessionStudentObj = {
+      section: sectionId,
+      classId: classInfo._id,
+      session: session._id,
+      school: adminId,
+      student: student._id,
+    };
+
+    const [sessionStudent] = await Promise.all([
+      registerSessionStudentService(sessionStudentObj),
+      updateSectionService({ _id: sectionId }, { studentCount: (section.studentCount || 0) + 1 }),
+    ]);
+
+    return res.status(StatusCodes.CREATED).send(success(201, { message: "Student registered successfully!", student: sessionStudent }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -89,60 +133,82 @@ export async function registerStudentAndSessionStudentController(req, res) {
 
 export async function registerSessionStudentController(req, res) {
   try {
-    const { enrollmentStatus, studentId, sectionId, classId, sessionId,aadharNumber } = req.body;
+    const { enrollmentStatus, studentId, sectionId, classId, sessionId, aadharNumber } = req.body;
     const adminId = req.adminId;
 
-    const section = await getSectionService({ _id:sectionId });
-    if(!section){
+    if (!studentId || !sectionId || !classId || !sessionId) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "studentId, sectionId, classId and sessionId are required"));
+    }
+
+    const [section, student, classInfo, session] = await Promise.all([
+      getSectionService({ _id: sectionId }),
+      getStudentService({ _id: studentId }),
+      getClassService({ _id: classId }),
+      getSessionService({ _id: sessionId }),
+    ]);
+
+    if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
 
-    let student = await getStudentService({_id: studentId});
-    if(!student){
+    if (!student) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
-    const classInfo = await getClassService({ _id:classId });
-    if(!classInfo){
+    if (!classInfo) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
     }
 
-    const session = await getSessionService({ _id:sessionId });
-    if(!session){
+    if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
 
-    if(session['status']==='completed') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session is completed"));
+    if (session.status === "completed") {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session is completed"));
     }
 
-    if(
-      classInfo['session'].toString() !== session['_id'].toString() || 
-      section['session'].toString() !== session['_id'].toString() ||
-      section['classId'].toString() !== classInfo['_id'].toString()
-     ) {
+    if (
+      classInfo.session.toString() !== session._id.toString() ||
+      section.session.toString() !== session._id.toString() ||
+      section.classId.toString() !== classInfo._id.toString()
+    ) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid class or section"));
     }
-    const studentWithAadhar = await getStudentService({ aadharNumber: aadharNumber, isActive: true });
-    if(studentWithAadhar) {
+
+    const [studentWithAadhar, parent, schoolParent] = await Promise.all([
+      aadharNumber ? getStudentService({ aadharNumber, isActive: true }) : Promise.resolve(null),
+      getParentService({ _id: student.parent }),
+      getSchoolParentService({ _id: student.schoolParent }),
+    ]);
+
+    if (studentWithAadhar && studentWithAadhar._id.toString() !== studentId) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
     }
-    let parent = await getParentService({_id: student['parent']});
-    let schoolParent = await getSchoolParentService({_id: student['schoolParent']});
 
-    if(!parent || !schoolParent) {
+    if (!parent || !schoolParent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
-    let sessionStudent = await getSessionStudentService({student: student['_id'], session: session['_id'], school: adminId});
-    if(sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student already registered for this session"));
+    const sessionStudent = await getSessionStudentService({ student: student._id, session: session._id, school: adminId });
+    if (sessionStudent) {
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Student already registered for this session"));
     }
-    const sessionStudentObj = { section:section['_id'], classId:classInfo["_id"], session: session['_id'], school:adminId, student: student['_id'], aadharNumber: aadharNumber };
-    sessionStudent = await registerSessionStudentService(sessionStudentObj);
 
-    await updateSectionService({_id:sectionId}, {studentCount:section["studentCount"]+1});
-    return res.status(StatusCodes.OK).send(success(201, {message: "Student registered successfully!", student: sessionStudent}));
+    const sessionStudentObj = {
+      section: section._id,
+      classId: classInfo._id,
+      session: session._id,
+      school: adminId,
+      student: student._id,
+      aadharNumber,
+    };
+
+    const [createdSessionStudent] = await Promise.all([
+      registerSessionStudentService(sessionStudentObj),
+      updateSectionService({ _id: sectionId }, { studentCount: (section.studentCount || 0) + 1 }),
+    ]);
+
+    return res.status(StatusCodes.CREATED).send(success(201, { message: "Student registered successfully!", student: createdSessionStudent }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -175,20 +241,25 @@ export async function updateStudentBySchoolController(req, res){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
-    if(req.body["firstname"]){ studentUpdate.firstname = req.body["firstname"]; }
-    if(req.body["lastname"]){ studentUpdate.lastname = req.body["lastname"]; }
-    if(req.body["gender"]){ studentUpdate.gender = req.body["gender"]; }
-    if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
-    if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
-    if(req.body["photo"] || req.body["method"]==="DELETE"){ studentUpdate.photo = (req.body["method"]==="DELETE")? "": req.body["photo"]; }
-    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
-    if(req.body["city"]){ studentUpdate.city = req.body["city"]; }
-    if(req.body["district"]){ studentUpdate.district = req.body["district"]; }
-    if(req.body["state"]){ studentUpdate.state = req.body["state"]; }
-    if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
-    if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
-    if(req.body["guardianName"]){ studentUpdate.guardianName = req.body["guardianName"]; }
-    if(req.body["aadharNumber"]){ studentUpdate.aadharNumber = req.body["aadharNumber"]; }
+    addFieldsIfPresent(studentUpdate, req.body, [
+      "firstname",
+      "lastname",
+      "gender",
+      "bloodGroup",
+      "dob",
+      "address",
+      "city",
+      "district",
+      "state",
+      "country",
+      "pincode",
+      "guardianName",
+      "aadharNumber",
+    ]);
+
+    if (req.body.photo || req.body.method === "DELETE") {
+      studentUpdate.photo = req.body.method === "DELETE" ? "" : req.body.photo;
+    }
 
     const studentWithAadhar = await getStudentService({aadharNumber: studentUpdate.aadharNumber, isActive: true,});
     // If a student with same Aadhar exists AND it's not the same student
@@ -197,34 +268,44 @@ export async function updateStudentBySchoolController(req, res){
     }
     if(req.body["phone"] && schoolParent['phone']!==req.body['phone']){
       const phone = req.body['phone'];
-      if (parent && parent['students']?.includes(studentId)) {
+      if (parent && parent.students?.includes(studentId)) {
         return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Phone number can not be updated'));
       }
-      const schoolParentWithPhone = await getSchoolParentService({ phone, school: student['adminId'], isActive:true, _id: { $ne: schoolParent["_id"] } });
-      const parentWithPhone = await getParentService({ phone, isActive:true, _id: {$ne: parent["_id"]}});
-      if(parentWithPhone || schoolParentWithPhone){
+
+      const [schoolParentWithPhone, parentWithPhone] = await Promise.all([
+        getSchoolParentService({ phone, school: student.adminId, isActive: true, _id: { $ne: schoolParent._id } }),
+        getParentService({ phone, isActive: true, _id: { $ne: parent._id } }),
+      ]);
+
+      if (parentWithPhone || schoolParentWithPhone) {
         return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
       }
-      if(phone!==schoolParent['phone']) {
-        parent = await registerParentService({phone, status: 'unVerified'});
-        schoolParent = await registerSchoolParentService({phone, school: adminId, parent: parent['_id']});
-        studentUpdate['schoolParent'] = schoolParent['_id'];
-        studentUpdate['parent'] = parent['_id'];
+
+      if (phone !== schoolParent.phone) {
+        parent = await registerParentService({ phone, status: 'unVerified' });
+        schoolParent = await registerSchoolParentService({ phone, school: adminId, parent: parent._id });
+        studentUpdate.schoolParent = schoolParent._id;
+        studentUpdate.parent = parent._id;
       }
     }
-    if(req.body["parentName"]){ schoolParentUpdate.fullname = req.body["parentName"]; }
-    if(req.body["parentGender"]){ schoolParentUpdate.gender = req.body["parentGender"]; }
-    if(req.body["parentAge"]){ schoolParentUpdate.age = req.body["parentAge"]; }
-    if(req.body["parentEmail"]){ schoolParentUpdate.email = req.body["parentEmail"]; }
-    if(req.body["parentQualification"]){ schoolParentUpdate.qualification = req.body["parentQualification"]; }
-    if(req.body["parentOccupation"]){ schoolParentUpdate.occupation = req.body["parentOccupation"]; }
-    if(req.body["parentAddress"]){ schoolParentUpdate.address = req.body["parentAddress"]; }
-    if(req.body["parentCity"]){ schoolParentUpdate.city = req.body["parentCity"]; }
-    if(req.body["parentDistrict"]){ schoolParentUpdate.district = req.body["parentDistrict"]; }
-    if(req.body["parentState"]){ schoolParentUpdate.state = req.body["parentState"]; }
-    if(req.body["parentCountry"]){ schoolParentUpdate.country = req.body["parentCountry"]; }
-    if(req.body["parentPincode"]){ schoolParentUpdate.pincode = req.body["parentPincode"]; }
-    if(req.body["parentDob"]){ parentProfileUpdate.dob = req.body["parentDob"]; }
+    addFieldsIfPresent(schoolParentUpdate, req.body, [
+      "parentName",
+      "parentGender",
+      "parentAge",
+      "parentEmail",
+      "parentQualification",
+      "parentOccupation",
+      "parentAddress",
+      "parentCity",
+      "parentDistrict",
+      "parentState",
+      "parentCountry",
+      "parentPincode",
+    ]);
+
+    if (req.body.parentDob) {
+      parentProfileUpdate.dob = req.body.parentDob;
+    }
 
     const updatePromises = [
       updateStudentService({ _id:studentId }, studentUpdate),
@@ -261,19 +342,24 @@ export async function updateStudentByParentController(req, res) {
           return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'User is not authorized'));
     }
 
-    if(req.body["firstname"]){ studentUpdate.firstname = req.body["firstname"]; }
-    if(req.body["lastname"]){ studentUpdate.lastname = req.body["lastname"]; }
-    if(req.body["gender"]){ studentUpdate.gender = req.body["gender"]; }
-    if(req.body["bloodGroup"]){ studentUpdate.bloodGroup = req.body["bloodGroup"]; }
-    if(req.body["dob"]){ studentUpdate.dob = req.body["dob"]; }
-    if(req.body["photo"] || req.body["method"]==="DELETE"){ studentUpdate.photo = (req.body["method"]==="DELETE")? "": req.body["photo"]; }    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
-    if(req.body["address"]){ studentUpdate.address = req.body["address"]; }
-    if(req.body["city"]){ studentUpdate.city = req.body["city"]; }
-    if(req.body["district"]){ studentUpdate.district = req.body["district"]; }
-    if(req.body["state"]){ studentUpdate.state = req.body["state"]; }
-    if(req.body["country"]){ studentUpdate.country = req.body["country"]; }
-    if(req.body["pincode"]){ studentUpdate.pincode = req.body["pincode"]; }
-    if(req.body["guardianName"]){ studentUpdate.guardianName = req.body["guardianName"]; }
+addFieldsIfPresent(studentUpdate, req.body, [
+      "firstname",
+      "lastname",
+      "gender",
+      "bloodGroup",
+      "dob",
+      "address",
+      "city",
+      "district",
+      "state",
+      "country",
+      "pincode",
+      "guardianName",
+    ]);
+
+    if (req.body.photo || req.body.method === "DELETE") {
+      studentUpdate.photo = req.body.method === "DELETE" ? "" : req.body.photo;
+    }
 
     await updateStudentService({ _id:studentId }, studentUpdate);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
@@ -497,12 +583,15 @@ export async function getSessionStudentSController(req,res) {
     const sessionStudents = await getSessionStudentsPipelineService(
       buildSessionStudentDetailPipeline(filter, startTime, endTime)
     );
-    for (let student of sessionStudents) {
-      student.attendancePercentage = await calculateAttendancePercentageForSessionStudent(
-        student._id,
-        student.sessionId
-      );
-    }
+
+    await Promise.all(
+      sessionStudents.map((student) =>
+        calculateAttendancePercentageForSessionStudent(student._id, student.sessionId).then((percentage) => {
+          student.attendancePercentage = percentage;
+        }),
+      ),
+    );
+
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -801,8 +890,8 @@ export async function searchStudentsController(req, res){
 
     const adminId = req.adminId;
 
-    const pageNum = parseInt(page);
-    const limitNum = limit ? parseInt(limit) : "no limit";
+    const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+    const limitNum = Math.max(parseInt(limit, 10) || 10, 1);
     const skipNum = (pageNum - 1) * limitNum;
     let filter = {
       school: convertToMongoId(adminId),
@@ -1051,26 +1140,26 @@ export async function searchStudentsController(req, res){
         }
     ];
 
-    if (limit) {
-      pipeline.push(
-        {
-          $skip: skipNum,
-        },
-        {
-          $limit: limitNum,
-        }
-      );
-    }
+    pipeline.push(
+      {
+        $skip: skipNum,
+      },
+      {
+        $limit: limitNum,
+      },
+    );
 
     const students = await getSessionStudentsPipelineService(pipeline);
     const totalStudents = students.length;
     const totalPages = Math.ceil(totalStudents / limitNum);
-    for (let student of students) {
-      student.attendancePercentage = await calculateAttendancePercentageForSessionStudent(
-        student._id,
-        student.sessionId
-      );
-    }
+
+    await Promise.all(
+      students.map((student) =>
+        calculateAttendancePercentageForSessionStudent(student._id, student.sessionId).then((percentage) => {
+          student.attendancePercentage = percentage;
+        }),
+      ),
+    );
 
     return res.status(StatusCodes.OK).send(
       success(200, {
@@ -1092,22 +1181,22 @@ export async function registerStudentsFromExcelController(req, res){
     const { sectionId, classId, sessionId } = req.body;
     const adminId = req.adminId;
 
-    const[section, classInfo, session] = await Promise.all([
+    const [section, classInfo, session] = await Promise.all([
       getSectionService({ _id: sectionId }),
       getClassService({ _id: classId }),
-      getSessionService({ _id: sessionId })
+      getSessionService({ _id: sessionId }),
     ]);
 
-    if(!session){
-      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Session not found"));
+    if (!session) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
 
-    if(!section){
-      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Section not found"));
+    if (!section) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
 
-    if(!classInfo){
-      return res.status(StatusCodes.NOT_FOUND).send(404, "Class not found");
+    if (!classInfo) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
     }
 
     if(section["classId"].toString()!==classInfo["_id"].toString()){

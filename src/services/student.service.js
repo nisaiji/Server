@@ -1,4 +1,4 @@
-import studentModel from "../models/v2/student.model.js";
+import studentModel from "../models/student.model.js";
 import { convertToMongoId } from "./mongoose.services.js";
 
 
@@ -59,7 +59,7 @@ export async function updateStudentService(filter, update){
   }
 }
 
-export async function getstudentsService(filter, sortingLogic, skipNumber, limitNumber,  projection={}, populateOptions=[]) {
+export async function getStudentsService(filter, sortingLogic, skipNumber, limitNumber,  projection={}, populateOptions=[]) {
   try {
     const students = await studentModel.find(filter).limit(limitNumber).skip(skipNumber).select(projection).populate(populateOptions);
     return students;

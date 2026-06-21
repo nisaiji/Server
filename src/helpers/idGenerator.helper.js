@@ -1,4 +1,3 @@
-// utils/idGeneratorNoCounter.js
 import mongoose from "mongoose";
 
 function toBase36(str, length = 6) {

@@ -57,7 +57,7 @@ const sessionStudentSchema = mongoose.Schema({
     type: Boolean,
     default: true
   },
-  scholorship: {
+  scholarship: {
     type: mongoose.Schema.Types.Mixed,
     default: {}
   }
