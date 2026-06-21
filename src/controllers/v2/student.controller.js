@@ -5,7 +5,7 @@ import { getStudentCountService, getStudentService, getStudentsPipelineService, 
 import { error, success } from "../../utills/responseWrapper.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
-import { getClassService } from "../../services/class.sevices.js";
+import { getClassService } from "../../services/class.services.js";
 import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
 import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";

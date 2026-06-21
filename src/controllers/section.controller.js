@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { getClassService, updateClassService } from "../services/class.sevices.js";
+import { getClassService, updateClassService } from "../services/class.services.js";
 import { deleteSectionService, getAllSection,getClassSections, getSectionService, registerSectionService, updateSectionService} from "../services/section.services.js";
 import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { error, success } from "../utils/responseWrapper.js";

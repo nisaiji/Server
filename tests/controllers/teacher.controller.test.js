@@ -5,7 +5,7 @@ import { hashPasswordService } from "../../src/services/password.service.js";
 import { matchPasswordService } from "../../src/services/password.service.js";
 import { getAdminService } from "../../src/services/admin.services.js";
 import { getSectionService } from "../../src/services/section.services.js";
-import { getClassService } from "../../src/services/class.sevices.js";
+import { getClassService } from "../../src/services/class.services.js";
 import { getAccessTokenService, getRefreshTokenService } from "../../src/services/JWTToken.service.js";
 import { error, success } from "../../src/utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
@@ -16,7 +16,7 @@ jest.mock("../../src/services/password.service.js");
 jest.mock("../../src/services/guestTeacher.service.js");
 jest.mock("../../src/services/admin.services.js");
 jest.mock("../../src/services/section.services.js");
-jest.mock("../../src/services/class.sevices.js");
+jest.mock("../../src/services/class.services.js");
 jest.mock("../../src/services/JWTToken.service.js");
 jest.mock("../../src/services/mongoose.services.js")
 jest.mock("../../src/utills/responseWrapper.js", () => ({

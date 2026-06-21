@@ -51,5 +51,7 @@ const FeeHeadSchema = new mongoose.Schema(
   },
 );
 
+FeeHeadSchema.index({ adminId: 1, sessionId: 1 }, { unique: true });
+
 const feeHeadModel = mongoose.model("feeHead", FeeHeadSchema);
 export default feeHeadModel;

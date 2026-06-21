@@ -5,7 +5,7 @@ import { convertToMongoId } from '../services/mongoose.services.js';
 import { getSessionStudentService } from '../services/v2/sessionStudent.service.js';
 import { getSectionService } from '../services/section.services.js';
 import { getSessionService } from '../services/session.services.js';
-import { getClassService } from '../services/class.sevices.js';
+import { getClassService } from '../services/class.services.js';
 import { getTeacherSubjectSectionsService } from '../services/teacherSubjectSection.service.js';
 import { sendPushNotification } from '../config/firebase.config.js';
 import {

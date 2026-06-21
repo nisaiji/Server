@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import { getClassService } from "../services/class.sevices.js";
+import { getClassService } from "../services/class.services.js";
 import { getParentService, registerParentService, updateParentService } from "../services/v2/parent.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import { getSectionService, updateSectionService } from "../services/section.services.js";
@@ -12,7 +12,7 @@ import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
 import { getHolidayCountService } from "../services/holiday.service.js";
 import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
 import { getWorkDayCountService } from "../services/workDay.services.js";
-
+import { createOrUpdateDuesForFeeStructure } from "../services/studentFeeDue.service.js";
 
 export async function registerStudentController(req, res) {
   try {
@@ -44,6 +44,11 @@ export async function registerStudentController(req, res) {
     student = await registerStudentService(studentObj);
 
     await updateSectionService({ _id: sectionId }, { studentCount: section["studentCount"] + 1 });
+
+
+    await createOrUpdateDuesForFeeStructure(student["feeStructureId"], student["feeCycleId"], student["session"], student["_id"]);
+
+
     return res.status(StatusCodes.OK).send(success(201, "Student registered successfully!"));
   } catch (err) {
 

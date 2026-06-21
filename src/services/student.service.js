@@ -59,7 +59,7 @@ export async function updateStudentService(filter, update){
   }
 }
 
-export async function getStudentsService(filter, sortingLogic, skipNumber, limitNumber,  projection={}, populateOptions=[]) {
+export async function getStudentsPaginatedService(filter, sortingLogic, skipNumber, limitNumber,  projection={}, populateOptions=[]) {
   try {
     const students = await studentModel.find(filter).limit(limitNumber).skip(skipNumber).select(projection).populate(populateOptions);
     return students;

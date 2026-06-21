@@ -5,7 +5,7 @@ import { matchPasswordService, hashPasswordService } from "../services/password.
 import { error, success } from "../utils/responseWrapper.js";
 import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
 import { getSectionService } from "../services/section.services.js";
-import { getClassService } from "../services/class.sevices.js";
+import { getClassService } from "../services/class.services.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { getGuestTeacherService } from "../services/guestTeacher.service.js";
 import { getAdminService } from "../services/admin.services.js";

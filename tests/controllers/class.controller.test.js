@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import { registerClassController, deleteClassController, getClassController, getClassListController  } from "../../src/controllers/class.controller.js";
-import { getClassService, registerClassService, deleteClassService, getClassWithSectionsService, customGetClassWithSectionTeacherService   } from "../../src/services/class.sevices.js";
+import { getClassService, registerClassService, deleteClassService, getClassWithSectionsService, customGetClassWithSectionTeacherService   } from "../../src/services/class.services.js";
 import { error, success } from "../../src/utills/responseWrapper.js";
 
-jest.mock("../../src/services/class.sevices.js", () => ({
+jest.mock("../../src/services/class.services.js", () => ({
   getClassService: jest.fn(),
   registerClassService: jest.fn(),
   deleteClassService: jest.fn(),

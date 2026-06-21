@@ -37,11 +37,11 @@ export async function registerStudentAndSessionStudentController(req, res) {
     const studentData = req.body;
     const adminId = req.adminId;
 
-    if (!sectionId) {
+    if (!studentData.sectionId) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "sectionId is required"));
     }
 
-    const section = await getSectionService({ _id: sectionId });
+    const section = await getSectionService({ _id: studentData.sectionId });
     if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
@@ -90,7 +90,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
       });
     }
 
-    const existingStudent = await getStudentService({ firstname, schoolParent: schoolParent._id });
+    const existingStudent = await getStudentService({ firstname: studentData.firstname, schoolParent: schoolParent._id });
     if (existingStudent) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Student already exists"));
     }
@@ -102,7 +102,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
       aadharNumber: studentData.aadharNumber,
       guardianName: studentData.guardianName,
       schoolParent: schoolParent._id,
-      section: sectionId,
+      section: studentData.sectionId,
       classId: classInfo._id,
       parent: parentObj?._id,
       admin: adminId,
@@ -113,7 +113,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
     const student = await registerStudentService(studentObj);
 
     const sessionStudentObj = {
-      section: sectionId,
+      section: studentData.sectionId,
       classId: classInfo._id,
       session: session._id,
       school: adminId,
@@ -122,7 +122,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
 
     const [sessionStudent] = await Promise.all([
       registerSessionStudentService(sessionStudentObj),
-      updateSectionService({ _id: sectionId }, { studentCount: (section.studentCount || 0) + 1 }),
+      updateSectionService({ _id: studentData.sectionId }, { studentCount: (section.studentCount || 0) + 1 }),
     ]);
 
     return res.status(StatusCodes.CREATED).send(success(201, { message: "Student registered successfully!", student: sessionStudent }));

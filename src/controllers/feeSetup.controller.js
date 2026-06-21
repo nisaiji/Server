@@ -2,9 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import { error, success } from "../utils/responseWrapper.js";
 import { getSessionService } from "../services/session.services.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
-import { getClassService } from "../services/class.sevices.js";
+import { getClassService } from "../services/class.services.js";
 import { getSectionsService } from "../services/section.services.js";
 import { config } from "../config/config.js";
+import { verifyMsg91Token } from "../services/msg91.service.js";
 import {
   addFeeHeadService,
   createFeeCycleService,
@@ -29,7 +30,7 @@ function hasInvalidMongoIds(ids) {
 }
 
 function getFeeStructureIds(feeStructureData) {
-  const sectionIds = feeStructureData.applicableSections.map(({ section }) => section.sectionId);
+  const sectionIds = feeStructureData.applicableSections.map(({ section }) => section?.sectionId) || [];
   const feeHeadIds = feeStructureData.applicableSections.flatMap(({ feeHeads }) => {
     return feeHeads.map(({ feeHeadId }) => feeHeadId);
   });
@@ -81,17 +82,21 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
     return { statusCode: StatusCodes.NOT_FOUND, message: "Class not found" };
   }
 
-  const sections = await getSectionsService({
+  const filter = sectionIds.length > 0 ? {
     _id: { $in: sectionIds },
     admin: adminId,
     session: sessionId,
     classId,
-  });
+  } : {
+    admin: adminId,
+    session: sessionId,
+    classId,
+  };
+  const sections = await getSectionsService(filter);
 
   if (sections.length !== new Set(sectionIds).size) {
     return { statusCode: StatusCodes.NOT_FOUND, message: "One or more sections not found" };
   }
-
   const feeHeadGroup = await getFeeHeadService({
     adminId,
     sessionId,
@@ -789,12 +794,12 @@ export async function verifyFeeSetupController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Mongo Id"));
     }
 
-    if(!config.bypassToken) {
-    const response = await verifyMsg91Token(token);
-    if (response?.type !== 'success') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    if (!config.bypassToken) {
+      const response = await verifyMsg91Token(token);
+      if (response?.type !== 'success') {
+        return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+      }
     }
-  }
 
     if (type === "VERIFY_FEE_STRUCTURE") {
       const feeStructure = await getFeeStructureService({
@@ -815,29 +820,21 @@ export async function verifyFeeSetupController(req, res) {
           _id: id
         },
         {
-          isVerified: true,
+          //isVerified: true,
           status: "ACTIVE"
         });
 
       if (updatedFeeStructure) {
         try {
-          const [session, feeCycle] = await Promise.all([
-            getSessionService({
-              _id: updatedFeeStructure.sessionId,
-            }),
-            getFeeCycleService({
-              _id: updatedFeeStructure.feeCycleId
-            }),
-          ]);
-
-          await createOrUpdateDuesForFeeStructure(updatedFeeStructure, feeCycle, session);
+          await createOrUpdateDuesForFeeStructure(updatedFeeStructure);
         } catch (err) {
           return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
         }
       }
     } else if (type === "VERIFY_FEE_HEAD") {
       const feeHead = await getFeeHeadService({
-        _id: id
+        _id: id,
+        adminId
       });
 
       if (!feeHead) {

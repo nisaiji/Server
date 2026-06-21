@@ -2,7 +2,7 @@ import { registerStudentController, registerStudentsFromExcelController, getStud
 import { getSectionService, updateSectionService } from "../../src/services/section.services";
 import { getParentService, registerParentService, updateParentService } from "../../src/services/parent.services";
 import { getStudentService, getStudentsService, updateStudentService, registerStudentService, getStudentsPipelineService, getStudentCountService} from "../../src/services/student.service";
-import { getClassService } from "../../src/services/class.sevices.js";
+import { getClassService } from "../../src/services/class.services.js";
 import { hashPasswordService } from "../../src/services/password.service";
 import { calculateDaysBetweenDates, calculateSundays } from "../../src/services/celender.service.js";
 import { getHolidayCountService } from "../../src/services/holiday.service.js";
@@ -15,11 +15,11 @@ import xlsx from "xlsx";
 
 jest.mock("../../src/helpers/student.helper");
 jest.mock("../../src/services/section.services");
-jest.mock("../../src/services/class.sevices");
+jest.mock("../../src/services/class.services");
 jest.mock("../../src/services/parent.services");
 jest.mock("../../src/services/student.service");
 jest.mock("../../src/services/password.service");
-jest.mock("../../src/services/class.sevices.js");
+jest.mock("../../src/services/class.services.js");
 jest.mock("../../src/services/holiday.service.js");
 jest.mock("../../src/services/mongoose.services.js");
 jest.mock("../../src/services/celender.service.js");

@@ -1,11 +1,11 @@
 import { registerSectionController, assignGuestTeacherController, replaceTeacherController, getSectionController, deleteSectionController, getAllSectionsController } from "../../src/controllers/section.controller.js";
-import { getClassService, updateClassService } from "../../src/services/class.sevices.js";
+import { getClassService, updateClassService } from "../../src/services/class.services.js";
 import {  deleteSectionService, getAllSection, getSectionService, registerSectionService, updateSectionService } from "../../src/services/section.services.js";
 import {  getTeacherService, updateTeacherService  } from "../../src/services/teacher.services.js";
 import { success, error } from "../../src/utills/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 
-jest.mock("../../src/services/class.sevices.js");
+jest.mock("../../src/services/class.services.js");
 jest.mock("../../src/services/section.services.js");
 jest.mock("../../src/services/teacher.services.js");
 jest.mock("../../src/utills/responseWrapper.js", () => ({
