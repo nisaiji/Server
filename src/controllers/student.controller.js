@@ -1,18 +1,20 @@
+import fs from 'fs/promises';
+
 import { StatusCodes } from "http-status-codes";
+import xlsx from 'xlsx';
+
+import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
+import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
 import { getClassService } from "../services/class.services.js";
-import { getParentService, registerParentService, updateParentService } from "../services/v2/parent.services.js";
+import { getHolidayCountService } from "../services/holiday.service.js";
+import { convertToMongoId } from "../services/mongoose.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import { getSectionService, updateSectionService } from "../services/section.services.js";
 import { getStudentService, registerStudentService, updateStudentService, getStudentsService, getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
-import { error, success } from "../utills/responseWrapper.js";
-import { convertToMongoId } from "../services/mongoose.services.js";
-import xlsx from 'xlsx';
-import fs from 'fs/promises';
-import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
-import { getHolidayCountService } from "../services/holiday.service.js";
-import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
-import { getWorkDayCountService } from "../services/workDay.services.js";
 import { createOrUpdateDuesForFeeStructure } from "../services/studentFeeDue.service.js";
+import { getParentService, registerParentService, updateParentService } from "../services/v2/parent.services.js";
+import { getWorkDayCountService } from "../services/workDay.services.js";
+import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
   try {

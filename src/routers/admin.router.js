@@ -1,8 +1,9 @@
 import express from "express";
+
 import {getAdminController, getStudentDemoExcelSheetController, getTeacherDemoExcelSheetController, loginAdminController, refreshAccessTokenController, registerAdminController, updateAdminController} from "../controllers/admin.controller.js";
 import { adminAuthenticate, deactivatedAdminAuthenticate, refreshTokenAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
-import {adminAddressValidation, adminDetailsValidation, adminFcmTokenValidation, adminLoginValidation, adminProfileUpdateValidation,adminRegisterValidation, adminSocialProfileUpdateValidation, photoUpdateAdminValidation } from "../middlewares/validation/admin.validation.middleware.js"; 
 import { validateImageSizeMiddleware } from "../middlewares/teacher.middleware.js";
+import {adminAddressValidation, adminDetailsValidation, adminFcmTokenValidation, adminLoginValidation, adminProfileUpdateValidation,adminRegisterValidation, adminSocialProfileUpdateValidation, photoUpdateAdminValidation } from "../middlewares/validation/admin.validation.middleware.js"; 
 const adminRouter = express.Router();
 
 // adminRouter.post("/", adminRegisterValidation, registerAdminController);

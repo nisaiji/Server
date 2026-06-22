@@ -1,8 +1,9 @@
 import {StatusCodes} from "http-status-codes";
-import {error, success} from "../utils/responseWrapper.js";
-import {deleteSubjectService, getSubjectService, getSubjectsService, registerSubjectService, updateSubjectService} from "../services/subject.service.js";
+
 import { getSessionService } from "../services/session.services.js";
+import {deleteSubjectService, getSubjectService, getSubjectsService, registerSubjectService, updateSubjectService} from "../services/subject.service.js";
 import { getTeacherSubjectSectionsService } from "../services/teacherSubjectSection.service.js";
+import {error, success} from "../utils/responseWrapper.js";
 
 export async function createSubjectController(req, res) {
     try {

@@ -1,4 +1,5 @@
 import express from "express";
+
 import { createExambyAdminController, getExamsForSectionController, getSectionExamsForTeacherController, getStudentExamsForParentController, updateExamController } from "../controllers/exam.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";

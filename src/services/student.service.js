@@ -1,5 +1,5 @@
-import studentModel from "../models/student.model.js";
 import { convertToMongoId } from "./mongoose.services.js";
+import studentModel from "../models/student.model.js";
 
 
 export async function getStudentService(paramObj, projection={}){

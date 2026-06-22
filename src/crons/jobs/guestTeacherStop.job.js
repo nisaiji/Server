@@ -1,6 +1,6 @@
-import { updateSectionService } from '../../services/section.services.js';
 import { deleteGuestTeacherService, getGuestTeachersService, updateGuestTeacherService } from '../../services/guestTeacher.service.js';
 import { getLeaveRequestsService, updateLeaveRequestService } from '../../services/leave.service.js';
+import { updateSectionService } from '../../services/section.services.js';
 
 
 const GuestTeacherStopJob =  async() => {

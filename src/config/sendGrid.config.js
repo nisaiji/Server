@@ -1,4 +1,5 @@
 import sendGrid from "@sendgrid/mail";
+
 import { config } from "./config.js";
 
 sendGrid.setApiKey(config.sendGridApiKey);

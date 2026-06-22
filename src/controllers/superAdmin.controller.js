@@ -1,11 +1,12 @@
 import bcrypt from "bcrypt";
-import { getAccessTokenService } from "../services/JWTToken.service.js";
-import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
-import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
-import { error, success } from "../utils/responseWrapper.js";
+
 import { getAdminCountService, getAdminService, getAdminsPipelineService, getAdminsService, updateAdminService } from "../services/admin.services.js";
 import { getCustomerSupportQueriesService } from "../services/customerSupport.services.js";
+import { getAccessTokenService } from "../services/JWTToken.service.js";
+import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
+import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
+import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerSuperAdminController(req, res) {
   try {

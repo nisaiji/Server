@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+
 import { registerCustomerSupportQueryService } from "../services/customerSupport.services.js";
 
 export async function createCustomerSupportQueryController(req, res){

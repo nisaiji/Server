@@ -1,14 +1,16 @@
+import fs from 'fs/promises';
+
 import { StatusCodes } from "http-status-codes";
 import xlsx from 'xlsx';
-import fs from 'fs/promises';
-import { getStudentCountService, getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
-import { error, success } from "../../utills/responseWrapper.js";
+
+import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
+import { getClassService } from "../../services/class.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
-import { getClassService } from "../../services/class.services.js";
+import { getStudentCountService, getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
 import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
-import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
+import { error, success } from "../../utills/responseWrapper.js";
 
 export async function searchStudentsController(req, res){
   try{

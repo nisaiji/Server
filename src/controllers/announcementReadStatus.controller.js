@@ -1,11 +1,12 @@
 import {StatusCodes} from "http-status-codes";
-import {error, success} from "../utils/responseWrapper.js";
+
 import {
     createAnnouncementsReadStatusService,
     getAnnouncementsReadStatusService
 } from "../services/announcementReadStatus.service.js";
-import {getStudentService} from "../services/student.service.js";
 import {convertToMongoId} from "../services/mongoose.services.js";
+import {getStudentService} from "../services/student.service.js";
+import {error, success} from "../utils/responseWrapper.js";
 
 
 export async function markAnnouncementsAsReadForParentController(req, res) {

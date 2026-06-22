@@ -1,17 +1,20 @@
+import fs from 'fs/promises';
+
 import { StatusCodes } from "http-status-codes";
+import xlsx from 'xlsx';
+
+import { getAdminService } from "../services/admin.services.js";
+import { getClassService } from "../services/class.services.js";
+import { getGuestTeacherService } from "../services/guestTeacher.service.js";
+import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
+import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
+import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
+import { getSectionService } from "../services/section.services.js";
+import { getSessionService } from "../services/session.services.js";
 import { getTeacherService, registerTeacherService, getAllTeacherOfAdminService, updateTeacherService, getTeachersService, getTeachersPipelineService } from "../services/teacher.services.js";
 import { getTeacherSectionSessionService, getTeacherSectionSessionsService } from "../services/teacherSectionSession.service.js";
-import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
 import { error, success } from "../utils/responseWrapper.js";
-import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
-import { getSectionService } from "../services/section.services.js";
-import { getClassService } from "../services/class.services.js";
-import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
-import { getGuestTeacherService } from "../services/guestTeacher.service.js";
-import { getAdminService } from "../services/admin.services.js";
-import { getSessionService } from "../services/session.services.js";
-import xlsx from 'xlsx';
-import fs from 'fs/promises';
+
 
 export async function registerTeacherController(req, res) {
   try {

@@ -1,4 +1,5 @@
 import js from "@eslint/js";
+import importPlugin from "eslint-plugin-import";
 
 export default [
   {
@@ -17,12 +18,31 @@ export default [
         __filename: "readonly",
       },
     },
+    plugins: {
+      import: importPlugin,
+    },
     rules: {
       ...js.configs.recommended.rules,
       "no-undef": "error",
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "no-console": "off",
       semi: ["error", "always"],
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["parent", "sibling", "index"],
+          ],
+          "newlines-between": "always",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
+      ],
     },
   },
 ];

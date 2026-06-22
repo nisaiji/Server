@@ -1,10 +1,13 @@
-import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
-import { error, success } from "../utils/responseWrapper.js";
-import {getAdminService, registerAdminService,  updateAdminService } from "../services/admin.services.js";
-import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
-import { constructStudentXlsxTemplate, constructTeacherXlsxTemplate } from "../helpers/admin.helper.js";
+
 import { adminControllerResponse } from "../config/httpResponse.js";
+import { constructStudentXlsxTemplate, constructTeacherXlsxTemplate } from "../helpers/admin.helper.js";
+import {getAdminService, registerAdminService,  updateAdminService } from "../services/admin.services.js";
+import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
+import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
+import { error, success } from "../utils/responseWrapper.js";
+
+
 
 export async function registerAdminController(req, res) {
   try {

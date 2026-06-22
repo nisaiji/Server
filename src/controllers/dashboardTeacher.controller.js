@@ -1,7 +1,8 @@
-import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
-import { getSectionAttendanceStatusService } from "../services/sectionAttendance.services.js";
+
 import { getSectionService } from "../services/section.services.js";
+import { getSectionAttendanceStatusService } from "../services/sectionAttendance.services.js";
+import { error, success } from "../utils/responseWrapper.js";
 
 export async function attendanceStatusOfSectionController(req, res) {
   try {

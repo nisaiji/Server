@@ -1,6 +1,7 @@
 import express from "express";
-import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+
 import { createTeacherSubjectSectionController, deleteTeacherSubjectSectionController, getAllSubjectsOfTeacherInSectionController, getAllSubjectsTeachersOfSectionController, getAllSubjectsTeachersOfSectionForAdminController, updateTeacherSubjectSectionController } from "../controllers/teacherSubjectSection.controller.js";
+import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 
 const teacherSubjectSectionRouter = express.Router();

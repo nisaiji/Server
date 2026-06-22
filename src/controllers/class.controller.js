@@ -1,8 +1,9 @@
 import { StatusCodes } from "http-status-codes";
+
 import { deleteClassService, getClassService, registerClassService, customGetClassWithSectionTeacherService, getClassesPipelineService,} from "../services/class.services.js";
-import { error, success } from "../utils/responseWrapper.js";
-import { getSessionService } from "../services/session.services.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
+import { getSessionService } from "../services/session.services.js";
+import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerClassController(req, res) {
   try {

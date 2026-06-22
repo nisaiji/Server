@@ -1,5 +1,6 @@
-import { error } from "../../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
+
+import { error } from "../../utils/responseWrapper.js";
 import { attendancesStatusSchema } from "../../validators/dashboardTeacherSchema.validator.js";
 
 export async function attendancesStatusValidation(req, res, next) {

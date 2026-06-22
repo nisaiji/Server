@@ -1,8 +1,9 @@
-import { error } from "../../../utils/responseWrapper.js";
-import Jwt from "jsonwebtoken";
-import { config } from "../../../config/config.js";
 import { StatusCodes } from "http-status-codes";
+import Jwt from "jsonwebtoken";
+
+import { config } from "../../../config/config.js";
 import { getParentService } from "../../../services/v2/parent.services.js";
+import { error } from "../../../utils/responseWrapper.js";
 
 export async function parentAuthenticate(req, res, next) {
   try {

@@ -1,4 +1,5 @@
 import express from "express";
+
 import { createSessionController, getAllSessionsOfSchoolController, getSessionByIdController, MarkSessionAsCompletedController } from "../controllers/session.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 

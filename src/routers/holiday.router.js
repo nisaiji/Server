@@ -1,13 +1,14 @@
 import express from "express";
+
+import { deleteHolidayController, getHolidaysController, registerHolidayController, registerHolidaysController, updateHolidayController } from "../controllers/holiday.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import {
   createHolidaysValidation,
   createHolidayValidation,
   getHolidayValidation,
   updateHolidayValidation
 } from "../middlewares/validation/holiday.validation.middleware.js";
-import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
-import { deleteHolidayController, getHolidaysController, registerHolidayController, registerHolidaysController, updateHolidayController } from "../controllers/holiday.controller.js";
 
 const holidayRouter = express.Router();
 

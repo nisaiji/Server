@@ -1,16 +1,19 @@
-import otpGenerator from "otp-generator";
-import { getAdminService, registerAdminService, updateAdminService } from "../../services/admin.services.js";
-import { sentSMSByTwillio } from "../../config/twilio.config.js";
-import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
-import { error, success } from "../../utils/responseWrapper.js";
-import { adminControllerResponse } from "../../config/httpResponse.js";
-import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
+import crypto from "crypto";
+
 import { StatusCodes } from "http-status-codes";
+import otpGenerator from "otp-generator";
+
+import { adminControllerResponse } from "../../config/httpResponse.js";
 import { sendEmailService } from "../../config/sendGrid.config.js";
+import { sentSMSByTwillio } from "../../config/twilio.config.js";
+import { getAdminService, registerAdminService, updateAdminService } from "../../services/admin.services.js";
 import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
+import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
+import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { getSessionService, registerSessionService } from "../../services/session.services.js";
-import crypto from "crypto";
+import { error, success } from "../../utils/responseWrapper.js";
+
 
 export async function adminSendOtpToPhoneController (req, res) {
   try {

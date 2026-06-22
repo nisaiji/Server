@@ -1,6 +1,7 @@
-import { queryValidationSchema } from "../../validators/customerSupportSchema.validator.js";
 import { StatusCodes } from "http-status-codes";
+
 import { error } from "../../utils/responseWrapper.js";
+import { queryValidationSchema } from "../../validators/customerSupportSchema.validator.js";
 
 export async function registerCustomerQueryValidation(req, res, next) {
   try {

@@ -1,11 +1,12 @@
-import { error } from "../../utils/responseWrapper.js";
-import Jwt, { decode } from "jsonwebtoken";
-import { config } from "../../config/config.js";
-import { getTeacherService } from "../../services/teacher.services.js";
-import { getSectionByIdService, getSectionService } from "../../services/section.services.js";
 import { StatusCodes } from "http-status-codes";
-import { getGuestTeacherService } from "../../services/guestTeacher.service.js";
+import Jwt, { decode } from "jsonwebtoken";
+
+import { config } from "../../config/config.js";
 import { getAdminService } from "../../services/admin.services.js";
+import { getGuestTeacherService } from "../../services/guestTeacher.service.js";
+import { getSectionByIdService, getSectionService } from "../../services/section.services.js";
+import { getTeacherService } from "../../services/teacher.services.js";
+import { error } from "../../utils/responseWrapper.js";
 
 export async function teacherAuthenticate(req, res, next) {
   try { 

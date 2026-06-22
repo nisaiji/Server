@@ -1,7 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-import { error, success } from "../utils/responseWrapper.js";
+
 import { getGuestTeacherService, updateGuestTeacherService } from "../services/guestTeacher.service.js";
 import { hashPasswordService } from "../services/password.service.js";
+import { error, success } from "../utils/responseWrapper.js";
 
 
 // export async function loginGuestTeacherController(req, res) {

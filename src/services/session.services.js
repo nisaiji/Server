@@ -1,5 +1,5 @@
-import sessionModel from "../models/session.model.js";
 import { convertToMongoId } from "./mongoose.services.js";
+import sessionModel from "../models/session.model.js";
 
 export async function getSessionService(paramObj){
   try {

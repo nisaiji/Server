@@ -1,6 +1,7 @@
-import otpGenerator from "otp-generator";
-import { getReceiver, getUser } from "../helpers/event.helper.js";
 import { StatusCodes } from "http-status-codes";
+import otpGenerator from "otp-generator";
+
+import { getReceiver, getUser } from "../helpers/event.helper.js";
 import {
   getChangePasswordRequestCountService,
   getChangePasswordRequestService,
@@ -8,10 +9,10 @@ import {
   registerChangePasswordRequestService,
   updateChangePasswordRequestService
 } from "../services/changePassword.services.js";
-import { error, success } from "../utils/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
-import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
 import { hashPasswordService } from "../services/password.service.js";
+import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
+import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerChangePasswordRequestController(req, res) {
   try {

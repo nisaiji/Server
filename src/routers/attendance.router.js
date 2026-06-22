@@ -1,10 +1,11 @@
 import express from "express";
-import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
+
 import { checkAttendaceMarkedController, getMisMatchAttendanceController, checkParentAttendaceMarkedController, updateAttendanceController, attendanceStatusOfSectionController, attendanceCountOfStudentController, attendanceByTeacherController, attendanceByParentController, attendanceStatusOfStudentController, getAttendancesController, bulkAttendanceMarkController, undoAttendanceByTeacherController } from "../controllers/attendance.controller.js";
-import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
-import { attendanceByParentValidation, attendanceByTeacherValidation, attendanceCountValidation, attendanceStatusValidation, getAttendanceValidation, updateAttendanceValidation } from "../middlewares/validation/attendance.validation.middleware.js";
-import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
+import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
+import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
+import { attendanceByParentValidation, attendanceByTeacherValidation, attendanceCountValidation, attendanceStatusValidation, getAttendanceValidation, updateAttendanceValidation } from "../middlewares/validation/attendance.validation.middleware.js";
 
 const attendanceRouter = express.Router();
 

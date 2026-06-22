@@ -1,12 +1,13 @@
 import { StatusCodes } from 'http-status-codes';
-import { error, success } from '../utils/responseWrapper.js';
-import { createStudentExamResultService, getStudentExamResultService, getStudentExamResultsPipelineService, updateStudentExamResultService } from '../services/studentExamResult.service.js';
-import { getSectionService } from '../services/section.services.js';
+
 import { getExamService } from '../services/exam.services.js';
-import { getSubjectService } from '../services/subject.service.js';
 import { convertToMongoId } from '../services/mongoose.services.js';
-import { getSessionStudentService, getSessionStudentsPipelineService } from '../services/v2/sessionStudent.service.js';
+import { getSectionService } from '../services/section.services.js';
 import { getSessionService } from '../services/session.services.js';
+import { createStudentExamResultService, getStudentExamResultService, getStudentExamResultsPipelineService, updateStudentExamResultService } from '../services/studentExamResult.service.js';
+import { getSubjectService } from '../services/subject.service.js';
+import { getSessionStudentService, getSessionStudentsPipelineService } from '../services/v2/sessionStudent.service.js';
+import { error, success } from '../utils/responseWrapper.js';
 
 export async function createStudentExamResultController(req, res) {
   try {

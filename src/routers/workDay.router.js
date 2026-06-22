@@ -1,8 +1,9 @@
 import express from "express";
-import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+
 import { deleteWorkDayController, getWorkDaysController, registerWorkDayController, updateWorkDayController } from "../controllers/workDay.controller.js";
-import { createWorkDayValidation, getWorkDayValidation, updateWorkDayValidation } from "../middlewares/validation/workDay.validation.middleware.js";
+import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
+import { createWorkDayValidation, getWorkDayValidation, updateWorkDayValidation } from "../middlewares/validation/workDay.validation.middleware.js";
 
 const workDayRouter = express.Router();
 

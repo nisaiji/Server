@@ -1,8 +1,9 @@
 import express from "express";
-import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
+
 import { createTagController, deleteTagController, getTagsController, getTagsWithInfoController, updateTagController } from "../controllers/tag.controller.js";
-import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
+import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
 
 const tagRouter = express.Router();
 tagRouter.post("/", teacherAuthenticate, createTagController);

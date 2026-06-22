@@ -1,4 +1,5 @@
 import express from "express";
+
 import {
   registerTeacherController,
   deleteTeacherController,
@@ -16,6 +17,9 @@ import {
   refreshTokenAuthenticate,
   teacherAuthenticate,
 } from "../middlewares/authentication/teacher.authentication.middleware.js";
+import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
+import upload from "../middlewares/multer.middleware.js";
+import { validateImageSizeMiddleware } from "../middlewares/teacher.middleware.js";
 import {
   emailPhoneUpdateTeacherValidation,
   fcmTokenValidation,
@@ -26,9 +30,6 @@ import {
   updateTeacherValidation,
   UsernamePasswordUpdateTeacherValidation,
 } from "../middlewares/validation/teacher.validation.middleware.js";
-import { validateImageSizeMiddleware } from "../middlewares/teacher.middleware.js";
-import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
-import upload from "../middlewares/multer.middleware.js";
 
 const teacherRouter = express.Router();
 

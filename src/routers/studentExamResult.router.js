@@ -1,7 +1,8 @@
 import express from "express";
+
 import { createOrUpdateBulkStudentExamResultController, createStudentExamResultController, getSectionStudentsExamMarksController, getStudentExamMarksController, getStudentExamMarksForSubjectController, getStudentsExamMarksForSubjectController, updateStudentExamResultController } from "../controllers/studentExamResult.controller.js";
-import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
 const studentExamResultRouter = express.Router();
 

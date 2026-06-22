@@ -1,8 +1,10 @@
-import { error } from "../../utils/responseWrapper.js";
+import { StatusCodes } from "http-status-codes";
 import Jwt from "jsonwebtoken";
+
 import { config } from "../../config/config.js";
 import { getSuperAdminService } from "../../services/superAdmin.service.js";
-import { StatusCodes } from "http-status-codes";
+import { error } from "../../utils/responseWrapper.js";
+
 
 export async function superAdminAuthenticate(req, res, next) {
   try {

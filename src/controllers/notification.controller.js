@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { error, success } from "../utils/responseWrapper.js";
+
 import { sendPushNotification } from "../config/firebase.config.js";
+import { error, success } from "../utils/responseWrapper.js";
 
 export async function sendNotificationByAdminController(req, res) {
   try {

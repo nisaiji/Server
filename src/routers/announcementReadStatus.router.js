@@ -1,4 +1,5 @@
 import express from 'express';
+
 import { markAnnouncementsAsReadForParentController, markAnnouncementsAsReadForTeacherController } from "../controllers/announcementReadStatus.controller.js";
 const announcementReadStatusRouter = express.Router();
 

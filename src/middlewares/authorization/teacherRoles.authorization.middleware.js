@@ -1,5 +1,6 @@
-import { error } from "../../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
+
+import { error } from "../../utils/responseWrapper.js";
 
 export function authorizeTeacherRoles(...allowedRoles){
   return (req, res, next)=>{

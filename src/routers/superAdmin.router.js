@@ -1,8 +1,8 @@
 import express from "express";
 
 import { getAdminsController, getCustomerQueriesController, getSuperAdminController, loginSuperAdminController, registerSuperAdminController, updateAdminController, updateSuperAdminController } from "../controllers/superAdmin.controller.js";
-import { loginSuperAdminValidation, registerSuperAdminValidation, updateSuperAdminValidation } from "../middlewares/validation/superAdminValidation.js";
 import { superAdminAuthenticate } from "../middlewares/authentication/superAdmin.authentication.middleware.js";
+import { loginSuperAdminValidation, registerSuperAdminValidation, updateSuperAdminValidation } from "../middlewares/validation/superAdminValidation.js";
 
 const superAdminRouter = express.Router();
 

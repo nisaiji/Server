@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+
 import { error } from "../../utils/responseWrapper.js";
 import { createHolidaySchema, createHolidaysSchema, getHolidaySchema, updateHolidaySchema } from "../../validators/holidaySchema.validator.js";
 
