@@ -50,15 +50,13 @@ export async function registerAdminController(req, res) {
       active: registeredAdmin["isActive"]
     });
 
-    return res
-      .status(StatusCodes.CREATED)
-      .send(
-        success(201, {
-          accessToken,
-          refreshToken,
-          msg: adminControllerResponse.registerAdminController.adminResiteredSuccessfully
-        })
-      );
+    return res.status(StatusCodes.CREATED).send(
+      success(201, {
+        accessToken,
+        refreshToken,
+        msg: adminControllerResponse.registerAdminController.adminResiteredSuccessfully
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

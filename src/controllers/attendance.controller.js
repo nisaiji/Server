@@ -747,15 +747,13 @@ export async function attendanceCountOfStudentController(req, res) {
     const studentAbsentAttendanceCount = studentAbsentAttendance.length;
     const sectionAttendanceCount = sectionAttendance.length;
 
-    return res
-      .status(StatusCodes.OK)
-      .send(
-        success(200, {
-          studentPresentAttendanceCount,
-          studentAbsentAttendanceCount,
-          sectionAttendanceCount
-        })
-      );
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        studentPresentAttendanceCount,
+        studentAbsentAttendanceCount,
+        sectionAttendanceCount
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

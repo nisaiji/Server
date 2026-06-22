@@ -161,16 +161,14 @@ export async function loginTeacherController(req, res) {
       currentTeacher["deviceId"] = deviceId;
       await currentTeacher.save();
     }
-    return res
-      .status(StatusCodes.OK)
-      .send(
-        success(200, {
-          accessToken,
-          refreshToken,
-          firstname: teacher ? teacher["firstname"] : "",
-          isLoginAlready
-        })
-      );
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        accessToken,
+        refreshToken,
+        firstname: teacher ? teacher["firstname"] : "",
+        isLoginAlready
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
