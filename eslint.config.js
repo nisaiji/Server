@@ -26,7 +26,7 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       "no-undef": "error",
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-unused-vars": "off",
       "unused-imports/no-unused-imports": "warn",
       "unused-imports/no-unused-vars": [
         "warn",
