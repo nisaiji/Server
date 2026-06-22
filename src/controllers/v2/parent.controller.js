@@ -1,11 +1,17 @@
 import { StatusCodes } from "http-status-codes";
-import otpGenerator from "otp-generator";
-
+import { error, success } from "../../utils/responseWrapper.js";
+import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
+import { sentSMSByTwillio } from "../../config/twilio.config.js";
+import { getParentService, getParentsPipelineService, updateParentService } from "../../services/parent.services.js";
 import { sendEmailService } from "../../config/sendGrid.config.js";
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
 import { getHolidayPipelineService } from "../../services/holiday.service.js";
 import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
+import { getStudentService, getStudentsPipelineService } from "../../services/student.service.js";
+import { updateSchoolParentsService } from "../../services/schoolParent.services.js";
+import { getHolidayPipelineService } from "../../services/holiday.service.js";
+import { getWorkdayPipelineService } from "../../services/workDay.services.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
 import {
   getOtpsPipelineService,

@@ -2,10 +2,12 @@ import { excelDateToStringDateFormat } from "../services/celender.service.js";
 import { hashPasswordService } from "../services/password.service.js";
 import { getSectionService, updateSectionService } from "../services/section.services.js";
 import { getStudentService, registerStudentService } from "../services/student.service.js";
-import { getParentService, registerParentService } from "../services/v2/parent.services.js";
+import { getParentService, registerParentService } from "../services/parent.services.js";
+import { getSchoolParentService, registerSchoolParentService } from "../services/schoolParent.services.js";
+import { registerSessionStudentService } from "../services/sessionStudent.service.js";
 import { registerStudentFromExcelSchema } from "../validators/studentSchema.validator.js";
 
-export async function registerStudentsFromExcelHelper(students, sectionId, classId, adminId) {
+export async function registerStudentsFromExcelHelper(students, sectionId, classId, sessionId, adminId) {
   try {
     // validate each student from excel file
     students.shift();
@@ -27,81 +29,68 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
     let insertedStudentCount = 0;
     for (const student of students) {
       const normalizedStudent = {
-        firstname: student["First Name"],
-        lastname: student["Last Name"],
-        gender: student["Gender"],
-        bloodGroup: student["Blood Group"],
-        dob:
-          typeof student["DOB (dd-mm-yyyy)"] === "number"
-            ? excelDateToStringDateFormat(student["DOB (dd-mm-yyyy)"], "dd-mm-yyyy")
-            : student["DOB (dd-mm-yyyy)"],
-        address: student["Address"],
-        city: student["City"],
-        district: student["District"],
-        state: student["State"],
-        country: student["Country"],
-        pincode: student["Pincode"],
-        parentName: student["Guardian Name"],
-        phone: student["Phone"],
-        email: student["Email"],
-        occupation: student["Occupation"],
-        qualification: student["Qualification"]
+        firstName: student['First Name'],
+        lastName: student['Last Name'],
+        gender: student['Gender'],
+        bloodGroup: student['Blood Group'],
+        dob: typeof student['DOB (dd-mm-yyyy)'] === "number" ? excelDateToStringDateFormat(student['DOB (dd-mm-yyyy)'], 'dd-mm-yyyy') : student['DOB (dd-mm-yyyy)'],
+        address: student['Address'],
+        city: student['City'],
+        district: student['District'],
+        state: student['State'],
+        country: student['Country'],
+        pincode: student['Pincode'],
+        parentName: student['Guardian Name'],
+        phone: student['Phone'],
+        email: student['Email'],
+        occupation: student['Occupation'],
+        qualification: student['Qualification']
       };
 
-      const {
-        firstname,
-        lastname,
-        gender,
-        bloodGroup,
-        dob,
-        address,
-        city,
-        district,
-        state,
-        country,
-        pincode,
-        parentName,
-        phone,
-        email,
-        qualification,
-        occupation
-      } = normalizedStudent;
-      const parentObj = { fullname: parentName, phone, email, qualification, occupation };
-      const studentObj = {
-        firstname,
-        lastname,
-        gender,
-        bloodGroup,
-        dob,
-        address,
-        city,
-        district,
-        state,
-        country,
-        pincode
-      };
+      const { firstName, lastName, gender, bloodGroup, dob, address, city, district, state, country, pincode, parentName, phone, email, qualification, occupation } = normalizedStudent;
+      
+      // Handle parent creation/retrieval
       let parent = await getParentService({ phone, isActive: true });
-      if (!parent) {
-        const parentNames = parentName.split(" ");
-        const password = parentNames[0] + "@" + phone;
-        parentObj["password"] = await hashPasswordService(password);
-        parent = await registerParentService(parentObj);
+      let schoolParent = await getSchoolParentService({phone, school: adminId, isActive: true});
+
+      if (!schoolParent) {
+        if (!parent) {
+          parent = await registerParentService({phone, status: 'unVerified'});
+        }
+        const parentObj = { fullName: parentName, phone, email, qualification, occupation, school: adminId, parent: parent['_id'] };
+        schoolParent = await registerSchoolParentService(parentObj);
       }
-      let studentInfo = await getStudentService({ firstname, parent: parent["_id"] });
+
+      // Handle student creation
+      let studentInfo = await getStudentService({ firstName, schoolParent: schoolParent["_id"] });
+      const studentObj = { firstName, lastName, gender, bloodGroup, dob, address, city, district, state, country, pincode };
+
       if (!studentInfo) {
-        studentObj["parent"] = parent["_id"];
-        studentObj["section"] = sectionId;
-        studentObj["classId"] = classId;
-        studentObj["admin"] = adminId;
-        await registerStudentService(studentObj);
-        const section = await getSectionService({ _id: sectionId });
-        await updateSectionService(
-          { _id: sectionId },
-          { studentCount: section["studentCount"] + 1 }
-        );
+        studentObj['schoolParent'] = schoolParent['_id'];
+        studentObj['parent'] = parent['_id'];
+        studentObj['admin'] = adminId;
+
+        const registeredStudent = await registerStudentService(studentObj);
+        
+        // Create session student if sessionId is provided
+        if (sessionId) {
+          await registerSessionStudentService({
+            student: registeredStudent._id, 
+            session: sessionId, 
+            classId, 
+            section: sectionId, 
+            school: adminId, 
+            schoolParent: schoolParent._id, 
+            parent: parent._id
+          });
+        }
+        
+        const section = await getSectionService({_id: sectionId});
+        await updateSectionService({_id: sectionId}, {studentCount: section["studentCount"] + 1});
         insertedStudentCount++;
       }
     }
+    return insertedStudentCount;
     return insertedStudentCount;
   } catch (error) {
     throw error;

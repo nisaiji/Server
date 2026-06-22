@@ -1,13 +1,11 @@
 import { excelDateToStringDateFormat } from "../../services/celender.service.js";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import { getStudentService, registerStudentService } from "../../services/student.service.js";
-import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
-import {
-  getSchoolParentService,
-  registerSchoolParentService
-} from "../../services/v2/schoolParent.services.js";
-import { registerSessionStudentService } from "../../services/v2/sessionStudent.service.js";
 import { registerStudentFromExcelSchema } from "../../validators/studentSchema.validator.js";
+import { excelDateToStringDateFormat } from "../../services/celender.service.js";
+import { getParentService, registerParentService } from "../../services/parent.services.js";
+import { getSchoolParentService, registerSchoolParentService } from "../../services/schoolParent.services.js";
+import { registerSessionStudentService } from "../../services/sessionStudent.service.js";
 
 export async function registerStudentsFromExcelHelper(
   students,

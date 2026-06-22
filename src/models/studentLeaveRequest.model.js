@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
+import { LEAVE_REQUEST_STATUS } from "../enums/leave.enums.js";
 
-const studentLeaveRequestSchema = mongoose.Schema(
-  {
-    reason: {
-      type: String,
-      required: true
-    },
+const studentLeaveRequestSchema = mongoose.Schema({
+  reason: {
+    type: String,
+    required: true
+  },
 
-    description: {
-      type: String
-    },
+  description: {
+    type: String
+  },
 
     remark: {
       type: String
@@ -45,11 +45,11 @@ const studentLeaveRequestSchema = mongoose.Schema(
       ref: "admin"
     },
 
-    status: {
-      type: String,
-      enum: ["accept", "reject", "pending", "complete", "expired"],
-      default: "pending"
-    },
+  status: {
+    type: String,
+    enum: Object.values(LEAVE_REQUEST_STATUS),
+    default: LEAVE_REQUEST_STATUS.PENDING
+  },
 
     isRead: {
       type: Boolean,
@@ -61,14 +61,14 @@ const studentLeaveRequestSchema = mongoose.Schema(
       required: true
     },
 
-    endDate: {
-      type: Number,
-      required: true
-    }
+  endDate: {
+    type: Number,
+    required: true
   },
-  {
-    timestamps: true
-  }
+},
+{
+  timestamps: true
+}
 );
 
 const studentLeaveRequestModel = mongoose.model("studentLeaveRequest", studentLeaveRequestSchema);
