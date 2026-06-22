@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
+import unusedImportsPlugin from "eslint-plugin-unused-imports";
 
 export default [
   {
@@ -20,11 +21,22 @@ export default [
     },
     plugins: {
       import: importPlugin,
+      unusedImports: unusedImportsPlugin,
     },
     rules: {
       ...js.configs.recommended.rules,
       "no-undef": "error",
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "unused-imports/no-unused-imports": "warn",
+      "unused-imports/no-unused-vars": [
+        "warn",
+        {
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+        },
+      ],
       "no-useless-catch": "warn",
       "no-useless-escape": "warn",
       "no-console": "off",
