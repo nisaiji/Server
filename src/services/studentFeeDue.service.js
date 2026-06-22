@@ -4,6 +4,7 @@ import studentFeeDueModel from "../models/fee/studentFeeDue.model.js";
 import { getSessionService } from "./session.services.js";
 import { getFeeCycleService } from "./feeSetup.service.js";
 import { getFeeStructureService } from "./feeSetup.service.js";
+import { getFeeHeadService } from "./feeSetup.service.js";
 import sessionStudentModel from "../models/v2/sessionStudent.model.js";
 
 function monthsForFrequency(freq) {
@@ -52,7 +53,7 @@ export async function createOrUpdateDuesForFeeStructure(
   const feeStructureId = feeStructure._id;
   const feeCycleId = feeStructure.feeCycleId;
 
-  const [session, feeCycle] = await Promise.all([
+  const [academicSession, feeCycle] = await Promise.all([
     getSessionService({
       _id: sessionId,
       school: adminId,
@@ -66,20 +67,19 @@ export async function createOrUpdateDuesForFeeStructure(
   // fetch students in these sections for the session & class
   // if new student is added in middle of session
   const studentFilter = studentId
-    ? { studentId, adminId, sessionId, classId }
+    ? { studentId, school: adminId, session: sessionId, classId }
     : {
-        adminId,
-        sessionId,
+        school: adminId,
+        session: sessionId,
         classId,
       };
 
   const studentsInCurrentSession = await sessionStudentModel
     .find(studentFilter)
     .lean();
-  console.log("studentsInCurrentSession", studentsInCurrentSession);
-  if (!studentsInCurrentSession || studentsInCurrentSession.length === 0) return { created: 0, updated: 0 };
 
-  console.log("studentsInCurrentSession", studentsInCurrentSession);
+  if (!studentsInCurrentSession || studentsInCurrentSession.length === 0)
+    return { created: 0, updated: 0 };
 
   // prepare a map for fee amounts per section
   // handle the case where all sections have same fee heads & amounts -
@@ -88,8 +88,8 @@ export async function createOrUpdateDuesForFeeStructure(
 
   // what will happen when we onboard the schools in middle of session? start from the upcoming month.
   // if new student is added need to handle that cases
+  const sectionMap = new Map();
   if (!feeStructure.amountForAllSections) {
-    const sectionMap = new Map();
     (feeStructure.applicableSections || []).forEach((appSec) => {
       sectionMap.set(String(appSec.section.sectionId), appSec.feeHeads || []);
     });
@@ -105,11 +105,22 @@ export async function createOrUpdateDuesForFeeStructure(
     sessionId,
   });
 
-  console.log(feeHeadsDetails, "feeHeadsDetails");
+  // build a lookup of feeHead id -> type (ONE_TIME or RECURRING)
+  const feeHeadTypeMap = new Map();
+  if (feeHeadsDetails && Array.isArray(feeHeadsDetails.feeHeads)) {
+    feeHeadsDetails.feeHeads.forEach((h) => {
+      feeHeadTypeMap.set(String(h._id), h.type);
+    });
+  }
 
-  // if session start month and fee month month is same then onetime fee due will apply but
-  // if session start month and fee month is not same then one time fee will not apply on recurring fee due apply
+  // if session start month and fee month month is same then onetime fee due will apply
+  // otherwise exclude ONE_TIME heads for this run
 
+  const sessionStartMonth = academicSession.startDate.getMonth();
+const dueMonth = dueDate.getMonth();
+
+const includeOneTime = sessionStartMonth === dueMonth;
+  
   for (const student of studentsInCurrentSession) {
     const sid = String(student.studentId || student.student || "");
     const secId = String(student.sectionId || student.section || "");
@@ -117,10 +128,28 @@ export async function createOrUpdateDuesForFeeStructure(
     const feeHeadsForSection =
       sectionMap.get(secId) ?? feeStructure.applicableSections[0].feeHeads;
 
-    const feeBreakup = feeHeadsForSection.map((fh) => ({
-      feeHeadId: fh.feeHeadId,
-      amount: fh.amount || 0,
-    }));
+    // filter out ONE_TIME fee heads unless the session start month equals due month
+    const feeBreakup = (feeHeadsForSection || []).map((fh) => {
+      const type = feeHeadTypeMap.get(fh.feeHeadId);
+      if (type === "ONE_TIME") {
+        return includeOneTime ? {
+          feeHeadId: fh.feeHeadId,
+          amount: fh.amount,
+        } : {
+          feeHeadId: fh.feeHeadId,
+          amount: 0,
+        };
+      }
+      return {
+        feeHeadId: fh.feeHeadId,
+        amount: fh.amount || 0,
+      };
+    });
+
+    // const feeBreakup = effectiveFeeHeads.map((fh) => ({
+    //   feeHeadId: fh.feeHeadId,
+    //   amount: fh.amount || 0,
+    // }));
     const totalAmount = feeBreakup.reduce((s, f) => s + (f.amount || 0), 0);
 
     const filter = {
@@ -149,7 +178,9 @@ export async function createOrUpdateDuesForFeeStructure(
   try {
     let result;
     await transaction.withTransaction(async () => {
-      await studentFeeDueModel.bulkWrite(operations, { session });
+      await studentFeeDueModel.bulkWrite(operations, {
+        session: transaction,
+      });
     });
   } finally {
     transaction.endSession();

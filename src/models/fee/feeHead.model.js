@@ -48,6 +48,7 @@ const FeeHeadSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
+    collection: "fee_heads",
   },
 );
 

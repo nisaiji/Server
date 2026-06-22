@@ -72,6 +72,7 @@ const studentFeeDueSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
+    collection: "student_fee_dues",
   }
 );
 
