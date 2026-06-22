@@ -1,0 +1,33 @@
+export const EXAM_TYPE = {
+  TEST: 'TEST',
+  EXAM: 'EXAM'
+};
+
+export const EXAM_MODE = {
+  ONLINE: 'ONLINE',
+  OFFLINE: 'OFFLINE',
+  BOTH: 'BOTH'
+};
+
+export const SUBJECT_TYPE = {
+  MAIN_SUBJECT: 'MAIN_SUBJECT',
+  GRADE_ONLY_SUBJECT: 'GRADE_ONLY_SUBJECT'
+};
+
+export const GRADING_TYPE = {
+  MARKS: 'MARKS',
+  GRADES: 'GRADES'
+};
+
+export const COMPONENT_EXAM_TYPE = {
+  THEORY: 'THEORY',
+  PRACTICAL: 'PRACTICAL',
+  GRADE: 'GRADE'
+};
+
+export const EXAM_STATUS = {
+  SCHEDULED: 'SCHEDULED',
+  ONGOING: 'ONGOING',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};

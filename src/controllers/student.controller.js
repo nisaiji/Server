@@ -7,8 +7,7 @@ import {
   calculateSundays
 } from "../services/celender.service.js";
 import { getClassService } from "../services/class.services.js";
-import { getHolidayCountService } from "../services/holiday.service.js";
-import { convertToMongoId } from "../services/mongoose.services.js";
+import { getParentService, registerParentService, updateParentService } from "../services/parent.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import {
   getSectionService,

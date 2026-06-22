@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { FEE_FREQUENCY } from "../../enums/fee.enums.js";
 
 const FeeCycleSchema = new mongoose.Schema(
   {
@@ -16,11 +17,11 @@ const FeeCycleSchema = new mongoose.Schema(
       index: true
     },
 
-    frequency: {
-      type: String,
-      enum: ["MONTHLY", "QUARTERLY", "BY_MONTHLY", "HALF_YEARLY", "YEARLY"],
-      required: true
-    },
+  frequency: {
+    type: String,
+    enum: Object.values(FEE_FREQUENCY),
+    required: true
+  },
 
     dueDate: {
       type: Number,
@@ -29,17 +30,15 @@ const FeeCycleSchema = new mongoose.Schema(
       max: 28
     },
 
-    isVerified: {
-      type: Boolean,
-      default: false
-    }
-  },
-  {
-    timestamps: true,
-    versionKey: false,
-    collection: "fee_cycles"
+  isVerified: {
+    type: Boolean,
+    default: false
   }
-);
+}, {
+  timestamps: true,
+  versionKey: false,
+  collection: "feeCycles"
+});
 
 FeeCycleSchema.index(
   {

@@ -8,7 +8,7 @@ import {
 } from "../controllers/exam.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
-import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
+import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
 const examRouter = express.Router();
 
 examRouter.post("/", adminAuthenticate, createExambyAdminController);

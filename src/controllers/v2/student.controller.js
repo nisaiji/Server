@@ -9,29 +9,11 @@ import {
 import { getClassService } from "../../services/class.services.js";
 import { getHolidayCountService } from "../../services/holiday.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
-import {
-  getSectionService,
-  updateSectionService
-} from "../../services/section.services.js";
-import {
-  getStudentCountService,
-  getStudentService,
-  getStudentsPipelineService,
-  getStudentsService,
-  registerStudentService,
-  updateStudentService
-} from "../../services/student.service.js";
-import {
-  getParentService,
-  registerParentService
-} from "../../services/v2/parent.services.js";
-import {
-  getSchoolParentService,
-  registerSchoolParentService,
-  updateSchoolParentService
-} from "../../services/v2/schoolParent.services.js";
-import { getWorkDayCountService } from "../../services/workDay.services.js";
-import { error, success } from "../../utills/responseWrapper.js";
+import { getSectionService, updateSectionService } from "../../services/section.services.js";
+import { getClassService } from "../../services/class.services.js";
+import { getParentService, registerParentService } from "../../services/parent.services.js";
+import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/schoolParent.services.js";
+import { registerStudentsFromExcelHelper } from "../../helpers/student.helper.js";
 
 export async function searchStudentsController(req, res) {
   try {
