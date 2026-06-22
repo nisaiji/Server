@@ -20,7 +20,7 @@ export function constructStudentXlsxTemplate() {
     "Pincode",
     "Email",
     "Qualification",
-    "Occupation",
+    "Occupation"
   ];
   let row = [
     "(Required)",
@@ -38,7 +38,7 @@ export function constructStudentXlsxTemplate() {
     "(Optional)",
     "(Optional)",
     "(Optional)",
-    "(Optional)",
+    "(Optional)"
   ];
   worksheet.columns = columns.map((el) => ({ header: el, key: el, width: 20 }));
   worksheet.insertRow(2, row);

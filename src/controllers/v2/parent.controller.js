@@ -7,7 +7,11 @@ import { getHolidayPipelineService } from "../../services/holiday.service.js";
 import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
-import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
+import {
+  getOtpsPipelineService,
+  registerOtpService,
+  updateOtpService
+} from "../../services/otp.service.js";
 import {
   registerParentPasswordChangeRequestService,
   getParentPasswordChangeRequestService,
@@ -16,16 +20,20 @@ import {
 } from "../../services/parentPasswordChangeRequest.service.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { getStudentService, getStudentsPipelineService } from "../../services/student.service.js";
-import { getParentService, getParentsPipelineService, updateParentService } from "../../services/v2/parent.services.js";
+import {
+  getParentService,
+  getParentsPipelineService,
+  updateParentService
+} from "../../services/v2/parent.services.js";
 import { updateSchoolParentsService } from "../../services/v2/schoolParent.services.js";
 import { getWorkdayPipelineService } from "../../services/workDay.services.js";
 import { error, success } from "../../utils/responseWrapper.js";
 
-export async function parentSendOtpToPhoneController (req, res) {
+export async function parentSendOtpToPhoneController(req, res) {
   try {
     const { phone } = req.body;
     const parent = await getParentService({ phone });
-    if(!parent) {
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
     }
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
@@ -37,9 +45,16 @@ export async function parentSendOtpToPhoneController (req, res) {
       upperCaseAlphabets: false,
       specialChars: false
     });
-    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await sentSMSByTwillio("+91"+phone,sms);
-    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 });
+    const sms = `Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await sentSMSByTwillio("+91" + phone, sms);
+    await registerOtpService({
+      otp,
+      identifier: phone,
+      otpType: "phoneVerification",
+      medium: "sms",
+      entityType: "parent",
+      expiredAt: new Date().getTime() + 1000 * 60 * 5
+    });
 
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
@@ -47,11 +62,11 @@ export async function parentSendOtpToPhoneController (req, res) {
   }
 }
 
-export async function parentPhoneVerifyByOtpController (req, res) {
+export async function parentPhoneVerifyByOtpController(req, res) {
   try {
     const { phone, otp } = req.body;
     let parent = await getParentService({ phone });
-    if(!parent) {
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
     }
 
@@ -63,9 +78,9 @@ export async function parentPhoneVerifyByOtpController (req, res) {
       {
         $match: {
           identifier: phone,
-          medium: 'sms',
-          entityType: 'parent',
-          otpType: 'phoneVerification'
+          medium: "sms",
+          entityType: "parent",
+          otpType: "phoneVerification"
         }
       },
       {
@@ -80,45 +95,49 @@ export async function parentPhoneVerifyByOtpController (req, res) {
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
-    if(!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
+    if (!storedOtp) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
     }
 
-    if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Your OTP has expired'));
+    if (
+      storedOtp["status"] === "verified" ||
+      storedOtp["status"] === "expired" ||
+      storedOtp["expiredAt"] < new Date().getTime()
+    ) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Your OTP has expired"));
     }
 
-    if(otp!==storedOtp['otp']) {
+    if (otp !== storedOtp["otp"]) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, `You entered wrong OTP`));
     }
 
     await Promise.all([
-      updateParentService({_id: parent['_id']}, {status: 'phoneVerified'}),
-      updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+      updateParentService({ _id: parent["_id"] }, { status: "phoneVerified" }),
+      updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" })
     ]);
 
-    parent = await getParentService({ _id: parent['_id'] });
+    parent = await getParentService({ _id: parent["_id"] });
     const token = getAccessTokenService({
-      parentId: parent['_id'],
-      status: parent['status'],
-      isLoginAlready: parent['isLoginAlready'],
-      phoneVerified: parent['status'] !== 'unVerified',
-      emailVerified: parent['status'] === 'verified',
-      passwordUpdated: parent['password'] ? true : false,
-      personalInfoUpdated: parent['fullname'] ? true : false
+      parentId: parent["_id"],
+      status: parent["status"],
+      isLoginAlready: parent["isLoginAlready"],
+      phoneVerified: parent["status"] !== "unVerified",
+      emailVerified: parent["status"] === "verified",
+      passwordUpdated: parent["password"] ? true : false,
+      personalInfoUpdated: parent["fullname"] ? true : false
     });
 
-    res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", token}));
+    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully", token }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
-export async function parentPhoneUpdateSendOtpToPhoneController (req, res) {
+export async function parentPhoneUpdateSendOtpToPhoneController(req, res) {
   try {
     const { phone } = req.body;
     const parent = await getParentService({ phone, isActive: true });
-    if(parent) {
+    if (parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number already used"));
     }
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
@@ -130,9 +149,16 @@ export async function parentPhoneUpdateSendOtpToPhoneController (req, res) {
       upperCaseAlphabets: false,
       specialChars: false
     });
-    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await sentSMSByTwillio("+91"+phone,sms);
-    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 });
+    const sms = `Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await sentSMSByTwillio("+91" + phone, sms);
+    await registerOtpService({
+      otp,
+      identifier: phone,
+      otpType: "phoneVerification",
+      medium: "sms",
+      entityType: "parent",
+      expiredAt: new Date().getTime() + 1000 * 60 * 5
+    });
 
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
@@ -140,12 +166,12 @@ export async function parentPhoneUpdateSendOtpToPhoneController (req, res) {
   }
 }
 
-export async function parentPhoneUpdateVerifyByOtpController (req, res) {
+export async function parentPhoneUpdateVerifyByOtpController(req, res) {
   try {
     const { phone, otp } = req.body;
     const parentId = req.parentId;
-    let parent = await getParentService({ _id:parentId, isActive: true });
-    if(!parent) {
+    let parent = await getParentService({ _id: parentId, isActive: true });
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not found"));
     }
 
@@ -157,9 +183,9 @@ export async function parentPhoneUpdateVerifyByOtpController (req, res) {
       {
         $match: {
           identifier: phone,
-          medium: 'sms',
-          entityType: 'parent',
-          otpType: 'phoneVerification'
+          medium: "sms",
+          entityType: "parent",
+          otpType: "phoneVerification"
         }
       },
       {
@@ -174,22 +200,26 @@ export async function parentPhoneUpdateVerifyByOtpController (req, res) {
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
-    if(!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
+    if (!storedOtp) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
     }
 
-    if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Your OTP has expired'));
+    if (
+      storedOtp["status"] === "verified" ||
+      storedOtp["status"] === "expired" ||
+      storedOtp["expiredAt"] < new Date().getTime()
+    ) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Your OTP has expired"));
     }
 
-    if(otp!==storedOtp['otp']) {
+    if (otp !== storedOtp["otp"]) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, `You entered wrong OTP`));
     }
 
     await Promise.all([
-      updateParentService({_id: parent['_id']}, {phone}),
-      updateSchoolParentsService({parent: parent['_id']}, {phone}),
-      updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+      updateParentService({ _id: parent["_id"] }, { phone }),
+      updateSchoolParentsService({ parent: parent["_id"] }, { phone }),
+      updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" })
     ]);
 
     res.status(StatusCodes.OK).send(success(200, "Phone updated successfully"));
@@ -198,27 +228,36 @@ export async function parentPhoneUpdateVerifyByOtpController (req, res) {
   }
 }
 
-export async function parentEmailInsertAndSendEmailOtpController (req, res) {
+export async function parentEmailInsertAndSendEmailOtpController(req, res) {
   try {
     const { email } = req.body;
     const parentId = req.parentId;
-    const parent = await getParentService({_id: parentId});
-    if(!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'User not found'));
+    const parent = await getParentService({ _id: parentId });
+    if (!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
-    if(parent['status']==='verified'){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "User email has already been verified"));
+    if (parent["status"] === "verified") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "User email has already been verified"));
     }
     const otp = otpGenerator.generate(5, {
       lowerCaseAlphabets: false,
       upperCaseAlphabets: false,
       specialChars: false
     });
-    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 });
-    await updateParentService({_id: parent['_id']}, {email});
+    const sms = `Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await registerOtpService({
+      otp,
+      identifier: email,
+      otpType: "emailVerification",
+      medium: "email",
+      entityType: "parent",
+      expiredAt: new Date().getTime() + 1000 * 60 * 5
+    });
+    await updateParentService({ _id: parent["_id"] }, { email });
 
-    console.log('inside controller');
+    console.log("inside controller");
     const rej = await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
@@ -226,25 +265,25 @@ export async function parentEmailInsertAndSendEmailOtpController (req, res) {
   }
 }
 
-export async function parentEmailVerifyByOtpController (req, res) {
+export async function parentEmailVerifyByOtpController(req, res) {
   try {
     const { otp } = req.body;
     const parentId = req.parentId;
     let parent = await getParentService({ _id: parentId });
-    if(!parent) {
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
     }
-    if(['verified'].includes(parent['status'])) {
+    if (["verified"].includes(parent["status"])) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Your Email has already verified"));
     }
 
     const getOtpPipeline = [
       {
         $match: {
-          identifier: parent['email'],
-          medium: 'email',
-          entityType: 'parent',
-          otpType: 'emailVerification'
+          identifier: parent["email"],
+          medium: "email",
+          entityType: "parent",
+          otpType: "emailVerification"
         }
       },
       {
@@ -259,37 +298,41 @@ export async function parentEmailVerifyByOtpController (req, res) {
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
-    if(!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
+    if (!storedOtp) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
     }
-    console.log({storedOtp, now: new Date().getTime()});
+    console.log({ storedOtp, now: new Date().getTime() });
 
-    if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, 'Your OTP has expired'));
+    if (
+      storedOtp["status"] === "verified" ||
+      storedOtp["status"] === "expired" ||
+      storedOtp["expiredAt"] < new Date().getTime()
+    ) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Your OTP has expired"));
     }
 
-    if(otp!==storedOtp['otp']) {
+    if (otp !== storedOtp["otp"]) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, `You entered wrong OTP`));
     }
 
-    console.log("promise: ", {_id: storedOtp['_id']}, {status: 'verified'});
+    console.log("promise: ", { _id: storedOtp["_id"] }, { status: "verified" });
     await Promise.all([
-      updateParentService({_id: parent['_id']}, {status: 'verified'}),
-      updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+      updateParentService({ _id: parent["_id"] }, { status: "verified" }),
+      updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" })
     ]);
 
-    parent = await getParentService({ _id: parent['_id'] });
+    parent = await getParentService({ _id: parent["_id"] });
     const token = getAccessTokenService({
-      parentId: parent['_id'],
-      status: parent['status'],
-      isLoginAlready: parent['isLoginAlready'],
-      phoneVerified: parent['status'] !== 'unVerified',
-      emailVerified: parent['status'] === 'verified',
-      passwordUpdated: parent['password'] ? true : false,
-      personalInfoUpdated: parent['fullname'] ? true : false
+      parentId: parent["_id"],
+      status: parent["status"],
+      isLoginAlready: parent["isLoginAlready"],
+      phoneVerified: parent["status"] !== "unVerified",
+      emailVerified: parent["status"] === "verified",
+      passwordUpdated: parent["password"] ? true : false,
+      personalInfoUpdated: parent["fullname"] ? true : false
     });
 
-    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully" , token}));
+    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully", token }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -298,15 +341,19 @@ export async function parentEmailVerifyByOtpController (req, res) {
 export async function loginParentController(req, res) {
   try {
     const { user, password } = req.body;
-    const parent = await getParentService({$or: [{username: user}, {email: user}, {phone:user}]});
+    const parent = await getParentService({
+      $or: [{ username: user }, { email: user }, { phone: user }]
+    });
     if (!parent) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
     }
-    if (parent['isActive']===false) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Services are temporarily paused. Please contact support"));
+    if (parent["isActive"] === false) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Services are temporarily paused. Please contact support"));
     }
 
-    if(parent['status']==='unVerified') {
+    if (parent["status"] === "unVerified") {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User verification is pending"));
     }
 
@@ -316,7 +363,7 @@ export async function loginParentController(req, res) {
 
     const enteredPassword = password;
     const storedPassword = parent.password;
-    const matchPassword = await matchPasswordService({enteredPassword, storedPassword});
+    const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
     }
@@ -325,26 +372,27 @@ export async function loginParentController(req, res) {
       role: "parent",
       parentId: parent["_id"],
       phone: parent["phone"],
-      email: parent["email"] ? parent['email'] : "",
-      address: parent["address"]? parent["address"]:"",
-      username: parent["username"]? parent["username"]: ""
+      email: parent["email"] ? parent["email"] : "",
+      address: parent["address"] ? parent["address"] : "",
+      username: parent["username"] ? parent["username"] : ""
     });
 
     const refreshToken = getRefreshTokenService({
       role: "parent",
       parentId: parent["_id"],
       phone: parent["phone"],
-      email: parent["email"] ? parent['email'] : "",
-      address: parent["address"]? parent["address"]:"",
-      username: parent["username"]? parent["username"]: ""
+      email: parent["email"] ? parent["email"] : "",
+      address: parent["address"] ? parent["address"] : "",
+      username: parent["username"] ? parent["username"] : ""
     });
 
-
     const isLoginAlready = parent["isLoginAlready"];
-    if(!isLoginAlready){
-      await updateParentService({_id:parent["_id"]}, {"isLoginAlready":true});
+    if (!isLoginAlready) {
+      await updateParentService({ _id: parent["_id"] }, { isLoginAlready: true });
     }
-    return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, isLoginAlready }));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { accessToken, refreshToken, isLoginAlready }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -355,7 +403,7 @@ export async function parentPasswordUpdateController(req, res) {
     const { password } = req.body;
     const parentId = req.parentId;
     await updateParentService({ _id: parentId }, { password });
-    return res.status(StatusCodes.OK).send(success(200, 'Password updated successfully'));  
+    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -366,26 +414,49 @@ export async function updateParentController(req, res) {
     const parentId = req.parentId;
 
     const fieldsToBeUpdated = {};
-    if(req.body['username']) { fieldsToBeUpdated['username'] = req.body['username']; }
-    if(req.body['fullname']) { fieldsToBeUpdated['fullname'] = req.body['fullname']; }
-    if(req.body['gender']) { fieldsToBeUpdated['gender'] = req.body['gender']; }
-    if(req.body['address']) { fieldsToBeUpdated['address'] = req.body['address']; }
-    if(req.body['city']) { fieldsToBeUpdated['city'] = req.body['city']; }
-    if(req.body['district']) { fieldsToBeUpdated['district'] = req.body['district']; }
-    if(req.body['country']) { fieldsToBeUpdated['country'] = req.body['country']; }
-    if(req.body['pincode']) { fieldsToBeUpdated['pincode'] = req.body['pincode']; }
-    if(req.body['qualification']) { fieldsToBeUpdated['qualification'] = req.body['qualification']; }
-    if(req.body['occupation']) { fieldsToBeUpdated['occupation'] = req.body['occupation']; }
-    if(req.body['fcmToken']) { fieldsToBeUpdated['fcmToken'] = req.body['fcmToken']; }
-    if(req.body['dob']) { fieldsToBeUpdated['dob'] = req.body['dob']; }
+    if (req.body["username"]) {
+      fieldsToBeUpdated["username"] = req.body["username"];
+    }
+    if (req.body["fullname"]) {
+      fieldsToBeUpdated["fullname"] = req.body["fullname"];
+    }
+    if (req.body["gender"]) {
+      fieldsToBeUpdated["gender"] = req.body["gender"];
+    }
+    if (req.body["address"]) {
+      fieldsToBeUpdated["address"] = req.body["address"];
+    }
+    if (req.body["city"]) {
+      fieldsToBeUpdated["city"] = req.body["city"];
+    }
+    if (req.body["district"]) {
+      fieldsToBeUpdated["district"] = req.body["district"];
+    }
+    if (req.body["country"]) {
+      fieldsToBeUpdated["country"] = req.body["country"];
+    }
+    if (req.body["pincode"]) {
+      fieldsToBeUpdated["pincode"] = req.body["pincode"];
+    }
+    if (req.body["qualification"]) {
+      fieldsToBeUpdated["qualification"] = req.body["qualification"];
+    }
+    if (req.body["occupation"]) {
+      fieldsToBeUpdated["occupation"] = req.body["occupation"];
+    }
+    if (req.body["fcmToken"]) {
+      fieldsToBeUpdated["fcmToken"] = req.body["fcmToken"];
+    }
+    if (req.body["dob"]) {
+      fieldsToBeUpdated["dob"] = req.body["dob"];
+    }
     if (req.body["password"]) {
       const hashedPassword = await hashPasswordService(req.body["password"]);
       fieldsToBeUpdated.password = hashedPassword;
     }
-    if(req.body["photo"] || req.body["method"]==="DELETE"){ 
-      fieldsToBeUpdated['photo'] = (req.body["method"]==="DELETE")? "": req.body["photo"]; 
+    if (req.body["photo"] || req.body["method"] === "DELETE") {
+      fieldsToBeUpdated["photo"] = req.body["method"] === "DELETE" ? "" : req.body["photo"];
     }
-
 
     await updateParentService({ _id: parentId }, fieldsToBeUpdated);
 
@@ -398,8 +469,8 @@ export async function updateParentController(req, res) {
 export async function getParentStatusController(req, res) {
   try {
     const { phone } = req.body;
-    const parent = await getParentService({phone: phone, isActive: true});
-    if(!parent){
+    const parent = await getParentService({ phone: phone, isActive: true });
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not registered"));
     }
     const parentStatus = {
@@ -407,19 +478,18 @@ export async function getParentStatusController(req, res) {
       phoneVerified: false,
       emailVerified: false,
       passwordUpdated: false,
-      personalInfoUpdated: false,
+      personalInfoUpdated: false
     };
 
-    parentStatus['status'] = parent['status'];
-    parentStatus['isLoginAlready'] = parent['isLoginAlready'];
-    parentStatus['phoneVerified'] = parent['status'] !== 'unVerified';
-    parentStatus['emailVerified'] = parent['status'] === 'verified';
-    parentStatus['passwordUpdated'] = parent['password'] ? true : false;
-    parentStatus['personalInfoUpdated'] = parent['fullname'] ? true : false;
-    parentStatus['studentAdded'] = parent['students']?.length > 0 ? true :false;
+    parentStatus["status"] = parent["status"];
+    parentStatus["isLoginAlready"] = parent["isLoginAlready"];
+    parentStatus["phoneVerified"] = parent["status"] !== "unVerified";
+    parentStatus["emailVerified"] = parent["status"] === "verified";
+    parentStatus["passwordUpdated"] = parent["password"] ? true : false;
+    parentStatus["personalInfoUpdated"] = parent["fullname"] ? true : false;
+    parentStatus["studentAdded"] = parent["students"]?.length > 0 ? true : false;
 
     return res.status(StatusCodes.OK).send(success(200, parentStatus));
-    
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -434,8 +504,8 @@ export async function checkValidStudentController(req, res) {
     const pipeline = [
       {
         $match: {
-          firstname: { $regex: new RegExp(`^${firstname}$`, 'i') },
-          lastname: { $regex: new RegExp(`^${lastname}$`, 'i') },
+          firstname: { $regex: new RegExp(`^${firstname}$`, "i") },
+          lastname: { $regex: new RegExp(`^${lastname}$`, "i") },
           isActive: true
         }
       },
@@ -458,14 +528,14 @@ export async function checkValidStudentController(req, res) {
     ];
 
     const students = await getStudentsPipelineService(pipeline);
-    if(students.length === 0){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Student not found!'));
+    if (students.length === 0) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found!"));
     }
-    const parent = await getParentService({_id: parentId});
-    
+    const parent = await getParentService({ _id: parentId });
+
     const student = students[0];
-    if (parent?.students.some(id => id.equals(student._id))) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Student already added'));
+    if (parent?.students.some((id) => id.equals(student._id))) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student already added"));
     }
     // await updateParentService({_id: parentId},  { $push: { students: student['_id'] } });
     return res.status(StatusCodes.OK).send(success(200, students[0]));
@@ -478,14 +548,14 @@ export async function addStudentController(req, res) {
   try {
     const { studentIds } = req.body;
     const parentId = req.parentId;
-    const parent = await getParentService({_id: parentId});
-    if(!parent) {
+    const parent = await getParentService({ _id: parentId });
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
     const validStudentIds = [];
 
-    for(const studentId of studentIds) {
+    for (const studentId of studentIds) {
       const pipeline = [
         {
           $match: {
@@ -512,11 +582,12 @@ export async function addStudentController(req, res) {
       ];
 
       const students = await getStudentsPipelineService(pipeline);
-      console.log({students});
-      if(students.length === 0 || parent?.students.some(id => id.equals(studentId))){
+      console.log({ students });
+      if (students.length === 0 || parent?.students.some((id) => id.equals(studentId))) {
         continue;
       }
-      validStudentIds.push(studentId);    }
+      validStudentIds.push(studentId);
+    }
 
     await updateParentService(
       { _id: parentId },
@@ -541,21 +612,18 @@ export async function getParentController(req, res) {
       },
       {
         $lookup: {
-          from: 'students',
-          let: { studentIds: '$students' },
+          from: "students",
+          let: { studentIds: "$students" },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $and: [
-                    { $in: ['$_id', '$$studentIds'] },
-                    { $eq: ['$isActive', true] }
-                  ]
+                  $and: [{ $in: ["$_id", "$$studentIds"] }, { $eq: ["$isActive", true] }]
                 }
               }
             }
           ],
-          as: 'students'
+          as: "students"
         }
       },
       {
@@ -570,7 +638,7 @@ export async function getParentController(req, res) {
           localField: "students._id",
           foreignField: "student",
           as: "students.sessionstudents"
-      }
+        }
       },
       {
         $lookup: {
@@ -653,7 +721,7 @@ export async function getParentController(req, res) {
           district: { $first: "$district" },
           status: { $first: "$status" },
           country: { $first: "$country" },
-          pincode: {$first: '$pincode'},
+          pincode: { $first: "$pincode" },
           qualification: { $first: "$qualification" },
           occupation: { $first: "$occupation" },
           isLoginAlready: { $first: "$isLoginAlready" },
@@ -674,22 +742,26 @@ export async function getParentController(req, res) {
           status: { $cond: [{ $ne: ["$status", null] }, "$status", "$$REMOVE"] },
           country: { $cond: [{ $ne: ["$country", null] }, "$country", "$$REMOVE"] },
           pincode: { $cond: [{ $ne: ["$pincode", null] }, "$pincode", "$$REMOVE"] },
-          qualification: { $cond: [{ $ne: ["$qualification", null] }, "$qualification", "$$REMOVE"] },
+          qualification: {
+            $cond: [{ $ne: ["$qualification", null] }, "$qualification", "$$REMOVE"]
+          },
           occupation: { $cond: [{ $ne: ["$occupation", null] }, "$occupation", "$$REMOVE"] },
-          isLoginAlready: { $cond: [{ $ne: ["$isLoginAlready", null] }, "$isLoginAlready", "$$REMOVE"] },
+          isLoginAlready: {
+            $cond: [{ $ne: ["$isLoginAlready", null] }, "$isLoginAlready", "$$REMOVE"]
+          },
           email: { $cond: [{ $ne: ["$email", null] }, "$email", "$$REMOVE"] },
           students: 1
         }
-      },      
+      },
       {
         $project: {
           password: 0
         }
       }
     ];
-    
+
     const parents = await getParentsPipelineService(pipeline);
-    if(parents.length <=0){
+    if (parents.length <= 0) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User details not found"));
     }
 
@@ -699,7 +771,7 @@ export async function getParentController(req, res) {
   }
 }
 
-export async function getParentWithStudentsController(req, res) { 
+export async function getParentWithStudentsController(req, res) {
   try {
     const parentId = req.parentId;
     const pipeline = [
@@ -711,57 +783,57 @@ export async function getParentWithStudentsController(req, res) {
       },
       {
         $lookup: {
-          from: 'students',
-          localField: 'students',
-          foreignField: '_id',
-          as:  'students',
+          from: "students",
+          localField: "students",
+          foreignField: "_id",
+          as: "students",
           pipeline: [
             {
               $lookup: {
-                from: 'sessionstudents',
-                localField: '_id',
-                foreignField: 'student',
-                as: 'sessionStudents',
+                from: "sessionstudents",
+                localField: "_id",
+                foreignField: "student",
+                as: "sessionStudents",
                 pipeline: [
                   {
                     $lookup: {
-                      from: 'sections',
-                      localField: 'section',
-                      foreignField: '_id',
-                      as: 'section'
+                      from: "sections",
+                      localField: "section",
+                      foreignField: "_id",
+                      as: "section"
                     }
                   },
                   {
                     $unwind: {
-                      path: '$section',
+                      path: "$section",
                       preserveNullAndEmptyArrays: true
                     }
                   },
                   {
                     $lookup: {
-                      from: 'classes',
-                      localField: 'classId',
-                      foreignField: '_id',
-                      as: 'class'
+                      from: "classes",
+                      localField: "classId",
+                      foreignField: "_id",
+                      as: "class"
                     }
                   },
                   {
                     $unwind: {
-                      path: '$class',
+                      path: "$class",
                       preserveNullAndEmptyArrays: true
                     }
                   },
                   {
                     $lookup: {
-                      from: 'sessions',
-                      localField: 'session',
-                      foreignField: '_id',
-                      as: 'session'
+                      from: "sessions",
+                      localField: "session",
+                      foreignField: "_id",
+                      as: "session"
                     }
                   },
                   {
                     $unwind: {
-                      path: '$session',
+                      path: "$session",
                       preserveNullAndEmptyArrays: true
                     }
                   },
@@ -772,26 +844,26 @@ export async function getParentWithStudentsController(req, res) {
                   },
                   {
                     $project: {
-                      sessionStudentId: '$_id',
-                      sessionStudentRollNumber: '$rollNumber',
-                      sessionStuddentEnrollmentStatus: '$enrollmentStatus',
-                      sessionStudentExams: '$exams',
-                      sessionStudentTests: '$tests',
-                      sessionStudentFeeStatus: '$feeStatus',
-                      sessionStudentFeeDetails: '$feeDetails',
-                      sessionStudentScholorship: '$scholorship',
-                      sectionName: '$section.name',
-                      sectionStartTime: '$section.startTime',
-                      sessionName: '$session.name',
-                      sessionStartDate: '$session.startDate',
-                      sessionEndDate: '$session.endDate',
-                      sessionStatus: '$session.status',
-                      sessionStartYear: '$session.academicStartYear',
-                      sessionEndYear: '$session.academicEndYear',
-                      className: '$class.name',
-                      classId: '$class._id',
-                      sessionId: '$session._id',
-                      sectionId: '$section._id',
+                      sessionStudentId: "$_id",
+                      sessionStudentRollNumber: "$rollNumber",
+                      sessionStuddentEnrollmentStatus: "$enrollmentStatus",
+                      sessionStudentExams: "$exams",
+                      sessionStudentTests: "$tests",
+                      sessionStudentFeeStatus: "$feeStatus",
+                      sessionStudentFeeDetails: "$feeDetails",
+                      sessionStudentScholorship: "$scholorship",
+                      sectionName: "$section.name",
+                      sectionStartTime: "$section.startTime",
+                      sessionName: "$session.name",
+                      sessionStartDate: "$session.startDate",
+                      sessionEndDate: "$session.endDate",
+                      sessionStatus: "$session.status",
+                      sessionStartYear: "$session.academicStartYear",
+                      sessionEndYear: "$session.academicEndYear",
+                      className: "$class.name",
+                      classId: "$class._id",
+                      sessionId: "$session._id",
+                      sectionId: "$section._id"
                     }
                   }
                 ]
@@ -799,15 +871,15 @@ export async function getParentWithStudentsController(req, res) {
             },
             {
               $lookup: {
-                from : 'admins',
-                localField: 'admin',
-                foreignField: '_id',
-                as: 'school'
+                from: "admins",
+                localField: "admin",
+                foreignField: "_id",
+                as: "school"
               }
             },
             {
               $unwind: {
-                path: '$school',
+                path: "$school",
                 preserveNullAndEmptyArrays: true
               }
             },
@@ -818,36 +890,36 @@ export async function getParentWithStudentsController(req, res) {
             },
             {
               $project: {
-                studentId: '$_id',
-                studentFirstName: '$firstname',
-                studentLastName: '$lastname',
-                guardianName: '$guardianName',
-                studentGender: '$gender',
-                studentbloodGroup: '$bloodGroup',
-                studentGuardianName: '$guardianName',
-                studentDOB: '$dob',
-                studentPhoto: '$photo',
-                studentAddress: '$address',
-                studentCity: '$city',
-                studentDistrict: '$district',
-                studentCountry: '$country',
-                studentPincode: '$pincode',
-                studentState: '$state',
-                studentCountry: '$country',
+                studentId: "$_id",
+                studentFirstName: "$firstname",
+                studentLastName: "$lastname",
+                guardianName: "$guardianName",
+                studentGender: "$gender",
+                studentbloodGroup: "$bloodGroup",
+                studentGuardianName: "$guardianName",
+                studentDOB: "$dob",
+                studentPhoto: "$photo",
+                studentAddress: "$address",
+                studentCity: "$city",
+                studentDistrict: "$district",
+                studentCountry: "$country",
+                studentPincode: "$pincode",
+                studentState: "$state",
+                studentCountry: "$country",
                 sessionStudents: 1,
-                schoolName: '$school.schoolName',
-                schoolAffiliationNo: '$school.affiliationNo',
-                schoolphone: '$school.phone',
-                schoolEmail: '$school.email',
-                schoolBoard: '$school.schoolBoard',
-                schoolAddress: '$school.address',
-                schoolCity: '$school.city',
-                schoolDistrict: '$school.district', 
-                schoolState: '$school.state',
-                schoolCountry: '$school.country',
-                schoolPhoto: '$school.photo',
-                schoolPincode: '$school.pincode',
-                schoolId: '$school._id'
+                schoolName: "$school.schoolName",
+                schoolAffiliationNo: "$school.affiliationNo",
+                schoolphone: "$school.phone",
+                schoolEmail: "$school.email",
+                schoolBoard: "$school.schoolBoard",
+                schoolAddress: "$school.address",
+                schoolCity: "$school.city",
+                schoolDistrict: "$school.district",
+                schoolState: "$school.state",
+                schoolCountry: "$school.country",
+                schoolPhoto: "$school.photo",
+                schoolPincode: "$school.pincode",
+                schoolId: "$school._id"
               }
             }
           ]
@@ -855,65 +927,70 @@ export async function getParentWithStudentsController(req, res) {
       },
       {
         $project: {
-          parentFullName: '$fullname',
-          parentDob: '$dob',
-          parentGender: '$gender',
-          parentAddress: '$address',
-          parentPhoto: '$photo',
-          parentAddress: '$address',
-          parentCity: '$city',
-          parentState: '$state',
-          parentCountry: '$country',
-          parentPincode: '$pincode',
-          parentQualification: '$qualification',
-          parentOccupation: '$occupation',
-          parentEmail: '$email',
-          parentPhone: '$phone',
-          parentIsLoginAlready: '$isLoginAlready',
+          parentFullName: "$fullname",
+          parentDob: "$dob",
+          parentGender: "$gender",
+          parentAddress: "$address",
+          parentPhoto: "$photo",
+          parentAddress: "$address",
+          parentCity: "$city",
+          parentState: "$state",
+          parentCountry: "$country",
+          parentPincode: "$pincode",
+          parentQualification: "$qualification",
+          parentOccupation: "$occupation",
+          parentEmail: "$email",
+          parentPhone: "$phone",
+          parentIsLoginAlready: "$isLoginAlready",
           students: 1
-        }     
+        }
       }
     ];
 
     const students = await getParentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, students));
-  }catch (err) {  
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 export async function editPasswordController(req, res) {
   try {
-    const parentId = req.parentId || '67fe851bc9ae5cf26bfeab80';
+    const parentId = req.parentId || "67fe851bc9ae5cf26bfeab80";
     const { newPassword, oldPassword } = req.body;
-    const parent = await getParentService({_id: parentId});
-    if(!parent['password']) {
+    const parent = await getParentService({ _id: parentId });
+    if (!parent["password"]) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Please complete your profile"));
     }
-    const matchPassword = await matchPasswordService({enteredPassword: oldPassword, storedPassword: parent['password']});
+    const matchPassword = await matchPasswordService({
+      enteredPassword: oldPassword,
+      storedPassword: parent["password"]
+    });
     if (!matchPassword) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Please enter correct previous password"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(404, "Please enter correct previous password"));
     }
 
     const hashedPassword = await hashPasswordService(newPassword);
-    await updateParentService({_id: parentId}, {password: hashedPassword});
+    await updateParentService({ _id: parentId }, { password: hashedPassword });
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
-export async function parentUpdateEmailAndSendEmailOtpController (req, res) {
+export async function parentUpdateEmailAndSendEmailOtpController(req, res) {
   try {
     const { email } = req.body;
     const parentId = req.parentId;
-    const emailParent = await getParentService({email, isActive: true});
-    const parent = await getParentService({_id: parentId});
-    if(emailParent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Email already used'));
+    const emailParent = await getParentService({ email, isActive: true });
+    const parent = await getParentService({ _id: parentId });
+    if (emailParent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Email already used"));
     }
-    if(!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'User not found'));
+    if (!parent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
 
     const otp = otpGenerator.generate(5, {
@@ -921,8 +998,15 @@ export async function parentUpdateEmailAndSendEmailOtpController (req, res) {
       upperCaseAlphabets: false,
       specialChars: false
     });
-    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 });
+    const sms = `Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await registerOtpService({
+      otp,
+      identifier: email,
+      otpType: "emailVerification",
+      medium: "email",
+      entityType: "parent",
+      expiredAt: new Date().getTime() + 1000 * 60 * 5
+    });
 
     await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
@@ -931,12 +1015,12 @@ export async function parentUpdateEmailAndSendEmailOtpController (req, res) {
   }
 }
 
-export async function parentUpdateEmailVerifyByOtpController (req, res) {
+export async function parentUpdateEmailVerifyByOtpController(req, res) {
   try {
-    const {email, otp } = req.body;
+    const { email, otp } = req.body;
     const parentId = req.parentId;
     let parent = await getParentService({ _id: parentId });
-    if(!parent) {
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
     }
 
@@ -944,9 +1028,9 @@ export async function parentUpdateEmailVerifyByOtpController (req, res) {
       {
         $match: {
           identifier: email,
-          medium: 'email',
-          entityType: 'parent',
-          otpType: 'emailVerification'
+          medium: "email",
+          entityType: "parent",
+          otpType: "emailVerification"
         }
       },
       {
@@ -961,22 +1045,26 @@ export async function parentUpdateEmailVerifyByOtpController (req, res) {
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
-    if(!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
+    if (!storedOtp) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
     }
 
-    if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, 'Your OTP has expired'));
+    if (
+      storedOtp["status"] === "verified" ||
+      storedOtp["status"] === "expired" ||
+      storedOtp["expiredAt"] < new Date().getTime()
+    ) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Your OTP has expired"));
     }
 
-    if(otp!==storedOtp['otp']) {
+    if (otp !== storedOtp["otp"]) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, `You entered wrong OTP`));
     }
 
     await Promise.all([
-      updateParentService({_id: parent['_id']}, { email }),
-      updateSchoolParentsService({parent: parent['_id']}, {email}),
-      updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+      updateParentService({ _id: parent["_id"] }, { email }),
+      updateSchoolParentsService({ parent: parent["_id"] }, { email }),
+      updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" })
     ]);
 
     res.status(StatusCodes.OK).send(success(200, "Email updated successfully"));
@@ -987,60 +1075,61 @@ export async function parentUpdateEmailVerifyByOtpController (req, res) {
 
 export async function getHolidayAndWorkdayController(req, res) {
   try {
-   const parentId = req.parentId;
-   const { studentId, startTime, endTime } = req.body;
-   const student = await getStudentService({_id: studentId, isActive: true});
-   if(!student) {
-    return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
-   }
-   const pipeline = [
-    {
-      $match: {
-        admin: convertToMongoId(student['admin']),
-        date: { $gte: startTime, $lte: endTime }
-      }
+    const parentId = req.parentId;
+    const { studentId, startTime, endTime } = req.body;
+    const student = await getStudentService({ _id: studentId, isActive: true });
+    if (!student) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
-   ];
+    const pipeline = [
+      {
+        $match: {
+          admin: convertToMongoId(student["admin"]),
+          date: { $gte: startTime, $lte: endTime }
+        }
+      }
+    ];
 
-   const holidays = await getHolidayPipelineService(pipeline);
-   const workdays = await getWorkdayPipelineService(pipeline);
+    const holidays = await getHolidayPipelineService(pipeline);
+    const workdays = await getWorkdayPipelineService(pipeline);
 
-   return res.status(StatusCodes.OK).send(success(200, {holidays, workdays}));
+    return res.status(StatusCodes.OK).send(success(200, { holidays, workdays }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
-
 export async function verifyPhoneController(req, res) {
   try {
     const { token, phone } = req.body;
 
-    let parent = await getParentService({phone: phone, isActive: true});
-    if(!parent) {
+    let parent = await getParentService({ phone: phone, isActive: true });
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number not registered"));
     }
 
     // const response =  await verifyMsg91Token(token);
-    
+
     // if(response?.type !== 'success') {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
     // }
 
-    if(parent['status']==='unVerified') {
-      await updateParentService({_id: parent['_id']}, {status: 'phoneVerified'});
+    if (parent["status"] === "unVerified") {
+      await updateParentService({ _id: parent["_id"] }, { status: "phoneVerified" });
     }
-    parent = await getParentService({ _id: parent['_id'] });
+    parent = await getParentService({ _id: parent["_id"] });
     const jwtToken = getAccessTokenService({
-      parentId: parent['_id'],
-      status: parent['status'],
-      isLoginAlready: parent['isLoginAlready'],
-      phoneVerified: parent['status'] !== 'unVerified',
-      emailVerified: parent['status'] === 'verified',
-      passwordUpdated: parent['password'] ? true : false,
-      personalInfoUpdated: parent['fullname'] ? true : false
+      parentId: parent["_id"],
+      status: parent["status"],
+      isLoginAlready: parent["isLoginAlready"],
+      phoneVerified: parent["status"] !== "unVerified",
+      emailVerified: parent["status"] === "verified",
+      passwordUpdated: parent["password"] ? true : false,
+      personalInfoUpdated: parent["fullname"] ? true : false
     });
-    res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", jwtToken}));
+    res
+      .status(StatusCodes.OK)
+      .send(success(200, { message: "OTP verified successfully", jwtToken }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -1051,26 +1140,27 @@ export async function verifyEmailController(req, res) {
     const { token, email } = req.body;
     const parentId = req.parentId;
 
-    let parent = await getParentService({_id: parentId, isActive: true});
+    let parent = await getParentService({ _id: parentId, isActive: true });
 
     // const response =  await verifyMsg91Token(token);
     // if(response?.type !== 'success') {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
     // }
 
-    updateParentService({_id: parent['_id']}, { email, status: 'verified'}),
-
-    parent = await getParentService({ _id: parent['_id'] });
+    (updateParentService({ _id: parent["_id"] }, { email, status: "verified" }),
+      (parent = await getParentService({ _id: parent["_id"] })));
     const jwtToken = getAccessTokenService({
-      parentId: parent['_id'],
-      status: parent['status'],
-      isLoginAlready: parent['isLoginAlready'],
-      phoneVerified: parent['status'] !== 'unVerified',
-      emailVerified: parent['status'] === 'verified',
-      passwordUpdated: parent['password'] ? true : false,
-      personalInfoUpdated: parent['fullname'] ? true : false
+      parentId: parent["_id"],
+      status: parent["status"],
+      isLoginAlready: parent["isLoginAlready"],
+      phoneVerified: parent["status"] !== "unVerified",
+      emailVerified: parent["status"] === "verified",
+      passwordUpdated: parent["password"] ? true : false,
+      personalInfoUpdated: parent["fullname"] ? true : false
     });
-    res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", jwtToken}));
+    res
+      .status(StatusCodes.OK)
+      .send(success(200, { message: "OTP verified successfully", jwtToken }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -1098,11 +1188,13 @@ export async function requestParentPasswordChangeController(req, res) {
     // Check for existing pending request
     const existingRequest = await getParentPasswordChangeRequestService({
       parent: parent._id,
-      status: 'pending'
+      status: "pending"
     });
 
     if (existingRequest) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Password change request already exists"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Password change request already exists"));
     }
 
     const requestObj = {
@@ -1113,10 +1205,12 @@ export async function requestParentPasswordChangeController(req, res) {
 
     const passwordChangeRequest = await registerParentPasswordChangeRequestService(requestObj);
 
-    return res.status(StatusCodes.OK).send(success(200, {
-      message: "Password change request created successfully",
-      requestId: passwordChangeRequest._id
-    }));
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        message: "Password change request created successfully",
+        requestId: passwordChangeRequest._id
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -1128,19 +1222,23 @@ export async function verifyAndChangePasswordController(req, res) {
 
     const passwordChangeRequest = await getParentPasswordChangeRequestService({
       _id: requestId,
-      status: 'pending'
+      status: "pending"
     });
 
     if (!passwordChangeRequest) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid or expired password change request"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Invalid or expired password change request"));
     }
 
     // Verify token with MSG91
     try {
       const response = await verifyMsg91Token(token);
-      if(response?.type !== 'success') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
-    }
+      if (response?.type !== "success") {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(error(400, response?.message || "Token can't verified"));
+      }
     } catch (verifyError) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Token verification failed"));
     }
@@ -1149,16 +1247,10 @@ export async function verifyAndChangePasswordController(req, res) {
     const hashedPassword = await hashPasswordService(newPassword);
 
     // Update parent password
-    await updateParentService(
-      { _id: passwordChangeRequest.parent },
-      { password: hashedPassword }
-    );
+    await updateParentService({ _id: passwordChangeRequest.parent }, { password: hashedPassword });
 
     // Mark request as used
-    await updateParentPasswordChangeRequestService(
-      { _id: requestId },
-      { status: 'completed' }
-    );
+    await updateParentPasswordChangeRequestService({ _id: requestId }, { status: "completed" });
 
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
@@ -1174,9 +1266,7 @@ export async function getParentPasswordChangeRequestsController(req, res) {
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
 
-    const requests = await getParentPasswordChangeRequestsService(
-      { parentId }
-    );
+    const requests = await getParentPasswordChangeRequestsService({ parentId });
 
     const totalRequests = requests.length;
     const startIndex = (pageNum - 1) * limitNum;
@@ -1185,13 +1275,15 @@ export async function getParentPasswordChangeRequestsController(req, res) {
 
     const totalPages = Math.ceil(totalRequests / limitNum);
 
-    return res.status(StatusCodes.OK).send(success(200, {
-      requests: paginatedRequests,
-      currentPage: pageNum,
-      totalPages,
-      totalRequests,
-      pageSize: limitNum
-    }));
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        requests: paginatedRequests,
+        currentPage: pageNum,
+        totalPages,
+        totalRequests,
+        pageSize: limitNum
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

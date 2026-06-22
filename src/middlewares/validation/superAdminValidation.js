@@ -3,9 +3,8 @@ import {
   registerSuperAdminSchema,
   loginSuperAdminSchema,
   updateSuperAdminSchema,
-  updateAdminSchema,
-} 
-from "../../validators/superAdminSchema.validator.js";
+  updateAdminSchema
+} from "../../validators/superAdminSchema.validator.js";
 
 export async function registerSuperAdminValidation(req, res, next) {
   try {

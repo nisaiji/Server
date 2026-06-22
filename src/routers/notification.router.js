@@ -4,6 +4,6 @@ import { sendNotificationByAdminController } from "../controllers/notification.c
 
 const notificationRouter = express.Router();
 
-notificationRouter.post('/', sendNotificationByAdminController);
+notificationRouter.post("/", sendNotificationByAdminController);
 
 export default notificationRouter;

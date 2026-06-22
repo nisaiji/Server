@@ -1,46 +1,51 @@
 import mongoose from "mongoose";
 
-const customerSupportQuerySchema = new mongoose.Schema({
-    firstname:{
-        type:String,
-        required:true
+const customerSupportQuerySchema = new mongoose.Schema(
+  {
+    firstname: {
+      type: String,
+      required: true
     },
-    lastname:{ 
-        type:String,
-        required:true,
+    lastname: {
+      type: String,
+      required: true
     },
     schoolName: {
-        type: String,
-        required: true
+      type: String,
+      required: true
     },
     state: {
-        type: String,
-        required: true
+      type: String,
+      required: true
     },
     city: {
-        type: String
+      type: String
     },
-    email:{
-        type:String
+    email: {
+      type: String
     },
-    phone:{
-        type:String,
-        lowercase: true,
-        required: true
+    phone: {
+      type: String,
+      lowercase: true,
+      required: true
     },
     teacherCount: {
-        type: Number
+      type: Number
     },
     source: {
-        type: String
+      type: String
     },
-    message:{
-        type: String
+    message: {
+      type: String
     }
-},
-{
-   timestamps:true
-});
+  },
+  {
+    timestamps: true
+  }
+);
 
-const customerSupportQueryModel = mongoose.model("customerSupportQuery",customerSupportQuerySchema);
+const customerSupportQueryModel = mongoose.model(
+  "customerSupportQuery",
+  customerSupportQuerySchema
+);
 export default customerSupportQueryModel;

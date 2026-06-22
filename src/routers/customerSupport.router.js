@@ -5,6 +5,10 @@ import { registerCustomerQueryValidation } from "../middlewares/validation/custo
 
 const customerSupportRouter = express.Router();
 
-customerSupportRouter.post("/query", registerCustomerQueryValidation, createCustomerSupportQueryController );
+customerSupportRouter.post(
+  "/query",
+  registerCustomerQueryValidation,
+  createCustomerSupportQueryController
+);
 
 export default customerSupportRouter;

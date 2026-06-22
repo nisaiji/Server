@@ -3,7 +3,6 @@ import { StatusCodes } from "http-status-codes";
 import { error } from "../../utils/responseWrapper.js";
 import { guestTeacherLoginSchema } from "../../validators/guestTeacherSchema.validator.js";
 
-
 export async function loginGuestTeacherValidation(req, res, next) {
   try {
     const { error: schemaError } = guestTeacherLoginSchema.validate(req.body);

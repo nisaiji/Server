@@ -1,4 +1,4 @@
-export function formatLog({level, message, context={}, error=null}){
+export function formatLog({ level, message, context = {}, error = null }) {
   const log = {
     level,
     message,
@@ -6,7 +6,7 @@ export function formatLog({level, message, context={}, error=null}){
     ...context
   };
 
-  if(error){
+  if (error) {
     log.error = {
       name: error.name,
       message: error.message,

@@ -4,7 +4,6 @@ import { getTeacherService } from "../services/teacher.services.js";
 import { getParentService } from "../services/v2/parent.services.js";
 
 export async function getUser(modelType, paramObj) {
-
   switch (modelType) {
     case "superAdmin":
       return await getSuperAdminService(paramObj);
@@ -33,4 +32,3 @@ export function getReceiver(reqObj) {
       return [null, null];
   }
 }
-

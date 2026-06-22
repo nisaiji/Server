@@ -1,38 +1,38 @@
 import changePasswordRequestModel from "../models/changePasswordRequest.model.js";
 
-export async function registerChangePasswordRequestService(paramObj){
+export async function registerChangePasswordRequestService(paramObj) {
   try {
     const request = await changePasswordRequestModel.create(paramObj);
     return request;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }
 
-export async function getChangePasswordRequestService(paramObj, projection={}){
+export async function getChangePasswordRequestService(paramObj, projection = {}) {
   try {
     const request = await changePasswordRequestModel.findOne(paramObj).select(projection);
-    return request; 
-  }catch (error) {
-    throw error;    
+    return request;
+  } catch (error) {
+    throw error;
   }
 }
 
-export async function getChangePasswordRequestsService(paramObj, projection={}){
+export async function getChangePasswordRequestsService(paramObj, projection = {}) {
   try {
     const requests = await changePasswordRequestModel.find(paramObj).select(projection);
-    return requests; 
-  }catch (error) {
-    throw error;    
+    return requests;
+  } catch (error) {
+    throw error;
   }
 }
 
-export async function getChangePasswordRequestsPipelineService(pipeline){
+export async function getChangePasswordRequestsPipelineService(pipeline) {
   try {
     const requests = await changePasswordRequestModel.aggregate(pipeline).exec();
     return requests;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }
 
@@ -54,11 +54,11 @@ export async function updateChangePasswordRequestsService(filter, update) {
   }
 }
 
-export async function getChangePasswordRequestCountService(filter){
+export async function getChangePasswordRequestCountService(filter) {
   try {
     const requestCount = await changePasswordRequestModel.countDocuments(filter);
     return requestCount;
   } catch (error) {
-    throw error;  
+    throw error;
   }
 }

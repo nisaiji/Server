@@ -1,7 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 
 import { convertToMongoId } from "../services/mongoose.services.js";
-import { getSessionService, getSessionsPipelineService, registerSessionService, updateSessionService, updateSessionsService } from "../services/session.services.js";
+import {
+  getSessionService,
+  getSessionsPipelineService,
+  registerSessionService,
+  updateSessionService,
+  updateSessionsService
+} from "../services/session.services.js";
 import { success } from "../utils/responseWrapper.js";
 
 export async function createSessionController(req, res) {
@@ -20,21 +26,21 @@ export async function createSessionController(req, res) {
       status
     };
 
-    const session = await getSessionService({school: adminId, status});
-    if(session) {
-    return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Session already created"));
+    const session = await getSessionService({ school: adminId, status });
+    if (session) {
+      return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Session already created"));
     }
     const newSession = await registerSessionService(sessionData);
     return res.status(StatusCodes.OK).send(success(200, "Session created successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
   }
-};
+}
 
 export async function getAllSessionsOfSchoolController(req, res) {
   try {
-    const adminId  = req.adminId;
-    console.log({adminId});
+    const adminId = req.adminId;
+    console.log({ adminId });
     const pipeline = [
       {
         $match: {
@@ -43,14 +49,13 @@ export async function getAllSessionsOfSchoolController(req, res) {
       }
     ];
     const sessions = await getSessionsPipelineService(pipeline);
-    console.log({sessions});
+    console.log({ sessions });
     if (!sessions || sessions.length === 0) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "No sessions found"));
     }
-    return res.status(StatusCodes.OK).send(success(200,  sessions));
-
+    return res.status(StatusCodes.OK).send(success(200, sessions));
   } catch (err) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
   }
 }
 
@@ -82,15 +87,15 @@ export async function getSessionByIdController(req, res) {
             }
           ]
         }
-      },
+      }
     ];
-    
+
     const sessions = await getSessionsPipelineService(pipeline);
     if (!sessions || sessions.length === 0) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "Session not found"));
     }
     const session = sessions[0];
-    
+
     return res.status(StatusCodes.OK).send(success(200, session));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
@@ -106,12 +111,14 @@ export async function MarkSessionAsCompletedController(req, res) {
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "Session not found"));
     }
-    if (session.status === 'completed') {
-      await updateSessionService({ _id: sessionId }, { status: 'active', isCurrent: true });
+    if (session.status === "completed") {
+      await updateSessionService({ _id: sessionId }, { status: "active", isCurrent: true });
       return res.status(StatusCodes.OK).send(success(200, "Session marked as active successfully"));
     } else {
-      await updateSessionService({ _id: sessionId }, { status: 'completed', isCurrent: false });
-      return res.status(StatusCodes.OK).send(success(200, "Session marked as completed successfully"));
+      await updateSessionService({ _id: sessionId }, { status: "completed", isCurrent: false });
+      return res
+        .status(StatusCodes.OK)
+        .send(success(200, "Session marked as completed successfully"));
     }
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);

@@ -3,80 +3,74 @@ import mongoose from "mongoose";
 const sessionStudentSchema = mongoose.Schema(
   {
     rollNumber: {
-      type: Number,
+      type: Number
     },
     enrollmentStatus: {
       type: String,
-      enum: ["newAdmission", "promoted", "failed"],
+      enum: ["newAdmission", "promoted", "failed"]
     },
     student: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "student",
-      required: true,
+      required: true
     },
     section: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "section",
+      ref: "section"
     },
     classId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "class",
+      ref: "class"
     },
     session: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "session",
+      ref: "session"
     },
     school: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "admin",
+      ref: "admin"
     },
     exams: {
       type: mongoose.Schema.Types.Mixed,
-      default: {},
+      default: {}
     },
     tests: {
       type: mongoose.Schema.Types.Mixed,
-      default: {},
+      default: {}
     },
     transferCertificateIssued: {
       type: Boolean,
-      default: false,
+      default: false
     },
     transferCertificateIssuedAt: {
-      type: Date,
+      type: Date
     },
     feeStatus: {
       type: String,
       enum: ["pending", "partial", "paid"],
-      default: "pending",
+      default: "pending"
     },
     feeDetails: {
       type: mongoose.Schema.Types.Mixed,
-      default: {},
+      default: {}
     },
     isActive: {
       type: Boolean,
-      default: true,
+      default: true
     },
     scholarship: {
       type: mongoose.Schema.Types.Mixed,
-      default: {},
-    },
+      default: {}
+    }
   },
   {
     timestamps: true,
-    collection: "session_students",
-  },
+    collection: "session_students"
+  }
 );
 
 sessionStudentSchema.index({ student: 1, session: 1 }, { unique: true });
-sessionStudentSchema.index(
-  { school: 1, session: 1, classId: 1, section: 1 },
-  { unique: true },
-);
+sessionStudentSchema.index({ school: 1, session: 1, classId: 1, section: 1 }, { unique: true });
 
-const sessionStudentModel = mongoose.model(
-  "sessionStudent",
-  sessionStudentSchema,
-);
+const sessionStudentModel = mongoose.model("sessionStudent", sessionStudentSchema);
 export default sessionStudentModel;

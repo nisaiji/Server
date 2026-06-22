@@ -6,38 +6,38 @@ const studentFeeDueSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "admins",
       required: true,
-      index: true,
+      index: true
     },
 
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "students",
       required: true,
-      index: true,
+      index: true
     },
 
     feeCycleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "feeCycle",
       required: true,
-      index: true,
+      index: true
     },
 
     feeStructureId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "feeStructure",
-      required: true,
+      required: true
     },
 
     sessionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "sessions",
-      required: true,
+      required: true
     },
 
     dueDate: {
       type: Date,
-      required: true,
+      required: true
     },
 
     feeBreakup: [
@@ -46,37 +46,29 @@ const studentFeeDueSchema = new mongoose.Schema(
 
         feeHeadId: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "feeHead",
+          ref: "feeHead"
         },
 
-        amount: Number,
-      },
+        amount: Number
+      }
     ],
 
     totalAmount: {
       type: Number,
-      required: true,
+      required: true
     },
 
     status: {
       type: String,
-      enum: [
-        "PENDING",
-        "PARTIAL",
-        "PAID",
-        "OVERDUE",
-      ],
-      default: "PENDING",
-    },
+      enum: ["PENDING", "PARTIAL", "PAID", "OVERDUE"],
+      default: "PENDING"
+    }
   },
   {
     timestamps: true,
     versionKey: false,
-    collection: "student_fee_dues",
+    collection: "student_fee_dues"
   }
 );
 
-export default mongoose.model(
-  "studentFeeDue",
-  studentFeeDueSchema
-);
+export default mongoose.model("studentFeeDue", studentFeeDueSchema);

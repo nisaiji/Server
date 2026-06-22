@@ -27,12 +27,12 @@ export async function getAttendanceCountService(filter) {
   }
 }
 
-export async function getAttendancePipelineService(pipeline){
+export async function getAttendancePipelineService(pipeline) {
   try {
     const attendances = await attendanceModel.aggregate(pipeline).exec();
     return attendances;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }
 

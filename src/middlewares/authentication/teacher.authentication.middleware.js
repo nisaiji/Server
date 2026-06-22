@@ -9,7 +9,7 @@ import { getTeacherService } from "../../services/teacher.services.js";
 import { error } from "../../utils/responseWrapper.js";
 
 export async function teacherAuthenticate(req, res, next) {
-  try { 
+  try {
     const token = req.header("Authorization");
     if (!token) {
       return res.send(error(404, "Authorization token is required!"));
@@ -17,35 +17,40 @@ export async function teacherAuthenticate(req, res, next) {
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
     let teacher;
-    if(decoded['role']==='teacher' || decoded['role']==='classTeacher'){
-      teacher = await getTeacherService({_id:decoded.teacherId, isActive:true});
+    if (decoded["role"] === "teacher" || decoded["role"] === "classTeacher") {
+      teacher = await getTeacherService({ _id: decoded.teacherId, isActive: true });
     }
-    if(decoded['role']==='guestTeacher'){
-      teacher = await getGuestTeacherService({_id:decoded.teacherId });
+    if (decoded["role"] === "guestTeacher") {
+      teacher = await getGuestTeacherService({ _id: decoded.teacherId });
     }
     if (!teacher) {
       return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }
     const adminId = decoded.adminId;
-    const admin = await getAdminService({_id:adminId});
-    if (!admin){
+    const admin = await getAdminService({ _id: adminId });
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
-    if(admin && !admin['isActive']){
-      return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact admin."));
+    if (admin && !admin["isActive"]) {
+      return res
+        .status(StatusCodes.GONE)
+        .send(error(410, "Services are temporarily paused. Please contact admin."));
     }
 
-    if (decoded['role']=='classTeacher') {
-      const section = await getSectionService({_id : decoded?.sectionId});
+    if (decoded["role"] == "classTeacher") {
+      const section = await getSectionService({ _id: decoded?.sectionId });
       if (!section) {
-       return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
+        return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
       }
-      if (section['teacher'].toString()!==decoded?.teacherId) {
-       return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
+      if (section["teacher"].toString() !== decoded?.teacherId) {
+        return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
       }
     }
 
-    if (decoded['role']==='guestTeacher' && section['guestTeacher'].toString()!==decoded?.teacherId) {
+    if (
+      decoded["role"] === "guestTeacher" &&
+      section["guestTeacher"].toString() !== decoded?.teacherId
+    ) {
       return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
     }
 
@@ -69,7 +74,7 @@ export async function refreshTokenAuthenticate(req, res, next) {
     const decoded = Jwt.verify(parsedToken, config.refreshTokenSecretKey);
     delete decoded.iat;
     delete decoded.exp;
-    const teacher = await getTeacherService({_id:decoded.teacherId, isActive:true});
+    const teacher = await getTeacherService({ _id: decoded.teacherId, isActive: true });
     if (!teacher) {
       return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }
@@ -83,7 +88,6 @@ export async function refreshTokenAuthenticate(req, res, next) {
     req.role = decoded?.role;
     req.data = decoded;
     next();
-
   } catch (err) {
     res.send(error(500, err.message));
   }

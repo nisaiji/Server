@@ -9,7 +9,7 @@ export async function getSectionAttendanceService(paramObj) {
   }
 }
 
-export async function getSectionAttendancesService(paramObj){
+export async function getSectionAttendancesService(paramObj) {
   try {
     const attendances = await sectionAttendanceModel.find(paramObj);
     return attendances;
@@ -18,47 +18,50 @@ export async function getSectionAttendancesService(paramObj){
   }
 }
 
-export async function getSectionAttendancesPipelineService(pipeline){
+export async function getSectionAttendancesPipelineService(pipeline) {
   try {
     const attendances = await sectionAttendanceModel.aggregate(pipeline).exec();
     return attendances;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }
 
 export async function getSectionAttendanceStatusService(filter) {
   try {
-    const attendance = await sectionAttendanceModel.find(filter).select({status:0,_id:0,section:0,teacher:0}).sort({ date: 1 });;
+    const attendance = await sectionAttendanceModel
+      .find(filter)
+      .select({ status: 0, _id: 0, section: 0, teacher: 0 })
+      .sort({ date: 1 });
     return attendance;
   } catch (error) {
     throw error;
   }
 }
 
-export async function createSectionAttendanceService(paramObj){
+export async function createSectionAttendanceService(paramObj) {
   try {
     const sectionAttendance = await sectionAttendanceModel.create(paramObj);
     return sectionAttendance;
-  } catch (error){
-    throw error;    
+  } catch (error) {
+    throw error;
   }
 }
 
-export async function updateSectionAttendanceService(filter, update){
+export async function updateSectionAttendanceService(filter, update) {
   try {
-    const sectionAttendance = await sectionAttendanceModel.findOneAndUpdate(filter, update);;
+    const sectionAttendance = await sectionAttendanceModel.findOneAndUpdate(filter, update);
     return sectionAttendance;
-  } catch (error){
-    throw error;    
+  } catch (error) {
+    throw error;
   }
 }
 
-export async function deleteSectionAttendanceService(filter){
+export async function deleteSectionAttendanceService(filter) {
   try {
     const sectionAttendance = await sectionAttendanceModel.findOneAndDelete(filter);
     return sectionAttendance;
-  } catch (error){
-    throw error;    
+  } catch (error) {
+    throw error;
   }
 }

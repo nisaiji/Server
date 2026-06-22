@@ -35,8 +35,7 @@ const parentProfileUpdateSchema = Joi.object({
     .pattern(/^[6-9][0-9]{9}$/)
     .length(10)
     .messages({
-      "string.pattern.base":
-        "Phone number must have 10-digit number starting with 1-5.",
+      "string.pattern.base": "Phone number must have 10-digit number starting with 1-5.",
       "string.length": "Phone number must be exactly 10 characters long."
     })
 });

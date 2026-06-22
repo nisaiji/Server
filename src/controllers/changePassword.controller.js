@@ -16,7 +16,11 @@ import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerChangePasswordRequestController(req, res) {
   try {
-    const { reason, description, sender: { phone: senderPhone, model: senderModel } } = req.body;
+    const {
+      reason,
+      description,
+      sender: { phone: senderPhone, model: senderModel }
+    } = req.body;
 
     const sender = await getUser(senderModel, { phone: senderPhone, isActive: true });
 
@@ -25,14 +29,23 @@ export async function registerChangePasswordRequestController(req, res) {
     }
 
     if (senderModel === "teacher" && !sender.section) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(409, "User in not authorized for forget password"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(409, "User in not authorized for forget password"));
     }
-    const request = await getChangePasswordRequestService({ "sender.id": sender["_id"], status: { $in: ["pending", "accept"] } });
+    const request = await getChangePasswordRequestService({
+      "sender.id": sender["_id"],
+      status: { $in: ["pending", "accept"] }
+    });
     if (request && request.status === "accept") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Request approved, please change the password"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Request approved, please change the password"));
     }
     if (request && request.status === "pending") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Your password reset request is being processed by the admin"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Your password reset request is being processed by the admin"));
     }
     const receiver = await getUser("admin", { _id: sender["admin"], isActive: true });
     if (!receiver) {
@@ -232,18 +245,22 @@ export async function verifyTeacherForgetPasswordController(req, res) {
       status: "accept"
     });
     if (!request) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Please raise a password reset request first"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(401, "Please raise a password reset request first"));
     }
     if (otp !== request["otp"]) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "OTP not matched"));
     }
 
-    if(request['reason']!=='changeDevice' && deviceId!==teacher['deviceId']){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Access denied due to device mismatch"));
+    if (request["reason"] !== "changeDevice" && deviceId !== teacher["deviceId"]) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Access denied due to device mismatch"));
     }
 
-    if(request['reason']==='changeDevice'){
-      await updateTeacherService({ _id: teacher['_id'] }, { deviceId });
+    if (request["reason"] === "changeDevice") {
+      await updateTeacherService({ _id: teacher["_id"] }, { deviceId });
     }
 
     return res.status(StatusCodes.OK).send(success(200, { id: teacher["id"] }));
@@ -261,12 +278,20 @@ export async function changePasswordByVerifiedTeacherController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
 
-    if(teacher['deviceId']!==deviceId){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Access denied due to device mismatch"));
+    if (teacher["deviceId"] !== deviceId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Access denied due to device mismatch"));
     }
     const hashedPassword = await hashPasswordService(password);
-    await updateTeacherService({ _id: id, isActive: true }, { password: hashedPassword, forgetPasswordCount: teacher.forgetPasswordCount + 1 });
-    await updateChangePasswordRequestService({ "sender.id": convertToMongoId(id), status: "accept" }, { status: "complete" });
+    await updateTeacherService(
+      { _id: id, isActive: true },
+      { password: hashedPassword, forgetPasswordCount: teacher.forgetPasswordCount + 1 }
+    );
+    await updateChangePasswordRequestService(
+      { "sender.id": convertToMongoId(id), status: "accept" },
+      { status: "complete" }
+    );
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

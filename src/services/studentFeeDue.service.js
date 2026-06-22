@@ -23,160 +23,213 @@ function monthsForFrequency(freq) {
   }
 }
 
-function computeNextDueDate(feeCycle) {
-  // feeCycle.dueDate is expected to be day-of-month (1-28)
+function getAllDueDatesInSession(session, feeCycle) {
   const frequency = monthsForFrequency(feeCycle.frequency);
-  const now = new Date();
-  let candidate = new Date(now.getFullYear(), now.getMonth(), feeCycle.dueDate);
-  if (candidate < now) {
-    // advance until candidate >= now
-    while (candidate < now) {
-      candidate = new Date(
-        candidate.getFullYear(),
-        candidate.getMonth() + frequency,
-        feeCycle.dueDate,
-      );
-    }
+  const dates = [];
+  let current = new Date();
+  let dueDate = new Date(current.getFullYear(), current.getMonth(), feeCycle.dueDate);
+
+  while (dueDate < current) {
+    dueDate = new Date(dueDate.getFullYear(), dueDate.getMonth() + frequency, feeCycle.dueDate);
   }
 
-  return candidate;
+  while (dueDate <= session.endDate) {
+    dates.push(new Date(dueDate));
+    dueDate = new Date(dueDate.getFullYear(), dueDate.getMonth() + frequency, feeCycle.dueDate);
+  }
+
+  return dates;
 }
 
-export async function createOrUpdateDuesForFeeStructure(
-  feeStructure,
-  studentId,
-) {
-  const adminId = feeStructure.adminId;
-  const sessionId = feeStructure.sessionId;
-  const classId = feeStructure.classId;
-  const feeStructureId = feeStructure._id;
-  const feeCycleId = feeStructure.feeCycleId;
+function getStudentFilter(feeStructure, studentId) {
+  const baseFilter = {
+    school: feeStructure.adminId,
+    session: feeStructure.sessionId,
+    classId: feeStructure.classId
+  };
 
-  const [academicSession, feeCycle] = await Promise.all([
-    getSessionService({
-      _id: sessionId,
-      school: adminId,
-    }),
-    getFeeCycleService({
-      _id: feeCycleId,
-      adminId,
-    }),
-  ]);
+  return studentId ? { ...baseFilter, studentId } : baseFilter;
+}
 
-  // fetch students in these sections for the session & class
-  // if new student is added in middle of session
-  const studentFilter = studentId
-    ? { studentId, school: adminId, session: sessionId, classId }
-    : {
-        school: adminId,
-        session: sessionId,
-        classId,
-      };
-
-  const studentsInCurrentSession = await sessionStudentModel
-    .find(studentFilter)
-    .lean();
-
-  if (!studentsInCurrentSession || studentsInCurrentSession.length === 0)
-    return { created: 0, updated: 0 };
-
-  // prepare a map for fee amounts per section
-  // handle the case where all sections have same fee heads & amounts -
-  // in that case, applicableSections will have one entry with empty sectionId,
-  // so all students will be mapped to that entry.
-
-  // what will happen when we onboard the schools in middle of session? start from the upcoming month.
-  // if new student is added need to handle that cases
+function buildSectionMap(feeStructure) {
   const sectionMap = new Map();
+
   if (!feeStructure.amountForAllSections) {
     (feeStructure.applicableSections || []).forEach((appSec) => {
       sectionMap.set(String(appSec.section.sectionId), appSec.feeHeads || []);
     });
   }
 
-  const dueDate = computeNextDueDate(feeCycle);
+  return sectionMap;
+}
 
+function buildFeeHeadTypeMap(feeHeadsDetails) {
+  const feeHeadTypeMap = new Map();
+
+  if (feeHeadsDetails && Array.isArray(feeHeadsDetails.feeHeads)) {
+    feeHeadsDetails.feeHeads.forEach((head) => {
+      feeHeadTypeMap.set(String(head._id), head.type);
+    });
+  }
+
+  return feeHeadTypeMap;
+}
+
+function shouldIncludeOneTime(academicSession, dueDate) {
+  return (
+    dueDate.getMonth() === academicSession.startDate.getMonth() &&
+    dueDate.getFullYear() === academicSession.startDate.getFullYear()
+  );
+}
+
+function getFeeHeadsForSection(sectionMap, feeStructure, secId) {
+  return sectionMap.get(secId) ?? feeStructure.applicableSections[0].feeHeads;
+}
+
+function buildFeeBreakup(feeHeadsForSection, feeHeadTypeMap, includeOneTime) {
+  return (feeHeadsForSection || []).map((feeHead) => {
+    const type = feeHeadTypeMap.get(String(feeHead.feeHeadId));
+
+    if (type === "ONE_TIME" && !includeOneTime) {
+      return {
+        feeHeadId: feeHead.feeHeadId,
+        amount: 0
+      };
+    }
+
+    return {
+      feeHeadId: feeHead.feeHeadId,
+      amount: feeHead.amount || 0
+    };
+  });
+}
+
+function buildUpdateOperation({
+  adminId,
+  studentId,
+  feeStructureId,
+  feeCycleId,
+  sessionId,
+  dueDate,
+  feeBreakup,
+  totalAmount
+}) {
+  return {
+    updateOne: {
+      filter: {
+        adminId,
+        studentId,
+        feeStructureId,
+        feeCycleId,
+        sessionId,
+        dueDate
+      },
+      update: {
+        $set: {
+          feeBreakup,
+          totalAmount,
+          dueDate,
+          status: "PENDING"
+        }
+      },
+      upsert: true
+    }
+  };
+}
+
+function buildFeeDueOperations({
+  studentsInCurrentSession,
+  dueDates,
+  academicSession,
+  feeStructure,
+  sectionMap,
+  feeHeadTypeMap,
+  adminId,
+  sessionId,
+  feeStructureId,
+  feeCycleId
+}) {
   const operations = [];
 
-  // get fee head details
-  const feeHeadsDetails = await getFeeHeadService({
-    adminId,
-    sessionId,
-  });
-
-  // build a lookup of feeHead id -> type (ONE_TIME or RECURRING)
-  const feeHeadTypeMap = new Map();
-  if (feeHeadsDetails && Array.isArray(feeHeadsDetails.feeHeads)) {
-    feeHeadsDetails.feeHeads.forEach((h) => {
-      feeHeadTypeMap.set(String(h._id), h.type);
-    });
-  }
-
-  // if session start month and fee month month is same then onetime fee due will apply
-  // otherwise exclude ONE_TIME heads for this run
-
-  const sessionStartMonth = academicSession.startDate.getMonth();
-const dueMonth = dueDate.getMonth();
-
-const includeOneTime = sessionStartMonth === dueMonth;
-  
   for (const student of studentsInCurrentSession) {
     const secId = String(student.sectionId || student.section || "");
+    const feeHeadsForSection = getFeeHeadsForSection(sectionMap, feeStructure, secId);
 
-    const feeHeadsForSection =
-      sectionMap.get(secId) ?? feeStructure.applicableSections[0].feeHeads;
+    for (const dueDate of dueDates) {
+      const includeOneTime = shouldIncludeOneTime(academicSession, dueDate);
+      const feeBreakup = buildFeeBreakup(feeHeadsForSection, feeHeadTypeMap, includeOneTime);
+      const totalAmount = feeBreakup.reduce((sum, item) => sum + item.amount, 0);
 
-    // filter out ONE_TIME fee heads unless the session start month equals due month
-    const feeBreakup = (feeHeadsForSection || []).map((fh) => {
-      const type = feeHeadTypeMap.get(fh.feeHeadId);
-      if (type === "ONE_TIME") {
-        return includeOneTime ? {
-          feeHeadId: fh.feeHeadId,
-          amount: fh.amount,
-        } : {
-          feeHeadId: fh.feeHeadId,
-          amount: 0,
-        };
-      }
-      return {
-        feeHeadId: fh.feeHeadId,
-        amount: fh.amount || 0,
-      };
-    });
-
-    // const feeBreakup = effectiveFeeHeads.map((fh) => ({
-    //   feeHeadId: fh.feeHeadId,
-    //   amount: fh.amount || 0,
-    // }));
-    const totalAmount = feeBreakup.reduce((s, f) => s + (f.amount || 0), 0);
-
-    const filter = {
-      adminId,
-      studentId: student._id,
-      feeStructureId,
-      feeCycleId,
-      sessionId,
-    };
-
-    const update = {
-      $set: {
-        feeBreakup,
-        totalAmount,
-        dueDate,
-        status: "PENDING",
-      },
-    };
-
-    operations.push({ updateOne: { filter, update, upsert: true } });
+      operations.push(
+        buildUpdateOperation({
+          adminId,
+          studentId: student.studentId,
+          feeStructureId,
+          feeCycleId,
+          sessionId,
+          dueDate,
+          feeBreakup,
+          totalAmount
+        })
+      );
+    }
   }
 
-  if (operations.length === 0) return { created: 0, updated: 0 };
+  return operations;
+}
+
+export async function createOrUpdateDuesForFeeStructure(feeStructure, studentId) {
+  const adminId = feeStructure.adminId;
+  const sessionId = feeStructure.sessionId;
+  const feeStructureId = feeStructure._id;
+  const feeCycleId = feeStructure.feeCycleId;
+
+  const [academicSession, feeCycle] = await Promise.all([
+    getSessionService({
+      _id: sessionId,
+      school: adminId
+    }),
+    getFeeCycleService({
+      _id: feeCycleId,
+      adminId
+    })
+  ]);
+
+  const studentFilter = getStudentFilter(feeStructure, studentId);
+  const studentsInCurrentSession = await sessionStudentModel.find(studentFilter).lean();
+
+  if (!studentsInCurrentSession || studentsInCurrentSession.length === 0) {
+    return { created: 0, updated: 0 };
+  }
+
+  const sectionMap = buildSectionMap(feeStructure);
+  const dueDates = getAllDueDatesInSession(academicSession, feeCycle);
+
+  const feeHeadsDetails = await getFeeHeadService({ adminId, sessionId });
+  const feeHeadTypeMap = buildFeeHeadTypeMap(feeHeadsDetails);
+
+  const operations = buildFeeDueOperations({
+    studentsInCurrentSession,
+    dueDates,
+    academicSession,
+    feeStructure,
+    sectionMap,
+    feeHeadTypeMap,
+    adminId,
+    sessionId,
+    feeStructureId,
+    feeCycleId
+  });
+
+  if (operations.length === 0) {
+    return { created: 0, updated: 0 };
+  }
 
   const transaction = await mongoose.startSession();
   try {
     await transaction.withTransaction(async () => {
       await studentFeeDueModel.bulkWrite(operations, {
-        session: transaction,
+        session: transaction
       });
     });
   } finally {

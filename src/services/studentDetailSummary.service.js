@@ -113,10 +113,7 @@ function getMarksSummaryForExam(results = [], evaluatedSubjectCount, subjectCoun
         return {};
       }
 
-      if (
-        typeof component.marksObtained !== "number" ||
-        typeof component.maxMarks !== "number"
-      ) {
+      if (typeof component.marksObtained !== "number" || typeof component.maxMarks !== "number") {
         return {};
       }
 
@@ -144,7 +141,7 @@ function getMarksSummaryForExam(results = [], evaluatedSubjectCount, subjectCoun
   return {
     totalMarksObtained,
     totalMaxMarks,
-    percentage: (totalMarksObtained / totalMaxMarks) * 100,
+    percentage: (totalMarksObtained / totalMaxMarks) * 100
   };
 }
 
@@ -154,14 +151,14 @@ export function getDefaultAttendanceSummary() {
     presentCount: 0,
     absentCount: 0,
     totalMarkedDays: 0,
-    latestAttendanceStatus: null,
+    latestAttendanceStatus: null
   };
 }
 
 export function getDefaultSubjectSummary() {
   return {
     totalSubjects: 0,
-    subjects: [],
+    subjects: []
   };
 }
 
@@ -172,7 +169,7 @@ export function getDefaultLeaveSummary() {
     reject: 0,
     complete: 0,
     expired: 0,
-    latestRequests: [],
+    latestRequests: []
   };
 }
 
@@ -187,10 +184,10 @@ export function getDefaultExamSummary() {
       publishedResultCount: 0,
       attemptedResultCount: 0,
       passedExamCount: 0,
-      failedExamCount: 0,
+      failedExamCount: 0
     },
     latestExams: [],
-    hasMore: false,
+    hasMore: false
   };
 }
 
@@ -200,19 +197,19 @@ export async function calculateAttendancePercentageForSessionStudent(sessionStud
   const currentDate = new Date().getTime();
   const holidaysCount = await getHolidayCountService({
     admin: session["school"],
-    date: { $gte: startTime, $lte: currentDate },
+    date: { $gte: startTime, $lte: currentDate }
   });
   const sundayCount = calculateSundays(startTime, currentDate);
   const sundayAsWorkDayCount = await getWorkDayCountService({
     admin: session["school"],
-    date: { $gte: startTime, $lte: currentDate },
+    date: { $gte: startTime, $lte: currentDate }
   });
   const dayscount = calculateDaysBetweenDates(startTime, currentDate);
   const attendancableDays = dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
   const presentDaysCount = await getAttendanceCountService({
     sessionStudent: convertToMongoId(sessionStudentId),
     teacherAttendance: "present",
-    date: { $gte: startTime, $lte: currentDate },
+    date: { $gte: startTime, $lte: currentDate }
   });
 
   return (presentDaysCount / attendancableDays) * 100;
@@ -227,14 +224,14 @@ export async function buildAttendanceSummaryForSessionStudent(sessionStudentId, 
         $match: {
           sessionStudent: convertToMongoId(sessionStudentId),
           session: convertToMongoId(sessionId),
-          teacherAttendance: { $ne: EMPTY_ATTENDANCE_STATUS },
-        },
+          teacherAttendance: { $ne: EMPTY_ATTENDANCE_STATUS }
+        }
       },
       {
         $sort: {
           date: -1,
-          createdAt: -1,
-        },
+          createdAt: -1
+        }
       },
       {
         $group: {
@@ -242,25 +239,25 @@ export async function buildAttendanceSummaryForSessionStudent(sessionStudentId, 
           latestAttendanceStatus: { $first: "$teacherAttendance" },
           presentCount: {
             $sum: {
-              $cond: [{ $eq: ["$teacherAttendance", "present"] }, 1, 0],
-            },
+              $cond: [{ $eq: ["$teacherAttendance", "present"] }, 1, 0]
+            }
           },
           absentCount: {
             $sum: {
-              $cond: [{ $eq: ["$teacherAttendance", "absent"] }, 1, 0],
-            },
+              $cond: [{ $eq: ["$teacherAttendance", "absent"] }, 1, 0]
+            }
           },
-          totalMarkedDays: { $sum: 1 },
-        },
-      },
-    ]),
+          totalMarkedDays: { $sum: 1 }
+        }
+      }
+    ])
   ]);
 
   const stats = attendanceStats[0];
   if (!stats) {
     return {
       ...defaultSummary,
-      currentSessionPercentage: attendancePercentage,
+      currentSessionPercentage: attendancePercentage
     };
   }
 
@@ -269,57 +266,52 @@ export async function buildAttendanceSummaryForSessionStudent(sessionStudentId, 
     presentCount: stats.presentCount ?? 0,
     absentCount: stats.absentCount ?? 0,
     totalMarkedDays: stats.totalMarkedDays ?? 0,
-    latestAttendanceStatus: stats.latestAttendanceStatus ?? null,
+    latestAttendanceStatus: stats.latestAttendanceStatus ?? null
   };
 }
 
-export async function buildSubjectSummaryForContext({
-  schoolId,
-  sessionId,
-  classId,
-  sectionId,
-}) {
+export async function buildSubjectSummaryForContext({ schoolId, sessionId, classId, sectionId }) {
   const subjects = await getTeacherSubjectSectionPipelineService([
     {
       $match: {
         school: convertToMongoId(schoolId),
         session: convertToMongoId(sessionId),
         classId: convertToMongoId(classId),
-        section: convertToMongoId(sectionId),
-      },
+        section: convertToMongoId(sectionId)
+      }
     },
     {
       $lookup: {
         from: "subjects",
         localField: "subject",
         foreignField: "_id",
-        as: "subject",
-      },
+        as: "subject"
+      }
     },
     {
       $unwind: {
         path: "$subject",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $lookup: {
         from: "teachers",
         localField: "teacher",
         foreignField: "_id",
-        as: "teacher",
-      },
+        as: "teacher"
+      }
     },
     {
       $unwind: {
         path: "$teacher",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $sort: {
-        createdAt: -1,
-      },
+        createdAt: -1
+      }
     },
     {
       $group: {
@@ -328,9 +320,9 @@ export async function buildSubjectSummaryForContext({
         subjectName: { $first: "$subject.name" },
         subjectCode: { $first: "$subject.code" },
         teacherFirstName: { $first: "$teacher.firstname" },
-        teacherLastName: { $first: "$teacher.lastname" },
-      },
-    },
+        teacherLastName: { $first: "$teacher.lastname" }
+      }
+    }
   ]);
 
   const filteredSubjects = subjects
@@ -339,12 +331,12 @@ export async function buildSubjectSummaryForContext({
       subjectId: subject.subjectId,
       subjectName: subject.subjectName ?? "",
       subjectCode: subject.subjectCode ?? null,
-      teacherName: getTeacherName(subject.teacherFirstName, subject.teacherLastName),
+      teacherName: getTeacherName(subject.teacherFirstName, subject.teacherLastName)
     }));
 
   return {
     totalSubjects: filteredSubjects.length,
-    subjects: filteredSubjects,
+    subjects: filteredSubjects
   };
 }
 
@@ -352,13 +344,13 @@ export async function buildLeaveSummaryForSessionStudent(sessionStudentId) {
   const summaries = await getStudentLeaveRequestsPipelineService([
     {
       $match: {
-        sessionStudent: convertToMongoId(sessionStudentId),
-      },
+        sessionStudent: convertToMongoId(sessionStudentId)
+      }
     },
     {
       $sort: {
-        createdAt: -1,
-      },
+        createdAt: -1
+      }
     },
     {
       $project: {
@@ -373,48 +365,48 @@ export async function buildLeaveSummaryForSessionStudent(sessionStudentId) {
             $add: [
               {
                 $floor: {
-                  $divide: [{ $subtract: ["$endDate", "$startDate"] }, DAY_IN_MS],
-                },
+                  $divide: [{ $subtract: ["$endDate", "$startDate"] }, DAY_IN_MS]
+                }
               },
-              1,
-            ],
+              1
+            ]
           },
           reason: { $ifNull: ["$reason", "$description"] },
           status: "$status",
-          appliedAt: "$createdAt",
-        },
-      },
+          appliedAt: "$createdAt"
+        }
+      }
     },
     {
       $group: {
         _id: "$sessionStudent",
         pending: {
           $sum: {
-            $cond: [{ $eq: ["$status", "pending"] }, 1, 0],
-          },
+            $cond: [{ $eq: ["$status", "pending"] }, 1, 0]
+          }
         },
         accept: {
           $sum: {
-            $cond: [{ $eq: ["$status", "accept"] }, 1, 0],
-          },
+            $cond: [{ $eq: ["$status", "accept"] }, 1, 0]
+          }
         },
         reject: {
           $sum: {
-            $cond: [{ $eq: ["$status", "reject"] }, 1, 0],
-          },
+            $cond: [{ $eq: ["$status", "reject"] }, 1, 0]
+          }
         },
         complete: {
           $sum: {
-            $cond: [{ $eq: ["$status", "complete"] }, 1, 0],
-          },
+            $cond: [{ $eq: ["$status", "complete"] }, 1, 0]
+          }
         },
         expired: {
           $sum: {
-            $cond: [{ $eq: ["$status", "expired"] }, 1, 0],
-          },
+            $cond: [{ $eq: ["$status", "expired"] }, 1, 0]
+          }
         },
-        latestRequests: { $push: "$leaveRequest" },
-      },
+        latestRequests: { $push: "$leaveRequest" }
+      }
     },
     {
       $project: {
@@ -423,9 +415,9 @@ export async function buildLeaveSummaryForSessionStudent(sessionStudentId) {
         reject: 1,
         complete: 1,
         expired: 1,
-        latestRequests: { $slice: ["$latestRequests", 5] },
-      },
-    },
+        latestRequests: { $slice: ["$latestRequests", 5] }
+      }
+    }
   ]);
 
   const summary = summaries[0];
@@ -439,7 +431,7 @@ export async function buildLeaveSummaryForSessionStudent(sessionStudentId) {
     reject: summary.reject ?? 0,
     complete: summary.complete ?? 0,
     expired: summary.expired ?? 0,
-    latestRequests: summary.latestRequests ?? [],
+    latestRequests: summary.latestRequests ?? []
   };
 }
 
@@ -447,7 +439,7 @@ export function resolveExamSummaryForStudent(exams = [], examResultsByExamId = {
   const defaultSummary = getDefaultExamSummary();
   const stats = {
     ...defaultSummary.stats,
-    totalExams: exams.length,
+    totalExams: exams.length
   };
   const latestExams = [];
 
@@ -527,7 +519,7 @@ export function resolveExamSummaryForStudent(exams = [], examResultsByExamId = {
       resultPublishedAt: exam?.resultPublishedAt ?? null,
       subjectCount,
       evaluatedSubjectCount,
-      overallStatus,
+      overallStatus
     };
 
     Object.assign(
@@ -541,7 +533,7 @@ export function resolveExamSummaryForStudent(exams = [], examResultsByExamId = {
   return {
     stats,
     latestExams: latestExams.slice(0, 5),
-    hasMore: latestExams.length > 5,
+    hasMore: latestExams.length > 5
   };
 }
 
@@ -549,7 +541,7 @@ export async function buildExamSummaryForSessionStudent({
   schoolId,
   sessionId,
   sectionId,
-  sessionStudentId,
+  sessionStudentId
 }) {
   const exams = await getExamsPipelineService([
     {
@@ -557,8 +549,8 @@ export async function buildExamSummaryForSessionStudent({
         school: convertToMongoId(schoolId),
         session: convertToMongoId(sessionId),
         section: convertToMongoId(sectionId),
-        isActive: true,
-      },
+        isActive: true
+      }
     },
     {
       $project: {
@@ -573,9 +565,9 @@ export async function buildExamSummaryForSessionStudent({
         resultPublished: 1,
         resultPublishedAt: 1,
         createdAt: 1,
-        subjects: 1,
-      },
-    },
+        subjects: 1
+      }
+    }
   ]);
 
   if (exams.length === 0) {
@@ -587,8 +579,8 @@ export async function buildExamSummaryForSessionStudent({
     {
       $match: {
         sessionStudent: convertToMongoId(sessionStudentId),
-        exam: { $in: examIds.map((examId) => convertToMongoId(examId)) },
-      },
+        exam: { $in: examIds.map((examId) => convertToMongoId(examId)) }
+      }
     },
     {
       $project: {
@@ -596,9 +588,9 @@ export async function buildExamSummaryForSessionStudent({
         subject: 1,
         components: 1,
         createdAt: 1,
-        updatedAt: 1,
-      },
-    },
+        updatedAt: 1
+      }
+    }
   ]);
 
   const examResultsByExamId = examResults.reduce((accumulator, result) => {

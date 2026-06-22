@@ -10,15 +10,7 @@ export function getDaysArray(year, month) {
   var numDaysInMonth, daysInWeek, daysIndex, index, i, l, daysArray;
 
   numDaysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  daysInWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
+  daysInWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   daysIndex = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
   index = daysIndex[new Date(year, month - 1, 1).toString().split(" ")[0]];
   daysArray = [];
@@ -47,9 +39,7 @@ export function isSaturday(date) {
 export function startOfWeek(date, options = {}) {
   const weekStartsOn = options.weekStartsOn ?? 0; // default Sunday, like date-fns
   if (weekStartsOn < 0 || weekStartsOn > 6) {
-    throw new RangeError(
-      "weekStartsOn must be between 0 (Sunday) and 6 (Saturday)"
-    );
+    throw new RangeError("weekStartsOn must be between 0 (Sunday) and 6 (Saturday)");
   }
   const d = dayjs(date);
   if (!d.isValid()) throw new Error("Invalid date");
@@ -76,9 +66,7 @@ export function startOfWeek(date, options = {}) {
 export function endOfWeekDayjs(date, options = {}) {
   const weekStartsOn = options.weekStartsOn ?? 0; // default Sunday, like date-fns
   if (weekStartsOn < 0 || weekStartsOn > 6) {
-    throw new RangeError(
-      "weekStartsOn must be between 0 (Sunday) and 6 (Saturday)"
-    );
+    throw new RangeError("weekStartsOn must be between 0 (Sunday) and 6 (Saturday)");
   }
 
   const d = dayjs(date);
@@ -100,10 +88,7 @@ export function endOfWeekDayjs(date, options = {}) {
 // Detect the last working day of the month, assuming working days are Mon-Sat.
 export function detectLastWorkingDayOfMonth(currentDate) {
   let date = new Date(currentDate);
-  while (
-    !isLastDayOfMonth(date) ||
-    ![1, 2, 3, 4, 5, 6].includes(getDay(date))
-  ) {
+  while (!isLastDayOfMonth(date) || ![1, 2, 3, 4, 5, 6].includes(getDay(date))) {
     // Mon-Sat are working days
     date = new Date(date.getTime() + 24 * 60 * 60 * 1000);
   }
@@ -135,9 +120,7 @@ export function subWeeks(date, amount, options = {}) {
     throw new RangeError("amount must be a positive integer");
   }
   if (weekStartsOn < 0 || weekStartsOn > 6) {
-    throw new RangeError(
-      "weekStartsOn must be between 0 (Sunday) and 6 (Saturday)"
-    );
+    throw new RangeError("weekStartsOn must be between 0 (Sunday) and 6 (Saturday)");
   }
 
   const d = dayjs(date);

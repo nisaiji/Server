@@ -34,9 +34,7 @@ const router = express();
 
 router.use("/", (req, res, next) => {
   console.log("");
-  console.log(
-    "*************************REQUEST START*****************************",
-  );
+  console.log("*************************REQUEST START*****************************");
   console.log(`NEW REQUEST ---> ${req.method} ${req.originalUrl}`);
   console.log("req Type=======>", req.method.toUpperCase());
   console.log("req Path=======>", req.path);
@@ -44,9 +42,7 @@ router.use("/", (req, res, next) => {
   console.log("req Params=====>", req.params);
   console.log("req Query======>", req.query);
   console.log("Authorization======>", req.headers.authorization);
-  console.log(
-    "*********************REQUEST ENDS********************************",
-  );
+  console.log("*********************REQUEST ENDS********************************");
 
   next();
 });

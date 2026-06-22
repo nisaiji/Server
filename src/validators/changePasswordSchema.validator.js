@@ -1,22 +1,29 @@
 import Joi from "joi";
 
 const registerChangePasswordRequestSchema = Joi.object({
-  reason: Joi.string().valid("forgetPassword", "changeDevice", "technical", "other").required().messages({
-    "any.required": "reason is required",
-    "string.valid": "Invalid reason"
-  }),
+  reason: Joi.string()
+    .valid("forgetPassword", "changeDevice", "technical", "other")
+    .required()
+    .messages({
+      "any.required": "reason is required",
+      "string.valid": "Invalid reason"
+    }),
   description: Joi.string().optional(),
   sender: Joi.object({
-    phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).length(10).messages({
-        "string.pattern.base":
-        "Phone number must have 10-digit number starting with 1-5.",
+    phone: Joi.string()
+      .pattern(/^[6-9][0-9]{9}$/)
+      .length(10)
+      .messages({
+        "string.pattern.base": "Phone number must have 10-digit number starting with 1-5.",
         "string.length": "Phone number must be exactly 10 characters long."
       }),
     model: Joi.string().valid("parent", "teacher", "admin").required().messages({
-        "any.required": "Model is required.",
-        "string.valid": "Model can be parent, teacher"
-      })
-  }).required().messages({
+      "any.required": "Model is required.",
+      "string.valid": "Model can be parent, teacher"
+    })
+  })
+    .required()
+    .messages({
       "any.required": "Sender information is required"
     })
 });
@@ -44,24 +51,26 @@ const updateChangePasswordRequestByAdminSchema = Joi.object({
     "any.required": "Request Id is required.",
     "string.base": "Request Id must be a string."
   }),
-  status: Joi.string().valid('accept', 'reject').required().messages({
+  status: Joi.string().valid("accept", "reject").required().messages({
     "any.required": "Status is required",
     "string.base": "Status must be a string",
-    "string.valid": 'Invalid status'
-  }),
+    "string.valid": "Invalid status"
+  })
 });
 
 const verifyTeacherChangePasswordSchema = Joi.object({
-  phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).length(10).messages({
-    "string.pattern.base":
-    "Phone number must have a 10-digit number starting with 6-9",
-    "string.length": "Phone number must be exactly 10 characters long",
-  }),
+  phone: Joi.string()
+    .pattern(/^[6-9][0-9]{9}$/)
+    .length(10)
+    .messages({
+      "string.pattern.base": "Phone number must have a 10-digit number starting with 6-9",
+      "string.length": "Phone number must be exactly 10 characters long"
+    }),
   otp: Joi.number().integer().min(10000).max(99999).required().messages({
     "any.required": "OTP is required",
     "number.base": "OTP must be a number",
-    "number.min": 'OTP must have 5 digits',
-    "number.max": 'OTP must have 5 digits'
+    "number.min": "OTP must have 5 digits",
+    "number.max": "OTP must have 5 digits"
   }),
   deviceId: Joi.string().required().messages({
     "any.required": "Device ID is required"
@@ -69,10 +78,13 @@ const verifyTeacherChangePasswordSchema = Joi.object({
 });
 
 const changePasswordByVerifiedTeacherSchema = Joi.object({
-  id: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
+  id: Joi.string()
+    .regex(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
       "string.pattern.base": "Invalid id",
       "any.required": "Id is required"
-  }),
+    }),
   password: Joi.string().required().messages({
     "any.required": "Password is required."
   }),
@@ -81,5 +93,10 @@ const changePasswordByVerifiedTeacherSchema = Joi.object({
   })
 });
 
-
-export { registerChangePasswordRequestSchema, getChangePasswordRequestsForAdminSchema, updateChangePasswordRequestByAdminSchema, verifyTeacherChangePasswordSchema, changePasswordByVerifiedTeacherSchema };
+export {
+  registerChangePasswordRequestSchema,
+  getChangePasswordRequestsForAdminSchema,
+  updateChangePasswordRequestByAdminSchema,
+  verifyTeacherChangePasswordSchema,
+  changePasswordByVerifiedTeacherSchema
+};

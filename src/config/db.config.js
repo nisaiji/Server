@@ -4,13 +4,13 @@ import { config } from "./config.js";
 
 const MONGO_URL = config.dbURL;
 
-export default async function connectDB(){
-    try {
-        mongoose.set('debug', true);
-        await mongoose.connect(MONGO_URL, {serverSelectionTimeoutMS:30000});
-        console.log("DB connected!");
-    } catch {
-       console.log('error in db connection!');
-       process.exit(1);
-    }
+export default async function connectDB() {
+  try {
+    mongoose.set("debug", true);
+    await mongoose.connect(MONGO_URL, { serverSelectionTimeoutMS: 30000 });
+    console.log("DB connected!");
+  } catch {
+    console.log("error in db connection!");
+    process.exit(1);
+  }
 }

@@ -1,11 +1,21 @@
 import bcrypt from "bcrypt";
 import { StatusCodes } from "http-status-codes";
 
-import { getAdminCountService, getAdminService, getAdminsPipelineService, getAdminsService, updateAdminService } from "../services/admin.services.js";
+import {
+  getAdminCountService,
+  getAdminService,
+  getAdminsPipelineService,
+  getAdminsService,
+  updateAdminService
+} from "../services/admin.services.js";
 import { getCustomerSupportQueriesService } from "../services/customerSupport.services.js";
 import { getAccessTokenService } from "../services/JWTToken.service.js";
 import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
-import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
+import {
+  getSuperAdminService,
+  registerSuperAdminService,
+  updateSuperAdminService
+} from "../services/superAdmin.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerSuperAdminController(req, res) {
@@ -17,8 +27,7 @@ export async function registerSuperAdminController(req, res) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    superAdmin = await registerSuperAdminService({ username, email, password: hashedPassword});
-
+    superAdmin = await registerSuperAdminService({ username, email, password: hashedPassword });
 
     return res.status(StatusCodes.CREATED).send(success(201, "User registered successfully"));
   } catch (err) {
@@ -33,7 +42,10 @@ export async function loginSuperAdminController(req, res) {
     if (!superAdmin) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
-    const matchPassword = await matchPasswordService({enteredPassword:password, storedPassword:superAdmin["password"]});
+    const matchPassword = await matchPasswordService({
+      enteredPassword: password,
+      storedPassword: superAdmin["password"]
+    });
     if (!matchPassword) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
     }
@@ -45,7 +57,9 @@ export async function loginSuperAdminController(req, res) {
       email: superAdmin["email"]
     });
 
-    return res.status(StatusCodes.OK).send(success(200, { accessToken, username: superAdmin["username"] }));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { accessToken, username: superAdmin["username"] }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -54,23 +68,23 @@ export async function loginSuperAdminController(req, res) {
 export async function updateSuperAdminController(req, res) {
   try {
     const superAdminId = req.superAdminId;
-    const superAdmin = await getSuperAdminService({_id: superAdminId});
+    const superAdmin = await getSuperAdminService({ _id: superAdminId });
     if (!superAdmin) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "User not exists"));
     }
-    
-    const updateFields = { };
 
-    if(req.body["email"]){
+    const updateFields = {};
+
+    if (req.body["email"]) {
       updateFields["email"] = req.body["email"];
     }
-    if(req.body["username"]){
+    if (req.body["username"]) {
       updateFields["username"] = req.body["username"];
     }
     if (req.body["password"]) {
       updateFields["password"] = await hashPasswordService(req.body["password"]);
     }
-    await updateSuperAdminService({_id:superAdminId}, updateFields);
+    await updateSuperAdminService({ _id: superAdminId }, updateFields);
     return res.status(StatusCodes.OK).send(success(200, "User updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -80,7 +94,7 @@ export async function updateSuperAdminController(req, res) {
 export async function getSuperAdminController(req, res) {
   try {
     const superAdminId = req.superAdminId;
-    const superAdmin = await getSuperAdminService({ _id: superAdminId }, {email:1, username:1});
+    const superAdmin = await getSuperAdminService({ _id: superAdminId }, { email: 1, username: 1 });
     if (!superAdmin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Super Admin not found"));
     }
@@ -90,21 +104,31 @@ export async function getSuperAdminController(req, res) {
   }
 }
 
-export async function getAdminsController(req, res){
+export async function getAdminsController(req, res) {
   try {
-    const{ nation, state, district, city, username, page = 1, limit = 1000 } = req.query;
+    const { nation, state, district, city, username, page = 1, limit = 1000 } = req.query;
 
     const filter = {};
-    if (nation){ filter.nation = nation; }
-    if (state){ filter.state = state; }
-    if (district){ filter.district = district; }
-    if (city){ filter.city = city; }
-    if (username){ filter.username = new RegExp(username, 'i'); }
+    if (nation) {
+      filter.nation = nation;
+    }
+    if (state) {
+      filter.state = state;
+    }
+    if (district) {
+      filter.district = district;
+    }
+    if (city) {
+      filter.city = city;
+    }
+    if (username) {
+      filter.username = new RegExp(username, "i");
+    }
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
-    const skipNum = (pageNum-1)*limitNum;
-    
+    const skipNum = (pageNum - 1) * limitNum;
+
     // const admins = await getAdminsService(filter, {username:1}, skipNum, limitNum);
     const admins = await getAdminsPipelineService([
       {
@@ -112,87 +136,99 @@ export async function getAdminsController(req, res){
       },
       {
         $lookup: {
-          from: 'marchantpaymentconfigs',
-          localField: 'marchantPaymentConfig',
-          foreignField: '_id',
-          as: 'marchantPaymentConfig',
-          pipeline: [{
-            $project: {
-              zohoClientId: 1,
-              zohoAccountId: 1,
-              accessTokenExpiresAt: 1
+          from: "marchantpaymentconfigs",
+          localField: "marchantPaymentConfig",
+          foreignField: "_id",
+          as: "marchantPaymentConfig",
+          pipeline: [
+            {
+              $project: {
+                zohoClientId: 1,
+                zohoAccountId: 1,
+                accessTokenExpiresAt: 1
+              }
             }
-          }]
+          ]
         }
       },
       {
         $unwind: {
-          path: '$marchantPaymentConfig',
+          path: "$marchantPaymentConfig",
           preserveNullAndEmptyArrays: true
         }
       },
       {
         $sort: {
-          createdAt: -1,
-        },
+          createdAt: -1
+        }
       },
       {
-        $skip: skipNum,
+        $skip: skipNum
       },
       {
-        $limit: parseInt(limitNum),
-      },
+        $limit: parseInt(limitNum)
+      }
     ]);
     const totalAdmins = await getAdminCountService(filter);
     const totalPages = Math.ceil(totalAdmins / limitNum);
 
-    return res.status(StatusCodes.OK).send(success(200,{     
-      admins,
-      currentPage: pageNum,
-      totalPages,
-      totalAdmins,
-      pageSize: limitNum,
-    }));
-    
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        admins,
+        currentPage: pageNum,
+        totalPages,
+        totalAdmins,
+        pageSize: limitNum
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-    
   }
 }
 
-export async function getCustomerQueriesController(req, res){
+export async function getCustomerQueriesController(req, res) {
   try {
     const queries = await getCustomerSupportQueriesService({});
 
-    return res.status(StatusCodes.OK).send(success(200,{ queries }));
-
+    return res.status(StatusCodes.OK).send(success(200, { queries }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-    
   }
 }
 
-export async function updateAdminController(req, res){
+export async function updateAdminController(req, res) {
   try {
     const adminId = req.params.adminId;
-    const admin = await getAdminService({_id: adminId});
+    const admin = await getAdminService({ _id: adminId });
     const { active } = req.body;
-    if(!admin){
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
-    if(active.toString() === admin['isActive'].toString()){
-      return res.status(StatusCodes.BAD_REQUEST).send(success(400, `Admin already ${active ? "activated" : "deactivated"}`));
+    if (active.toString() === admin["isActive"].toString()) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(success(400, `Admin already ${active ? "activated" : "deactivated"}`));
     }
-    let statusChangeCount = admin['statusChangeCount'];
+    let statusChangeCount = admin["statusChangeCount"];
     statusChangeCount += 1;
-    await updateAdminService({ _id: admin["_id"] }, {isActive: active, statusChangeCount, $push: {statusChangeLog: {status: active ? "activated": "deactivated"}}});
+    await updateAdminService(
+      { _id: admin["_id"] },
+      {
+        isActive: active,
+        statusChangeCount,
+        $push: { statusChangeLog: { status: active ? "activated" : "deactivated" } }
+      }
+    );
     let successMessage = "Admin updated successfully";
-    if(statusChangeCount===1 && active === true){ successMessage = "The School has been Approved Successfully";}
-    else if(active === true) { successMessage = "The School has been Activated Successfully"; }
-    else if(active === false) { successMessage = "The School has been Deactivated Successfully";}
+    if (statusChangeCount === 1 && active === true) {
+      successMessage = "The School has been Approved Successfully";
+    } else if (active === true) {
+      successMessage = "The School has been Activated Successfully";
+    } else if (active === false) {
+      successMessage = "The School has been Deactivated Successfully";
+    }
 
     return res.status(StatusCodes.OK).send(success(200, successMessage));
-    
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

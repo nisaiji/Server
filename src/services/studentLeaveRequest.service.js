@@ -1,6 +1,6 @@
 import studentLeaveRequestModel from "../models/studentLeaveRequest.model.js";
 
-export async function getStudentLeaveRequestsPipelineService(pipeline){
+export async function getStudentLeaveRequestsPipelineService(pipeline) {
   try {
     const leaveRequests = await studentLeaveRequestModel.aggregate(pipeline).exec();
     return leaveRequests;
@@ -9,7 +9,7 @@ export async function getStudentLeaveRequestsPipelineService(pipeline){
   }
 }
 
-export async function getStudentLeaveRequestService(filter, projection={}) {
+export async function getStudentLeaveRequestService(filter, projection = {}) {
   try {
     const leaveRequest = await studentLeaveRequestModel.findOne(filter).select(projection);
     return leaveRequest;
@@ -18,7 +18,7 @@ export async function getStudentLeaveRequestService(filter, projection={}) {
   }
 }
 
-export async function getStudentLeaveRequestsService(filter, projection={}) {
+export async function getStudentLeaveRequestsService(filter, projection = {}) {
   try {
     const leaveRequests = await studentLeaveRequestModel.find(filter).select(projection);
     return leaveRequests;
@@ -36,12 +36,12 @@ export async function deleteStudentLeaveRequestsService(filter) {
   }
 }
 
-export async function registerStudentLeaveRequestService(paramObj){
+export async function registerStudentLeaveRequestService(paramObj) {
   try {
     const leaveRequest = await studentLeaveRequestModel.create(paramObj);
     return leaveRequest;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }
 
@@ -54,11 +54,11 @@ export async function updateStudentLeaveRequestService(filter, update) {
   }
 }
 
-export async function getStudentLeaveRequestsCountService(filter){
+export async function getStudentLeaveRequestsCountService(filter) {
   try {
     const count = await studentLeaveRequestModel.countDocuments(filter);
     return count;
   } catch (error) {
-    throw error;  
+    throw error;
   }
 }

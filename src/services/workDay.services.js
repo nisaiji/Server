@@ -45,20 +45,20 @@ export async function deleteWorkDayService(paramObj) {
   }
 }
 
-export async function getWorkDayCountService(filter){
+export async function getWorkDayCountService(filter) {
   try {
     const count = await workDayModel.countDocuments(filter);
     return count;
   } catch (error) {
-    throw error;  
+    throw error;
   }
 }
 
-export async function getWorkdayPipelineService(pipeline){
+export async function getWorkdayPipelineService(pipeline) {
   try {
     const workdays = await workDayModel.aggregate(pipeline).exec();
     return workdays;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }

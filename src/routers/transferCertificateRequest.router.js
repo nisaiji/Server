@@ -4,7 +4,7 @@ import {
   applyTransferCertificateController,
   getChildrenTCRequestsController,
   approveParentConsentController,
-  getAdminTCRequestsController,
+  getAdminTCRequestsController
 } from "../controllers/transferCertificateRequest.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
@@ -34,10 +34,6 @@ transferCertificateRequestRouter.put(
 );
 
 // Admin Routes
-transferCertificateRequestRouter.get(
-  "/admin",
-  adminAuthenticate,
-  getAdminTCRequestsController
-);
+transferCertificateRequestRouter.get("/admin", adminAuthenticate, getAdminTCRequestsController);
 
 export default transferCertificateRequestRouter;

@@ -2,5 +2,4 @@
 
 // const attendanceRouter = express.Router();
 
-
 // export default attendanceRouter

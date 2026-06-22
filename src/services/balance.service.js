@@ -3,17 +3,17 @@
 import { getAdminsService } from "./admin.services.js";
 import {
   updateFeeDashboardSnapshotService,
-  getStudentFeeInstallmentDistinctService,
+  getStudentFeeInstallmentDistinctService
 } from "./feeDashboardSnapshot.service.js";
 import {
   getLedgerEventsCountService,
   registerLedgerEventService,
-  getLedgerEventsPipelineService,
+  getLedgerEventsPipelineService
 } from "./ledgerEvent.service.js";
 import {
   getStudentFeeInstallmentsService,
   updateStudentFeeInstallmentService,
-  getStudentFeeInstallmentsPipelineService,
+  getStudentFeeInstallmentsPipelineService
 } from "./studentFeeInstallment.service.js";
 import { isLastDayOfMonth } from "../helpers/utils.helper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
@@ -162,7 +162,7 @@ export async function processPayment(txn) {
   // };
   // Idempotency
   const exists = await getLedgerEventsCountService({
-    externalRef: txn?.paymentReferenceId,
+    externalRef: txn?.paymentReferenceId
   });
   if (exists) return;
 
@@ -180,8 +180,8 @@ export async function processPayment(txn) {
     externalRef: txn.paymentReferenceId,
     metaData: {
       school: convertToMongoId(txn.school),
-      session: convertToMongoId(txn.session),
-    },
+      session: convertToMongoId(txn.session)
+    }
   });
 
   // Get unpaid installments ordered by due date
@@ -190,7 +190,7 @@ export async function processPayment(txn) {
       session: txn.session,
       school: txn.school,
       student: txn.student,
-      status: { $ne: "paid" },
+      status: { $ne: "paid" }
     },
     { totalPayable: 1, lateFeeApplied: 1, amountPaid: 1, status: 1 },
     { dueDate: 1 }
@@ -211,15 +211,12 @@ export async function processPayment(txn) {
       actorId: txn.school,
       metaData: {
         school: convertToMongoId(txn.school),
-        session: convertToMongoId(txn.session),
-      },
+        session: convertToMongoId(txn.session)
+      }
     });
 
     inst.amountPaid += apply;
-    inst.status =
-      inst.amountPaid >= inst.totalPayable + inst.lateFeeApplied
-        ? "paid"
-        : "partial";
+    inst.status = inst.amountPaid >= inst.totalPayable + inst.lateFeeApplied ? "paid" : "partial";
 
     await updateStudentFeeInstallmentService(
       { _id: inst._id },
@@ -242,8 +239,8 @@ export async function processRefund(txn) {
     externalRef: txn.paymentReferenceId,
     metaData: {
       school: convertToMongoId(txn.school),
-      session: convertToMongoId(txn.session),
-    },
+      session: convertToMongoId(txn.session)
+    }
   });
 
   let refund = txn.amountPaid;
@@ -252,7 +249,7 @@ export async function processRefund(txn) {
   const paidInst = await getStudentFeeInstallmentsService(
     {
       student: txn.student,
-      amountPaid: { $gt: 0 },
+      amountPaid: { $gt: 0 }
     },
     {},
     { dueDate: -1 }
@@ -283,11 +280,7 @@ export async function recalcDashboard(school, session) {
     session = convertToMongoId(session);
     const now = new Date();
     const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const dayEnd = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1
-    );
+    const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     const thisWeekStart = new Date(now);
     thisWeekStart.setDate(now.getDate() - 7);
 
@@ -301,7 +294,7 @@ export async function recalcDashboard(school, session) {
       thisWeekOverDueFees,
       lastWeekOverDueFees,
       thisWeekPendingFees,
-      lastWeekPendingFees,
+      lastWeekPendingFees
     ] = await Promise.all([
       getLedgerEventsPipelineService([
         {
@@ -310,11 +303,11 @@ export async function recalcDashboard(school, session) {
             "metaData.session": session,
             eventTime: { $gte: thisWeekStart },
             eventType: {
-              $in: ["PaymentReceived", "RefundIssued", "PaymentFailed"],
-            },
-          },
+              $in: ["PaymentReceived", "RefundIssued", "PaymentFailed"]
+            }
+          }
         },
-        { $group: { _id: "$eventType", amount: { $sum: "$amount" } } },
+        { $group: { _id: "$eventType", amount: { $sum: "$amount" } } }
       ]),
       getLedgerEventsPipelineService([
         {
@@ -323,11 +316,11 @@ export async function recalcDashboard(school, session) {
             "metaData.session": session,
             eventTime: { $gte: lastWeekStart, $lt: thisWeekStart },
             eventType: {
-              $in: ["PaymentReceived", "RefundIssued", "PaymentFailed"],
-            },
-          },
+              $in: ["PaymentReceived", "RefundIssued", "PaymentFailed"]
+            }
+          }
         },
-        { $group: { _id: "$eventType", amount: { $sum: "$amount" } } },
+        { $group: { _id: "$eventType", amount: { $sum: "$amount" } } }
       ]),
       //OverDue Amount Queries
       getStudentFeeInstallmentsPipelineService([
@@ -336,18 +329,15 @@ export async function recalcDashboard(school, session) {
             school: school,
             session: session,
             status: "overdue",
-            $or: [
-              { createdAt: { $gte: thisWeekStart } },
-              { updatedAt: { $gte: thisWeekStart } },
-            ],
-          },
+            $or: [{ createdAt: { $gte: thisWeekStart } }, { updatedAt: { $gte: thisWeekStart } }]
+          }
         },
         {
           $group: {
             _id: "Overdue",
-            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
-          },
-        },
+            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } }
+          }
+        }
       ]),
       getStudentFeeInstallmentsPipelineService([
         {
@@ -357,16 +347,16 @@ export async function recalcDashboard(school, session) {
             status: "overdue",
             $or: [
               { createdAt: { $gte: lastWeekStart, $lt: thisWeekStart } },
-              { updatedAt: { $gte: lastWeekStart, $lt: thisWeekStart } },
-            ],
-          },
+              { updatedAt: { $gte: lastWeekStart, $lt: thisWeekStart } }
+            ]
+          }
         },
         {
           $group: {
             _id: "Overdue",
-            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
-          },
-        },
+            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } }
+          }
+        }
       ]),
       //Pending Amount Queries
       getStudentFeeInstallmentsPipelineService([
@@ -375,18 +365,15 @@ export async function recalcDashboard(school, session) {
             school: school,
             session: session,
             status: { $in: ["pending", "partial"] },
-            $or: [
-              { createdAt: { $gte: thisWeekStart } },
-              { updatedAt: { $gte: thisWeekStart } },
-            ],
-          },
+            $or: [{ createdAt: { $gte: thisWeekStart } }, { updatedAt: { $gte: thisWeekStart } }]
+          }
         },
         {
           $group: {
             _id: "Pending",
-            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
-          },
-        },
+            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } }
+          }
+        }
       ]),
       getStudentFeeInstallmentsPipelineService([
         {
@@ -396,28 +383,28 @@ export async function recalcDashboard(school, session) {
             status: { $in: ["pending", "partial"] },
             $or: [
               { createdAt: { $gte: lastWeekStart, $lt: thisWeekStart } },
-              { updatedAt: { $gte: lastWeekStart, $lt: thisWeekStart } },
-            ],
-          },
+              { updatedAt: { $gte: lastWeekStart, $lt: thisWeekStart } }
+            ]
+          }
         },
         {
           $group: {
             _id: "Pending",
-            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } },
-          },
-        },
-      ]),
+            amount: { $sum: { $subtract: ["$totalPayable", "$amountPaid"] } }
+          }
+        }
+      ])
     ]);
 
     const curWeekData = eventTotals([
       ...thisWeekEvents,
       ...thisWeekOverDueFees,
-      ...thisWeekPendingFees,
+      ...thisWeekPendingFees
     ]);
     const prevWeekData = eventTotals([
       ...lastWeekEvents,
       ...lastWeekOverDueFees,
-      ...lastWeekPendingFees,
+      ...lastWeekPendingFees
     ]);
 
     /** MONTHLY CALCULATIONS **/
@@ -428,16 +415,16 @@ export async function recalcDashboard(school, session) {
           "metaData.school": convertToMongoId(school),
           "metaData.session": convertToMongoId(session),
           eventType: {
-            $in: ["PaymentReceived", "RefundIssued", "PaymentFailed"],
-          },
-        },
+            $in: ["PaymentReceived", "RefundIssued", "PaymentFailed"]
+          }
+        }
       },
       {
         $group: {
           _id: "$eventType",
-          amount: { $sum: "$amount" },
-        },
-      },
+          amount: { $sum: "$amount" }
+        }
+      }
     ]);
 
     let { collected = 0, refunded = 0, failed = 0 } = eventTotals(events);
@@ -446,8 +433,8 @@ export async function recalcDashboard(school, session) {
       {
         $match: {
           school: convertToMongoId(school),
-          session: convertToMongoId(session),
-        },
+          session: convertToMongoId(session)
+        }
       },
       {
         $facet: {
@@ -457,10 +444,10 @@ export async function recalcDashboard(school, session) {
               $group: {
                 _id: null,
                 total: {
-                  $sum: { $subtract: ["$totalPayable", "$amountPaid"] },
-                },
-              },
-            },
+                  $sum: { $subtract: ["$totalPayable", "$amountPaid"] }
+                }
+              }
+            }
           ],
           overdue: [
             { $match: { status: "overdue" } },
@@ -468,19 +455,16 @@ export async function recalcDashboard(school, session) {
               $group: {
                 _id: null,
                 total: {
-                  $sum: { $subtract: ["$totalPayable", "$amountPaid"] },
-                },
-              },
-            },
-          ],
-        },
-      },
+                  $sum: { $subtract: ["$totalPayable", "$amountPaid"] }
+                }
+              }
+            }
+          ]
+        }
+      }
     ]);
 
-    const [pending, overdue] = [
-      result.pending[0]?.total || 0,
-      result.overdue[0]?.total || 0,
-    ];
+    const [pending, overdue] = [result.pending[0]?.total || 0, result.overdue[0]?.total || 0];
 
     const updateObj = {
       totals: {
@@ -493,17 +477,17 @@ export async function recalcDashboard(school, session) {
         refundedChangePct: pct(curWeekData.refunded, prevWeekData.refunded),
         failedChangePct: pct(curWeekData.failed, prevWeekData.failed),
         pendingChangePct: pct(curWeekData.pending, prevWeekData.pending),
-        overdueChangePct: pct(curWeekData.overdue, prevWeekData.overdue),
+        overdueChangePct: pct(curWeekData.overdue, prevWeekData.overdue)
       },
       month: now.getMonth() + 1,
-      isMonthEndRecord: isLastDayOfMonth(now),
+      isMonthEndRecord: isLastDayOfMonth(now)
     };
 
     await updateFeeDashboardSnapshotService(
       {
         school: convertToMongoId(school),
         session: convertToMongoId(session),
-        generatedAt: { $gte: dayStart, $lt: dayEnd },
+        generatedAt: { $gte: dayStart, $lt: dayEnd }
       },
       updateObj,
       { upsert: true }
@@ -549,31 +533,26 @@ export async function storeDailySnapshot(req, res) {
     session = convertToMongoId(session);
     const now = new Date();
     const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const dayEnd = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1
-    );
+    const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     /**
      /get all active schools in a session
      * Loop through schools
      /TODO kuldeep add active session check
      */
-    const schoolsWithSnapshotsToday =
-      await getStudentFeeInstallmentDistinctService("school", {
-        session,
-        generatedAt: {
-          $gte: dayStart,
-          $lt: dayEnd,
-        },
-      });
+    const schoolsWithSnapshotsToday = await getStudentFeeInstallmentDistinctService("school", {
+      session,
+      generatedAt: {
+        $gte: dayStart,
+        $lt: dayEnd
+      }
+    });
     // Get ALL schools, TODO kuldeep add session filter
     //if dashboard data is generated, then skip, else call recalcDashboard for the schools
     const remainingSchools = await getAdminsService(
       {
         _id: { $nin: schoolsWithSnapshotsToday },
         isActive: true,
-        status: "verified",
+        status: "verified"
       },
       { _id: -1 }
     );
@@ -584,36 +563,29 @@ export async function storeDailySnapshot(req, res) {
     return res.status(200).json({
       // data,
       data: {},
-      message: `StoreDailySnapshot completed successfully For schools: ${remainingSchools.length}`,
+      message: `StoreDailySnapshot completed successfully For schools: ${remainingSchools.length}`
     });
   } catch (err) {
     console.error("storeDailySnapshot Error:", err?.message);
     return res.status(500).json({
-      message: err?.message,
+      message: err?.message
     });
   }
 }
 // 3. payment process, when a payment is done/failed, update data in dashboard data
 
-export async function getTotalFeesAndStudents(
-  session,
-  school,
-  options = {},
-  studentCount = false
-) {
+export async function getTotalFeesAndStudents(session, school, options = {}, studentCount = false) {
   const matchQuery = {
     school: convertToMongoId(school),
-    session: convertToMongoId(session),
+    session: convertToMongoId(session)
   };
   if (options.classId) matchQuery.classId = convertToMongoId(options.classId);
-  if (options.sectionId)
-    matchQuery.section = convertToMongoId(options.sectionId);
-  if (options.studentId)
-    matchQuery.student = convertToMongoId(options.studentId);
+  if (options.sectionId) matchQuery.section = convertToMongoId(options.sectionId);
+  if (options.studentId) matchQuery.student = convertToMongoId(options.studentId);
 
   let groupQuery = {
     _id: "null",
-    amount: { $sum: "$totalPayable" },
+    amount: { $sum: "$totalPayable" }
     //for future reference and need
     // remainigAmount: { '$sum': { $subtract: ["$totalPayable","$amountPaid"]} },
     // paidAmount: { $sum: "$amountPaid" },
@@ -651,13 +623,13 @@ export async function getTotalFeesAndStudents(
       ...groupQuery,
       totalStudents: { $sum: 1 },
       collectedStudentsCount: {
-        $sum: { $cond: [{ $gt: ["$amountPaid", 0] }, 1, 0] },
+        $sum: { $cond: [{ $gt: ["$amountPaid", 0] }, 1, 0] }
       },
       pendingStudentsCount: {
         $sum: {
-          $cond: [{ $in: ["$status", ["pending", "partial"]] }, 1, 0],
-        },
-      },
+          $cond: [{ $in: ["$status", ["pending", "partial"]] }, 1, 0]
+        }
+      }
       // overdueStudents: {
       //   $sum: { $cond: [{ $eq: ["$status", "overdue"] }, 1, 0] },
       // },
@@ -669,11 +641,11 @@ export async function getTotalFeesAndStudents(
 
   const result = await getStudentFeeInstallmentsPipelineService([
     {
-      $match: matchQuery,
+      $match: matchQuery
     },
     {
-      $group: groupQuery,
-    },
+      $group: groupQuery
+    }
   ]);
 
   return result[0];

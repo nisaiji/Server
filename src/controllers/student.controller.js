@@ -1,7 +1,7 @@
-import fs from 'fs/promises';
+import fs from "fs/promises";
 
 import { StatusCodes } from "http-status-codes";
-import xlsx from 'xlsx';
+import xlsx from "xlsx";
 
 import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
 import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
@@ -10,9 +10,20 @@ import { getHolidayCountService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import { getSectionService, updateSectionService } from "../services/section.services.js";
-import { getStudentService, registerStudentService, updateStudentService, getStudentsService, getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
+import {
+  getStudentService,
+  registerStudentService,
+  updateStudentService,
+  getStudentsService,
+  getStudentCountService,
+  getStudentsPipelineService
+} from "../services/student.service.js";
 import { createOrUpdateDuesForFeeStructure } from "../services/studentFeeDue.service.js";
-import { getParentService, registerParentService, updateParentService } from "../services/v2/parent.services.js";
+import {
+  getParentService,
+  registerParentService,
+  updateParentService
+} from "../services/v2/parent.services.js";
 import { getWorkDayCountService } from "../services/workDay.services.js";
 import { error, success } from "../utills/responseWrapper.js";
 
@@ -35,25 +46,39 @@ export async function registerStudentController(req, res) {
     const hashedPassword = await hashPasswordService(password);
     let parent = await getParentService({ phone, isActive: true });
     if (!parent) {
-      parent = await registerParentService({ fullname: parentName, phone, password: hashedPassword });
+      parent = await registerParentService({
+        fullname: parentName,
+        phone,
+        password: hashedPassword
+      });
     }
 
     let student = await getStudentService({ firstname, parent: parent["_id"] });
     if (student) {
       return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
     }
-    const studentObj = { firstname, lastname, gender, parent: parent["_id"], section: sectionId, classId: classInfo["_id"], admin: adminId };
+    const studentObj = {
+      firstname,
+      lastname,
+      gender,
+      parent: parent["_id"],
+      section: sectionId,
+      classId: classInfo["_id"],
+      admin: adminId
+    };
     student = await registerStudentService(studentObj);
 
     await updateSectionService({ _id: sectionId }, { studentCount: section["studentCount"] + 1 });
 
-
-    await createOrUpdateDuesForFeeStructure(student["feeStructureId"], student["feeCycleId"], student["session"], student["_id"]);
-
+    await createOrUpdateDuesForFeeStructure(
+      student["feeStructureId"],
+      student["feeCycleId"],
+      student["session"],
+      student["_id"]
+    );
 
     return res.status(StatusCodes.OK).send(success(201, "Student registered successfully!"));
   } catch (err) {
-
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
@@ -106,44 +131,99 @@ export async function updateStudentController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
-    if (req.body["firstname"]) { studentUpdate.firstname = req.body["firstname"]; }
-    if (req.body["lastname"]) { studentUpdate.lastname = req.body["lastname"]; }
-    if (req.body["gender"]) { studentUpdate.gender = req.body["gender"]; }
-    if (req.body["bloodGroup"]) { studentUpdate.bloodGroup = req.body["bloodGroup"]; }
-    if (req.body["dob"]) { studentUpdate.dob = req.body["dob"]; }
-    if (req.body["photo"] || req.body["method"] === "DELETE") { studentUpdate.photo = (req.body["method"] === "DELETE") ? "" : req.body["photo"]; } if (req.body["address"]) { studentUpdate.address = req.body["address"]; }
-    if (req.body["address"]) { studentUpdate.address = req.body["address"]; }
-    if (req.body["city"]) { studentUpdate.city = req.body["city"]; }
-    if (req.body["district"]) { studentUpdate.district = req.body["district"]; }
-    if (req.body["state"]) { studentUpdate.state = req.body["state"]; }
-    if (req.body["country"]) { studentUpdate.country = req.body["country"]; }
-    if (req.body["pincode"]) { studentUpdate.pincode = req.body["pincode"]; }
-
+    if (req.body["firstname"]) {
+      studentUpdate.firstname = req.body["firstname"];
+    }
+    if (req.body["lastname"]) {
+      studentUpdate.lastname = req.body["lastname"];
+    }
+    if (req.body["gender"]) {
+      studentUpdate.gender = req.body["gender"];
+    }
+    if (req.body["bloodGroup"]) {
+      studentUpdate.bloodGroup = req.body["bloodGroup"];
+    }
+    if (req.body["dob"]) {
+      studentUpdate.dob = req.body["dob"];
+    }
+    if (req.body["photo"] || req.body["method"] === "DELETE") {
+      studentUpdate.photo = req.body["method"] === "DELETE" ? "" : req.body["photo"];
+    }
+    if (req.body["address"]) {
+      studentUpdate.address = req.body["address"];
+    }
+    if (req.body["address"]) {
+      studentUpdate.address = req.body["address"];
+    }
+    if (req.body["city"]) {
+      studentUpdate.city = req.body["city"];
+    }
+    if (req.body["district"]) {
+      studentUpdate.district = req.body["district"];
+    }
+    if (req.body["state"]) {
+      studentUpdate.state = req.body["state"];
+    }
+    if (req.body["country"]) {
+      studentUpdate.country = req.body["country"];
+    }
+    if (req.body["pincode"]) {
+      studentUpdate.pincode = req.body["pincode"];
+    }
 
     if (req.body["phone"]) {
-      const parentWithPhone = await getParentService({ phone: req.body["phone"], isActive: true, _id: { $ne: parent["_id"] } });
+      const parentWithPhone = await getParentService({
+        phone: req.body["phone"],
+        isActive: true,
+        _id: { $ne: parent["_id"] }
+      });
       if (parentWithPhone) {
         return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
       }
       parentUpdate.phone = req.body["phone"];
     }
-    if (req.body["parentName"]) { parentUpdate.fullname = req.body["parentName"]; }
-    if (req.body["parentGender"]) { parentUpdate.gender = req.body["parentGender"]; }
-    if (req.body["parentAge"]) { parentUpdate.age = req.body["parentAge"]; }
-    if (req.body["parentEmail"]) { parentUpdate.email = req.body["parentEmail"]; }
-    if (req.body["parentQualification"]) { parentUpdate.qualification = req.body["parentQualification"]; }
-    if (req.body["parentOccupation"]) { parentUpdate.occupation = req.body["parentOccupation"]; }
-    if (req.body["parentAddress"]) { parentUpdate.address = req.body["parentAddress"]; }
-    if (req.body["parentCity"]) { parentUpdate.city = req.body["parentCity"]; }
-    if (req.body["parentDistrict"]) { parentUpdate.district = req.body["parentDistrict"]; }
-    if (req.body["parentState"]) { parentUpdate.state = req.body["parentState"]; }
-    if (req.body["parentCountry"]) { parentUpdate.country = req.body["parentCountry"]; }
-    if (req.body["parentPincode"]) { parentUpdate.pincode = req.body["parentPincode"]; }
+    if (req.body["parentName"]) {
+      parentUpdate.fullname = req.body["parentName"];
+    }
+    if (req.body["parentGender"]) {
+      parentUpdate.gender = req.body["parentGender"];
+    }
+    if (req.body["parentAge"]) {
+      parentUpdate.age = req.body["parentAge"];
+    }
+    if (req.body["parentEmail"]) {
+      parentUpdate.email = req.body["parentEmail"];
+    }
+    if (req.body["parentQualification"]) {
+      parentUpdate.qualification = req.body["parentQualification"];
+    }
+    if (req.body["parentOccupation"]) {
+      parentUpdate.occupation = req.body["parentOccupation"];
+    }
+    if (req.body["parentAddress"]) {
+      parentUpdate.address = req.body["parentAddress"];
+    }
+    if (req.body["parentCity"]) {
+      parentUpdate.city = req.body["parentCity"];
+    }
+    if (req.body["parentDistrict"]) {
+      parentUpdate.district = req.body["parentDistrict"];
+    }
+    if (req.body["parentState"]) {
+      parentUpdate.state = req.body["parentState"];
+    }
+    if (req.body["parentCountry"]) {
+      parentUpdate.country = req.body["parentCountry"];
+    }
+    if (req.body["parentPincode"]) {
+      parentUpdate.pincode = req.body["parentPincode"];
+    }
 
-
-    await Promise.all([updateStudentService({ _id: studentId }, studentUpdate), updateParentService({ _id: student["parent"] }, parentUpdate)]);
+    await Promise.all([
+      updateStudentService({ _id: studentId }, studentUpdate),
+      updateParentService({ _id: student["parent"] }, parentUpdate)
+    ]);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));
-
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -151,9 +231,32 @@ export async function updateStudentController(req, res) {
 
 export async function getStudentsController(req, res) {
   try {
-    let { admin, classId, section, parent, student, firstname, lastname, gender, startTime, endTime, include, page = 1, limit } = req.query;
+    let {
+      admin,
+      classId,
+      section,
+      parent,
+      student,
+      firstname,
+      lastname,
+      gender,
+      startTime,
+      endTime,
+      include,
+      page = 1,
+      limit
+    } = req.query;
 
-    if (!admin && !classId && !section && !parent && !student && !firstname && !lastname && !gender) {
+    if (
+      !admin &&
+      !classId &&
+      !section &&
+      !parent &&
+      !student &&
+      !firstname &&
+      !lastname &&
+      !gender
+    ) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
     }
 
@@ -181,20 +284,32 @@ export async function getStudentsController(req, res) {
       return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
     }
     const filter = { isActive: true };
-    if (admin) { filter.admin = convertToMongoId(admin); }
-    if (classId) { filter.classId = convertToMongoId(classId); }
-    if (section) { filter.section = convertToMongoId(section); }
-    if (parent) { filter.parent = convertToMongoId(parent); }
-    if (student) { filter._id = convertToMongoId(student); }
+    if (admin) {
+      filter.admin = convertToMongoId(admin);
+    }
+    if (classId) {
+      filter.classId = convertToMongoId(classId);
+    }
+    if (section) {
+      filter.section = convertToMongoId(section);
+    }
+    if (parent) {
+      filter.parent = convertToMongoId(parent);
+    }
+    if (student) {
+      filter._id = convertToMongoId(student);
+    }
     if (firstname) {
-      const regexFirstname = new RegExp(firstname, 'i');
+      const regexFirstname = new RegExp(firstname, "i");
       filter.firstname = { $regex: regexFirstname };
     }
     if (lastname) {
-      const regexLastname = new RegExp(firstname, 'i');
+      const regexLastname = new RegExp(firstname, "i");
       filter.lastname = { $regex: regexLastname };
     }
-    if (gender) { filter.gender = gender; }
+    if (gender) {
+      filter.gender = gender;
+    }
 
     const pageNum = parseInt(page);
     const limitNum = limit ? parseInt(limit) : "no limit";
@@ -205,7 +320,7 @@ export async function getStudentsController(req, res) {
         $match: filter
       },
       {
-        $sort: { firstname: 1 },
+        $sort: { firstname: 1 }
       }
     ];
 
@@ -221,16 +336,18 @@ export async function getStudentsController(req, res) {
     }
 
     if (include) {
-      const includes = include.split(',');
-      if (includes.includes('attendance') && (!startTime || !endTime)) {
-        return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Start time and end time are required"));
+      const includes = include.split(",");
+      if (includes.includes("attendance") && (!startTime || !endTime)) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(error(400, "Start time and end time are required"));
       }
-      if (includes.includes('attendance')) {
+      if (includes.includes("attendance")) {
         pipeline.push({
           $lookup: {
-            from: 'attendances',
+            from: "attendances",
             let: {
-              studentId: '$_id',
+              studentId: "$_id",
               startTime: { $toLong: startTime },
               endTime: { $toLong: endTime }
             },
@@ -239,9 +356,9 @@ export async function getStudentsController(req, res) {
                 $match: {
                   $expr: {
                     $and: [
-                      { $eq: ['$student', '$$studentId'] },
-                      { $gte: ['$date', '$$startTime'] },
-                      { $lte: ['$date', '$$endTime'] }
+                      { $eq: ["$student", "$$studentId"] },
+                      { $gte: ["$date", "$$startTime"] },
+                      { $lte: ["$date", "$$endTime"] }
                     ]
                   }
                 }
@@ -253,20 +370,19 @@ export async function getStudentsController(req, res) {
                   parentAttendance: 1,
                   teacherAttendance: 1
                 }
-              },
-
+              }
             ],
-            as: 'attendance'
+            as: "attendance"
           }
         });
       }
-      if (includes.includes('parent')) {
+      if (includes.includes("parent")) {
         pipeline.push({
           $lookup: {
-            from: 'parents',
-            localField: 'parent',
-            foreignField: '_id',
-            as: 'parentDetails',
+            from: "parents",
+            localField: "parent",
+            foreignField: "_id",
+            as: "parentDetails",
             pipeline: [
               {
                 $project: {
@@ -281,18 +397,18 @@ export async function getStudentsController(req, res) {
         });
         pipeline.push({
           $unwind: {
-            path: '$parentDetails',
+            path: "$parentDetails",
             preserveNullAndEmptyArrays: true
           }
         });
       }
-      if (includes.includes('section')) {
+      if (includes.includes("section")) {
         pipeline.push({
           $lookup: {
-            from: 'sections',
-            localField: 'section',
-            foreignField: '_id',
-            as: 'sectionDetails',
+            from: "sections",
+            localField: "section",
+            foreignField: "_id",
+            as: "sectionDetails",
             pipeline: [
               {
                 $project: {
@@ -305,23 +421,23 @@ export async function getStudentsController(req, res) {
         });
         pipeline.push({
           $unwind: {
-            path: '$sectionDetails',
+            path: "$sectionDetails",
             preserveNullAndEmptyArrays: true
           }
         });
       }
-      if (includes.includes('class')) {
+      if (includes.includes("class")) {
         pipeline.push({
           $lookup: {
-            from: 'classes',
-            localField: 'classId',
-            foreignField: '_id',
-            as: 'classDetails',
+            from: "classes",
+            localField: "classId",
+            foreignField: "_id",
+            as: "classDetails",
             pipeline: [
               {
                 $project: {
                   name: 1,
-                  sectionCount: { $size: '$section' }
+                  sectionCount: { $size: "$section" }
                 }
               }
             ]
@@ -329,18 +445,18 @@ export async function getStudentsController(req, res) {
         });
         pipeline.push({
           $unwind: {
-            path: '$classDetails',
+            path: "$classDetails",
             preserveNullAndEmptyArrays: true
           }
         });
       }
-      if (includes.includes('admin')) {
+      if (includes.includes("admin")) {
         pipeline.push({
           $lookup: {
-            from: 'admins',
-            localField: 'admin',
-            foreignField: '_id',
-            as: 'adminDetails',
+            from: "admins",
+            localField: "admin",
+            foreignField: "_id",
+            as: "adminDetails",
             pipeline: [
               {
                 $project: {
@@ -360,27 +476,33 @@ export async function getStudentsController(req, res) {
         });
         pipeline.push({
           $unwind: {
-            path: '$adminDetails',
+            path: "$adminDetails",
             preserveNullAndEmptyArrays: true
           }
         });
       }
-      if (includes.includes('percentageAttendance')) {
+      if (includes.includes("percentageAttendance")) {
         const currentDate = new Date().getTime();
         const sectionInfo = await getSectionService({ _id: section });
         const startDate = sectionInfo["startTime"];
-        const holidaysCount = await getHolidayCountService({ admin: sectionInfo['admin'], date: { $gte: startDate, $lte: currentDate } });
+        const holidaysCount = await getHolidayCountService({
+          admin: sectionInfo["admin"],
+          date: { $gte: startDate, $lte: currentDate }
+        });
         const sundayCount = calculateSundays(startDate, currentDate);
-        const sundayAsWorkDayCount = await getWorkDayCountService({ admin: sectionInfo['admin'], date: { $gte: startDate, $lte: currentDate } });
+        const sundayAsWorkDayCount = await getWorkDayCountService({
+          admin: sectionInfo["admin"],
+          date: { $gte: startDate, $lte: currentDate }
+        });
         const dayscount = calculateDaysBetweenDates(startDate, currentDate);
         const attendancableDays = dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
 
         pipeline.push({
           $lookup: {
-            from: 'attendances',
+            from: "attendances",
             let: {
-              studentId: '$_id',
-              startTime: '$sectionInfo.startTime',
+              studentId: "$_id",
+              startTime: "$sectionInfo.startTime",
               currentTime: currentDate
             },
             pipeline: [
@@ -388,12 +510,12 @@ export async function getStudentsController(req, res) {
                 $match: {
                   $expr: {
                     $and: [
-                      { $eq: ['$student', '$$studentId'] },
-                      { $gte: ['$date', '$$startTime'] },
-                      { $lte: ['$date', '$$currentTime'] }
+                      { $eq: ["$student", "$$studentId"] },
+                      { $gte: ["$date", "$$startTime"] },
+                      { $lte: ["$date", "$$currentTime"] }
                     ]
                   },
-                  teacherAttendance: { $in: ['present', 'absent'] }
+                  teacherAttendance: { $in: ["present", "absent"] }
                 }
               },
               {
@@ -402,13 +524,13 @@ export async function getStudentsController(req, res) {
                   totalDays: { $sum: 1 },
                   presentDays: {
                     $sum: {
-                      $cond: [{ $eq: ['$teacherAttendance', 'present'] }, 1, 0]
+                      $cond: [{ $eq: ["$teacherAttendance", "present"] }, 1, 0]
                     }
                   }
                 }
               }
             ],
-            as: 'attendanceStats'
+            as: "attendanceStats"
           }
         });
 
@@ -421,7 +543,7 @@ export async function getStudentsController(req, res) {
                   $multiply: [
                     {
                       $divide: [
-                        { $arrayElemAt: ['$attendanceStats.presentDays', 0] },
+                        { $arrayElemAt: ["$attendanceStats.presentDays", 0] },
                         attendancableDays
                       ]
                     },
@@ -435,7 +557,7 @@ export async function getStudentsController(req, res) {
         });
 
         pipeline.push({
-          $unset: ['attendanceStats', 'sectionInfo']
+          $unset: ["attendanceStats", "sectionInfo"]
         });
       }
     }
@@ -454,17 +576,19 @@ export async function getStudentsController(req, res) {
     const totalStudents = await getStudentCountService(filter);
     const totalPages = Math.ceil(totalStudents / limitNum);
 
-    return res.status(StatusCodes.OK).send(success(200, {
-      students,
-      currentPage: pageNum,
-      totalPages,
-      totalStudents,
-      pageSize: limitNum
-    }));
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        students,
+        currentPage: pageNum,
+        totalPages,
+        totalStudents,
+        pageSize: limitNum
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
-};
+}
 
 export async function registerStudentsFromExcelController(req, res) {
   try {
@@ -490,12 +614,19 @@ export async function registerStudentsFromExcelController(req, res) {
     const workbook = xlsx.readFile(file.path);
     const sheetName = workbook.SheetNames[0];
     const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, adminId);
+    const registeredStudentsCount = await registerStudentsFromExcelHelper(
+      students,
+      sectionId,
+      classId,
+      adminId
+    );
     if (registeredStudentsCount === 0) {
       throw new Error("Student registration failed");
     }
     await fs.unlink(file.path);
-    return res.status(StatusCodes.OK).send(success(201, `${registeredStudentsCount} Students registered successfully`));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(201, `${registeredStudentsCount} Students registered successfully`));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501, err.message));
   }

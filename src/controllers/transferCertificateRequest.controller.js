@@ -10,12 +10,14 @@ import {
   registerTransferCertificateRequestService,
   getTransferCertificateRequestService,
   updateTransferCertificateRequestService,
-  getTransferCertificateRequestsPipelineService,
+  getTransferCertificateRequestsPipelineService
 } from "../services/transferCertificateRequest.service.js";
 import { getParentService } from "../services/v2/parent.services.js";
-import { getSessionStudentService, updateSessionStudentService } from "../services/v2/sessionStudent.service.js";
+import {
+  getSessionStudentService,
+  updateSessionStudentService
+} from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
-
 
 // Generate unique TC number
 function generateUniqueTCNumber() {
@@ -47,7 +49,11 @@ export async function applyTransferCertificateController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId, isActive: true, student: studentId });
+    const sessionStudent = await getSessionStudentService({
+      _id: sessionStudentId,
+      isActive: true,
+      student: studentId
+    });
     if (!sessionStudent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
     }
@@ -60,7 +66,9 @@ export async function applyTransferCertificateController(req, res) {
     ]);
 
     if (!section || !classInfo || !session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student academic information not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student academic information not found"));
     }
 
     // Check if there's already a pending request for this student
@@ -68,11 +76,13 @@ export async function applyTransferCertificateController(req, res) {
       student: studentId,
       sessionStudent: sessionStudentId,
       school: adminId,
-      status: { $in: ['submitted', 'underReview', 'pendingClearance', 'approved'] },
+      status: { $in: ["submitted", "underReview", "pendingClearance", "approved"] }
     });
 
     if (existingRequest) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Transfer certificate request already exists for this student"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Transfer certificate request already exists for this student"));
     }
 
     // Generate unique TC number
@@ -88,7 +98,7 @@ export async function applyTransferCertificateController(req, res) {
       session: session._id,
       class: classInfo._id,
       section: section._id,
-      requestType: 'transfer',
+      requestType: "transfer",
       reason,
       reasonDescription,
       lastAttendanceDate: new Date(lastAttendanceDate),
@@ -100,11 +110,13 @@ export async function applyTransferCertificateController(req, res) {
 
     const tcRequest = await registerTransferCertificateRequestService(requestData);
 
-    return res.status(StatusCodes.CREATED).send(success(201, {
-      message: "Transfer certificate request submitted successfully",
-      requestId: tcRequest._id,
-      certificateNumber: tcRequest.certificateNumber
-    }));
+    return res.status(StatusCodes.CREATED).send(
+      success(201, {
+        message: "Transfer certificate request submitted successfully",
+        requestId: tcRequest._id,
+        certificateNumber: tcRequest.certificateNumber
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -133,19 +145,18 @@ export async function getChildrenTCRequestsController(req, res) {
       },
       {
         $lookup: {
-          from: 'students',
-          localField: 'student',
-          foreignField: '_id',
-          as: 'studentInfo'
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "studentInfo"
         }
       },
       {
-        $unwind: '$studentInfo' 
+        $unwind: "$studentInfo"
       }
     ]);
 
     return res.status(StatusCodes.OK).send(success(200, result));
-
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -164,31 +175,43 @@ export async function approveParentConsentController(req, res) {
     }
 
     // Get TC request
-    const tcRequest = await getTransferCertificateRequestService({ 
-      _id: requestId, 
+    const tcRequest = await getTransferCertificateRequestService({
+      _id: requestId,
       parent: parentId
     });
 
     if (!tcRequest) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Transfer certificate request not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Transfer certificate request not found"));
     }
 
-    if (tcRequest.status === 'completed' || tcRequest.status === 'rejected') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Cannot modify completed or rejected request"));
+    if (tcRequest.status === "completed" || tcRequest.status === "rejected") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Cannot modify completed or rejected request"));
     }
-    const student = await getStudentService({_id: tcRequest.student});
-    const sessionStudent = await getSessionStudentService({_id: tcRequest.sessionStudent});
+    const student = await getStudentService({ _id: tcRequest.student });
+    const sessionStudent = await getSessionStudentService({ _id: tcRequest.sessionStudent });
 
-    if(!student || !sessionStudent){
+    if (!student || !sessionStudent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student information not found"));
     }
 
-    await updateStudentService({_id: tcRequest.student}, {isActive: consent === 'approvedByParent' ? false : true});
-    await updateSessionStudentService({_id: tcRequest.sessionStudent}, {isActive: consent === 'approvedByParent' ? false : true});
+    await updateStudentService(
+      { _id: tcRequest.student },
+      { isActive: consent === "approvedByParent" ? false : true }
+    );
+    await updateSessionStudentService(
+      { _id: tcRequest.sessionStudent },
+      { isActive: consent === "approvedByParent" ? false : true }
+    );
 
-    await updateTransferCertificateRequestService({_id: requestId}, {status: consent, parentApproved: consent === 'approvedByParent', parentNotified: true});
+    await updateTransferCertificateRequestService(
+      { _id: requestId },
+      { status: consent, parentApproved: consent === "approvedByParent", parentNotified: true }
+    );
     return res.status(StatusCodes.OK).send(success(200, "TC request updated successfully"));
-
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -198,7 +221,15 @@ export async function approveParentConsentController(req, res) {
 export async function getAdminTCRequestsController(req, res) {
   try {
     const adminId = req.adminId;
-    const { page = 1, limit = 10, sessionId, classId, sectionId, sessionStudentId, status } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sessionId,
+      classId,
+      sectionId,
+      sessionStudentId,
+      status
+    } = req.query;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -223,7 +254,7 @@ export async function getAdminTCRequestsController(req, res) {
     }
 
     if (status) {
-      const statusArray = status.split(',').map(s => s.trim());
+      const statusArray = status.split(",").map((s) => s.trim());
       matchFilter.status = { $in: statusArray };
     }
 
@@ -234,10 +265,10 @@ export async function getAdminTCRequestsController(req, res) {
       },
       {
         $lookup: {
-          from: 'students',
-          localField: 'student',
-          foreignField: '_id',
-          as: 'studentInfo',
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "studentInfo",
           pipeline: [
             {
               $project: {
@@ -261,16 +292,16 @@ export async function getAdminTCRequestsController(req, res) {
       },
       {
         $unwind: {
-          path: '$studentInfo',
+          path: "$studentInfo",
           preserveNullAndEmptyArrays: true
         }
       },
       {
         $lookup: {
-          from: 'parents',
-          localField: 'parent',
-          foreignField: '_id',
-          as: 'parentInfo',
+          from: "parents",
+          localField: "parent",
+          foreignField: "_id",
+          as: "parentInfo",
           pipeline: [
             {
               $project: {
@@ -290,16 +321,16 @@ export async function getAdminTCRequestsController(req, res) {
       },
       {
         $unwind: {
-          path: '$parentInfo',
+          path: "$parentInfo",
           preserveNullAndEmptyArrays: true
         }
       },
       {
         $lookup: {
-          from: 'classes',
-          localField: 'class',
-          foreignField: '_id',
-          as: 'classInfo',
+          from: "classes",
+          localField: "class",
+          foreignField: "_id",
+          as: "classInfo",
           pipeline: [
             {
               $project: {
@@ -311,16 +342,16 @@ export async function getAdminTCRequestsController(req, res) {
       },
       {
         $unwind: {
-          path: '$classInfo',
+          path: "$classInfo",
           preserveNullAndEmptyArrays: true
         }
       },
       {
         $lookup: {
-          from: 'sections',
-          localField: 'section',
-          foreignField: '_id',
-          as: 'sectionInfo',
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "sectionInfo",
           pipeline: [
             {
               $project: {
@@ -334,16 +365,16 @@ export async function getAdminTCRequestsController(req, res) {
       },
       {
         $unwind: {
-          path: '$sectionInfo',
+          path: "$sectionInfo",
           preserveNullAndEmptyArrays: true
         }
       },
       {
         $lookup: {
-          from: 'sessions',
-          localField: 'session',
-          foreignField: '_id',
-          as: 'sessionInfo',
+          from: "sessions",
+          localField: "session",
+          foreignField: "_id",
+          as: "sessionInfo",
           pipeline: [
             {
               $project: {
@@ -360,16 +391,16 @@ export async function getAdminTCRequestsController(req, res) {
       },
       {
         $unwind: {
-          path: '$sessionInfo',
+          path: "$sessionInfo",
           preserveNullAndEmptyArrays: true
         }
       },
       {
         $lookup: {
-          from: 'sessionstudents',
-          localField: 'sessionStudent',
-          foreignField: '_id',
-          as: 'sessionStudentInfo',
+          from: "sessionstudents",
+          localField: "sessionStudent",
+          foreignField: "_id",
+          as: "sessionStudentInfo",
           pipeline: [
             {
               $project: {
@@ -383,7 +414,7 @@ export async function getAdminTCRequestsController(req, res) {
       },
       {
         $unwind: {
-          path: '$sessionStudentInfo',
+          path: "$sessionStudentInfo",
           preserveNullAndEmptyArrays: true
         }
       },
@@ -401,79 +432,79 @@ export async function getAdminTCRequestsController(req, res) {
       {
         $project: {
           // Request basic info
-          requestId: '$_id',
+          requestId: "$_id",
           status: 1,
           reason: 1,
           reasonDescription: 1,
           requestType: 1,
           priority: 1,
-          promotionStatus : 1,
+          promotionStatus: 1,
           certificateNumber: 1,
           lastAttendanceDate: 1,
           expectedLeavingDate: 1,
           requestedDate: 1,
-          
+
           // New school info
           newSchoolName: 1,
           newSchoolAddress: 1,
           newSchoolBoard: 1,
           newSchoolAffiliationNo: 1,
-          
+
           // Academic info
           currentClass: 1,
           currentSection: 1,
           rollNumber: 1,
           admissionNumber: 1,
           admissionDate: 1,
-          
+
           // Performance and conduct
           lastExamResult: 1,
           conduct: 1,
           character: 1,
-          
+
           // Clearance status
           feeStatus: 1,
           pendingFeeAmount: 1,
           feeRemarks: 1,
           libraryStatus: 1,
           libraryRemarks: 1,
-          
+
           // Documents
           documentsRequired: 1,
-          
+
           // Approval status
           classTeacherApproval: 1,
           principalApproval: 1,
           accountsApproval: 1,
           librarianApproval: 1,
-          
+
           // Certificate info
           certificateGeneratedDate: 1,
           certificateIssuedDate: 1,
           certificateIssuedTo: 1,
-          
+
           // Processing info
           processedDate: 1,
           rejectionReason: 1,
           rejectedDate: 1,
           parentNotified: 1,
           notificationDate: 1,
-          
+
           // Notes and attachments
           internalNotes: 1,
           attachments: 1,
           statusHistory: 1,
-          
+
           // Populated data
-          student: '$studentInfo',
-          parent: '$parentInfo',
-          class: '$classInfo',
-          section: '$sectionInfo',
-          session: '$sessionInfo',
-          sessionStudent: '$sessionStudentInfo',
-          classTeacher: '$classTeacherInfo',
-          principal: '$principalInfo',
-          
+          student: "$studentInfo",
+          parent: "$parentInfo",
+          class: "$classInfo",
+          section: "$sectionInfo",
+          session: "$sessionInfo",
+          sessionStudent: "$sessionStudentInfo",
+          classTeacher: "$classTeacherInfo",
+          principal: "$principalInfo",
+
           // Timestamps
           createdAt: 1,
           updatedAt: 1
@@ -487,7 +518,7 @@ export async function getAdminTCRequestsController(req, res) {
         $match: matchFilter
       },
       {
-        $count: 'total'
+        $count: "total"
       }
     ];
 
@@ -500,22 +531,23 @@ export async function getAdminTCRequestsController(req, res) {
     const total = countResult[0]?.total || 0;
     const totalPages = Math.ceil(total / limitNum);
 
-    return res.status(StatusCodes.OK).send(success(200, {
-      requests,
-      pagination: {
-        currentPage: pageNum,
-        totalPages,
-        totalRequests: total,
-        pageSize: limitNum
-      },
-      filters: {
-        sessionId,
-        classId,
-        sectionId,
-        sessionStudentId
-      }
-    }));
-
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        requests,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalRequests: total,
+          pageSize: limitNum
+        },
+        filters: {
+          sessionId,
+          classId,
+          sectionId,
+          sessionStudentId
+        }
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

@@ -1,3 +1,3 @@
-import logger from './providers/winston.logger.js';
+import logger from "./providers/winston.logger.js";
 
 export default logger;

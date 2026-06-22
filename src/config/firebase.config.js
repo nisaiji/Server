@@ -7,7 +7,7 @@ const imageUrl = "http://localhost:4000/images/logo.jpeg";
 
 if (!admin.apps?.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(serviceAccount)
   });
 }
 
@@ -30,7 +30,7 @@ export async function sendPushNotification(fcmToken, title, body, route, id) {
     if (!fcmToken) {
       return {
         status: "skipped",
-        reason: "missing-fcm-token",
+        reason: "missing-fcm-token"
       };
     }
 
@@ -39,23 +39,23 @@ export async function sendPushNotification(fcmToken, title, body, route, id) {
       notification: {
         title,
         body,
-        imageUrl,
+        imageUrl
       },
       token: fcmToken,
       android: {
         priority: "high",
         notification: {
           sound: "default",
-          channelId: "default",
-        },
+          channelId: "default"
+        }
       },
       apns: {
         payload: {
           aps: {
-            sound: "default",
-          },
-        },
-      },
+            sound: "default"
+          }
+        }
+      }
     };
 
     if (Object.keys(data).length) {
@@ -65,7 +65,7 @@ export async function sendPushNotification(fcmToken, title, body, route, id) {
     const response = await admin.messaging().send(message);
     return {
       status: "sent",
-      messageId: response,
+      messageId: response
     };
   } catch (error) {
     logger.error(
@@ -73,15 +73,15 @@ export async function sendPushNotification(fcmToken, title, body, route, id) {
       {
         route: route ?? null,
         hasToken: Boolean(fcmToken),
-        tokenSuffix: typeof fcmToken === "string" ? fcmToken.slice(-6) : null,
+        tokenSuffix: typeof fcmToken === "string" ? fcmToken.slice(-6) : null
       },
-      error,
+      error
     );
 
     return {
       status: "failed",
       reason: error.code ?? "unknown-error",
-      message: error.message,
+      message: error.message
     };
   }
 }

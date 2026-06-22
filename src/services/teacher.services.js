@@ -1,7 +1,7 @@
 import { convertToMongoId } from "./mongoose.services.js";
 import teacherModel from "../models/teacher.model.js";
 
-export async function getTeacherService(filter, projection={}) {
+export async function getTeacherService(filter, projection = {}) {
   try {
     const teacher = await teacherModel.findOne(filter).select(projection);
     return teacher;
@@ -10,7 +10,7 @@ export async function getTeacherService(filter, projection={}) {
   }
 }
 
-export async function getTeachersService(paramObj){
+export async function getTeachersService(paramObj) {
   try {
     const teachers = await teacherModel.find(paramObj);
     return teachers;
@@ -30,28 +30,35 @@ export async function registerTeacherService(data) {
 
 export async function getAllTeacherOfAdminService(admin) {
   try {
-    const teachers = await teacherModel.find({admin,isActive:true}).populate({path: "section", select: { name: 1 }, populate: {path: "classId",select: { name: 1 } }}).select({password:0,admin:0});
+    const teachers = await teacherModel
+      .find({ admin, isActive: true })
+      .populate({
+        path: "section",
+        select: { name: 1 },
+        populate: { path: "classId", select: { name: 1 } }
+      })
+      .select({ password: 0, admin: 0 });
     return teachers;
   } catch (error) {
     return error;
   }
 }
 
-export async function updateTeacherService(filter, update){
+export async function updateTeacherService(filter, update) {
   try {
-      const teacher = await teacherModel.updateOne(filter, update);
-      return teacher;
+    const teacher = await teacherModel.updateOne(filter, update);
+    return teacher;
   } catch (error) {
     throw error;
   }
 }
 
-export async function getTeacherCountService(filter){
+export async function getTeacherCountService(filter) {
   try {
     const teachers = await teacherModel.countDocuments(filter);
     return teachers;
   } catch (error) {
-    throw error;  
+    throw error;
   }
 }
 
@@ -71,11 +78,11 @@ export async function getTeachersByAdminIdService(adminId) {
   }
 }
 
-export async function getTeachersPipelineService(pipeline){
+export async function getTeachersPipelineService(pipeline) {
   try {
     const teachers = await teacherModel.aggregate(pipeline).exec();
     return teachers;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }

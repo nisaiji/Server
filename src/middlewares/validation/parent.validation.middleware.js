@@ -1,7 +1,14 @@
 import { StatusCodes } from "http-status-codes";
 
 import { error } from "../../utills/responseWrapper.js";
-import { parentAddressUpdateSchema, parentAuthUpdateSchema, parentLoginSchema, parentPasswordChangeSchema, parentProfileInfoUpdateSchema, parentProfileUpdateSchema } from "../../validators/parentSchema.validator.js";
+import {
+  parentAddressUpdateSchema,
+  parentAuthUpdateSchema,
+  parentLoginSchema,
+  parentPasswordChangeSchema,
+  parentProfileInfoUpdateSchema,
+  parentProfileUpdateSchema
+} from "../../validators/parentSchema.validator.js";
 
 export async function loginParentValidation(req, res, next) {
   try {

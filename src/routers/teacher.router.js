@@ -10,12 +10,12 @@ import {
   getTeacherController,
   getAllNonSectionTeacherController,
   refreshAccessTokenController,
-  registerTeachersFromExcelController,
+  registerTeachersFromExcelController
 } from "../controllers/teacher.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import {
   refreshTokenAuthenticate,
-  teacherAuthenticate,
+  teacherAuthenticate
 } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
 import upload from "../middlewares/multer.middleware.js";
@@ -28,30 +28,16 @@ import {
   registerTeacherValidation,
   updateAddressValidation,
   updateTeacherValidation,
-  UsernamePasswordUpdateTeacherValidation,
+  UsernamePasswordUpdateTeacherValidation
 } from "../middlewares/validation/teacher.validation.middleware.js";
 
 const teacherRouter = express.Router();
 
-teacherRouter.post(
-  "/",
-  adminAuthenticate,
-  registerTeacherValidation,
-  registerTeacherController
-);
+teacherRouter.post("/", adminAuthenticate, registerTeacherValidation, registerTeacherController);
 
-teacherRouter.post(
-  "/bulk",
-  adminAuthenticate,
-  upload,
-  registerTeachersFromExcelController
-);
+teacherRouter.post("/bulk", adminAuthenticate, upload, registerTeachersFromExcelController);
 
-teacherRouter.post(
-  "/login", 
-  loginTeacherValidation, 
-  loginTeacherController
-);
+teacherRouter.post("/login", loginTeacherValidation, loginTeacherController);
 
 teacherRouter.get(
   "/",
@@ -60,29 +46,13 @@ teacherRouter.get(
   getTeacherController
 );
 
-teacherRouter.post(
-  "/all", 
-  adminAuthenticate, 
-  getAllTeacherOfAdminController
-);
+teacherRouter.post("/all", adminAuthenticate, getAllTeacherOfAdminController);
 
-teacherRouter.get(
-  "/unassigned/:sessionId",
-  adminAuthenticate,
-  getAllNonSectionTeacherController
-);
+teacherRouter.get("/unassigned/:sessionId", adminAuthenticate, getAllNonSectionTeacherController);
 
-teacherRouter.get(
-  "/refresh",
-  refreshTokenAuthenticate,
-  refreshAccessTokenController
-);
+teacherRouter.get("/refresh", refreshTokenAuthenticate, refreshAccessTokenController);
 
-teacherRouter.get(
-  "/:teacherId",
-  adminAuthenticate, 
-  getTeacherController
-);
+teacherRouter.get("/:teacherId", adminAuthenticate, getTeacherController);
 
 teacherRouter.put(
   "/auth",
@@ -146,10 +116,6 @@ teacherRouter.put(
   updateTeacherController
 );
 
-teacherRouter.delete(
-  "/:teacherId", 
-  adminAuthenticate, 
-  deleteTeacherController
-);
+teacherRouter.delete("/:teacherId", adminAuthenticate, deleteTeacherController);
 
 export default teacherRouter;

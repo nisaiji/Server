@@ -6,15 +6,15 @@ export const classWiseSummarySchema = Joi.object({
     .required()
     .messages({
       "string.base": "SessionID must be a valid string.",
-      "string.pattern.base": "SessionID must be a valid  id.",
+      "string.pattern.base": "SessionID must be a valid  id."
     }),
   school: Joi.string()
     .regex(/^[a-f\d]{24}$/i)
     .required()
     .messages({
       "string.base": "school must be a valid string.",
-      "string.pattern.base": "school must be a valid  id.",
-    }),
+      "string.pattern.base": "school must be a valid  id."
+    })
 });
 
 export const paymentModeReportSchema = Joi.object({
@@ -23,15 +23,15 @@ export const paymentModeReportSchema = Joi.object({
     .required()
     .messages({
       "string.base": "SessionID must be a valid string.",
-      "string.pattern.base": "SessionID must be a valid  id.",
+      "string.pattern.base": "SessionID must be a valid  id."
     }),
   classID: Joi.string()
     .regex(/^[a-f\d]{24}$/i)
     .required()
     .messages({
       "string.base": "ClassID must be a valid string.",
-      "string.pattern.base": "ClassID must be a valid  id.",
-    }),
+      "string.pattern.base": "ClassID must be a valid  id."
+    })
 });
 
 export const installmentReminderSchema = Joi.object({
@@ -40,6 +40,6 @@ export const installmentReminderSchema = Joi.object({
     .required()
     .messages({
       "string.base": "Instance ID must be a valid string.",
-      "string.pattern.base": "Instance ID must be a valid  id.",
-    }),
+      "string.pattern.base": "Instance ID must be a valid  id."
+    })
 });

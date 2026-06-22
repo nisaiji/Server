@@ -39,7 +39,11 @@ export function dedupeNotificationRecipientsService(recipients = []) {
   });
 }
 
-export async function getSectionParentNotificationRecipientsService({ sectionId, sessionId, schoolId }) {
+export async function getSectionParentNotificationRecipientsService({
+  sectionId,
+  sessionId,
+  schoolId
+}) {
   try {
     const recipients = await sessionStudentModel.aggregate([
       {
@@ -47,64 +51,64 @@ export async function getSectionParentNotificationRecipientsService({ sectionId,
           section: convertToMongoId(sectionId),
           session: convertToMongoId(sessionId),
           school: convertToMongoId(schoolId),
-          isActive: true,
-        },
+          isActive: true
+        }
       },
       {
         $lookup: {
           from: "students",
           localField: "student",
           foreignField: "_id",
-          as: "student",
-        },
+          as: "student"
+        }
       },
       {
         $unwind: {
           path: "$student",
-          preserveNullAndEmptyArrays: false,
-        },
+          preserveNullAndEmptyArrays: false
+        }
       },
       {
         $lookup: {
           from: "schoolparents",
           localField: "student.schoolParent",
           foreignField: "_id",
-          as: "schoolParent",
-        },
+          as: "schoolParent"
+        }
       },
       {
         $unwind: {
           path: "$schoolParent",
-          preserveNullAndEmptyArrays: false,
-        },
+          preserveNullAndEmptyArrays: false
+        }
       },
       {
         $match: {
-          "schoolParent.isActive": true,
-        },
+          "schoolParent.isActive": true
+        }
       },
       {
         $lookup: {
           from: "parents",
           localField: "schoolParent.parent",
           foreignField: "_id",
-          as: "parent",
-        },
+          as: "parent"
+        }
       },
       {
         $unwind: {
           path: "$parent",
-          preserveNullAndEmptyArrays: false,
-        },
+          preserveNullAndEmptyArrays: false
+        }
       },
       {
         $match: {
           "parent.isActive": true,
           "parent.fcmToken": {
             $type: "string",
-            $ne: "",
-          },
-        },
+            $ne: ""
+          }
+        }
       },
       {
         $project: {
@@ -113,10 +117,10 @@ export async function getSectionParentNotificationRecipientsService({ sectionId,
           fullname: "$parent.fullname",
           fcmToken: "$parent.fcmToken",
           role: {
-            $literal: "parent",
-          },
-        },
-      },
+            $literal: "parent"
+          }
+        }
+      }
     ]);
 
     return dedupeNotificationRecipientsService(recipients);
@@ -130,7 +134,7 @@ async function getTeacherNotificationRecipientsService({
   sessionId,
   schoolId,
   subjectIds,
-  excludeTeacherId,
+  excludeTeacherId
 }) {
   const normalizedSubjectIds = normalizeSubjectIds(subjectIds);
 
@@ -148,31 +152,31 @@ async function getTeacherNotificationRecipientsService({
           session: convertToMongoId(sessionId),
           school: convertToMongoId(schoolId),
           subject: { $in: normalizedSubjectIds },
-          ...teacherRecipientMatch,
-        },
+          ...teacherRecipientMatch
+        }
       },
       {
         $lookup: {
           from: "teachers",
           localField: "teacher",
           foreignField: "_id",
-          as: "teacher",
-        },
+          as: "teacher"
+        }
       },
       {
         $unwind: {
           path: "$teacher",
-          preserveNullAndEmptyArrays: false,
-        },
+          preserveNullAndEmptyArrays: false
+        }
       },
       {
         $match: {
           "teacher.isActive": true,
           "teacher.fcmToken": {
             $type: "string",
-            $ne: "",
-          },
-        },
+            $ne: ""
+          }
+        }
       },
       {
         $project: {
@@ -182,10 +186,10 @@ async function getTeacherNotificationRecipientsService({
           lastname: "$teacher.lastname",
           fcmToken: "$teacher.fcmToken",
           role: {
-            $literal: "teacher",
-          },
-        },
-      },
+            $literal: "teacher"
+          }
+        }
+      }
     ]);
 
     return dedupeNotificationRecipientsService(recipients);
@@ -199,14 +203,14 @@ export async function getTagTeacherNotificationRecipientsService({
   subjectId,
   sessionId,
   schoolId,
-  excludeTeacherId,
+  excludeTeacherId
 }) {
   return getTeacherNotificationRecipientsService({
     sectionId,
     sessionId,
     schoolId,
     subjectIds: [subjectId],
-    excludeTeacherId,
+    excludeTeacherId
   });
 }
 
@@ -215,13 +219,13 @@ export async function getExamTeacherNotificationRecipientsService({
   sessionId,
   schoolId,
   subjectIds,
-  excludeTeacherId,
+  excludeTeacherId
 }) {
   return getTeacherNotificationRecipientsService({
     sectionId,
     sessionId,
     schoolId,
     subjectIds,
-    excludeTeacherId,
+    excludeTeacherId
   });
 }

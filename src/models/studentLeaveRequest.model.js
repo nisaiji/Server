@@ -1,73 +1,74 @@
 import mongoose from "mongoose";
 
-const studentLeaveRequestSchema = mongoose.Schema({
-  reason:{
-    type:String,
-    required: true
-  },
+const studentLeaveRequestSchema = mongoose.Schema(
+  {
+    reason: {
+      type: String,
+      required: true
+    },
 
-  description:{
-    type:String,
-  },
+    description: {
+      type: String
+    },
 
-  remark: {
-    type: String
-  },
+    remark: {
+      type: String
+    },
 
-  parent: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "parent"
-  },
+    parent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "parent"
+    },
 
-  sessionStudent: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "sessionStudent"
-  },
+    sessionStudent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "sessionStudent"
+    },
 
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "student"
-  },
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "student"
+    },
 
-  teacher:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "teacher"
-  },
+    teacher: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "teacher"
+    },
 
-  section: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "section"
-  },
+    section: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "section"
+    },
 
-  school:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "admin"
-  },
+    school: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "admin"
+    },
 
-  status:{
-    type:String,
-    enum:["accept", "reject", "pending", "complete", "expired"],
-    default: "pending"
-  },
+    status: {
+      type: String,
+      enum: ["accept", "reject", "pending", "complete", "expired"],
+      default: "pending"
+    },
 
-  isRead: {
-    type: Boolean,
-    default: false
-  },
+    isRead: {
+      type: Boolean,
+      default: false
+    },
 
-  startDate: {
-    type: Number,
-    required: true
-  },
+    startDate: {
+      type: Number,
+      required: true
+    },
 
-  endDate: {
-    type: Number,
-    required: true
+    endDate: {
+      type: Number,
+      required: true
+    }
   },
-},
-{
-  timestamps:true
-}
+  {
+    timestamps: true
+  }
 );
 
 const studentLeaveRequestModel = mongoose.model("studentLeaveRequest", studentLeaveRequestSchema);

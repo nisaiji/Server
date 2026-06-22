@@ -6,20 +6,27 @@ import otpGenerator from "otp-generator";
 import { adminControllerResponse } from "../../config/httpResponse.js";
 import { sendEmailService } from "../../config/sendGrid.config.js";
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
-import { getAdminService, registerAdminService, updateAdminService } from "../../services/admin.services.js";
+import {
+  getAdminService,
+  registerAdminService,
+  updateAdminService
+} from "../../services/admin.services.js";
 import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
-import { getOtpsPipelineService, registerOtpService, updateOtpService } from "../../services/otp.service.js";
+import {
+  getOtpsPipelineService,
+  registerOtpService,
+  updateOtpService
+} from "../../services/otp.service.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
 import { getSessionService, registerSessionService } from "../../services/session.services.js";
 import { error, success } from "../../utils/responseWrapper.js";
 
-
-export async function adminSendOtpToPhoneController (req, res) {
+export async function adminSendOtpToPhoneController(req, res) {
   try {
     const { phone } = req.body;
     const admin = await getAdminService({ phone });
-    if(admin) {
+    if (admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number already used"));
     }
 
@@ -28,21 +35,28 @@ export async function adminSendOtpToPhoneController (req, res) {
       upperCaseAlphabets: false,
       specialChars: false
     });
-    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await sentSMSByTwillio("+91"+phone, sms);
-    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'admin', expiredAt: new Date().getTime()+1000*60*5 });
-    await registerAdminService({ phone, status: 'unVerified' });
+    const sms = `Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await sentSMSByTwillio("+91" + phone, sms);
+    await registerOtpService({
+      otp,
+      identifier: phone,
+      otpType: "phoneVerification",
+      medium: "sms",
+      entityType: "admin",
+      expiredAt: new Date().getTime() + 1000 * 60 * 5
+    });
+    await registerAdminService({ phone, status: "unVerified" });
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err));
   }
 }
 
-export async function adminReSendOtpToPhoneController (req, res) {
+export async function adminReSendOtpToPhoneController(req, res) {
   try {
     const { phone } = req.body;
     const admin = await getAdminService({ phone });
-    if(!admin) {
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid Phone number"));
     }
 
@@ -51,9 +65,16 @@ export async function adminReSendOtpToPhoneController (req, res) {
       upperCaseAlphabets: false,
       specialChars: false
     });
-    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await sentSMSByTwillio("+91"+phone, sms);
-    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'admin', expiredAt: new Date().getTime()+1000*60*5 });
+    const sms = `Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await sentSMSByTwillio("+91" + phone, sms);
+    await registerOtpService({
+      otp,
+      identifier: phone,
+      otpType: "phoneVerification",
+      medium: "sms",
+      entityType: "admin",
+      expiredAt: new Date().getTime() + 1000 * 60 * 5
+    });
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -64,7 +85,7 @@ export async function adminPhoneVerifyByOtpController(req, res) {
   try {
     const { phone, otp } = req.body;
     let admin = await getAdminService({ phone });
-    if(!admin) {
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
 
@@ -72,9 +93,9 @@ export async function adminPhoneVerifyByOtpController(req, res) {
       {
         $match: {
           identifier: phone,
-          medium: 'sms',
-          entityType: 'admin',
-          otpType: 'phoneVerification'
+          medium: "sms",
+          entityType: "admin",
+          otpType: "phoneVerification"
         }
       },
       {
@@ -89,38 +110,40 @@ export async function adminPhoneVerifyByOtpController(req, res) {
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
-    if(!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
+    if (!storedOtp) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
     }
 
-    if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Your OTP has expired'));
-    }  
-    
-    if(otp!==storedOtp['otp']) {
+    if (
+      storedOtp["status"] === "verified" ||
+      storedOtp["status"] === "expired" ||
+      storedOtp["expiredAt"] < new Date().getTime()
+    ) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Your OTP has expired"));
+    }
+
+    if (otp !== storedOtp["otp"]) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, `You entered wrong OTP`));
     }
 
-    if(admin['status'] === 'unVerified') {
-     await updateAdminService({_id: admin['_id']}, {status: 'phoneVerified'});
+    if (admin["status"] === "unVerified") {
+      await updateAdminService({ _id: admin["_id"] }, { status: "phoneVerified" });
     }
 
-    await updateOtpService({_id: storedOtp['_id']}, {status: 'verified'});
-  
+    await updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" });
 
-    admin = await getAdminService({_id: admin['_id']});
+    admin = await getAdminService({ _id: admin["_id"] });
     const token = getAccessTokenService({
-      adminId: admin['_id'],
-      role: 'admin',
-      status: admin['status'],
-      isActive: admin['isActive'],
-      phoneVerified: admin['status'] !== 'unVerified',
-      emailVerified: admin['status'] === 'verified',
-      passwordUpdated: admin['password'] ? true : false
+      adminId: admin["_id"],
+      role: "admin",
+      status: admin["status"],
+      isActive: admin["isActive"],
+      phoneVerified: admin["status"] !== "unVerified",
+      emailVerified: admin["status"] === "verified",
+      passwordUpdated: admin["password"] ? true : false
     });
 
-
-    res.status(StatusCodes.OK).send(success(200,  { msg: "OTP verified successfully", token}));
+    res.status(StatusCodes.OK).send(success(200, { msg: "OTP verified successfully", token }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -128,62 +151,157 @@ export async function adminPhoneVerifyByOtpController(req, res) {
 
 export async function updateAdminController(req, res) {
   try {
-    const{schoolName, principal, schoolBoard, schoolNumber, password, affiliationNo, address,city,state,country, district, pincode, email, phone, username, photo, method, website, facebook, instagram, linkedin, twitter, whatsapp, youtube} = req.body;
+    const {
+      schoolName,
+      principal,
+      schoolBoard,
+      schoolNumber,
+      password,
+      affiliationNo,
+      address,
+      city,
+      state,
+      country,
+      district,
+      pincode,
+      email,
+      phone,
+      username,
+      photo,
+      method,
+      website,
+      facebook,
+      instagram,
+      linkedin,
+      twitter,
+      whatsapp,
+      youtube
+    } = req.body;
     const fieldsToBeUpdated = {};
     const adminId = req.adminId;
     const condition = [];
-    if(username){ condition.push({ username });};
-    if(email){ condition.push({ email });};
-    if(phone){ condition.push({ phone });};
-    if(affiliationNo){ condition.push({ affiliationNo });};
-
-    const admin = await getAdminService({$or: [{username}, {email}, {phone}, {affiliationNo}], _id:{$ne:adminId}});
-
-    if(admin && username && admin["username"] && admin["username"]==username){
-      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.updateAdminController.usernameExists));
+    if (username) {
+      condition.push({ username });
     }
-    if(admin && email && admin["email"]==email){
-      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.updateAdminController.emailExists));
+    if (email) {
+      condition.push({ email });
     }
-    if(admin && phone && admin["phone"]==phone){
-      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.updateAdminController.phoneExists));
+    if (phone) {
+      condition.push({ phone });
     }
-    if(admin && affiliationNo && admin["affiliationNo"] && admin["affiliationNo"]==affiliationNo){
-      return res.status(StatusCodes.CONFLICT).send(error(409, adminControllerResponse.updateAdminController.affiliationExists));
+    if (affiliationNo) {
+      condition.push({ affiliationNo });
     }
 
-    if(password) {
-      fieldsToBeUpdated['password'] = await hashPasswordService(password);
+    const admin = await getAdminService({
+      $or: [{ username }, { email }, { phone }, { affiliationNo }],
+      _id: { $ne: adminId }
+    });
+
+    if (admin && username && admin["username"] && admin["username"] == username) {
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, adminControllerResponse.updateAdminController.usernameExists));
     }
-    if(schoolName){ fieldsToBeUpdated["schoolName"] = schoolName; }
-    if(principal){ fieldsToBeUpdated["principal"] = principal; }
-    if(schoolBoard){ fieldsToBeUpdated["schoolBoard"] = schoolBoard; }
-    if(schoolNumber){ fieldsToBeUpdated["schoolNumber"] = schoolNumber; }
-    if(affiliationNo){ fieldsToBeUpdated["affiliationNo"] = affiliationNo; }
-    if(address){ fieldsToBeUpdated["address"] = address; }
-    if(city){ fieldsToBeUpdated["city"] = city; }
-    if(district){ fieldsToBeUpdated["district"] = district; }
-    if(state){ fieldsToBeUpdated["state"] = state; }
-    if(country){ fieldsToBeUpdated["country"] = country; }
-    if(pincode){ fieldsToBeUpdated["pincode"] = pincode; }
-    if(email){ fieldsToBeUpdated["email"] = email; }
-    if(phone){ fieldsToBeUpdated["phone"] = phone; }
-    if(username){ fieldsToBeUpdated["username"] = username; }
-    if(website){ fieldsToBeUpdated["website"] = website; }
-    if(facebook){ fieldsToBeUpdated["facebook"] = facebook; }
-    if(instagram){ fieldsToBeUpdated["instagram"] = instagram; }
-    if(instagram){ fieldsToBeUpdated["instagram"] = instagram; }
-    if(twitter){ fieldsToBeUpdated["twitter"] = twitter; }
-    if(whatsapp){ fieldsToBeUpdated["whatsapp"] = whatsapp; }
-    if(youtube){ fieldsToBeUpdated["youtube"] = youtube; }
-    if(linkedin){ fieldsToBeUpdated["linkedin"] = linkedin; }
+    if (admin && email && admin["email"] == email) {
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, adminControllerResponse.updateAdminController.emailExists));
+    }
+    if (admin && phone && admin["phone"] == phone) {
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, adminControllerResponse.updateAdminController.phoneExists));
+    }
+    if (
+      admin &&
+      affiliationNo &&
+      admin["affiliationNo"] &&
+      admin["affiliationNo"] == affiliationNo
+    ) {
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, adminControllerResponse.updateAdminController.affiliationExists));
+    }
+
+    if (password) {
+      fieldsToBeUpdated["password"] = await hashPasswordService(password);
+    }
+    if (schoolName) {
+      fieldsToBeUpdated["schoolName"] = schoolName;
+    }
+    if (principal) {
+      fieldsToBeUpdated["principal"] = principal;
+    }
+    if (schoolBoard) {
+      fieldsToBeUpdated["schoolBoard"] = schoolBoard;
+    }
+    if (schoolNumber) {
+      fieldsToBeUpdated["schoolNumber"] = schoolNumber;
+    }
+    if (affiliationNo) {
+      fieldsToBeUpdated["affiliationNo"] = affiliationNo;
+    }
+    if (address) {
+      fieldsToBeUpdated["address"] = address;
+    }
+    if (city) {
+      fieldsToBeUpdated["city"] = city;
+    }
+    if (district) {
+      fieldsToBeUpdated["district"] = district;
+    }
+    if (state) {
+      fieldsToBeUpdated["state"] = state;
+    }
+    if (country) {
+      fieldsToBeUpdated["country"] = country;
+    }
+    if (pincode) {
+      fieldsToBeUpdated["pincode"] = pincode;
+    }
+    if (email) {
+      fieldsToBeUpdated["email"] = email;
+    }
+    if (phone) {
+      fieldsToBeUpdated["phone"] = phone;
+    }
+    if (username) {
+      fieldsToBeUpdated["username"] = username;
+    }
+    if (website) {
+      fieldsToBeUpdated["website"] = website;
+    }
+    if (facebook) {
+      fieldsToBeUpdated["facebook"] = facebook;
+    }
+    if (instagram) {
+      fieldsToBeUpdated["instagram"] = instagram;
+    }
+    if (instagram) {
+      fieldsToBeUpdated["instagram"] = instagram;
+    }
+    if (twitter) {
+      fieldsToBeUpdated["twitter"] = twitter;
+    }
+    if (whatsapp) {
+      fieldsToBeUpdated["whatsapp"] = whatsapp;
+    }
+    if (youtube) {
+      fieldsToBeUpdated["youtube"] = youtube;
+    }
+    if (linkedin) {
+      fieldsToBeUpdated["linkedin"] = linkedin;
+    }
     if (photo || method === "DELETE") {
       fieldsToBeUpdated.photo = method === "DELETE" ? "" : photo;
     }
 
-    await updateAdminService({_id:adminId}, fieldsToBeUpdated);
+    await updateAdminService({ _id: adminId }, fieldsToBeUpdated);
 
-    return res.status(StatusCodes.OK).send(success(200, adminControllerResponse.updateAdminController.adminUpdatedSuccessfully));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, adminControllerResponse.updateAdminController.adminUpdatedSuccessfully));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -194,23 +312,32 @@ export async function adminSendOtpToEmailController(req, res) {
     const { email } = req.body;
     const adminId = req.adminId;
     const admin = await getAdminService({ _id: adminId });
-    if(!admin) {
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
 
-    if(admin['status']==='verified'){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "User email has already been verified"));
+    if (admin["status"] === "verified") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "User email has already been verified"));
     }
     const otp = otpGenerator.generate(5, {
       lowerCaseAlphabets: false,
       upperCaseAlphabets: false,
       specialChars: false
     });
-    const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'admin', expiredAt: new Date().getTime()+1000*60*5 });
-    await updateAdminService({_id: admin['_id']}, {email});
+    const sms = `Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
+    await registerOtpService({
+      otp,
+      identifier: email,
+      otpType: "emailVerification",
+      medium: "email",
+      entityType: "admin",
+      expiredAt: new Date().getTime() + 1000 * 60 * 5
+    });
+    await updateAdminService({ _id: admin["_id"] }, { email });
     await sendEmailService(email, sms);
-    res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));    
+    res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -221,20 +348,20 @@ export async function adminEmailVerifyByOtpController(req, res) {
     const { otp } = req.body;
     const adminId = req.adminId;
     let admin = await getAdminService({ _id: adminId });
-    if(!admin) {
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
-    if(['verified'].includes(admin['status'])) {
+    if (["verified"].includes(admin["status"])) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Your Email has already verified"));
     }
 
     const getOtpPipeline = [
       {
         $match: {
-          identifier: admin['email'],
-          medium: 'email',
-          entityType: 'admin',
-          otpType: 'emailVerification'
+          identifier: admin["email"],
+          medium: "email",
+          entityType: "admin",
+          otpType: "emailVerification"
         }
       },
       {
@@ -249,36 +376,40 @@ export async function adminEmailVerifyByOtpController(req, res) {
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
-    if(!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
+    if (!storedOtp) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
     }
 
-    if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, 'Your OTP has expired'));
+    if (
+      storedOtp["status"] === "verified" ||
+      storedOtp["status"] === "expired" ||
+      storedOtp["expiredAt"] < new Date().getTime()
+    ) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Your OTP has expired"));
     }
 
-    if(otp!==storedOtp['otp']) {
+    if (otp !== storedOtp["otp"]) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, `You entered wrong OTP`));
     }
 
     await Promise.all([
-      updateAdminService({_id: admin['_id']}, {status: 'verified'}),
-      updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+      updateAdminService({ _id: admin["_id"] }, { status: "verified" }),
+      updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" })
     ]);
 
-    admin = await getAdminService({ _id: admin['_id'] });
+    admin = await getAdminService({ _id: admin["_id"] });
     const token = getAccessTokenService({
       role: "admin",
-      adminId : admin['_id'],
+      adminId: admin["_id"],
       email: admin["email"],
-      status: admin['status'],
+      status: admin["status"],
       phone: admin["phone"],
       active: admin["isActive"],
-      pincode: admin['pincode'] ? admin['pincode'] : '',
-      isLoginAlready: admin['isLoginAlready'],
+      pincode: admin["pincode"] ? admin["pincode"] : "",
+      isLoginAlready: admin["isLoginAlready"]
     });
 
-    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully" , token}));
+    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully", token }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -286,19 +417,19 @@ export async function adminEmailVerifyByOtpController(req, res) {
 
 export async function adminGetStatusController(req, res) {
   try {
-    const { phone }  = req.body;
+    const { phone } = req.body;
     const admin = await getAdminService({ phone });
-    if(!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Admin not found'));
+    if (!admin) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
 
     const status = {
-      phoneVerified: admin['status'] !== 'unVerified',
-      emailVerified: admin['status'] === 'verified',
-      passwordUpdated: !!admin['password'],
-      affiliationExists: !!admin['affiliationNo'],
-      status: admin['status'],
-      addressUpdated: !!admin['address'],
+      phoneVerified: admin["status"] !== "unVerified",
+      emailVerified: admin["status"] === "verified",
+      passwordUpdated: !!admin["password"],
+      affiliationExists: !!admin["affiliationNo"],
+      status: admin["status"],
+      addressUpdated: !!admin["address"],
       isActive: admin["isActive"]
     };
 
@@ -311,47 +442,60 @@ export async function adminGetStatusController(req, res) {
 export async function adminLoginController(req, res) {
   try {
     const { user, password } = req.body;
-  
-    const admin = await getAdminService({ $or: [{email: user, status: 'verified'}, {phone: user, status: 'verified'}] });
+
+    const admin = await getAdminService({
+      $or: [
+        { email: user, status: "verified" },
+        { phone: user, status: "verified" }
+      ]
+    });
     if (!admin) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(401, adminControllerResponse.loginController.unathorized));
     }
-    if(!admin['isActive']){
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Services are temporarily paused. Please contact support."));
+    if (!admin["isActive"]) {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .send(error(403, "Services are temporarily paused. Please contact support."));
     }
     const storedPassword = admin.password;
     const enteredPassword = password;
     const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
     if (!matchPassword) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, adminControllerResponse.loginController.unathorized));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(401, adminControllerResponse.loginController.unathorized));
     }
 
-    const session = await getSessionService({ school: admin['_id'], status: "active" });
+    const session = await getSessionService({ school: admin["_id"], status: "active" });
     const accessToken = getAccessTokenService({
       role: "admin",
-      username: admin["username"] ? admin['username'] : '',
+      username: admin["username"] ? admin["username"] : "",
       schoolName: admin["schoolName"],
       email: admin["email"],
       adminId: admin["_id"],
       phone: admin["phone"],
       status: admin["status"],
       active: admin["isActive"],
-      pincode: admin['pincode'] ? admin['pincode'] : '',
+      pincode: admin["pincode"] ? admin["pincode"] : "",
       isSessionCreated: !!session
     });
 
     const refreshToken = getRefreshTokenService({
       role: "admin",
-      username: admin["username"] ? admin['username'] : '',
+      username: admin["username"] ? admin["username"] : "",
       schoolName: admin["schoolName"],
       email: admin["email"],
       adminId: admin["_id"],
       phone: admin["phone"],
       active: admin["isActive"],
-      pincode: admin['pincode'] ? admin['pincode'] : '',
+      pincode: admin["pincode"] ? admin["pincode"] : "",
       isSessionCreated: !!session
     });
-    return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, username: admin.username }));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { accessToken, refreshToken, username: admin.username }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -359,31 +503,35 @@ export async function adminLoginController(req, res) {
 
 export async function adminPhoneVerifyController(req, res) {
   try {
-     const { phone, token } = req.body;
+    const { phone, token } = req.body;
     let admin = await getAdminService({ phone });
 
     const response = await verifyMsg91Token(token);
-    if(response?.type !== 'success') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    if (response?.type !== "success") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, response?.message || "Token can't verified"));
     }
 
-    if(!admin) {
-      await registerAdminService({ phone, status: 'phoneVerified' });
+    if (!admin) {
+      await registerAdminService({ phone, status: "phoneVerified" });
     }
 
-    admin = await getAdminService({phone});
+    admin = await getAdminService({ phone });
     const jwttoken = getAccessTokenService({
-      adminId: admin['_id'],
-      role: 'admin',
-      status: admin['status'],
-      isActive: admin['isActive'],
-      phoneVerified: admin['status'] !== 'unVerified',
-      emailVerified: admin['status'] === 'verified',
-      passwordUpdated: admin['password'] ? true : false,
+      adminId: admin["_id"],
+      role: "admin",
+      status: admin["status"],
+      isActive: admin["isActive"],
+      phoneVerified: admin["status"] !== "unVerified",
+      emailVerified: admin["status"] === "verified",
+      passwordUpdated: admin["password"] ? true : false,
       isSessionCreated: false
     });
 
-    res.status(StatusCodes.OK).send(success(200,  { msg: "OTP verified successfully", token: jwttoken}));
+    res
+      .status(StatusCodes.OK)
+      .send(success(200, { msg: "OTP verified successfully", token: jwttoken }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -395,27 +543,29 @@ export async function adminEmailVerifyController(req, res) {
     const adminId = req.adminId;
 
     let admin = await getAdminService({ _id: adminId });
-    if(!admin) {
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
-    const response =  await verifyMsg91Token(token);
-        
-    if(response?.type !== 'success') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+    const response = await verifyMsg91Token(token);
+
+    if (response?.type !== "success") {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, response?.message || "Token can't verified"));
     }
 
-    await updateAdminService({_id: admin['_id']}, {email, status: 'verified'});
+    await updateAdminService({ _id: admin["_id"] }, { email, status: "verified" });
 
-    admin = await getAdminService({ _id: admin['_id'] });
+    admin = await getAdminService({ _id: admin["_id"] });
     const jwtToken = getAccessTokenService({
       role: "admin",
-      adminId : admin['_id'],
+      adminId: admin["_id"],
       email: admin["email"],
-      status: admin['status'],
+      status: admin["status"],
       phone: admin["phone"],
       active: admin["isActive"],
-      pincode: admin['pincode'] ? admin['pincode'] : '',
-      isLoginAlready: admin['isLoginAlready'],
+      pincode: admin["pincode"] ? admin["pincode"] : "",
+      isLoginAlready: admin["isLoginAlready"],
       isSessionCreated: false
     });
 
@@ -428,8 +578,8 @@ export async function adminEmailVerifyController(req, res) {
     // if(!session) {
     //   await registerSessionService({
     //     school: admin['_id'],
-    //     isCurrent: true, 
-    //     status: "active", 
+    //     isCurrent: true,
+    //     status: "active",
     //     endDate: march31UTC,
     //     startDate: april1UTC,
     //     academicStartYear: currentYear,
@@ -437,7 +587,9 @@ export async function adminEmailVerifyController(req, res) {
     //   });
     // }
 
-    return res.status(StatusCodes.OK).send(success(200, {message: "Email updated successfully", token: jwtToken}));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { message: "Email updated successfully", token: jwtToken }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -445,14 +597,19 @@ export async function adminEmailVerifyController(req, res) {
 
 export async function adminChangePasswordRequestByPhoneController(req, res) {
   try {
-    const {phone} = req.body;
-    const admin = await getAdminService({ phone, isActive: true});
-    if(!admin) {
+    const { phone } = req.body;
+    const admin = await getAdminService({ phone, isActive: true });
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid phone number"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
-    await updateAdminService({_id: admin['_id']}, { resetPasswordToken: resetToken, resetPasswordStatus: 'requested' });
-    return res.status(StatusCodes.OK).send(success(200, { resetToken, phone, message: 'Phone verified' }));
+    await updateAdminService(
+      { _id: admin["_id"] },
+      { resetPasswordToken: resetToken, resetPasswordStatus: "requested" }
+    );
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { resetToken, phone, message: "Phone verified" }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -461,20 +618,30 @@ export async function adminChangePasswordRequestByPhoneController(req, res) {
 export async function adminChangePasswordHandlerByPhoneController(req, res) {
   try {
     const { phone, phoneToken, resetPasswordToken } = req.body;
-    let admin = await getAdminService({ phone, isActive: true, resetPasswordToken, resetPasswordStatus: 'requested' });
-    if(!admin) {
+    let admin = await getAdminService({
+      phone,
+      isActive: true,
+      resetPasswordToken,
+      resetPasswordStatus: "requested"
+    });
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
     }
 
     const phoneResponse = await verifyMsg91Token(phoneToken);
 
-    if(phoneResponse?.type !== 'success') {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400,"Token can't verified"));
+    if (phoneResponse?.type !== "success") {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Token can't verified"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
-    
-    await updateAdminService({_id: admin['_id']}, {resetPasswordToken: resetToken, resetPasswordStatus: 'phoneVerified'});
-    return res.status(StatusCodes.OK).send(success(200, {resetToken, message: "Phone verified successfully"}));
+
+    await updateAdminService(
+      { _id: admin["_id"] },
+      { resetPasswordToken: resetToken, resetPasswordStatus: "phoneVerified" }
+    );
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { resetToken, message: "Phone verified successfully" }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -482,14 +649,21 @@ export async function adminChangePasswordHandlerByPhoneController(req, res) {
 
 export async function adminChangePasswordRequestByEmailController(req, res) {
   try {
-    const {email, resetPasswordToken} = req.body;
-    const admin = await getAdminService({ email, resetPasswordToken, isActive: true, resetPasswordStatus: 'phoneVerified'});
-    if(!admin) {
+    const { email, resetPasswordToken } = req.body;
+    const admin = await getAdminService({
+      email,
+      resetPasswordToken,
+      isActive: true,
+      resetPasswordStatus: "phoneVerified"
+    });
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid email"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
-    await updateAdminService({_id: admin['_id']}, { resetPasswordToken: resetToken });
-    return res.status(StatusCodes.OK).send(success(200, { resetToken, email, message: 'Email verified' }));
+    await updateAdminService({ _id: admin["_id"] }, { resetPasswordToken: resetToken });
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { resetToken, email, message: "Email verified" }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -498,20 +672,30 @@ export async function adminChangePasswordRequestByEmailController(req, res) {
 export async function adminChangePasswordHandlerByEmailController(req, res) {
   try {
     const { email, emailToken, resetPasswordToken } = req.body;
-    let admin = await getAdminService({ email, isActive: true, resetPasswordToken, resetPasswordStatus: 'phoneVerified' });
-    if(!admin) {
+    let admin = await getAdminService({
+      email,
+      isActive: true,
+      resetPasswordToken,
+      resetPasswordStatus: "phoneVerified"
+    });
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
 
     const emailResponse = await verifyMsg91Token(emailToken);
 
-    if(emailResponse?.type !== 'success') {
+    if (emailResponse?.type !== "success") {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Token can't verified"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
-    
-    await updateAdminService({_id: admin['_id']}, {resetPasswordToken: resetToken, resetPasswordStatus: 'emailVerified'});
-    return res.status(StatusCodes.OK).send(success(200, {resetToken, message: "Email verified successfully"}));
+
+    await updateAdminService(
+      { _id: admin["_id"] },
+      { resetPasswordToken: resetToken, resetPasswordStatus: "emailVerified" }
+    );
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { resetToken, message: "Email verified successfully" }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -520,13 +704,20 @@ export async function adminChangePasswordHandlerByEmailController(req, res) {
 export async function adminChangePasswordHandlerController(req, res) {
   try {
     const { resetPasswordToken, password } = req.body;
-    let admin = await getAdminService({ resetPasswordStatus: 'emailVerified', isActive: true, resetPasswordToken });
-    if(!admin) {
+    let admin = await getAdminService({
+      resetPasswordStatus: "emailVerified",
+      isActive: true,
+      resetPasswordToken
+    });
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
     }
 
     const hashedPassword = await hashPasswordService(password);
-    await updateAdminService({_id: admin['_id']}, { password: hashedPassword, resetPasswordToken: '', resetPasswordStatus: '' });
+    await updateAdminService(
+      { _id: admin["_id"] },
+      { password: hashedPassword, resetPasswordToken: "", resetPasswordStatus: "" }
+    );
     return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

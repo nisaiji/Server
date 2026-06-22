@@ -1,7 +1,14 @@
 import { StatusCodes } from "http-status-codes";
 
 import { error } from "../../../utils/responseWrapper.js";
-import { adminDetailsValidator, adminEmailOtpValidator, adminEmailValidator, adminPasswordUpdateValidator, adminPhoneAndOtpValidator, adminPhoneValidator } from "../../../validators/v2/adminSchema.validator.js";
+import {
+  adminDetailsValidator,
+  adminEmailOtpValidator,
+  adminEmailValidator,
+  adminPasswordUpdateValidator,
+  adminPhoneAndOtpValidator,
+  adminPhoneValidator
+} from "../../../validators/v2/adminSchema.validator.js";
 
 export async function adminPhoneValidation(req, res, next) {
   try {

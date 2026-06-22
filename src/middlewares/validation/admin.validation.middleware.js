@@ -1,12 +1,21 @@
 import { StatusCodes } from "http-status-codes";
 
 import { error } from "../../utils/responseWrapper.js";
-import {adminAddressSchema, adminDetailsSchema, adminFcmTokenSchema, adminPhotoUpdateSchema, loginAdminSchema, registerAdminSchema,updateAdminProfileSchema, updateAdminSocialProfileSchema} from "../../validators/adminSchema.validator.js";
+import {
+  adminAddressSchema,
+  adminDetailsSchema,
+  adminFcmTokenSchema,
+  adminPhotoUpdateSchema,
+  loginAdminSchema,
+  registerAdminSchema,
+  updateAdminProfileSchema,
+  updateAdminSocialProfileSchema
+} from "../../validators/adminSchema.validator.js";
 
 export async function adminRegisterValidation(req, res, next) {
   try {
     const { error: schemaError } = registerAdminSchema.validate(req.body);
-    if (schemaError){
+    if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
     next();
@@ -18,7 +27,7 @@ export async function adminRegisterValidation(req, res, next) {
 export async function adminAddressValidation(req, res, next) {
   try {
     const { error: schemaError } = adminAddressSchema.validate(req.body);
-    if (schemaError){
+    if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
     next();
@@ -30,7 +39,7 @@ export async function adminAddressValidation(req, res, next) {
 export async function adminDetailsValidation(req, res, next) {
   try {
     const { error: schemaError } = adminDetailsSchema.validate(req.body);
-    if (schemaError){
+    if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
     next();
@@ -42,7 +51,7 @@ export async function adminDetailsValidation(req, res, next) {
 export async function adminFcmTokenValidation(req, res, next) {
   try {
     const { error: schemaError } = adminFcmTokenSchema.validate(req.body);
-    if (schemaError){
+    if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
     next();
@@ -54,7 +63,7 @@ export async function adminFcmTokenValidation(req, res, next) {
 export async function adminLoginValidation(req, res, next) {
   try {
     const { error: schemaError } = loginAdminSchema.validate(req.body);
-    if (schemaError){
+    if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
     next();

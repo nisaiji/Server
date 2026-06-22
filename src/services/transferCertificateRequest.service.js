@@ -10,9 +10,15 @@ export async function getTransferCertificateRequestService(paramObj, projection 
   }
 }
 
-export async function getTransferCertificateRequestsService(paramObj, projection = {}, populateObj = "") {
+export async function getTransferCertificateRequestsService(
+  paramObj,
+  projection = {},
+  populateObj = ""
+) {
   try {
-    const requests = await TransferCertificateRequestModel.find(paramObj).select(projection).populate(populateObj);
+    const requests = await TransferCertificateRequestModel.find(paramObj)
+      .select(projection)
+      .populate(populateObj);
     return requests;
   } catch (error) {
     throw error;
@@ -73,10 +79,16 @@ export async function getTransferCertificateRequestsPipelineService(pipeline) {
   }
 }
 
-export async function getTransferCertificateRequestsWithPaginationService(filter, sortingLogic, skipNumber, limitNumber, projection = {}, populateOptions = []) {
+export async function getTransferCertificateRequestsWithPaginationService(
+  filter,
+  sortingLogic,
+  skipNumber,
+  limitNumber,
+  projection = {},
+  populateOptions = []
+) {
   try {
-    const requests = await TransferCertificateRequestModel
-      .find(filter)
+    const requests = await TransferCertificateRequestModel.find(filter)
       .sort(sortingLogic)
       .limit(limitNumber)
       .skip(skipNumber)

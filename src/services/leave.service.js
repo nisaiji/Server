@@ -1,6 +1,6 @@
 import leaveRequestModel from "../models/leaveRequest.model.js";
 
-export async function getLeaveRequestsPipelineService(pipeline){
+export async function getLeaveRequestsPipelineService(pipeline) {
   try {
     const leaveRequests = await leaveRequestModel.aggregate(pipeline).exec();
     return leaveRequests;
@@ -9,7 +9,7 @@ export async function getLeaveRequestsPipelineService(pipeline){
   }
 }
 
-export async function getLeaveRequestService(filter, projection={}) {
+export async function getLeaveRequestService(filter, projection = {}) {
   try {
     const leaveRequest = await leaveRequestModel.findOne(filter).select(projection);
     return leaveRequest;
@@ -18,7 +18,7 @@ export async function getLeaveRequestService(filter, projection={}) {
   }
 }
 
-export async function getLeaveRequestsService(filter, projection={}) {
+export async function getLeaveRequestsService(filter, projection = {}) {
   try {
     const leaveRequests = await leaveRequestModel.find(filter).select(projection);
     return leaveRequests;
@@ -27,12 +27,12 @@ export async function getLeaveRequestsService(filter, projection={}) {
   }
 }
 
-export async function registerLeaveRequestService(paramObj){
+export async function registerLeaveRequestService(paramObj) {
   try {
     const event = await leaveRequestModel.create(paramObj);
     return event;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }
 
@@ -45,11 +45,11 @@ export async function updateLeaveRequestService(filter, update) {
   }
 }
 
-export async function getLeaveRequestsCountService(filter){
+export async function getLeaveRequestsCountService(filter) {
   try {
     const events = await leaveRequestModel.countDocuments(filter);
     return events;
   } catch (error) {
-    throw error;  
+    throw error;
   }
 }

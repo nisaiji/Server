@@ -1,22 +1,22 @@
 const adminControllerResponse = {
-    registerAdminController: {
-      emailExists: "Email already exists",
-      phoneExists: "Phone number already exists",
-      adminResiteredSuccessfully: "Admin registered successfully"
-    },
+  registerAdminController: {
+    emailExists: "Email already exists",
+    phoneExists: "Phone number already exists",
+    adminResiteredSuccessfully: "Admin registered successfully"
+  },
 
-    loginController: {
-      unathorized: "Invalid credentials. Please try again"
-    },
+  loginController: {
+    unathorized: "Invalid credentials. Please try again"
+  },
 
-    updateAdminController: {
-      usernameExists: "Username already exists. Try a different one",
-      emailExists: "Email already exists",
-      phoneExists: "Phone already exists",
-      affiliationExists: "Affiliation No already exists",
-      adminUpdatedSuccessfully: "Admin Profile updated successfully"
-    }
-  };
+  updateAdminController: {
+    usernameExists: "Username already exists. Try a different one",
+    emailExists: "Email already exists",
+    phoneExists: "Phone already exists",
+    affiliationExists: "Affiliation No already exists",
+    adminUpdatedSuccessfully: "Admin Profile updated successfully"
+  }
+};
 
 const attendanceControllerResponse = {
   attendanceByTeacherController: {
@@ -26,7 +26,7 @@ const attendanceControllerResponse = {
     todayIsSunday: "Today is Sunday",
     scheduledHoliday: "Today is scheduled as holiday",
     attendanceAlreadyMarked: "Attendance already marked",
-    attendanceMarkedSuccessfully: "Attendance marked successfully",
+    attendanceMarkedSuccessfully: "Attendance marked successfully"
   },
 
   attendanceByParentController: {
@@ -40,11 +40,6 @@ const attendanceControllerResponse = {
     parentUnableToMarkAttendance: "Parent is unable to mark attendance",
     attendanceMarkedSuccessfully: "Attendance marked sucessfully"
   }
-
 };
 
-
-export {
-  adminControllerResponse,
-  attendanceControllerResponse
-};
+export { adminControllerResponse, attendanceControllerResponse };

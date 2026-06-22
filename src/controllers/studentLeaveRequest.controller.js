@@ -3,60 +3,75 @@ import StatusCodes from "http-status-codes";
 import { getHolidaysService } from "../services/holiday.service.js";
 import { updateLeaveRequestService } from "../services/leave.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
-import { deleteStudentLeaveRequestsService, getStudentLeaveRequestService, getStudentLeaveRequestsPipelineService, registerStudentLeaveRequestService, updateStudentLeaveRequestService } from "../services/studentLeaveRequest.service.js";
+import {
+  deleteStudentLeaveRequestsService,
+  getStudentLeaveRequestService,
+  getStudentLeaveRequestsPipelineService,
+  registerStudentLeaveRequestService,
+  updateStudentLeaveRequestService
+} from "../services/studentLeaveRequest.service.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 
-export async function registerStudentLeaveRequestController(req, res){
+export async function registerStudentLeaveRequestController(req, res) {
   try {
     const { reason, description, startDate, endDate, sessionStudentId } = req.body;
     const parentId = req.parentId;
 
-    if(startDate > endDate){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start Time must be less than End Time'));
+    if (startDate > endDate) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Start Time must be less than End Time"));
     }
 
-    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
-    if(!sessionStudent){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Session Student not found'));
+    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    if (!sessionStudent) {
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Student not found"));
     }
 
-    const holidays = await getHolidaysService({admin: sessionStudent['school'], session: sessionStudent['session'], date: { $gte: startDate, $lte: endDate } });
-    if(holidays.length > 0){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Leave request overlaps with existing holidays'));
+    const holidays = await getHolidaysService({
+      admin: sessionStudent["school"],
+      session: sessionStudent["session"],
+      date: { $gte: startDate, $lte: endDate }
+    });
+    if (holidays.length > 0) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Leave request overlaps with existing holidays"));
     }
 
     const pipeline = [
       {
         $match: {
           parent: convertToMongoId(parentId),
-          startDate: {$lte: endDate},
-          endDate: {$gte: startDate}
+          startDate: { $lte: endDate },
+          endDate: { $gte: startDate }
         }
       }
     ];
 
-  const leaveRequests = await getStudentLeaveRequestsPipelineService(pipeline);
-  if(leaveRequests.length > 0) {
-    const startDate = new Date(leaveRequests[0].startTime);
-    const endDate = new Date(leaveRequests[0].endTime);
-    return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already requested from ${startDate} to ${endDate}.`));
-  }
+    const leaveRequests = await getStudentLeaveRequestsPipelineService(pipeline);
+    if (leaveRequests.length > 0) {
+      const startDate = new Date(leaveRequests[0].startTime);
+      const endDate = new Date(leaveRequests[0].endTime);
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, `Leave already requested from ${startDate} to ${endDate}.`));
+    }
 
-  const leaveRequestObj = {
-    reason,
-    description,
-    parent: convertToMongoId(parentId),
-    sessionStudent: convertToMongoId(sessionStudentId),
-    student: convertToMongoId(sessionStudent.student),
-    section: convertToMongoId(sessionStudent.section),
-    school: convertToMongoId(sessionStudent.school),
-    startDate,
-    endDate
-  };
-  await registerStudentLeaveRequestService(leaveRequestObj);
-  return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
-
+    const leaveRequestObj = {
+      reason,
+      description,
+      parent: convertToMongoId(parentId),
+      sessionStudent: convertToMongoId(sessionStudentId),
+      student: convertToMongoId(sessionStudent.student),
+      section: convertToMongoId(sessionStudent.section),
+      school: convertToMongoId(sessionStudent.school),
+      startDate,
+      endDate
+    };
+    await registerStudentLeaveRequestService(leaveRequestObj);
+    return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -64,7 +79,7 @@ export async function registerStudentLeaveRequestController(req, res){
 
 export async function getStudentLeaveRequestForTeacherController(req, res) {
   try {
-    const {startDate, endDate} = req.body;
+    const { startDate, endDate } = req.body;
     const teacherId = req.teacherId;
     const sectionId = req.sectionId;
     const schoolId = req.adminId;
@@ -72,11 +87,11 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
     const filter = {
       school: convertToMongoId(schoolId),
       section: convertToMongoId(sectionId),
-      startDate:{$gte: startDate},
-      endDate:{$lte: endDate}
+      startDate: { $gte: startDate },
+      endDate: { $lte: endDate }
     };
 
-    console.log({filter});
+    console.log({ filter });
 
     const pipeline = [
       {
@@ -126,17 +141,19 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
 
 export async function getStudentLeaveRequestForParentController(req, res) {
   try {
-    const {startDate, endDate, sessionStudentId} = req.body;
+    const { startDate, endDate, sessionStudentId } = req.body;
     const parentId = req.parentId;
-    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
-    if(!sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Session Student not found for this parent'));
+    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    if (!sessionStudent) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Student not found for this parent"));
     }
-    
+
     const filter = {
       sessionStudent: convertToMongoId(sessionStudentId),
-      startDate:{$gte: startDate},
-      endDate:{$lte: endDate}
+      startDate: { $gte: startDate },
+      endDate: { $lte: endDate }
     };
 
     const pipeline = [
@@ -157,11 +174,11 @@ export async function deleteStudentLeaveRequestByParentController(req, res) {
     const requestId = req.params.requestId;
     const parentId = req.parentId;
 
-    const request = await getStudentLeaveRequestService({_id: requestId, parent: parentId});
-    if(!request) {
+    const request = await getStudentLeaveRequestService({ _id: requestId, parent: parentId });
+    if (!request) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
     }
-    deleteStudentLeaveRequestsService({_id: requestId});
+    deleteStudentLeaveRequestsService({ _id: requestId });
     return res.status(StatusCodes.OK).send(success(200, "Request deleted successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -174,18 +191,18 @@ export async function updateStudentLeaveRequestController(req, res) {
     const { reason, description, startDate, endDate, remark, isRead } = req.body;
     const parentId = req.parentId;
     const fieldsToBeUpdated = {};
-    if(reason) fieldsToBeUpdated.reason = reason;
-    if(description) fieldsToBeUpdated.description = description;
-    if(startDate) fieldsToBeUpdated.startDate = startDate;
-    if(endDate) fieldsToBeUpdated.endDate = endDate;
-    if(remark) fieldsToBeUpdated.remark = remark;
-    if(isRead) fieldsToBeUpdated.isRead = isRead;
+    if (reason) fieldsToBeUpdated.reason = reason;
+    if (description) fieldsToBeUpdated.description = description;
+    if (startDate) fieldsToBeUpdated.startDate = startDate;
+    if (endDate) fieldsToBeUpdated.endDate = endDate;
+    if (remark) fieldsToBeUpdated.remark = remark;
+    if (isRead) fieldsToBeUpdated.isRead = isRead;
 
-    const request = await getStudentLeaveRequestService({_id: requestId, parent: parentId});
-    if(!request) {
+    const request = await getStudentLeaveRequestService({ _id: requestId, parent: parentId });
+    if (!request) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
     }
-    updateStudentLeaveRequestService({_id: requestId}, fieldsToBeUpdated);
+    updateStudentLeaveRequestService({ _id: requestId }, fieldsToBeUpdated);
     return res.status(StatusCodes.OK).send(success(200, "Request updated successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -198,18 +215,18 @@ export async function updateStudentLeaveRequestByTeacherController(req, res) {
     const { reason, description, startDate, endDate, remark, isRead } = req.body;
     const teacherId = req.teacherId;
     const fieldsToBeUpdated = {};
-    if(reason) fieldsToBeUpdated.reason = reason;
-    if(description) fieldsToBeUpdated.description = description;
-    if(startDate) fieldsToBeUpdated.startDate = startDate;
-    if(endDate) fieldsToBeUpdated.endDate = endDate;
-    if(remark) fieldsToBeUpdated.remark = remark;
-    if(isRead) fieldsToBeUpdated.isRead = isRead;
+    if (reason) fieldsToBeUpdated.reason = reason;
+    if (description) fieldsToBeUpdated.description = description;
+    if (startDate) fieldsToBeUpdated.startDate = startDate;
+    if (endDate) fieldsToBeUpdated.endDate = endDate;
+    if (remark) fieldsToBeUpdated.remark = remark;
+    if (isRead) fieldsToBeUpdated.isRead = isRead;
 
-    const request = await getStudentLeaveRequestService({_id: requestId});
-    if(!request) {
+    const request = await getStudentLeaveRequestService({ _id: requestId });
+    if (!request) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
     }
-    updateStudentLeaveRequestService({_id: requestId}, fieldsToBeUpdated);
+    updateStudentLeaveRequestService({ _id: requestId }, fieldsToBeUpdated);
     return res.status(StatusCodes.OK).send(success(200, "Request updated successfully!"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

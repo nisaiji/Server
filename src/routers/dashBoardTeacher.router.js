@@ -6,6 +6,11 @@ import { attendancesStatusValidation } from "../middlewares/validation/dashboard
 
 const teacherDashboardRouter = express.Router();
 
-teacherDashboardRouter.post("/attendance-status",teacherAuthenticate, attendancesStatusValidation, attendanceStatusOfSectionController);
+teacherDashboardRouter.post(
+  "/attendance-status",
+  teacherAuthenticate,
+  attendancesStatusValidation,
+  attendanceStatusOfSectionController
+);
 
 export default teacherDashboardRouter;

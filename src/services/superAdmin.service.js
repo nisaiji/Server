@@ -1,6 +1,6 @@
 import superAdminModel from "../models/superAdmin.model.js";
 
-export async function getSuperAdminService(filter, projection={}) {
+export async function getSuperAdminService(filter, projection = {}) {
   try {
     const superAdmin = await superAdminModel.findOne(filter).select(projection);
     return superAdmin;

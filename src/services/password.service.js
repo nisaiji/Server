@@ -7,12 +7,12 @@ export async function hashPasswordService(password) {
   } catch (error) {
     return error;
   }
-} 
+}
 
 export async function matchPasswordService(passwords) {
   try {
-    const{enteredPassword, storedPassword} = passwords;
-    const matchPassword = await bcrypt.compare(enteredPassword,storedPassword);
+    const { enteredPassword, storedPassword } = passwords;
+    const matchPassword = await bcrypt.compare(enteredPassword, storedPassword);
     return matchPassword;
   } catch (error) {
     throw error;

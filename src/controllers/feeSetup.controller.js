@@ -16,7 +16,7 @@ import {
   updateFeeCycleService,
   updateFeeHeadService,
   updateFeeStructureService,
-  updateFeeHeadVerifyStatusService,
+  updateFeeHeadVerifyStatusService
 } from "../services/feeSetup.service.js";
 import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
 import { verifyMsg91Token } from "../services/msg91.service.js";
@@ -30,14 +30,15 @@ function hasInvalidMongoIds(ids) {
 }
 
 function getFeeStructureIds(feeStructureData) {
-  const sectionIds = feeStructureData.applicableSections.map(({ section }) => section?.sectionId) || [];
+  const sectionIds =
+    feeStructureData.applicableSections.map(({ section }) => section?.sectionId) || [];
   const feeHeadIds = feeStructureData.applicableSections.flatMap(({ feeHeads }) => {
     return feeHeads.map(({ feeHeadId }) => feeHeadId);
   });
 
   return {
     sectionIds,
-    feeHeadIds,
+    feeHeadIds
   };
 }
 
@@ -51,7 +52,7 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
 
   const session = await getSessionService({
     _id: sessionId,
-    school: adminId,
+    school: adminId
   });
 
   if (!session) {
@@ -59,13 +60,16 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
   }
 
   if (session.status === "completed") {
-    return { statusCode: StatusCodes.BAD_REQUEST, message: "Session completed! can't save fee structure" };
+    return {
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: "Session completed! can't save fee structure"
+    };
   }
 
   const feeCycle = await getFeeCycleService({
     _id: feeCycleId,
     adminId,
-    sessionId,
+    sessionId
   });
 
   if (!feeCycle) {
@@ -75,23 +79,26 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
   const classInfo = await getClassService({
     _id: classId,
     admin: adminId,
-    session: sessionId,
+    session: sessionId
   });
 
   if (!classInfo) {
     return { statusCode: StatusCodes.NOT_FOUND, message: "Class not found" };
   }
 
-  const filter = sectionIds.length > 0 ? {
-    _id: { $in: sectionIds },
-    admin: adminId,
-    session: sessionId,
-    classId,
-  } : {
-    admin: adminId,
-    session: sessionId,
-    classId,
-  };
+  const filter =
+    sectionIds.length > 0
+      ? {
+          _id: { $in: sectionIds },
+          admin: adminId,
+          session: sessionId,
+          classId
+        }
+      : {
+          admin: adminId,
+          session: sessionId,
+          classId
+        };
   const sections = await getSectionsService(filter);
 
   if (sections.length !== new Set(sectionIds).size) {
@@ -99,7 +106,7 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
   }
   const feeHeadGroup = await getFeeHeadService({
     adminId,
-    sessionId,
+    sessionId
   });
 
   if (!feeHeadGroup) {
@@ -110,7 +117,9 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
     return { statusCode: StatusCodes.BAD_REQUEST, message: "Fee heads is not verified" };
   }
 
-  const existingFeeHeadIds = new Set(feeHeadGroup.feeHeads.map((feeHead) => feeHead._id.toString()));
+  const existingFeeHeadIds = new Set(
+    feeHeadGroup.feeHeads.map((feeHead) => feeHead._id.toString())
+  );
   const hasInvalidFeeHead = feeHeadIds.some((feeHeadId) => !existingFeeHeadIds.has(feeHeadId));
 
   if (hasInvalidFeeHead) {
@@ -126,8 +135,8 @@ async function validateFeeStructureData({ adminId, feeStructureData }) {
     data: {
       ...feeStructureData,
       adminId,
-      applicableSections,
-    },
+      applicableSections
+    }
   };
 }
 
@@ -137,7 +146,7 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
     (feeHeadGroup?.feeHeads || []).map((feeHead) => {
       const feeHeadObj = feeHead.toObject ? feeHead.toObject() : feeHead;
       return [feeHeadObj._id.toString(), feeHeadObj];
-    }),
+    })
   );
 
   const applicableSections = feeStructureObj.applicableSections.map((applicableSection) => {
@@ -146,14 +155,14 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
       feeHeads: applicableSection.feeHeads.map((feeHead) => {
         return {
           ...feeHead,
-          feeHeadDetails: feeHeadMap.get(feeHead.feeHeadId.toString()) || null,
+          feeHeadDetails: feeHeadMap.get(feeHead.feeHeadId.toString()) || null
         };
-      }),
+      })
     };
   });
 
   const feeBreakdownMap = new Map();
-  const grandTotalBySection = applicableSections.map((applicableSection) => {
+  applicableSections.map((applicableSection) => {
     //let total = 0;
 
     applicableSection.feeHeads.forEach((feeHead) => {
@@ -164,7 +173,7 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
         feeBreakdownMap.set(feeHeadId, {
           feeHeadId,
           feeHeadDetails,
-          amountsBySection: [],
+          amountsBySection: []
           //   total: 0,
         });
       }
@@ -176,14 +185,14 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
       feeBreakdown.amountsBySection.push({
         sectionId: applicableSection.section.sectionId,
         sectionName: applicableSection.section.name,
-        amount,
+        amount
       });
       //  feeBreakdown.total += amount;
     });
 
     return {
       sectionId: applicableSection.section.sectionId,
-      sectionName: applicableSection.section.name,
+      sectionName: applicableSection.section.name
       // total,
     };
   });
@@ -192,11 +201,11 @@ function buildFeeStructureDetails({ feeStructure, classInfo, feeHeadGroup }) {
     ...feeStructureObj,
     classDetails: classInfo
       ? {
-        _id: classInfo._id,
-        name: classInfo.name,
-      }
+          _id: classInfo._id,
+          name: classInfo.name
+        }
       : null,
-    applicableSections,
+    applicableSections
     // sessionDetails: session
     //   ? {
     //       _id: session._id,
@@ -232,7 +241,7 @@ export async function addFeeCycleController(req, res) {
 
     const session = await getSessionService({
       _id: sessionId,
-      school: adminId,
+      school: adminId
     });
 
     if (!session) {
@@ -240,29 +249,35 @@ export async function addFeeCycleController(req, res) {
     }
 
     if (session.status === "completed") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session completed! can't add fee cycle"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Session completed! can't add fee cycle"));
     }
 
     const existingFeeCycle = await getFeeCycleService({
       adminId: adminId,
-      sessionId: sessionId,
+      sessionId: sessionId
     });
 
     if (existingFeeCycle) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Fee cycle already exists for this session"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Fee cycle already exists for this session"));
     }
 
     const feeCycle = await createFeeCycleService({
       adminId,
       sessionId,
       frequency,
-      dueDate,
+      dueDate
     });
 
     return res.status(StatusCodes.CREATED).send(success(201, { feeCycle }));
   } catch (err) {
     if (err.code === 11000) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Fee cycle already exists for this session"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Fee cycle already exists for this session"));
     }
 
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -280,7 +295,7 @@ export async function getFeeCycleController(req, res) {
 
     const feeCycle = await getFeeCycleService({
       adminId,
-      sessionId,
+      sessionId
     });
 
     if (!feeCycle) {
@@ -305,7 +320,7 @@ export async function updateFeeCycleController(req, res) {
 
     const feeCycle = await getFeeCycleService({
       _id: feeCycleId,
-      adminId,
+      adminId
     });
 
     if (!feeCycle) {
@@ -318,7 +333,7 @@ export async function updateFeeCycleController(req, res) {
 
     const session = await getSessionService({
       _id: feeCycle.sessionId,
-      school: adminId,
+      school: adminId
     });
 
     if (!session) {
@@ -326,18 +341,20 @@ export async function updateFeeCycleController(req, res) {
     }
 
     if (session.status === "completed") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session completed! can't update fee cycle"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Session completed! can't update fee cycle"));
     }
 
     const updatedFeeCycle = await updateFeeCycleService(
       {
         _id: feeCycleId,
-        adminId,
+        adminId
       },
       {
         frequency,
-        dueDate,
-      },
+        dueDate
+      }
     );
 
     return res.status(StatusCodes.OK).send(success(200, { feeCycle: updatedFeeCycle }));
@@ -357,7 +374,7 @@ export async function addFeeHeadController(req, res) {
 
     const session = await getSessionService({
       _id: sessionId,
-      school: adminId,
+      school: adminId
     });
 
     if (!session) {
@@ -365,26 +382,28 @@ export async function addFeeHeadController(req, res) {
     }
 
     if (session.status === "completed") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session completed! can't add fee head"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Session completed! can't add fee head"));
     }
 
     const feeHeadData = {
       name,
       label,
       type,
-      refundable,
+      refundable
     };
 
     const existingFeeHeadGroup = await getFeeHeadService({
       adminId,
-      sessionId,
+      sessionId
     });
 
     if (!existingFeeHeadGroup) {
       const feeHead = await createFeeHeadService({
         adminId,
         sessionId,
-        feeHeads: [feeHeadData],
+        feeHeads: [feeHeadData]
       });
 
       return res.status(StatusCodes.CREATED).send(success(201, { feeHead }));
@@ -395,15 +414,17 @@ export async function addFeeHeadController(req, res) {
     });
 
     if (duplicateFeeHead) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Fee head already exists for this session"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Fee head already exists for this session"));
     }
 
     const feeHead = await addFeeHeadService(
       {
         adminId,
-        sessionId,
+        sessionId
       },
-      feeHeadData,
+      feeHeadData
     );
 
     return res.status(StatusCodes.CREATED).send(success(201, { feeHead }));
@@ -424,7 +445,7 @@ export async function updateFeeHeadController(req, res) {
 
     const feeHeadGroup = await getFeeHeadService({
       adminId,
-      "feeHeads._id": feeHeadId,
+      "feeHeads._id": feeHeadId
     });
 
     if (!feeHeadGroup) {
@@ -437,7 +458,7 @@ export async function updateFeeHeadController(req, res) {
 
     const session = await getSessionService({
       _id: feeHeadGroup.sessionId,
-      school: adminId,
+      school: adminId
     });
 
     if (!session) {
@@ -445,28 +466,34 @@ export async function updateFeeHeadController(req, res) {
     }
 
     if (session.status === "completed") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session completed! can't update fee head"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Session completed! can't update fee head"));
     }
 
     const duplicateFeeHead = feeHeadGroup.feeHeads.some((feeHead) => {
-      return feeHead._id.toString() !== feeHeadId && (feeHead.name === name || feeHead.label === label);
+      return (
+        feeHead._id.toString() !== feeHeadId && (feeHead.name === name || feeHead.label === label)
+      );
     });
 
     if (duplicateFeeHead) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Fee head already exists for this session"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Fee head already exists for this session"));
     }
 
-    const feeHead = await updateFeeHeadService(
+    await updateFeeHeadService(
       {
         adminId,
-        "feeHeads._id": feeHeadId,
+        "feeHeads._id": feeHeadId
       },
       {
         name,
         label,
         type,
-        refundable,
-      },
+        refundable
+      }
     );
 
     return res.status(StatusCodes.OK).send(success(200));
@@ -486,7 +513,7 @@ export async function getFeeHeadController(req, res) {
 
     const feeHead = await getFeeHeadService({
       adminId,
-      sessionId,
+      sessionId
     });
 
     if (!feeHead) {
@@ -510,7 +537,7 @@ export async function deleteFeeHeadController(req, res) {
 
     const feeHeadGroup = await getFeeHeadService({
       adminId,
-      "feeHeads._id": feeHeadId,
+      "feeHeads._id": feeHeadId
     });
 
     if (!feeHeadGroup) {
@@ -523,7 +550,7 @@ export async function deleteFeeHeadController(req, res) {
 
     const session = await getSessionService({
       _id: feeHeadGroup.sessionId,
-      school: adminId,
+      school: adminId
     });
 
     if (!session) {
@@ -531,15 +558,17 @@ export async function deleteFeeHeadController(req, res) {
     }
 
     if (session.status === "completed") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session completed! can't delete fee head"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Session completed! can't delete fee head"));
     }
 
-    const feeHead = await deleteFeeHeadService(
+    await deleteFeeHeadService(
       {
         adminId,
-        "feeHeads._id": feeHeadId,
+        "feeHeads._id": feeHeadId
       },
-      feeHeadId,
+      feeHeadId
     );
 
     return res.status(StatusCodes.OK).send(success(200));
@@ -553,21 +582,25 @@ export async function addFeeStructureController(req, res) {
     const adminId = req.adminId;
     const validation = await validateFeeStructureData({
       adminId,
-      feeStructureData: req.body,
+      feeStructureData: req.body
     });
 
     if (validation.message) {
-      return res.status(validation.statusCode).send(error(validation.statusCode, validation.message));
+      return res
+        .status(validation.statusCode)
+        .send(error(validation.statusCode, validation.message));
     }
 
     const existingFeeStructure = await getFeeStructureService({
       adminId,
       sessionId: req.body.sessionId,
-      classId: req.body.classId,
+      classId: req.body.classId
     });
 
     if (existingFeeStructure) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Fee structure already exists for this class"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Fee structure already exists for this class"));
     }
 
     const feeStructure = await createFeeStructureService(validation.data);
@@ -575,7 +608,9 @@ export async function addFeeStructureController(req, res) {
     return res.status(StatusCodes.CREATED).send(success(201, { feeStructure }));
   } catch (err) {
     if (err.code === 11000) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Fee structure already exists for this class"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Fee structure already exists for this class"));
     }
 
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -593,7 +628,7 @@ export async function getFeeStructureController(req, res) {
 
     const feeStructure = await getFeeStructureService({
       _id: feeStructureId,
-      adminId,
+      adminId
     });
 
     if (!feeStructure) {
@@ -603,7 +638,7 @@ export async function getFeeStructureController(req, res) {
     const [classInfo, feeHeadGroup] = await Promise.all([
       getClassService({
         _id: feeStructure.classId,
-        admin: adminId,
+        admin: adminId
       }),
       // getSessionService({
       //   _id: feeStructure.sessionId,
@@ -615,14 +650,14 @@ export async function getFeeStructureController(req, res) {
       // }),
       getFeeHeadService({
         adminId,
-        sessionId: feeStructure.sessionId,
-      }),
+        sessionId: feeStructure.sessionId
+      })
     ]);
 
     const feeStructureDetails = buildFeeStructureDetails({
       feeStructure,
       classInfo,
-      feeHeadGroup,
+      feeHeadGroup
     });
 
     return res.status(StatusCodes.OK).send(success(200, { feeStructure: feeStructureDetails }));
@@ -652,7 +687,7 @@ export async function getFeeStructureListingController(req, res) {
     }
 
     const match = {
-      adminId: convertToMongoId(adminId),
+      adminId: convertToMongoId(adminId)
     };
 
     if (classId) {
@@ -671,7 +706,7 @@ export async function getFeeStructureListingController(req, res) {
       match,
       search,
       skip,
-      limit,
+      limit
     });
 
     return res.status(StatusCodes.OK).send(
@@ -681,9 +716,9 @@ export async function getFeeStructureListingController(req, res) {
           total,
           page,
           limit,
-          totalPages: Math.ceil(total / limit),
-        },
-      }),
+          totalPages: Math.ceil(total / limit)
+        }
+      })
     );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -701,7 +736,7 @@ export async function updateFeeStructureController(req, res) {
 
     const existingFeeStructure = await getFeeStructureService({
       _id: feeStructureId,
-      adminId,
+      adminId
     });
 
     if (!existingFeeStructure) {
@@ -714,25 +749,29 @@ export async function updateFeeStructureController(req, res) {
 
     const validation = await validateFeeStructureData({
       adminId,
-      feeStructureData: req.body,
+      feeStructureData: req.body
     });
 
     if (validation.message) {
-      return res.status(validation.statusCode).send(error(validation.statusCode, validation.message));
+      return res
+        .status(validation.statusCode)
+        .send(error(validation.statusCode, validation.message));
     }
 
-    const feeStructure = await updateFeeStructureService(
+    await updateFeeStructureService(
       {
         _id: feeStructureId,
-        adminId,
+        adminId
       },
-      validation.data,
+      validation.data
     );
 
     return res.status(StatusCodes.OK).send(success(200));
   } catch (err) {
     if (err.code === 11000) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Fee structure already exists for this class"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Fee structure already exists for this class"));
     }
 
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -750,7 +789,7 @@ export async function deleteFeeStructureController(req, res) {
 
     const feeStructure = await getFeeStructureService({
       _id: feeStructureId,
-      adminId,
+      adminId
     });
 
     if (!feeStructure) {
@@ -763,7 +802,7 @@ export async function deleteFeeStructureController(req, res) {
 
     const session = await getSessionService({
       _id: feeStructure.sessionId,
-      school: adminId,
+      school: adminId
     });
 
     if (!session) {
@@ -771,12 +810,14 @@ export async function deleteFeeStructureController(req, res) {
     }
 
     if (session.status === "completed") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session completed! can't delete fee structure"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Session completed! can't delete fee structure"));
     }
 
-    const deletedFeeStructure = await deleteFeeStructureService({
+    await deleteFeeStructureService({
       _id: feeStructureId,
-      adminId,
+      adminId
     });
 
     return res.status(StatusCodes.OK).send(success(200));
@@ -796,15 +837,17 @@ export async function verifyFeeSetupController(req, res) {
 
     if (!config.bypassToken) {
       const response = await verifyMsg91Token(token);
-      if (response?.type !== 'success') {
-        return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
+      if (response?.type !== "success") {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(error(400, response?.message || "Token can't verified"));
       }
     }
 
     if (type === "VERIFY_FEE_STRUCTURE") {
       const feeStructure = await getFeeStructureService({
         _id: id,
-        adminId,
+        adminId
       });
 
       if (!feeStructure) {
@@ -812,7 +855,9 @@ export async function verifyFeeSetupController(req, res) {
       }
 
       if (feeStructure.isVerified) {
-        return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Fee structure already verified"));
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(error(400, "Fee structure already verified"));
       }
 
       const updatedFeeStructure = await updateFeeStructureService(
@@ -822,7 +867,8 @@ export async function verifyFeeSetupController(req, res) {
         {
           //isVerified: true,
           status: "ACTIVE"
-        });
+        }
+      );
 
       if (updatedFeeStructure) {
         try {
@@ -848,26 +894,25 @@ export async function verifyFeeSetupController(req, res) {
       await Promise.all([
         updateFeeHeadVerifyStatusService(
           {
-            _id: id,
+            _id: id
           },
           {
-            isVerified: true,
-          },
+            isVerified: true
+          }
         ),
         updateFeeCycleService(
           {
-            sessionId: feeHead.sessionId,
+            sessionId: feeHead.sessionId
           },
           {
-            isVerified: true,
-          },
-        ),
+            isVerified: true
+          }
+        )
       ]);
     }
 
     return res.status(StatusCodes.OK).send(success(200));
-  }
-  catch (err) {
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

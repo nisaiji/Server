@@ -1,61 +1,62 @@
 import mongoose from "mongoose";
 
-const teacherLeaveRequestSchema = mongoose.Schema({
-  reason:{
-    type:String,
-    required: true
-  },
+const teacherLeaveRequestSchema = mongoose.Schema(
+  {
+    reason: {
+      type: String,
+      required: true
+    },
 
-  description:{
-    type:String,
-  },
+    description: {
+      type: String
+    },
 
-  remark: {
-    type: String
-  },
+    remark: {
+      type: String
+    },
 
-  section:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "section",
-    required: true
-  },
+    section: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "section",
+      required: true
+    },
 
-  requestingTeacher: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "teacher",
-    required: true
-  },
+    requestingTeacher: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "teacher",
+      required: true
+    },
 
-  guestTeacher: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "teacher",
-    required: true
-  },
+    guestTeacher: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "teacher",
+      required: true
+    },
 
-  admin: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "admin"
-  },
+    admin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "admin"
+    },
 
-  status:{
-    type:String,
-    enum:["accept", "reject", "pending", "complete", "expired"],
-    default: "pending"
-  },
+    status: {
+      type: String,
+      enum: ["accept", "reject", "pending", "complete", "expired"],
+      default: "pending"
+    },
 
-  startTime: {
-    type: Number,
-    required: true
-  },
+    startTime: {
+      type: Number,
+      required: true
+    },
 
-  endTime: {
-    type: Number,
-    required: true
+    endTime: {
+      type: Number,
+      required: true
+    }
   },
-},
-{
-  timestamps:true
-}
+  {
+    timestamps: true
+  }
 );
 
 const teacherLeaveRequestModel = mongoose.model("teacherLeaveRequest", teacherLeaveRequestSchema);

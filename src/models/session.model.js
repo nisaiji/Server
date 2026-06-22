@@ -1,43 +1,44 @@
 import mongoose from "mongoose";
 
-const sessionSchema = mongoose.Schema({
-  name: {
-    type: String,
-    trim: true
+const sessionSchema = mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true
+    },
+    startDate: {
+      type: Date,
+      required: true
+    },
+    endDate: {
+      type: Date,
+      required: true
+    },
+    school: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "admin"
+    },
+    isCurrent: {
+      type: Boolean,
+      default: false
+    },
+    status: {
+      type: String,
+      enum: ["upcoming", "active", "completed"],
+      default: "active"
+    },
+    academicStartYear: {
+      type: Number,
+      required: true
+    },
+    academicEndYear: {
+      type: Number,
+      required: true
+    }
   },
-  startDate: {
-    type: Date,
-    required: true,
-  },
-  endDate: {
-    type: Date,
-    required: true,
-  },
-  school: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "admin"
-  },
-  isCurrent: {
-    type: Boolean,
-    default: false 
-  },
-  status: {
-    type: String,
-    enum: ["upcoming", "active", 'completed'],
-    default: "active"
-  },
-  academicStartYear: {
-    type: Number,
-    required: true
-  },
-  academicEndYear: {
-    type: Number,
-    required: true
+  {
+    timestamps: true
   }
-},
-{
-  timestamps:true
-}
 );
 
 const sessionModel = mongoose.model("session", sessionSchema);

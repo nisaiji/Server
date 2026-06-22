@@ -4,7 +4,7 @@ import { error } from "../../utils/responseWrapper.js";
 import { registerSectionSchema } from "../../validators/sectionSchema.validator.js";
 
 export async function registerSectionValidation(req, res, next) {
-  try {   
+  try {
     const { error: schemaError } = registerSectionSchema.validate(req.body);
     if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));

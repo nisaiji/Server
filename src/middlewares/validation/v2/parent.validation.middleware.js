@@ -1,7 +1,19 @@
 import { StatusCodes } from "http-status-codes";
 
 import { error } from "../../../utils/responseWrapper.js";
-import { parentEmailTokenValidator, parentEmailValidator, parentFcmTokenValidator, parentFullnameValidator, parentPasswordEditValidator, parentPasswordValidator, parentPhoneAndOtpValidator, parentPhoneTokenValidator, parentPhoneValidator, parentUpdateValidator, uploadParentPhotoValidator } from "../../../validators/v2/parentSchema.validator.js";
+import {
+  parentEmailTokenValidator,
+  parentEmailValidator,
+  parentFcmTokenValidator,
+  parentFullnameValidator,
+  parentPasswordEditValidator,
+  parentPasswordValidator,
+  parentPhoneAndOtpValidator,
+  parentPhoneTokenValidator,
+  parentPhoneValidator,
+  parentUpdateValidator,
+  uploadParentPhotoValidator
+} from "../../../validators/v2/parentSchema.validator.js";
 
 export async function parentPhoneValidation(req, res, next) {
   try {

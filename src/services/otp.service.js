@@ -1,6 +1,6 @@
 import otpModel from "../models/otp.model.js";
 
-export async function getOtpService(filter, projection={}) {
+export async function getOtpService(filter, projection = {}) {
   try {
     const otp = await otpModel.findOne(filter).select(projection);
     return otp;
@@ -9,7 +9,7 @@ export async function getOtpService(filter, projection={}) {
   }
 }
 
-export async function getOtpsService(paramObj){
+export async function getOtpsService(paramObj) {
   try {
     const otps = await otpModel.find(paramObj);
     return otps;
@@ -27,21 +27,21 @@ export async function registerOtpService(data) {
   }
 }
 
-export async function updateOtpService(filter, update){
+export async function updateOtpService(filter, update) {
   try {
-      const otp = await otpModel.updateOne(filter, update);
-      return otp;
+    const otp = await otpModel.updateOne(filter, update);
+    return otp;
   } catch (error) {
     throw error;
   }
 }
 
-export async function getOtpCountService(filter){
+export async function getOtpCountService(filter) {
   try {
     const count = await otpModel.countDocuments(filter);
     return count;
   } catch (error) {
-    throw error;  
+    throw error;
   }
 }
 
@@ -54,12 +54,11 @@ export async function deleteOtpService(filter) {
   }
 }
 
-
-export async function getOtpsPipelineService(pipeline){
+export async function getOtpsPipelineService(pipeline) {
   try {
     const otps = await otpModel.aggregate(pipeline).exec();
     return otps;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }

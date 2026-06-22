@@ -1,8 +1,16 @@
 import { StatusCodes } from "http-status-codes";
 
 import { error } from "../../utils/responseWrapper.js";
-import {teacherRegisterSchema,teacherUpdateSchema,teacherUsernamePasswordUpdateSchema,teacherLoginSchema,teacherEmailPhoneUpdateSchema, teacherPhotoUpdateSchema, teacherAddressUpdateSchema, teacherFcmTokenSchema} from "../../validators/teacherSchema.validator.js";
-
+import {
+  teacherRegisterSchema,
+  teacherUpdateSchema,
+  teacherUsernamePasswordUpdateSchema,
+  teacherLoginSchema,
+  teacherEmailPhoneUpdateSchema,
+  teacherPhotoUpdateSchema,
+  teacherAddressUpdateSchema,
+  teacherFcmTokenSchema
+} from "../../validators/teacherSchema.validator.js";
 
 export async function registerTeacherValidation(req, res, next) {
   try {

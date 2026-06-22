@@ -45,21 +45,20 @@ export async function deleteHolidayService(paramObj) {
   }
 }
 
-
-export async function getHolidayCountService(filter){
+export async function getHolidayCountService(filter) {
   try {
     const count = await holidayModel.countDocuments(filter);
     return count;
   } catch (error) {
-    throw error;  
+    throw error;
   }
 }
 
-export async function getHolidayPipelineService(pipeline){
+export async function getHolidayPipelineService(pipeline) {
   try {
     const holidays = await holidayModel.aggregate(pipeline).exec();
     return holidays;
   } catch (error) {
-    throw error;    
+    throw error;
   }
 }

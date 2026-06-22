@@ -10,7 +10,6 @@
 
 // const studentRouter = express.Router();
 
-
 // studentRouter.post("/teacher", teacherAuthenticate, authorizeTeacherRoles('classTeacher'), registerStudentValidation, registerStudentController );
 // studentRouter.post("/admin", adminAuthenticate, registerStudentValidation, registerStudentController );
 // studentRouter.post('/excel', adminAuthenticate, upload, registerStudentsFromExcelController);
@@ -28,5 +27,5 @@
 
 // studentRouter.put("/teacher/photo-upload/:studentId", teacherAuthenticate, authorizeTeacherRoles('classTeacher'), uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentController)
 // studentRouter.put("/parent/photo-upload/:studentId", parentAuthenticate, uploadStudentPhotoValidation, validateImageSizeMiddleware, updateStudentController)
-  
+
 // export default studentRouter;

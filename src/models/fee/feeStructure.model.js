@@ -6,38 +6,38 @@ const feeStructureSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "admins",
       required: true,
-      index: true,
+      index: true
     },
 
     feeCycleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "feeCycles",
       required: true,
-      index: true,
+      index: true
     },
 
     sessionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "sessions",
       required: true,
-      index: true,
+      index: true
     },
 
     classId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "classes",
       required: true,
-      index: true,
+      index: true
     },
 
     amountForAllSections: {
       type: Boolean,
-      default: false,
+      default: false
     },
 
     isVerified: {
       type: Boolean,
-      default: false,
+      default: false
     },
 
     applicableSections: [
@@ -46,11 +46,11 @@ const feeStructureSchema = new mongoose.Schema(
         section: {
           sectionId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "section",
+            ref: "section"
           },
           name: {
-            type: String,
-          },
+            type: String
+          }
         },
 
         feeHeads: [
@@ -58,40 +58,40 @@ const feeStructureSchema = new mongoose.Schema(
             _id: false,
             feeHeadId: {
               type: mongoose.Schema.Types.ObjectId,
-              ref: "feeHead",
+              ref: "feeHead"
             },
 
             amount: {
               type: Number,
-              required: true,
-            },
-          },
-        ],
-      },
+              required: true
+            }
+          }
+        ]
+      }
     ],
 
     status: {
       type: String,
       enum: ["DRAFT", "ACTIVE"],
-      default: "DRAFT",
-    },
+      default: "DRAFT"
+    }
   },
   {
     timestamps: true,
     versionKey: false,
-    collection: "fee_structures",
-  },
+    collection: "fee_structures"
+  }
 );
 
 feeStructureSchema.index(
   {
     adminId: 1,
     sessionId: 1,
-    classId: 1,
+    classId: 1
   },
   {
-    unique: true,
-  },
+    unique: true
+  }
 );
 
 const feeStructureModel = mongoose.model("feeStructure", feeStructureSchema);

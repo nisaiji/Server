@@ -12,7 +12,7 @@ export async function sentSMSByTwillio(toPhoneNumber, message) {
     const response = await client.messages.create({
       body: message,
       from: fromPhoneNumber,
-      to: toPhoneNumber,
+      to: toPhoneNumber
     });
     return response;
   } catch (error) {

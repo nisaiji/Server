@@ -1,7 +1,7 @@
-import fs from 'fs/promises';
+import fs from "fs/promises";
 
 import { StatusCodes } from "http-status-codes";
-import xlsx from 'xlsx';
+import xlsx from "xlsx";
 
 import { getAdminService } from "../services/admin.services.js";
 import { getClassService } from "../services/class.services.js";
@@ -11,10 +11,19 @@ import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.
 import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
 import { getSectionService } from "../services/section.services.js";
 import { getSessionService } from "../services/session.services.js";
-import { getTeacherService, registerTeacherService, getAllTeacherOfAdminService, updateTeacherService, getTeachersService, getTeachersPipelineService } from "../services/teacher.services.js";
-import { getTeacherSectionSessionService, getTeacherSectionSessionsService } from "../services/teacherSectionSession.service.js";
+import {
+  getTeacherService,
+  registerTeacherService,
+  getAllTeacherOfAdminService,
+  updateTeacherService,
+  getTeachersService,
+  getTeachersPipelineService
+} from "../services/teacher.services.js";
+import {
+  getTeacherSectionSessionService,
+  getTeacherSectionSessionsService
+} from "../services/teacherSectionSession.service.js";
 import { error, success } from "../utils/responseWrapper.js";
-
 
 export async function registerTeacherController(req, res) {
   try {
@@ -39,82 +48,106 @@ export async function loginTeacherController(req, res) {
   try {
     const { user, password, platform, deviceId } = req.body;
     const [teacher, guestTeacher] = await Promise.all([
-      getTeacherService({isActive: true, $or: [{ username: user }, { phone: user }, { email: user?.toLowerCase() }]}),
-      getGuestTeacherService({ username: user, isActive:true })
+      getTeacherService({
+        isActive: true,
+        $or: [{ username: user }, { phone: user }, { email: user?.toLowerCase() }]
+      }),
+      getGuestTeacherService({ username: user, isActive: true })
     ]);
 
     const currentTeacher = teacher ? teacher : guestTeacher;
 
     if (!currentTeacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid credentials. Please try again"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Invalid credentials. Please try again"));
     }
     // if (!currentTeacher['isActive']) {
     //   return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found. Please check your credentials."))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "));
     // }
-    const admin = await getAdminService({_id: currentTeacher['admin']});
-    if (!admin){
+    const admin = await getAdminService({ _id: currentTeacher["admin"] });
+    if (!admin) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
 
-    if(admin && !admin['isActive']){
-      return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact support."));
+    if (admin && !admin["isActive"]) {
+      return res
+        .status(StatusCodes.GONE)
+        .send(error(410, "Services are temporarily paused. Please contact support."));
     }
-    if (teacher && platform==='app' && !deviceId) {
+    if (teacher && platform === "app" && !deviceId) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Device Id is required"));
     }
-    const matchPassword = await matchPasswordService({ enteredPassword: password, storedPassword: currentTeacher["password"] });
+    const matchPassword = await matchPasswordService({
+      enteredPassword: password,
+      storedPassword: currentTeacher["password"]
+    });
     if (!matchPassword) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Invalid credentials. Please try again"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(404, "Invalid credentials. Please try again"));
     }
 
-    const session = await getSessionService({school: admin['_id'], status: "active"});
+    const session = await getSessionService({ school: admin["_id"], status: "active" });
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
     if (guestTeacher && platform === "web") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Guest teacher does not support on web"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Guest teacher does not support on web"));
     }
     let section;
     let Class;
-    const teacherSectionSession = await getTeacherSectionSessionService({ teacher: currentTeacher['_id'], session: session['_id'] });
+    const teacherSectionSession = await getTeacherSectionSessionService({
+      teacher: currentTeacher["_id"],
+      session: session["_id"]
+    });
     if (teacherSectionSession) {
       [section, Class] = await Promise.all([
-        getSectionService({ _id: teacherSectionSession.section}),
-        getClassService({ _id: teacherSectionSession.classInfo})
+        getSectionService({ _id: teacherSectionSession.section }),
+        getClassService({ _id: teacherSectionSession.classInfo })
       ]);
     }
     // if (!section) {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Teacher is not assigned to any section"));
     // }
 
-    if(platform=='app' && teacher && teacher['isLoginAlready'] && teacher['deviceId']!==deviceId){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Access denied due to device mismatch"));
+    if (
+      platform == "app" &&
+      teacher &&
+      teacher["isLoginAlready"] &&
+      teacher["deviceId"] !== deviceId
+    ) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(401, "Access denied due to device mismatch"));
     }
 
     const accessToken = getAccessTokenService({
       role: teacher ? (teacherSectionSession ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
-      sectionId: section? section["_id"]:"",
-      sectionStart: section? section['startTime']:"",
-      classId: Class?Class["_id"]:"",
-      sectionName: section? section["name"] : "",
+      sectionId: section ? section["_id"] : "",
+      sectionStart: section ? section["startTime"] : "",
+      classId: Class ? Class["_id"] : "",
+      sectionName: section ? section["name"] : "",
       className: Class ? Class["name"] : "",
-      schoolName: admin['schoolName'],
-      sessionId: section? section["session"]: "",
-      tagline: guestTeacher ? guestTeacher['tagline'] :"",
+      schoolName: admin["schoolName"],
+      sessionId: section ? section["session"] : "",
+      tagline: guestTeacher ? guestTeacher["tagline"] : "",
       phone: currentTeacher["phone"] ? currentTeacher["phone"] : "",
       email: currentTeacher["email"] ? currentTeacher["email"] : "",
       pincode: currentTeacher["pincode"] ? currentTeacher["pincode"] : "",
-      username: currentTeacher["username"] ? currentTeacher["username"] : "",
+      username: currentTeacher["username"] ? currentTeacher["username"] : ""
     });
     const refreshToken = getRefreshTokenService({
       role: teacher ? (teacherSectionSession ? "classTeacher" : "teacher") : "guestTeacher",
       teacherId: currentTeacher["_id"],
       adminId: currentTeacher["admin"],
-      sectionId: section?section["_id"]:"",
-      classId: Class?Class["_id"]:"",
-      sectionName: section? section["name"] : "",
+      sectionId: section ? section["_id"] : "",
+      classId: Class ? Class["_id"] : "",
+      sectionName: section ? section["name"] : "",
       className: Class ? Class["name"] : "",
       phone: currentTeacher["phone"] ? currentTeacher["phone"] : "",
       email: currentTeacher["email"] ? currentTeacher["email"] : "",
@@ -122,13 +155,22 @@ export async function loginTeacherController(req, res) {
       username: currentTeacher["username"] ? currentTeacher["username"] : ""
     });
     let isLoginAlready = true;
-    if (platform==='app' && !currentTeacher['isLoginAlready']) {
+    if (platform === "app" && !currentTeacher["isLoginAlready"]) {
       isLoginAlready = currentTeacher["isLoginAlready"];
       currentTeacher["isLoginAlready"] = true;
-      currentTeacher['deviceId'] = deviceId;
+      currentTeacher["deviceId"] = deviceId;
       await currentTeacher.save();
     }
-    return res.status(StatusCodes.OK).send(success(200, { accessToken, refreshToken, firstname: teacher ? teacher["firstname"] : "",isLoginAlready }));
+    return res
+      .status(StatusCodes.OK)
+      .send(
+        success(200, {
+          accessToken,
+          refreshToken,
+          firstname: teacher ? teacher["firstname"] : "",
+          isLoginAlready
+        })
+      );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -147,7 +189,7 @@ export async function refreshAccessTokenController(req, res) {
 export async function getAllTeacherOfAdminController(req, res) {
   try {
     const adminId = req.adminId;
-    const {sessionId} = req.body;
+    const { sessionId } = req.body;
     const teachers = await getTeachersPipelineService([
       {
         $match: { admin: convertToMongoId(adminId), isActive: true }
@@ -217,7 +259,7 @@ export async function getAllTeacherOfAdminController(req, res) {
                 from: "subjects",
                 localField: "subject",
                 foreignField: "_id",
-                as: "subject",
+                as: "subject"
               }
             },
             {
@@ -231,7 +273,7 @@ export async function getAllTeacherOfAdminController(req, res) {
                 from: "sections",
                 localField: "section",
                 foreignField: "_id",
-                as: "section",
+                as: "section"
               }
             },
             {
@@ -245,7 +287,7 @@ export async function getAllTeacherOfAdminController(req, res) {
                 from: "classes",
                 localField: "classId",
                 foreignField: "_id",
-                as: "class",
+                as: "class"
               }
             },
             {
@@ -306,8 +348,10 @@ export async function getAllTeacherOfAdminController(req, res) {
           sectionStartTime: "$teacherSectionSession.sectionInfo.startTime",
           classId: "$teacherSectionSession.classInfo._id",
           className: "$teacherSectionSession.classInfo.name",
-          sectionCountInClass: { $size: { $ifNull: ["$teacherSectionSession.classInfo.section", []] } },
-          sectionSubjects: "$sectionSubjects",
+          sectionCountInClass: {
+            $size: { $ifNull: ["$teacherSectionSession.classInfo.section", []] }
+          },
+          sectionSubjects: "$sectionSubjects"
         }
       },
       {
@@ -317,7 +361,7 @@ export async function getAllTeacherOfAdminController(req, res) {
         }
       }
     ]);
-    const teachersWithRole = teachers.map(t => {
+    const teachersWithRole = teachers.map((t) => {
       const hasSection = t.sectionId && String(t.sectionId).trim() !== "";
       return { ...t, role: hasSection ? "classTeacher" : "teacher" };
     });
@@ -364,7 +408,7 @@ export async function updateTeacherController(req, res) {
 
     const fieldsToBeUpdated = {};
     if (email) {
-      const teacher = await getTeacherService({_id: { $ne: teacherId }, email, isActive: true });
+      const teacher = await getTeacherService({ _id: { $ne: teacherId }, email, isActive: true });
       if (teacher) {
         return res.status(StatusCodes.CONFLICT).send(error(409, "Email already registered"));
       }
@@ -372,15 +416,21 @@ export async function updateTeacherController(req, res) {
     }
 
     if (username) {
-      const teacher = await getTeacherService({_id: { $ne: teacherId }, username, isActive: true });
+      const teacher = await getTeacherService({
+        _id: { $ne: teacherId },
+        username,
+        isActive: true
+      });
       if (teacher) {
-        return res.status(StatusCodes.CONFLICT).send(error(409, "Username already exists. Try a different one"));
+        return res
+          .status(StatusCodes.CONFLICT)
+          .send(error(409, "Username already exists. Try a different one"));
       }
       fieldsToBeUpdated.username = username;
     }
 
     if (phone) {
-      const teacher = await getTeacherService({_id: { $ne: teacherId }, phone, isActive: true });
+      const teacher = await getTeacherService({ _id: { $ne: teacherId }, phone, isActive: true });
       if (teacher) {
         return res.status(StatusCodes.CONFLICT).send(error(409, "Phone already registered"));
       }
@@ -458,7 +508,9 @@ export async function deleteTeacherController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
     }
     if (teacher["section"]) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Cannot delete the teacher as they are assigned to a section"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Cannot delete the teacher as they are assigned to a section"));
     }
     await updateTeacherService({ _id: teacher["_id"] }, { isActive: false });
     return res.status(StatusCodes.OK).send(success(200, "Teacher deleted successfully"));
@@ -473,7 +525,7 @@ export async function getTeacherController(req, res) {
     if (!isValidMongoId(id)) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid teacher Id"));
     }
-    const teacher = await getTeacherService({ _id: id, isActive: true }, {password:0});
+    const teacher = await getTeacherService({ _id: id, isActive: true }, { password: 0 });
     if (!teacher) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "User not found"));
     }
@@ -481,23 +533,20 @@ export async function getTeacherController(req, res) {
       {
         $match: { _id: convertToMongoId(id) }
       },
-      {$lookup: {
-        from: "sessions",
-        localField: "admin",
-        foreignField: "school",
-        as: "session",
-        pipeline: [
-          { $match: { status: "active" } },
-          { $sort: { createdAt: -1 } },
-          { $limit: 1 }
-        ]
-       }
+      {
+        $lookup: {
+          from: "sessions",
+          localField: "admin",
+          foreignField: "school",
+          as: "session",
+          pipeline: [{ $match: { status: "active" } }, { $sort: { createdAt: -1 } }, { $limit: 1 }]
+        }
       },
-       {
-         $unwind: {
-           path: "$session", 
-           preserveNullAndEmptyArrays: true
-         }
+      {
+        $unwind: {
+          path: "$session",
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $lookup: {
@@ -508,17 +557,17 @@ export async function getTeacherController(req, res) {
         }
       },
       {
-         $unwind: {
-           path: "$section", 
-           preserveNullAndEmptyArrays: true
-         }
+        $unwind: {
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $lookup: {
           from: "classes",
           localField: "section.classId",
           foreignField: "_id",
-          as:"class"
+          as: "class"
         }
       },
       {
@@ -539,7 +588,7 @@ export async function getTeacherController(req, res) {
                 from: "subjects",
                 localField: "subject",
                 foreignField: "_id",
-                as: "subject",
+                as: "subject"
               }
             },
             {
@@ -553,7 +602,7 @@ export async function getTeacherController(req, res) {
                 from: "sections",
                 localField: "section",
                 foreignField: "_id",
-                as: "section",
+                as: "section"
               }
             },
             {
@@ -567,7 +616,7 @@ export async function getTeacherController(req, res) {
                 from: "classes",
                 localField: "classId",
                 foreignField: "_id",
-                as: "class",
+                as: "class"
               }
             },
             {
@@ -635,7 +684,7 @@ export async function getTeacherController(req, res) {
           sessionStatus: "$session.status",
           sessionStartYear: "$session.academicStartYear",
           sessionEndYear: "$session.academicEndYear",
-          sectionSubjects: "$sectionSubjects",
+          sectionSubjects: "$sectionSubjects"
         }
       },
       {
@@ -655,14 +704,19 @@ export async function getAllNonSectionTeacherController(req, res) {
   try {
     const sessionId = req.params.sessionId;
     const adminId = req.adminId;
-    const session = await getSessionService({_id: sessionId});
+    const session = await getSessionService({ _id: sessionId });
     if (!session) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid session Id"));
     }
     const teachers = await getTeachersService({ admin: adminId, isActive: true });
-    const assignedTeachers = await getTeacherSectionSessionsService({ session: sessionId }, { teacher: 1 });
-    const assignedTeacherIds = assignedTeachers.map(t => t.teacher.toString());
-    const nonSectionTeachers = teachers.filter(teacher => !assignedTeacherIds.includes(teacher._id.toString()));
+    const assignedTeachers = await getTeacherSectionSessionsService(
+      { session: sessionId },
+      { teacher: 1 }
+    );
+    const assignedTeacherIds = assignedTeachers.map((t) => t.teacher.toString());
+    const nonSectionTeachers = teachers.filter(
+      (teacher) => !assignedTeacherIds.includes(teacher._id.toString())
+    );
     return res.send(success(200, nonSectionTeachers));
   } catch (err) {
     return res.send(error(500, err.message));
@@ -677,7 +731,10 @@ export async function changePasswordTeacherController(req, res) {
     if (!teacher) {
       return res.status(StatusCodes.GONE).send(error(410, "Unauthorized user"));
     }
-    const isMatched = await matchPasswordService({ enteredPassword: oldPassword, storedPassword: teacher["password"] });
+    const isMatched = await matchPasswordService({
+      enteredPassword: oldPassword,
+      storedPassword: teacher["password"]
+    });
     if (!isMatched) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Invalid Old Password"));
     }
@@ -693,7 +750,7 @@ export async function changePasswordTeacherController(req, res) {
 
 export async function assignTeacherAsGuestTeacherToSectionController(req, res) {
   try {
-    const {teacherId, sectionId} = req.body;
+    const { teacherId, sectionId } = req.body;
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -709,9 +766,9 @@ export async function registerTeachersFromExcelController(req, res) {
     }
 
     // Expected Excel columns based on teacher model:
-    // firstname (required), lastname, phone (required), email, gender, dob, bloodGroup, 
+    // firstname (required), lastname, phone (required), email, gender, dob, bloodGroup,
     // university, degree, address, city, district, state, country, pincode
-    
+
     const workbook = xlsx.readFile(file.path);
     const sheetName = workbook.SheetNames[0];
     const teachers = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
@@ -722,10 +779,28 @@ export async function registerTeachersFromExcelController(req, res) {
     teachers.shift();
     for (const teacherData of teachers) {
       try {
-        const { firstname, lastname, phone, email, gender, dob, bloodGroup, university, degree, address, city, district, state, country, pincode } = teacherData;
+        const {
+          firstname,
+          lastname,
+          phone,
+          email,
+          gender,
+          dob,
+          bloodGroup,
+          university,
+          degree,
+          address,
+          city,
+          district,
+          state,
+          country,
+          pincode
+        } = teacherData;
 
         if (!firstname || !phone) {
-          errors.push(`Row with firstname: ${firstname || 'N/A'} - Missing required fields (firstname, phone)`);
+          errors.push(
+            `Row with firstname: ${firstname || "N/A"} - Missing required fields (firstname, phone)`
+          );
           continue;
         }
 
@@ -740,20 +815,20 @@ export async function registerTeachersFromExcelController(req, res) {
 
         const teacherObj = {
           firstname,
-          lastname: lastname || '',
+          lastname: lastname || "",
           phone,
-          email: email || '',
-          gender: gender || '',
-          dob: dob || '',
-          bloodGroup: bloodGroup || '',
-          university: university || '',
-          degree: degree || '',
-          address: address || '',
-          city: city || '',
-          district: district || '',
-          state: state || '',
-          country: country || '',
-          pincode: pincode || '',
+          email: email || "",
+          gender: gender || "",
+          dob: dob || "",
+          bloodGroup: bloodGroup || "",
+          university: university || "",
+          degree: degree || "",
+          address: address || "",
+          city: city || "",
+          district: district || "",
+          state: state || "",
+          country: country || "",
+          pincode: pincode || "",
           password: hashedPassword,
           admin: adminId
         };
@@ -761,7 +836,9 @@ export async function registerTeachersFromExcelController(req, res) {
         await registerTeacherService(teacherObj);
         registeredCount++;
       } catch (err) {
-        errors.push(`Error registering teacher ${teacherData.firstname || 'Unknown'}: ${err.message}`);
+        errors.push(
+          `Error registering teacher ${teacherData.firstname || "Unknown"}: ${err.message}`
+        );
       }
     }
 

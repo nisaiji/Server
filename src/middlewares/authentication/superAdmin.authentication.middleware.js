@@ -5,12 +5,13 @@ import { config } from "../../config/config.js";
 import { getSuperAdminService } from "../../services/superAdmin.service.js";
 import { error } from "../../utils/responseWrapper.js";
 
-
 export async function superAdminAuthenticate(req, res, next) {
   try {
     const token = req.header("Authorization");
-    if (!token){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Authorization token is required"));
+    if (!token) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(404, "Authorization token is required"));
     }
     const parsedToken = token.split(" ")[1];
     const decoded = Jwt.verify(parsedToken, config.accessTokenSecretKey);
@@ -18,8 +19,8 @@ export async function superAdminAuthenticate(req, res, next) {
     //   return res.send(error(409,"Invalid super-admin token"))
     // }
     const _id = decoded.id;
-    const superAdmin = await getSuperAdminService({_id});
-    if (!superAdmin){
+    const superAdmin = await getSuperAdminService({ _id });
+    if (!superAdmin) {
       return res.send(error(404, "Super Admin not exists"));
     }
     req.superAdminId = _id;

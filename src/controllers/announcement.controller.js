@@ -2,8 +2,18 @@ import { StatusCodes } from "http-status-codes";
 
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getAdminService } from "../services/admin.services.js";
-import { createAnnouncementService, deleteAnnouncementService, getAnnouncementCountService, getAnnouncementService, getAnnouncementsPipelineService, updateAnnouncementService } from "../services/announcement.services.js";
-import { getAnnouncementReadStatusService, getAnnouncementsReadStatusService } from "../services/announcementReadStatus.service.js";
+import {
+  createAnnouncementService,
+  deleteAnnouncementService,
+  getAnnouncementCountService,
+  getAnnouncementService,
+  getAnnouncementsPipelineService,
+  updateAnnouncementService
+} from "../services/announcement.services.js";
+import {
+  getAnnouncementReadStatusService,
+  getAnnouncementsReadStatusService
+} from "../services/announcementReadStatus.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSessionService } from "../services/session.services.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
@@ -21,11 +31,13 @@ export async function createAnnouncementByAdminController(req, res) {
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
-    if (session['status'] === 'completed') {
+    if (session["status"] === "completed") {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
     }
-    if(new Date() < session.startDate || new Date() > session.endDate) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Announcement date must be within session dates"));
+    if (new Date() < session.startDate || new Date() > session.endDate) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Announcement date must be within session dates"));
     }
     await createAnnouncementService({
       title,
@@ -43,18 +55,29 @@ export async function createAnnouncementByAdminController(req, res) {
     if (targetAudience.includes("teacher")) {
       const teachers = await getTeachersByAdminIdService(adminId);
       for (const teacher of teachers) {
-        await sendPushNotification(teacher['fcmToken'], pushTitle, description, "announcement",teacher['_id']);
+        await sendPushNotification(
+          teacher["fcmToken"],
+          pushTitle,
+          description,
+          "announcement",
+          teacher["_id"]
+        );
       }
     }
 
     if (targetAudience.includes("parent")) {
       const parents = await getParentsByAdminIdService(adminId);
       for (const parent of parents) {
-        await sendPushNotification(parent['fcmToken'], pushTitle, title, "announcement",parent['_id']);
+        await sendPushNotification(
+          parent["fcmToken"],
+          pushTitle,
+          title,
+          "announcement",
+          parent["_id"]
+        );
       }
     }
     return res.status(StatusCodes.CREATED).json(success(201, "Announcement created successfully!"));
-
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error(500, err.message));
   }
@@ -71,16 +94,18 @@ export async function createAnnouncementByTeacherController(req, res) {
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
-    if (session['status'] === 'completed') {
+    if (session["status"] === "completed") {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
     }
-    if(new Date() < session.startDate || new Date() > session.endDate) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Announcement date must be within session dates"));
+    if (new Date() < session.startDate || new Date() > session.endDate) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Announcement date must be within session dates"));
     }
     await createAnnouncementService({
       title,
       description,
-      targetAudience: ['parent'],
+      targetAudience: ["parent"],
       startsAt,
       expiresAt,
       createdBy: teacherId,
@@ -91,7 +116,6 @@ export async function createAnnouncementByTeacherController(req, res) {
     });
 
     return res.status(StatusCodes.CREATED).json(success(201, "Announcement created successfully!"));
-
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error(500, err.message));
   }
@@ -100,25 +124,31 @@ export async function createAnnouncementByTeacherController(req, res) {
 export async function getAnnouncementsByAdminController(req, res) {
   try {
     const adminId = req.adminId;
-    const { page = 1, limit = 10, sortBy = "createdAt", order = "desc", createdBy = "admin", section, session } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      order = "desc",
+      createdBy = "admin",
+      section,
+      session
+    } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sortOrder = order === "asc" ? 1 : -1;
     const filter = {
       school: convertToMongoId(adminId),
-      isActive: true,
+      isActive: true
     };
 
     if (createdBy === "admin") {
       filter.createdBy = convertToMongoId(adminId);
       filter.createdByRole = "admin";
-    }
-    else if (createdBy === "teacher") {
+    } else if (createdBy === "teacher") {
       filter.createdByRole = "teacher";
-    }
-    else if (createdBy === "all") {
+    } else if (createdBy === "all") {
       filter.$or = [
         { createdBy: convertToMongoId(adminId), createdByRole: "admin" },
-        { createdByRole: "teacher" },
+        { createdByRole: "teacher" }
       ];
     }
 
@@ -211,7 +241,14 @@ export async function getAnnouncementsByTeacherController(req, res) {
     const teacherId = req.teacherId;
     const sectionId = req.sectionId;
 
-    const { page = 1, limit = 10, sortBy = "createdAt", order = "desc", createdBy = "teacher", sessionId } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      order = "desc",
+      createdBy = "teacher",
+      sessionId
+    } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sortOrder = order === "asc" ? 1 : -1;
 
@@ -228,14 +265,16 @@ export async function getAnnouncementsByTeacherController(req, res) {
       filter.createdBy = convertToMongoId(adminId);
       filter.createdByRole = "admin";
       filter.targetAudience = { $in: ["teacher"] };
-    }
-    else if (createdBy === "teacher") {
+    } else if (createdBy === "teacher") {
       filter.createdBy = convertToMongoId(teacherId);
       filter.createdByRole = "teacher";
-    }
-    else if (createdBy === "all") {
+    } else if (createdBy === "all") {
       filter.$or = [
-        { createdBy: convertToMongoId(adminId), createdByRole: "admin", targetAudience: { $in: ['teacher'] } },
+        {
+          createdBy: convertToMongoId(adminId),
+          createdByRole: "admin",
+          targetAudience: { $in: ["teacher"] }
+        },
         { createdBy: convertToMongoId(teacherId), createdByRole: "teacher" }
       ];
     }
@@ -309,7 +348,6 @@ export async function getAnnouncementsByTeacherController(req, res) {
     const announcements = await getAnnouncementsPipelineService(pipeline);
     const total = await getAnnouncementCountService(filter);
     return res.status(200).json(success(200, { announcements, page, limit, total }));
-
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
   }
@@ -319,11 +357,12 @@ export async function getAnnouncementsByParentController(req, res) {
   try {
     const parentId = req.parentId;
     const { sessionStudentId, page = 1, limit = 10, createdBy = "admin" } = req.query;
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId, isActive: true });
+    const sessionStudent = await getSessionStudentService({
+      _id: sessionStudentId,
+      isActive: true
+    });
     if (!sessionStudent) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Student not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
     if (!["admin", "teacher", "all"].includes(createdBy)) {
@@ -348,33 +387,39 @@ export async function getAnnouncementsByParentController(req, res) {
       filter.createdBy = convertToMongoId(adminId);
       filter.createdByRole = "admin";
       filter.targetAudience = { $in: ["parent"] };
-    }
-    else if (createdBy === "teacher") {
+    } else if (createdBy === "teacher") {
       filter.section = convertToMongoId(sectionId);
       filter.createdByRole = "teacher";
       filter.targetAudience = { $in: ["parent"] };
-    }
-    else if (createdBy === "all") {
+    } else if (createdBy === "all") {
       filter.$or = [
-        { createdBy: convertToMongoId(adminId), createdByRole: "admin", targetAudience: { $in: ['parent'] } },
-        { section: convertToMongoId(sectionId), createdByRole: "teacher", targetAudience: { $in: ['parent'] } }
+        {
+          createdBy: convertToMongoId(adminId),
+          createdByRole: "admin",
+          targetAudience: { $in: ["parent"] }
+        },
+        {
+          section: convertToMongoId(sectionId),
+          createdByRole: "teacher",
+          targetAudience: { $in: ["parent"] }
+        }
       ];
     }
 
     const pipeline = [
       {
-        $match: filter,
+        $match: filter
       },
       {
         $sort: {
-          createdAt: -1,
-        },
+          createdAt: -1
+        }
       },
       {
-        $skip: skip,
+        $skip: skip
       },
       {
-        $limit: parseInt(limit),
+        $limit: parseInt(limit)
       },
       {
         $lookup: {
@@ -385,12 +430,12 @@ export async function getAnnouncementsByParentController(req, res) {
             {
               $project: {
                 _id: 1,
-                name: 1,
-              },
-            },
+                name: 1
+              }
+            }
           ],
-          as: "sectionDetails",
-        },
+          as: "sectionDetails"
+        }
       },
       {
         $lookup: {
@@ -430,13 +475,9 @@ export async function getAnnouncementsByParentController(req, res) {
     const announcements = await getAnnouncementsPipelineService(pipeline);
     const total = await getAnnouncementCountService(filter);
 
-    return res
-      .status(200)
-      .json(success(200, { announcements, page, limit, total }));
+    return res.status(200).json(success(200, { announcements, page, limit, total }));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -444,14 +485,7 @@ export async function updateAnnouncementByAdminController(req, res) {
   try {
     const adminId = req.adminId;
     const announcementId = req.params.announcementId;
-    const {
-      title,
-      description,
-      targetAudience,
-      startsAt,
-      expiresAt,
-      isActive,
-    } = req.body;
+    const { title, description, targetAudience, startsAt, expiresAt, isActive } = req.body;
 
     const filter = {
       _id: convertToMongoId(announcementId),
@@ -466,27 +500,21 @@ export async function updateAnnouncementByAdminController(req, res) {
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
-    if (session['status'] === 'completed') {
+    if (session["status"] === "completed") {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
     }
     const fieldToBeUpdated = {};
     if (title) fieldToBeUpdated.title = title;
     if (description) fieldToBeUpdated.description = description;
-    if (targetAudience.length > 0)
-      fieldToBeUpdated.targetAudience = targetAudience;
+    if (targetAudience.length > 0) fieldToBeUpdated.targetAudience = targetAudience;
     if (startsAt) fieldToBeUpdated.startsAt = startsAt;
     if (expiresAt) fieldToBeUpdated.expiresAt = expiresAt;
-    if (isActive === true || isActive === false)
-      fieldToBeUpdated.isActive = isActive;
+    if (isActive === true || isActive === false) fieldToBeUpdated.isActive = isActive;
 
     await updateAnnouncementService({ _id: announcementId }, fieldToBeUpdated);
-    return res
-      .status(StatusCodes.OK)
-      .send(success(200, "Announcement updated successfully!"));
+    return res.status(StatusCodes.OK).send(success(200, "Announcement updated successfully!"));
   } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
@@ -494,25 +522,22 @@ export async function updateAnnouncementByTeacherController(req, res) {
   try {
     const teacherId = req.teacherId;
     const announcementId = req.params.announcementId;
-    const {
-      title,
-      description,
-      startsAt,
-      expiresAt,
-      isActive,
-    } = req.body;
+    const { title, description, startsAt, expiresAt, isActive } = req.body;
 
     const announcement = await getAnnouncementService({ _id: announcementId });
     if (!announcement) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found"));
     }
 
-    const session = await getSessionService({ _id: announcement.session, school: announcement.school });
+    const session = await getSessionService({
+      _id: announcement.session,
+      school: announcement.school
+    });
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
 
-    if (session['status'] === 'completed') {
+    if (session["status"] === "completed") {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
     }
 
@@ -557,12 +582,15 @@ export async function deleteAnnouncementByAdminController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found"));
     }
 
-    const session = await getSessionService({ _id: announcement.session, school: announcement.school });
+    const session = await getSessionService({
+      _id: announcement.session,
+      school: announcement.school
+    });
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
 
-    if (session['status'] === 'completed') {
+    if (session["status"] === "completed") {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
     }
 
@@ -590,12 +618,15 @@ export async function deleteAnnouncementByTeacherController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found"));
     }
 
-    const session = await getSessionService({ _id: announcement.session, school: announcement.school });
+    const session = await getSessionService({
+      _id: announcement.session,
+      school: announcement.school
+    });
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
     }
 
-    if (session['status'] === 'completed') {
+    if (session["status"] === "completed") {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
     }
 
@@ -613,9 +644,7 @@ export async function getUnReadAnnouncementsCountForParentController(req, res) {
     const { studentId, createdBy = "admin" } = req.query;
     const student = await getSessionStudentService({ _id: studentId, isActive: true });
     if (!student) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Student not found"));
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
     if (!["admin", "teacher", "all"].includes(createdBy)) {
@@ -633,37 +662,47 @@ export async function getUnReadAnnouncementsCountForParentController(req, res) {
       filter.createdBy = convertToMongoId(adminId);
       filter.createdByRole = "admin";
       filter.targetAudience = { $in: ["parent"] };
-    }
-    else if (createdBy === "teacher") {
+    } else if (createdBy === "teacher") {
       filter.section = convertToMongoId(sectionId);
       filter.createdByRole = "teacher";
       filter.targetAudience = { $in: ["parent"] };
-    }
-    else if (createdBy === "all") {
+    } else if (createdBy === "all") {
       filter.$or = [
-        { createdBy: convertToMongoId(adminId), createdByRole: "admin", targetAudience: { $in: ['parent'] } },
-        { section: convertToMongoId(sectionId), createdByRole: "teacher", targetAudience: { $in: ['parent'] } }
+        {
+          createdBy: convertToMongoId(adminId),
+          createdByRole: "admin",
+          targetAudience: { $in: ["parent"] }
+        },
+        {
+          section: convertToMongoId(sectionId),
+          createdByRole: "teacher",
+          targetAudience: { $in: ["parent"] }
+        }
       ];
     }
 
     const pipeline = [
       {
-        $match: filter,
+        $match: filter
       }
     ];
 
-
     const announcements = await getAnnouncementsPipelineService(pipeline);
-    const announcementIds = announcements.map(a => convertToMongoId(a._id));
+    const announcementIds = announcements.map((a) => convertToMongoId(a._id));
 
-    const readAnnouncements = await getAnnouncementsReadStatusService({
-      user: convertToMongoId(parentId),
-      userRole: 'parent',
-      announcement: { $in: announcementIds }
-    }, { "announcement": 1 });
+    const readAnnouncements = await getAnnouncementsReadStatusService(
+      {
+        user: convertToMongoId(parentId),
+        userRole: "parent",
+        announcement: { $in: announcementIds }
+      },
+      { announcement: 1 }
+    );
 
-    const readAnnouncementIds = readAnnouncements.map(r => r.announcement.toString());
-    const unreadCount = announcementIds.filter(id => !readAnnouncementIds.includes(id.toString())).length;
+    const readAnnouncementIds = readAnnouncements.map((r) => r.announcement.toString());
+    const unreadCount = announcementIds.filter(
+      (id) => !readAnnouncementIds.includes(id.toString())
+    ).length;
 
     return res.status(200).json(success(200, { unreadCount }));
   } catch (err) {
@@ -691,14 +730,16 @@ export async function getUnReadAnnouncementsCountForTeacherController(req, res) 
       filter.createdBy = convertToMongoId(adminId);
       filter.createdByRole = "admin";
       filter.targetAudience = { $in: ["teacher"] };
-    }
-    else if (createdBy === "teacher") {
+    } else if (createdBy === "teacher") {
       filter.createdBy = convertToMongoId(teacherId);
       filter.createdByRole = "teacher";
-    }
-    else if (createdBy === "all") {
+    } else if (createdBy === "all") {
       filter.$or = [
-        { createdBy: convertToMongoId(adminId), createdByRole: "admin", targetAudience: { $in: ['teacher'] } },
+        {
+          createdBy: convertToMongoId(adminId),
+          createdByRole: "admin",
+          targetAudience: { $in: ["teacher"] }
+        },
         { createdBy: convertToMongoId(teacherId), createdByRole: "teacher" }
       ];
     }
@@ -710,15 +751,20 @@ export async function getUnReadAnnouncementsCountForTeacherController(req, res) 
     ];
 
     const announcements = await getAnnouncementsPipelineService(pipeline);
-    const announcementIds = announcements.map(a => convertToMongoId(a._id));
-    const readAnnouncements = await getAnnouncementsReadStatusService({
-      user: convertToMongoId(teacherId),
-      userRole: 'teacher',
-      announcement: { $in: announcementIds }
-    }, { "announcement": 1 });
+    const announcementIds = announcements.map((a) => convertToMongoId(a._id));
+    const readAnnouncements = await getAnnouncementsReadStatusService(
+      {
+        user: convertToMongoId(teacherId),
+        userRole: "teacher",
+        announcement: { $in: announcementIds }
+      },
+      { announcement: 1 }
+    );
 
-    const readAnnouncementIds = readAnnouncements.map(r => r.announcement.toString());
-    const unreadCount = announcementIds.filter(id => !readAnnouncementIds.includes(id.toString())).length;
+    const readAnnouncementIds = readAnnouncements.map((r) => r.announcement.toString());
+    const unreadCount = announcementIds.filter(
+      (id) => !readAnnouncementIds.includes(id.toString())
+    ).length;
 
     return res.status(200).json(success(200, { unreadCount }));
   } catch (err) {

@@ -8,7 +8,7 @@ const statusChangeLogSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['activated', 'deactivated'],
+    enum: ["activated", "deactivated"],
     required: true
   }
 });

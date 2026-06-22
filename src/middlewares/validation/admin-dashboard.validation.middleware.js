@@ -1,7 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 
 import { error } from "../../utills/responseWrapper.js";
-import { classWiseSummarySchema, paymentModeReportSchema, installmentReminderSchema } from "../../validators/adminDashboardSchema.validator.js";
+import {
+  classWiseSummarySchema,
+  paymentModeReportSchema,
+  installmentReminderSchema
+} from "../../validators/adminDashboardSchema.validator.js";
 
 export async function classWiseSummaryValidation(req, res, next) {
   try {
@@ -14,7 +18,6 @@ export async function classWiseSummaryValidation(req, res, next) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
-
 
 export async function paymentModeReportValidation(req, res, next) {
   try {

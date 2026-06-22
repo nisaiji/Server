@@ -1,51 +1,53 @@
- import mongoose from "mongoose";
+import mongoose from "mongoose";
 
-const attendanceSchema = new mongoose.Schema({
-    date:{
-        type:Number,
-        required:true
+const attendanceSchema = new mongoose.Schema(
+  {
+    date: {
+      type: Number,
+      required: true
     },
-    day:{ 
-        type:String,
-        required:true,
+    day: {
+      type: String,
+      required: true
     },
-    parentAttendance:{
-        type:String,
-        default:""
+    parentAttendance: {
+      type: String,
+      default: ""
     },
-    teacherAttendance:{
-        type:String,
-        default:""
+    teacherAttendance: {
+      type: String,
+      default: ""
     },
-    sessionStudent:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"sessionStudent",
-        required: true
+    sessionStudent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "sessionStudent",
+      required: true
     },
-    student:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"student"
-    }, 
-    section:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"section"
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "student"
     },
-    classId:{ 
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"class"
+    section: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "section"
     },
-    session:{ 
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"session"
+    classId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "class"
     },
-    admin:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"admin"
+    session: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "session"
+    },
+    admin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "admin"
     }
-},
-{
-   timestamps:true
-});
+  },
+  {
+    timestamps: true
+  }
+);
 
-const attendanceModel = mongoose.model("attendance",attendanceSchema);
+const attendanceModel = mongoose.model("attendance", attendanceSchema);
 export default attendanceModel;

@@ -6,50 +6,50 @@ const FeeHeadSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "admins",
       required: true,
-      index: true,
+      index: true
     },
 
     sessionId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "sessions",
       required: true,
-      index: true,
+      index: true
     },
 
     isVerified: {
       type: Boolean,
-      default: false,
+      default: false
     },
 
     feeHeads: [
       {
         name: {
           type: String,
-          required: true,
+          required: true
         },
         label: {
           type: String,
-          required: true,
+          required: true
         },
 
         type: {
           type: String,
           enum: ["RECURRING", "ONE_TIME"],
-          required: true,
+          required: true
         },
 
         refundable: {
           type: Boolean,
-          default: false,
-        },
-      },
-    ],
+          default: false
+        }
+      }
+    ]
   },
   {
     timestamps: true,
     versionKey: false,
-    collection: "fee_heads",
-  },
+    collection: "fee_heads"
+  }
 );
 
 FeeHeadSchema.index({ adminId: 1, sessionId: 1 }, { unique: true });

@@ -26,7 +26,7 @@ export async function addFeeHeadService(filter, feeHead) {
   return await feeHeadModel.findOneAndUpdate(
     filter,
     { $push: { feeHeads: feeHead } },
-    { new: true },
+    { new: true }
   );
 }
 
@@ -38,26 +38,22 @@ export async function updateFeeHeadService(filter, feeHead) {
         "feeHeads.$.name": feeHead.name,
         "feeHeads.$.label": feeHead.label,
         "feeHeads.$.type": feeHead.type,
-        "feeHeads.$.refundable": feeHead.refundable,
-      },
+        "feeHeads.$.refundable": feeHead.refundable
+      }
     },
-    { new: true },
+    { new: true }
   );
 }
 
 export async function updateFeeHeadVerifyStatusService(filter, feeHead) {
-  return await feeHeadModel.findOneAndUpdate(
-    filter,
-    feeHead,
-    { new: true },
-  );
+  return await feeHeadModel.findOneAndUpdate(filter, feeHead, { new: true });
 }
 
 export async function deleteFeeHeadService(filter, feeHeadId) {
   return await feeHeadModel.findOneAndUpdate(
     filter,
     { $pull: { feeHeads: { _id: feeHeadId } } },
-    { new: true },
+    { new: true }
   );
 }
 
@@ -78,8 +74,8 @@ export async function getFeeStructureListingService({ match, search, skip, limit
     ? {
         $or: [
           { "classInfo.name": { $regex: search, $options: "i" } },
-          { "feeCycleInfo.frequency": { $regex: search, $options: "i" } },
-        ],
+          { "feeCycleInfo.frequency": { $regex: search, $options: "i" } }
+        ]
       }
     : {};
 
@@ -90,8 +86,8 @@ export async function getFeeStructureListingService({ match, search, skip, limit
         from: "classes",
         localField: "classId",
         foreignField: "_id",
-        as: "classInfo",
-      },
+        as: "classInfo"
+      }
     },
     { $unwind: { path: "$classInfo", preserveNullAndEmptyArrays: true } },
     {
@@ -99,8 +95,8 @@ export async function getFeeStructureListingService({ match, search, skip, limit
         from: "sessions",
         localField: "sessionId",
         foreignField: "_id",
-        as: "sessionInfo",
-      },
+        as: "sessionInfo"
+      }
     },
     { $unwind: { path: "$sessionInfo", preserveNullAndEmptyArrays: true } },
     {
@@ -108,8 +104,8 @@ export async function getFeeStructureListingService({ match, search, skip, limit
         from: "feecycles",
         localField: "feeCycleId",
         foreignField: "_id",
-        as: "feeCycleInfo",
-      },
+        as: "feeCycleInfo"
+      }
     },
     { $unwind: { path: "$feeCycleInfo", preserveNullAndEmptyArrays: true } },
     {
@@ -118,10 +114,10 @@ export async function getFeeStructureListingService({ match, search, skip, limit
           $concat: [
             { $toString: "$sessionInfo.academicStartYear" },
             "-",
-            { $toString: "$sessionInfo.academicEndYear" },
-          ],
-        },
-      },
+            { $toString: "$sessionInfo.academicEndYear" }
+          ]
+        }
+      }
     },
     { $match: searchMatch },
     { $sort: { updatedAt: -1 } },
@@ -142,13 +138,13 @@ export async function getFeeStructureListingService({ match, search, skip, limit
               feeCycle: "$feeCycleInfo.frequency",
               status: 1,
               updatedAt: 1,
-              createdAt: 1,
-            },
-          },
+              createdAt: 1
+            }
+          }
         ],
-        totalCount: [{ $count: "count" }],
-      },
-    },
+        totalCount: [{ $count: "count" }]
+      }
+    }
   ]);
 
   const records = result[0]?.records || [];
@@ -156,7 +152,7 @@ export async function getFeeStructureListingService({ match, search, skip, limit
 
   return {
     records,
-    total,
+    total
   };
 }
 

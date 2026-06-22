@@ -11,7 +11,7 @@ import {
   updateFeeCycleSchema,
   updateFeeHeadSchema,
   updateFeeStructureSchema,
-  feeSetupVerifySchema,
+  feeSetupVerifySchema
 } from "../../validators/feeSetupSchema.validator.js";
 
 function validateParams(schema, req, res, next) {

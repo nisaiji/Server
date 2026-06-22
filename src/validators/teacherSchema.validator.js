@@ -29,12 +29,11 @@ const teacherLoginSchema = Joi.object({
     "any.required": "Platform is required.",
     "any.only": "Only supports for 'app', 'web' "
   }),
-  deviceId: Joi.string()
-    .when("platform", {
-      is: "app",
-      then: Joi.optional(),
-      otherwise: Joi.forbidden()
-    })
+  deviceId: Joi.string().when("platform", {
+    is: "app",
+    then: Joi.optional(),
+    otherwise: Joi.forbidden()
+  })
 });
 
 const teacherUsernamePasswordUpdateSchema = Joi.object({
@@ -56,9 +55,13 @@ const teacherEmailPhoneUpdateSchema = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).optional().messages({
     "string.email": "Invalid email format."
   }),
-  phone: Joi.string().pattern(/^[6-9][0-9]{9}$/).length(10).required().messages({
+  phone: Joi.string()
+    .pattern(/^[6-9][0-9]{9}$/)
+    .length(10)
+    .required()
+    .messages({
       "string.pattern.base": "Invalid phone number format.",
-      "string.length": "Phone number must be 10 characters.",
+      "string.length": "Phone number must be 10 characters."
     }),
   username: Joi.string().required()
 });

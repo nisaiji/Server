@@ -6,7 +6,7 @@ import { queryValidationSchema } from "../../validators/customerSupportSchema.va
 export async function registerCustomerQueryValidation(req, res, next) {
   try {
     const { error: schemaError } = queryValidationSchema.validate(req.body);
-    if (schemaError){
+    if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
     next();

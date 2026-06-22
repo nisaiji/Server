@@ -1,7 +1,7 @@
-import fs from 'fs/promises';
+import fs from "fs/promises";
 
 import { StatusCodes } from "http-status-codes";
-import xlsx from 'xlsx';
+import xlsx from "xlsx";
 
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
 import { getStartAndEndTimeService } from "../../services/celender.service.js";
@@ -9,18 +9,37 @@ import { getClassService } from "../../services/class.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
-import { getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
+import {
+  getStudentService,
+  getStudentsPipelineService,
+  getStudentsService,
+  registerStudentService,
+  updateStudentService
+} from "../../services/student.service.js";
 import {
   buildAttendanceSummaryForSessionStudent,
   buildExamSummaryForSessionStudent,
   buildLeaveSummaryForSessionStudent,
   buildSubjectSummaryForContext,
-  calculateAttendancePercentageForSessionStudent,
+  calculateAttendancePercentageForSessionStudent
 } from "../../services/studentDetailSummary.service.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
-import { getParentService, registerParentService, updateParentService } from "../../services/v2/parent.services.js";
-import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/v2/schoolParent.services.js";
-import { getSessionStudentService, getSessionStudentsPipelineService, registerSessionStudentService, updateSessionStudentService } from "../../services/v2/sessionStudent.service.js";
+import {
+  getParentService,
+  registerParentService,
+  updateParentService
+} from "../../services/v2/parent.services.js";
+import {
+  getSchoolParentService,
+  registerSchoolParentService,
+  updateSchoolParentService
+} from "../../services/v2/schoolParent.services.js";
+import {
+  getSessionStudentService,
+  getSessionStudentsPipelineService,
+  registerSessionStudentService,
+  updateSessionStudentService
+} from "../../services/v2/sessionStudent.service.js";
 import { error, success } from "../../utils/responseWrapper.js";
 
 const addFieldsIfPresent = (target, source, fields) => {
@@ -50,7 +69,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
       getSessionService({ _id: section.session }),
       getStudentService({ aadharNumber: studentData.aadharNumber, isActive: true }),
       getParentService({ phone: studentData.phone, isActive: true }),
-      getSchoolParentService({ phone: studentData.phone, school: adminId, isActive: true }),
+      getSchoolParentService({ phone: studentData.phone, school: adminId, isActive: true })
     ]);
 
     if (!classInfo) {
@@ -73,29 +92,34 @@ export async function registerStudentAndSessionStudentController(req, res) {
     let schoolParent = schoolParentFromDb;
 
     if (!schoolParentFromDb) {
-        parentObj = parentObj ? parentObj : await registerParentService({ phone: studentData.phone, status: "unVerified" });
-      
+      parentObj = parentObj
+        ? parentObj
+        : await registerParentService({ phone: studentData.phone, status: "unVerified" });
+
       schoolParent = await registerSchoolParentService({
         fullname: studentData.parentName,
         phone: studentData.phone,
         school: adminId,
         parent: parentObj._id,
-        ...(studentData.qualification && { qualification:studentData.qualification }),
-        ...(studentData.occupation && { occupation:studentData.occupation }),
+        ...(studentData.qualification && { qualification: studentData.qualification }),
+        ...(studentData.occupation && { occupation: studentData.occupation }),
         ...(studentData.parentAddress && { address: studentData.parentAddress }),
         ...(studentData.parentGender && { gender: studentData.parentGender }),
-        ...(studentData.age && { age:studentData.age }),
-        ...(studentData.email && { email:studentData.email }),
+        ...(studentData.age && { age: studentData.age }),
+        ...(studentData.email && { email: studentData.email })
       });
     }
 
-    const existingStudent = await getStudentService({ firstname: studentData.firstname, schoolParent: schoolParent._id });
+    const existingStudent = await getStudentService({
+      firstname: studentData.firstname,
+      schoolParent: schoolParent._id
+    });
     if (existingStudent) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Student already exists"));
     }
 
     const studentObj = {
-      firstname:studentData.firstname,
+      firstname: studentData.firstname,
       lastname: studentData.lastname,
       gender: studentData.gender,
       aadharNumber: studentData.aadharNumber,
@@ -106,7 +130,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
       parent: parentObj?._id,
       admin: adminId,
       ...(studentData.address && { address: studentData.address }),
-      ...(studentData.dob && { dob: studentData.dob }),
+      ...(studentData.dob && { dob: studentData.dob })
     };
 
     const student = await registerStudentService(studentObj);
@@ -116,15 +140,20 @@ export async function registerStudentAndSessionStudentController(req, res) {
       classId: classInfo._id,
       session: session._id,
       school: adminId,
-      student: student._id,
+      student: student._id
     };
 
     const [sessionStudent] = await Promise.all([
       registerSessionStudentService(sessionStudentObj),
-      updateSectionService({ _id: studentData.sectionId }, { studentCount: (section.studentCount || 0) + 1 }),
+      updateSectionService(
+        { _id: studentData.sectionId },
+        { studentCount: (section.studentCount || 0) + 1 }
+      )
     ]);
 
-    return res.status(StatusCodes.CREATED).send(success(201, { message: "Student registered successfully!", student: sessionStudent }));
+    return res
+      .status(StatusCodes.CREATED)
+      .send(success(201, { message: "Student registered successfully!", student: sessionStudent }));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -136,14 +165,16 @@ export async function registerSessionStudentController(req, res) {
     const adminId = req.adminId;
 
     if (!studentId || !sectionId || !classId || !sessionId) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "studentId, sectionId, classId and sessionId are required"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "studentId, sectionId, classId and sessionId are required"));
     }
 
     const [section, student, classInfo, session] = await Promise.all([
       getSectionService({ _id: sectionId }),
       getStudentService({ _id: studentId }),
       getClassService({ _id: classId }),
-      getSessionService({ _id: sessionId }),
+      getSessionService({ _id: sessionId })
     ]);
 
     if (!section) {
@@ -177,7 +208,7 @@ export async function registerSessionStudentController(req, res) {
     const [studentWithAadhar, parent, schoolParent] = await Promise.all([
       aadharNumber ? getStudentService({ aadharNumber, isActive: true }) : Promise.resolve(null),
       getParentService({ _id: student.parent }),
-      getSchoolParentService({ _id: student.schoolParent }),
+      getSchoolParentService({ _id: student.schoolParent })
     ]);
 
     if (studentWithAadhar && studentWithAadhar._id.toString() !== studentId) {
@@ -188,9 +219,15 @@ export async function registerSessionStudentController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
-    const sessionStudent = await getSessionStudentService({ student: student._id, session: session._id, school: adminId });
+    const sessionStudent = await getSessionStudentService({
+      student: student._id,
+      session: session._id,
+      school: adminId
+    });
     if (sessionStudent) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Student already registered for this session"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Student already registered for this session"));
     }
 
     const sessionStudentObj = {
@@ -199,21 +236,28 @@ export async function registerSessionStudentController(req, res) {
       session: session._id,
       school: adminId,
       student: student._id,
-      aadharNumber,
+      aadharNumber
     };
 
     const [createdSessionStudent] = await Promise.all([
       registerSessionStudentService(sessionStudentObj),
-      updateSectionService({ _id: sectionId }, { studentCount: (section.studentCount || 0) + 1 }),
+      updateSectionService({ _id: sectionId }, { studentCount: (section.studentCount || 0) + 1 })
     ]);
 
-    return res.status(StatusCodes.CREATED).send(success(201, { message: "Student registered successfully!", student: createdSessionStudent }));
+    return res
+      .status(StatusCodes.CREATED)
+      .send(
+        success(201, {
+          message: "Student registered successfully!",
+          student: createdSessionStudent
+        })
+      );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
-export async function updateStudentBySchoolController(req, res){
+export async function updateStudentBySchoolController(req, res) {
   try {
     const studentId = req.params.studentId;
     const studentUpdate = {};
@@ -221,22 +265,22 @@ export async function updateStudentBySchoolController(req, res){
     const parentProfileUpdate = {};
     const adminId = req.adminId;
 
-    const student = await getStudentService({ _id:studentId, isActive: true });
-    if(!student){
+    const student = await getStudentService({ _id: studentId, isActive: true });
+    if (!student) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
     let schoolParent = await getSchoolParentService({ _id: student["schoolParent"] });
-    if(!schoolParent){
+    if (!schoolParent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
     let parent = await getParentService({ _id: student["parent"], isActive: true });
-    if(!parent && schoolParent["parent"]) {
+    if (!parent && schoolParent["parent"]) {
       parent = await getParentService({ _id: schoolParent["parent"], isActive: true });
-      if(parent) {
+      if (parent) {
         studentUpdate.parent = parent["_id"];
       }
     }
-    if(!parent){
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
@@ -253,27 +297,37 @@ export async function updateStudentBySchoolController(req, res){
       "country",
       "pincode",
       "guardianName",
-      "aadharNumber",
+      "aadharNumber"
     ]);
 
     if (req.body.photo || req.body.method === "DELETE") {
       studentUpdate.photo = req.body.method === "DELETE" ? "" : req.body.photo;
     }
 
-    const studentWithAadhar = await getStudentService({aadharNumber: studentUpdate.aadharNumber, isActive: true,});
+    const studentWithAadhar = await getStudentService({
+      aadharNumber: studentUpdate.aadharNumber,
+      isActive: true
+    });
     // If a student with same Aadhar exists AND it's not the same student
     if (studentWithAadhar && studentWithAadhar._id.toString() !== studentId) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
     }
-    if(req.body["phone"] && schoolParent['phone']!==req.body['phone']){
-      const phone = req.body['phone'];
+    if (req.body["phone"] && schoolParent["phone"] !== req.body["phone"]) {
+      const phone = req.body["phone"];
       if (parent && parent.students?.includes(studentId)) {
-        return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Phone number can not be updated'));
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .send(error(400, "Phone number can not be updated"));
       }
 
       const [schoolParentWithPhone, parentWithPhone] = await Promise.all([
-        getSchoolParentService({ phone, school: student.adminId, isActive: true, _id: { $ne: schoolParent._id } }),
-        getParentService({ phone, isActive: true, _id: { $ne: parent._id } }),
+        getSchoolParentService({
+          phone,
+          school: student.adminId,
+          isActive: true,
+          _id: { $ne: schoolParent._id }
+        }),
+        getParentService({ phone, isActive: true, _id: { $ne: parent._id } })
       ]);
 
       if (parentWithPhone || schoolParentWithPhone) {
@@ -281,8 +335,12 @@ export async function updateStudentBySchoolController(req, res){
       }
 
       if (phone !== schoolParent.phone) {
-        parent = await registerParentService({ phone, status: 'unVerified' });
-        schoolParent = await registerSchoolParentService({ phone, school: adminId, parent: parent._id });
+        parent = await registerParentService({ phone, status: "unVerified" });
+        schoolParent = await registerSchoolParentService({
+          phone,
+          school: adminId,
+          parent: parent._id
+        });
         studentUpdate.schoolParent = schoolParent._id;
         studentUpdate.parent = parent._id;
       }
@@ -299,7 +357,7 @@ export async function updateStudentBySchoolController(req, res){
       "parentDistrict",
       "parentState",
       "parentCountry",
-      "parentPincode",
+      "parentPincode"
     ]);
 
     if (req.body.parentDob) {
@@ -307,16 +365,15 @@ export async function updateStudentBySchoolController(req, res){
     }
 
     const updatePromises = [
-      updateStudentService({ _id:studentId }, studentUpdate),
-      updateSchoolParentService({ _id: schoolParent["_id"] }, schoolParentUpdate),
+      updateStudentService({ _id: studentId }, studentUpdate),
+      updateSchoolParentService({ _id: schoolParent["_id"] }, schoolParentUpdate)
     ];
-    if(Object.keys(parentProfileUpdate).length){
+    if (Object.keys(parentProfileUpdate).length) {
       updatePromises.push(updateParentService({ _id: parent["_id"] }, parentProfileUpdate));
     }
 
     await Promise.all(updatePromises);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));
-
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -327,21 +384,21 @@ export async function updateStudentByParentController(req, res) {
     const studentId = req.params.studentId;
     const parentId = req.parentId;
     const studentUpdate = {};
-    
-    const student = await getStudentService({ _id:studentId, isActive: true });
-    if(!student){
+
+    const student = await getStudentService({ _id: studentId, isActive: true });
+    if (!student) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
-    const parent = await getParentService({ _id: parentId});
-    if(!parent){
+    const parent = await getParentService({ _id: parentId });
+    if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
     }
 
-    if(!parent['students']?.some(id => id.equals(studentId))) {
-          return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'User is not authorized'));
+    if (!parent["students"]?.some((id) => id.equals(studentId))) {
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "User is not authorized"));
     }
 
-addFieldsIfPresent(studentUpdate, req.body, [
+    addFieldsIfPresent(studentUpdate, req.body, [
       "firstname",
       "lastname",
       "gender",
@@ -353,108 +410,108 @@ addFieldsIfPresent(studentUpdate, req.body, [
       "state",
       "country",
       "pincode",
-      "guardianName",
+      "guardianName"
     ]);
 
     if (req.body.photo || req.body.method === "DELETE") {
       studentUpdate.photo = req.body.method === "DELETE" ? "" : req.body.photo;
     }
 
-    await updateStudentService({ _id:studentId }, studentUpdate);
-    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
+    await updateStudentService({ _id: studentId }, studentUpdate);
+    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message));
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501, err.message));
   }
 }
 
 function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
   return [
     {
-      $match: filter,
+      $match: filter
     },
     {
       $lookup: {
         from: "students",
         localField: "student",
         foreignField: "_id",
-        as: "student",
-      },
+        as: "student"
+      }
     },
     {
       $unwind: {
         path: "$student",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $lookup: {
         from: "schoolparents",
         localField: "student.schoolParent",
         foreignField: "_id",
-        as: "schoolParent",
-      },
+        as: "schoolParent"
+      }
     },
     {
       $unwind: {
         path: "$schoolParent",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $lookup: {
         from: "parents",
         localField: "student.parent",
         foreignField: "_id",
-        as: "parent",
-      },
+        as: "parent"
+      }
     },
     {
       $unwind: {
         path: "$parent",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $lookup: {
         from: "sessions",
         localField: "session",
         foreignField: "_id",
-        as: "session",
-      },
+        as: "session"
+      }
     },
     {
       $unwind: {
         path: "$session",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $lookup: {
         from: "classes",
         localField: "classId",
         foreignField: "_id",
-        as: "classInfo",
-      },
+        as: "classInfo"
+      }
     },
     {
       $unwind: {
         path: "$classInfo",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $lookup: {
         from: "sections",
         localField: "section",
         foreignField: "_id",
-        as: "section",
-      },
+        as: "section"
+      }
     },
     {
       $unwind: {
         path: "$section",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $lookup: {
@@ -464,15 +521,15 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         as: "attendances",
         pipeline: [
           { $match: { date: { $gte: startTime, $lte: endTime } } },
-          { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } },
-        ],
-      },
+          { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } }
+        ]
+      }
     },
     {
       $unwind: {
         path: "$attendances",
-        preserveNullAndEmptyArrays: true,
-      },
+        preserveNullAndEmptyArrays: true
+      }
     },
     {
       $addFields: {
@@ -553,8 +610,8 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         sectionId: "$section._id",
         sectionName: "$section.name",
 
-        todayAttendance: "$attendances.teacherAttendance",
-      },
+        todayAttendance: "$attendances.teacherAttendance"
+      }
     },
     {
       $project: {
@@ -564,20 +621,24 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         section: 0,
         session: 0,
         classInfo: 0,
-        attendances: 0,
-      },
-    },
+        attendances: 0
+      }
+    }
   ];
 }
 
-export async function getSessionStudentSController(req,res) {
+export async function getSessionStudentSController(req, res) {
   try {
-    let {school, session, classId, section, sessionStudentId } = req.query;
-    const filter = {school: convertToMongoId(school), session: convertToMongoId(session), isActive: true};
-    if(classId) filter['classId']= convertToMongoId(classId);
-    if(section) filter['section']= convertToMongoId(section);
-    if(sessionStudentId) filter['_id'] = convertToMongoId(sessionStudentId);
-    const {startTime, endTime} = getStartAndEndTimeService(new Date(), new Date());
+    let { school, session, classId, section, sessionStudentId } = req.query;
+    const filter = {
+      school: convertToMongoId(school),
+      session: convertToMongoId(session),
+      isActive: true
+    };
+    if (classId) filter["classId"] = convertToMongoId(classId);
+    if (section) filter["section"] = convertToMongoId(section);
+    if (sessionStudentId) filter["_id"] = convertToMongoId(sessionStudentId);
+    const { startTime, endTime } = getStartAndEndTimeService(new Date(), new Date());
 
     const sessionStudents = await getSessionStudentsPipelineService(
       buildSessionStudentDetailPipeline(filter, startTime, endTime)
@@ -585,10 +646,12 @@ export async function getSessionStudentSController(req,res) {
 
     await Promise.all(
       sessionStudents.map((student) =>
-        calculateAttendancePercentageForSessionStudent(student._id, student.sessionId).then((percentage) => {
-          student.attendancePercentage = percentage;
-        }),
-      ),
+        calculateAttendancePercentageForSessionStudent(student._id, student.sessionId).then(
+          (percentage) => {
+            student.attendancePercentage = percentage;
+          }
+        )
+      )
     );
 
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
@@ -602,15 +665,13 @@ export async function getAdminStudentDetailController(req, res) {
     const sessionStudentId = req.params.sessionStudentId;
 
     if (!sessionStudentId) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "sessionStudentId is required"));
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "sessionStudentId is required"));
     }
 
     const filter = {
       _id: convertToMongoId(sessionStudentId),
       school: convertToMongoId(req.adminId),
-      isActive: true,
+      isActive: true
     };
     const { startTime, endTime } = getStartAndEndTimeService(new Date(), new Date());
     const sessionStudents = await getSessionStudentsPipelineService(
@@ -622,26 +683,21 @@ export async function getAdminStudentDetailController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
-    const [
-      attendanceSummary,
-      subjectSummary,
-      leaveSummary,
-      examSummary,
-    ] = await Promise.all([
+    const [attendanceSummary, subjectSummary, leaveSummary, examSummary] = await Promise.all([
       buildAttendanceSummaryForSessionStudent(student._id, student.sessionId),
       buildSubjectSummaryForContext({
         schoolId: req.adminId,
         sessionId: student.sessionId,
         classId: student.classId,
-        sectionId: student.sectionId,
+        sectionId: student.sectionId
       }),
       buildLeaveSummaryForSessionStudent(student._id),
       buildExamSummaryForSessionStudent({
         schoolId: req.adminId,
         sessionId: student.sessionId,
         sectionId: student.sectionId,
-        sessionStudentId: student._id,
-      }),
+        sessionStudentId: student._id
+      })
     ]);
 
     student.attendanceSummary = attendanceSummary;
@@ -656,99 +712,99 @@ export async function getAdminStudentDetailController(req, res) {
   }
 }
 
-export async function getAttendancesController(req, res){
+export async function getAttendancesController(req, res) {
   try {
     let { startTime, endTime, sessionStudentId } = req.body;
     const parentId = req.parentId;
-    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
-    if(!sessionStudent) {
+    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    if (!sessionStudent) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
     }
-    const parent = await getParentService({_id: parentId});
-    if(!parent['students']?.some(id => id.equals(sessionStudent.student))) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(400, 'Unauthorized access'));
+    const parent = await getParentService({ _id: parentId });
+    if (!parent["students"]?.some((id) => id.equals(sessionStudent.student))) {
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(400, "Unauthorized access"));
     }
 
     const filter = { isActive: true, _id: convertToMongoId(sessionStudentId) };
-    const attendanceFilter = {'date': { $gte: Number(startTime), $lte: Number(endTime) }};
+    const attendanceFilter = { date: { $gte: Number(startTime), $lte: Number(endTime) } };
 
     const pipeline = [
       {
-        $match: filter,
+        $match: filter
       },
       {
         $lookup: {
-          from: 'sections',
-          localField: 'section',
-          foreignField: '_id',
-          as: 'section',
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section",
           pipeline: [
             {
               $project: {
-                name: 1,
-              },
-            },
-          ],
-        },
+                name: 1
+              }
+            }
+          ]
+        }
       },
       {
         $unwind: {
-          path: '$section',
-          preserveNullAndEmptyArrays: true,
-        },
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $lookup: {
-          from: 'classes',
-          localField: 'classId',
-          foreignField: '_id',
-          as: 'class',
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "class",
           pipeline: [
             {
               $project: {
-                name: 1,
-              },
-            },
-          ],
-        },
+                name: 1
+              }
+            }
+          ]
+        }
       },
       {
         $unwind: {
-          path: '$class',
-          preserveNullAndEmptyArrays: true,
-        },
+          path: "$class",
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $lookup: {
-          from: 'students',
-          localField: 'student',
-          foreignField: '_id',
-          as: 'student',
-        },
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
+        }
       },
       {
         $unwind: {
-          path: '$student',
-          preserveNullAndEmptyArrays: true,
-        },
+          path: "$student",
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $lookup: {
-          from: 'attendances',
-          localField: '_id',
-          foreignField: 'sessionStudent',
-          as: 'attendances',
+          from: "attendances",
+          localField: "_id",
+          foreignField: "sessionStudent",
+          as: "attendances",
           pipeline: [
             {
-              $match: attendanceFilter,
+              $match: attendanceFilter
             },
             {
               $project: {
                 date: {
                   $dateToString: {
                     format: "%Y-%m-%d",
-                    date: {$toDate: '$date'},
-                    timezone: 'Asia/Kolkata'
+                    date: { $toDate: "$date" },
+                    timezone: "Asia/Kolkata"
                   }
                 },
                 day: 1,
@@ -756,35 +812,36 @@ export async function getAttendancesController(req, res){
                 teacherAttendance: 1
               }
             }
-          ],
-        },
+          ]
+        }
       },
       {
         $project: {
           firstname: "$student.firstname",
           lastname: "$student.lastname",
           gender: "$student.gender",
-          sectionName: '$section.name',
-          className: '$class.name',
+          sectionName: "$section.name",
+          className: "$class.name",
           attendances: 1
-        },
-      },
+        }
+      }
     ];
     const attendances = await getSessionStudentsPipelineService(pipeline);
-    return res.status(StatusCodes.OK).send(success(200, {
-      attendances
-    }));
-    
+    return res.status(StatusCodes.OK).send(
+      success(200, {
+        attendances
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
 
 export async function getStudentWithAllSessionStudentsController(req, res) {
-  try { 
+  try {
     const studentId = req.params.studentId;
-    const student = await getStudentService({_id: studentId, isActive: true});
-    if(!student) {
+    const student = await getStudentService({ _id: studentId, isActive: true });
+    if (!student) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
     }
 
@@ -798,55 +855,54 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
       {
         $lookup: {
           from: "sessionstudents",
-          localField: '_id',
-          foreignField: 'student',
-          as: 'sessionStudents',
+          localField: "_id",
+          foreignField: "student",
+          as: "sessionStudents",
           pipeline: [
             {
               $lookup: {
-                from: 'sessions',
-                localField: 'session',
-                foreignField: '_id',
-                as: 'session'
+                from: "sessions",
+                localField: "session",
+                foreignField: "_id",
+                as: "session"
               }
             },
             {
               $unwind: {
-                path: '$session',
-                preserveNullAndEmptyArrays: true,
+                path: "$session",
+                preserveNullAndEmptyArrays: true
               }
             },
             {
               $lookup: {
-                from: 'classes',
-                localField: 'classId',
-                foreignField: '_id',
-                as: 'classInfo'
+                from: "classes",
+                localField: "classId",
+                foreignField: "_id",
+                as: "classInfo"
               }
             },
             {
               $unwind: {
-                path: '$classInfo',
-                preserveNullAndEmptyArrays: true,
+                path: "$classInfo",
+                preserveNullAndEmptyArrays: true
               }
             },
             {
               $lookup: {
-                from: 'sections',
-                localField: 'section',
-                foreignField: '_id',
-                as: 'section'
+                from: "sections",
+                localField: "section",
+                foreignField: "_id",
+                as: "section"
               }
             },
             {
               $unwind: {
-                path: '$section',
-                preserveNullAndEmptyArrays: true,
+                path: "$section",
+                preserveNullAndEmptyArrays: true
               }
             },
             {
               $addFields: {
-
                 // session
                 sessionId: "$session._id",
                 sessionName: "$session.name",
@@ -862,7 +918,7 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
 
                 // section
                 sectionId: "$section._id",
-                sectionName: "$section.name",
+                sectionName: "$section.name"
               }
             },
             {
@@ -883,8 +939,8 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
   }
 }
 
-export async function searchStudentsController(req, res){
-  try{
+export async function searchStudentsController(req, res) {
+  try {
     let { search, page = 1, limit, classId, section, session } = req.query;
 
     const adminId = req.adminId;
@@ -897,255 +953,255 @@ export async function searchStudentsController(req, res){
       isActive: true
     };
 
-    if(classId) {
-      filter['classId'] = convertToMongoId(classId);
+    if (classId) {
+      filter["classId"] = convertToMongoId(classId);
     }
 
-    if(section) {
-      filter['section'] = convertToMongoId(section);
+    if (section) {
+      filter["section"] = convertToMongoId(section);
     }
 
-    if(session) {
-      filter['session'] = convertToMongoId(session);
+    if (session) {
+      filter["session"] = convertToMongoId(session);
     }
 
-    if(search){
+    if (search) {
       search = search.trim();
-      const[searchFirstname, searchLastname] = search.split(" ");
-      if(searchLastname){
-      filter['$and'] = [
+      const [searchFirstname, searchLastname] = search.split(" ");
+      if (searchLastname) {
+        filter["$and"] = [
           { "student.firstname": { $regex: new RegExp(searchFirstname, "i") } },
           { "student.lastname": { $regex: new RegExp(searchLastname, "i") } },
-          {isActive: true}
+          { isActive: true }
         ];
-    } else {
-      filter['$or'] = [
-        { "student.firstname" : { $regex: new RegExp(search, "i") }, isActive: true },
-        { "student.lastname": { $regex: new RegExp(search, "i") }, isActive: true },
-        { "schoolParent.email": { $regex: new RegExp(search, "i") }, isActive: true },
-        { "schoolParent.phone": { $regex: new RegExp(search, "i") }, isActive: true },
-      ];
+      } else {
+        filter["$or"] = [
+          { "student.firstname": { $regex: new RegExp(search, "i") }, isActive: true },
+          { "student.lastname": { $regex: new RegExp(search, "i") }, isActive: true },
+          { "schoolParent.email": { $regex: new RegExp(search, "i") }, isActive: true },
+          { "schoolParent.phone": { $regex: new RegExp(search, "i") }, isActive: true }
+        ];
+      }
     }
-  }
-  const {startTime, endTime} = getStartAndEndTimeService(new Date(), new Date());
+    const { startTime, endTime } = getStartAndEndTimeService(new Date(), new Date());
 
     const pipeline = [
-        // Join students with parents
-        {
-          $lookup: {
-            from: "students",
-            localField: "student",
-            foreignField: "_id",
-            as: "student",
-          }
-        },
-        {
-          $unwind: {
-            path: "$student",
-            preserveNullAndEmptyArrays: true,
-          }
-        },
-        {
-          $lookup: {
-            from: "schoolparents",
-            localField: "student.schoolParent",
-            foreignField: "_id",
-            as: "schoolParent"
-          }
-        },
-        {
-          $unwind: {
-            path: "$schoolParent",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $lookup: {
-            from: "parents",
-            localField: "student.parent",
-            foreignField: "_id",
-            as: "parent"
-          }
-        },
-        {
-          $unwind: {
-            path: "$parent",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $match: filter,
-        },
-        {
-          $sort: { "student.firstname": 1 }
-        },
-        {
-          $lookup: {
-            from: "sections",
-            localField: "section",
-            foreignField: "_id",
-            as: "section"
-          }
-        },
-        {
-          $unwind: {
-            path: "$section",
-            preserveNullAndEmptyArrays: true,
-          }
-        },
-        {
-          $lookup: {
-            from: "classes",
-            localField: "classId",
-            foreignField: "_id",
-            as: "classInfo"
-          }
-        },
-        {
-          $unwind: {
-            path: "$classInfo",
-            preserveNullAndEmptyArrays: true,
-          }
-        },
-        {
-          $lookup: {
-            from: 'attendances',
-            localField: '_id',
-            foreignField: 'sessionStudent',
-            as: 'attendances',
-            pipeline: [
-              { $match: { date: { $gte: startTime, $lte: endTime } } },
-              { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } }
-            ]
-          }
-        },
-        {
-          $unwind: {
-            path: '$attendances',
-            preserveNullAndEmptyArrays: true,
-          }
-        },
-        {
-          $lookup: {
-            from: "sessions",
-            localField: "session",
-            foreignField: "_id",
-            as: "session"
-          }
-        },
-        {
-          $unwind: {
-            path: "$session",
-            preserveNullAndEmptyArrays: true,
-          }
-        },
-        {
-          $addFields: {
-            id: "$student._id",
-            studentId: "$student.studentId",
-            rollNumber: "$student.rollNumber",
-            firstname: "$student.firstname",
-            lastname: "$student.lastname",
-            aadharNumber: "$student.aadharNumber",
-            dob: "$student.dob",
-            gender: "$student.gender",
-            bloodGroup: "$student.bloodGroup",
-            photo: "$student.photo",
-            address: "$student.address",
-            city: "$student.city",
-            district: "$student.district",
-            state: "$student.state",
-            country: "$student.country",
-            pincode: "$student.pincode",
-            guardianName: "$student.guardianName",
-            studentCreatedAt: "$student.createdAt",
-            studentUpdatedAt: "$student.updatedAt",
-
-            // schoolParent
-            parentId: "$schoolParent._id",
-            parentFullName: "$schoolParent.fullname",
-            parentUsername: "$schoolParent.username",
-            parentGender: "$schoolParent.gender",
-            parentAge: "$schoolParent.age",
-            parentAddress: "$schoolParent.address",
-            parentCity: "$schoolParent.city",
-            parentDistrict: "$schoolParent.district",
-            parentState: "$schoolParent.state",
-            parentCountry: "$schoolParent.country",
-            parentPincode: "$schoolParent.pincode",
-            parentStatus: "$schoolParent.status",
-            parentQualification: "$schoolParent.qualification",
-            parentOccupation: "$schoolParent.occupation",
-            parentPhone: "$schoolParent.phone",
-            parentEmail: "$schoolParent.email",
-            parentIsLoginAlready: "$schoolParent.isLoginAlready",
-            parentCreatedAt: "$schoolParent.createdAt",
-            parentUpdatedAt: "$schoolParent.updatedAt",
-
-            // parent (main parent record)
-            mainParentId: "$parent._id",
-            mainParentFullName: "$parent.fullname",
-            mainParentUsername: "$parent.username",
-            mainParentGender: "$parent.gender",
-            mainParentDob: "$parent.dob",
-            mainParentAddress: "$parent.address",
-            mainParentCity: "$parent.city",
-            mainParentDistrict: "$parent.district",
-            mainParentState: "$parent.state",
-            mainParentCountry: "$parent.country",
-            mainParentPincode: "$parent.pincode",
-            mainParentStatus: "$parent.status",
-            mainParentQualification: "$parent.qualification",
-            mainParentOccupation: "$parent.occupation",
-            mainParentPhone: "$parent.phone",
-            mainParentEmail: "$parent.email",
-            mainParentPhoto: "$parent.photo",
-            mainParentFcmToken: "$parent.fcmToken",
-            mainParentIsLoginAlready: "$parent.isLoginAlready",
-            mainParentStudents: "$parent.students",
-            mainParentCreatedAt: "$parent.createdAt",
-            mainParentUpdatedAt: "$parent.updatedAt",
-
-            // session
-            sessionId: "$session._id",
-            sessionName: "$session.name",
-            sessionStartDate: "$session.startDate",
-            sessionEndDate: "$session.endDate",
-            sessionStatus: "$session.status",
-            sessionStartYear: "$session.academicStartYear",
-            sessionEndYear: "$session.academicEndYear",
-
-            // class
-            classId: "$classInfo._id",
-            className: "$classInfo.name",
-
-            // section
-            sectionId: "$section._id",
-            sectionName: "$section.name",
-
-            // attendance
-            todayAttendance: "$attendances.teacherAttendance",
-          }
-        },
-        {
-          $project: {
-            student: 0,
-            schoolParent: 0,
-            parent: 0,
-            section: 0,
-            classInfo: 0,
-            session: 0,
-          }
+      // Join students with parents
+      {
+        $lookup: {
+          from: "students",
+          localField: "student",
+          foreignField: "_id",
+          as: "student"
         }
+      },
+      {
+        $unwind: {
+          path: "$student",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "schoolparents",
+          localField: "student.schoolParent",
+          foreignField: "_id",
+          as: "schoolParent"
+        }
+      },
+      {
+        $unwind: {
+          path: "$schoolParent",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "parents",
+          localField: "student.parent",
+          foreignField: "_id",
+          as: "parent"
+        }
+      },
+      {
+        $unwind: {
+          path: "$parent",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $match: filter
+      },
+      {
+        $sort: { "student.firstname": 1 }
+      },
+      {
+        $lookup: {
+          from: "sections",
+          localField: "section",
+          foreignField: "_id",
+          as: "section"
+        }
+      },
+      {
+        $unwind: {
+          path: "$section",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "classes",
+          localField: "classId",
+          foreignField: "_id",
+          as: "classInfo"
+        }
+      },
+      {
+        $unwind: {
+          path: "$classInfo",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "attendances",
+          localField: "_id",
+          foreignField: "sessionStudent",
+          as: "attendances",
+          pipeline: [
+            { $match: { date: { $gte: startTime, $lte: endTime } } },
+            { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } }
+          ]
+        }
+      },
+      {
+        $unwind: {
+          path: "$attendances",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "sessions",
+          localField: "session",
+          foreignField: "_id",
+          as: "session"
+        }
+      },
+      {
+        $unwind: {
+          path: "$session",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          id: "$student._id",
+          studentId: "$student.studentId",
+          rollNumber: "$student.rollNumber",
+          firstname: "$student.firstname",
+          lastname: "$student.lastname",
+          aadharNumber: "$student.aadharNumber",
+          dob: "$student.dob",
+          gender: "$student.gender",
+          bloodGroup: "$student.bloodGroup",
+          photo: "$student.photo",
+          address: "$student.address",
+          city: "$student.city",
+          district: "$student.district",
+          state: "$student.state",
+          country: "$student.country",
+          pincode: "$student.pincode",
+          guardianName: "$student.guardianName",
+          studentCreatedAt: "$student.createdAt",
+          studentUpdatedAt: "$student.updatedAt",
+
+          // schoolParent
+          parentId: "$schoolParent._id",
+          parentFullName: "$schoolParent.fullname",
+          parentUsername: "$schoolParent.username",
+          parentGender: "$schoolParent.gender",
+          parentAge: "$schoolParent.age",
+          parentAddress: "$schoolParent.address",
+          parentCity: "$schoolParent.city",
+          parentDistrict: "$schoolParent.district",
+          parentState: "$schoolParent.state",
+          parentCountry: "$schoolParent.country",
+          parentPincode: "$schoolParent.pincode",
+          parentStatus: "$schoolParent.status",
+          parentQualification: "$schoolParent.qualification",
+          parentOccupation: "$schoolParent.occupation",
+          parentPhone: "$schoolParent.phone",
+          parentEmail: "$schoolParent.email",
+          parentIsLoginAlready: "$schoolParent.isLoginAlready",
+          parentCreatedAt: "$schoolParent.createdAt",
+          parentUpdatedAt: "$schoolParent.updatedAt",
+
+          // parent (main parent record)
+          mainParentId: "$parent._id",
+          mainParentFullName: "$parent.fullname",
+          mainParentUsername: "$parent.username",
+          mainParentGender: "$parent.gender",
+          mainParentDob: "$parent.dob",
+          mainParentAddress: "$parent.address",
+          mainParentCity: "$parent.city",
+          mainParentDistrict: "$parent.district",
+          mainParentState: "$parent.state",
+          mainParentCountry: "$parent.country",
+          mainParentPincode: "$parent.pincode",
+          mainParentStatus: "$parent.status",
+          mainParentQualification: "$parent.qualification",
+          mainParentOccupation: "$parent.occupation",
+          mainParentPhone: "$parent.phone",
+          mainParentEmail: "$parent.email",
+          mainParentPhoto: "$parent.photo",
+          mainParentFcmToken: "$parent.fcmToken",
+          mainParentIsLoginAlready: "$parent.isLoginAlready",
+          mainParentStudents: "$parent.students",
+          mainParentCreatedAt: "$parent.createdAt",
+          mainParentUpdatedAt: "$parent.updatedAt",
+
+          // session
+          sessionId: "$session._id",
+          sessionName: "$session.name",
+          sessionStartDate: "$session.startDate",
+          sessionEndDate: "$session.endDate",
+          sessionStatus: "$session.status",
+          sessionStartYear: "$session.academicStartYear",
+          sessionEndYear: "$session.academicEndYear",
+
+          // class
+          classId: "$classInfo._id",
+          className: "$classInfo.name",
+
+          // section
+          sectionId: "$section._id",
+          sectionName: "$section.name",
+
+          // attendance
+          todayAttendance: "$attendances.teacherAttendance"
+        }
+      },
+      {
+        $project: {
+          student: 0,
+          schoolParent: 0,
+          parent: 0,
+          section: 0,
+          classInfo: 0,
+          session: 0
+        }
+      }
     ];
 
     pipeline.push(
       {
-        $skip: skipNum,
+        $skip: skipNum
       },
       {
-        $limit: limitNum,
-      },
+        $limit: limitNum
+      }
     );
 
     const students = await getSessionStudentsPipelineService(pipeline);
@@ -1154,10 +1210,12 @@ export async function searchStudentsController(req, res){
 
     await Promise.all(
       students.map((student) =>
-        calculateAttendancePercentageForSessionStudent(student._id, student.sessionId).then((percentage) => {
-          student.attendancePercentage = percentage;
-        }),
-      ),
+        calculateAttendancePercentageForSessionStudent(student._id, student.sessionId).then(
+          (percentage) => {
+            student.attendancePercentage = percentage;
+          }
+        )
+      )
     );
 
     return res.status(StatusCodes.OK).send(
@@ -1166,15 +1224,15 @@ export async function searchStudentsController(req, res){
         currentPage: pageNum,
         totalPages,
         totalStudents,
-        pageSize: limitNum,
+        pageSize: limitNum
       })
     );
-  }  catch (err) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
-    }
-};
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}
 
-export async function registerStudentsFromExcelController(req, res){
+export async function registerStudentsFromExcelController(req, res) {
   try {
     const file = req.file;
     const { sectionId, classId, sessionId } = req.body;
@@ -1183,7 +1241,7 @@ export async function registerStudentsFromExcelController(req, res){
     const [section, classInfo, session] = await Promise.all([
       getSectionService({ _id: sectionId }),
       getClassService({ _id: classId }),
-      getSessionService({ _id: sessionId }),
+      getSessionService({ _id: sessionId })
     ]);
 
     if (!session) {
@@ -1198,29 +1256,37 @@ export async function registerStudentsFromExcelController(req, res){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
     }
 
-    if(section["classId"].toString()!==classInfo["_id"].toString()){
+    if (section["classId"].toString() !== classInfo["_id"].toString()) {
       return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Invalid class, section ids"));
     }
 
     const workbook = xlsx.readFile(file.path);
     const sheetName = workbook.SheetNames[0];
     const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, sessionId, adminId);
-    if(registeredStudentsCount===0){
+    const registeredStudentsCount = await registerStudentsFromExcelHelper(
+      students,
+      sectionId,
+      classId,
+      sessionId,
+      adminId
+    );
+    if (registeredStudentsCount === 0) {
       throw new Error("Student registration failed");
     }
     await fs.unlink(file.path);
-    return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`));
-  } catch(err){
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(201, `${registeredStudentsCount} Students registered successfully`));
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501, err.message));
   }
 }
 
 export async function getSubjectsForStudentSectionController(req, res) {
   try {
     const sessionStudentId = req.params.sessionStudentId;
-    const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
-    if(!sessionStudent) {
+    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    if (!sessionStudent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
     }
     const pipeline = [
@@ -1316,32 +1382,38 @@ export async function getSubjectsForStudentSectionController(req, res) {
 export async function deleteStudentController(req, res) {
   try {
     const sessionStudentId = req.params.sessionStudentId;
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId, isActive:true });
+    const sessionStudent = await getSessionStudentService({
+      _id: sessionStudentId,
+      isActive: true
+    });
     if (!sessionStudent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Student doesn't exists"));
     }
-    const student = await getStudentService({_id: sessionStudent['student']});
+    const student = await getStudentService({ _id: sessionStudent["student"] });
     if (!student) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student doesn't exists"));
     }
-  
-    const[ parent, section] = await Promise.all([
-      getSchoolParentService({ _id:student["schoolParent"], isActive:true }),
-      getSectionService({ _id:sessionStudent["section"] })
+
+    const [parent, section] = await Promise.all([
+      getSchoolParentService({ _id: student["schoolParent"], isActive: true }),
+      getSectionService({ _id: sessionStudent["section"] })
     ]);
 
     if (!parent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
     }
-    
+
     await Promise.all([
-      updateSessionStudentService({_id:sessionStudentId}, {isActive:false}),
-      updateSectionService({_id:section["_id"]},{studentCount:section["studentCount"]-1})
+      updateSessionStudentService({ _id: sessionStudentId }, { isActive: false }),
+      updateSectionService({ _id: section["_id"] }, { studentCount: section["studentCount"] - 1 })
     ]);
 
-    const siblings = await getStudentsService({schoolParent:student["schoolParent"], isActive:true});
+    const siblings = await getStudentsService({
+      schoolParent: student["schoolParent"],
+      isActive: true
+    });
     if (siblings?.length === 0) {
-      await updateSchoolParentService({_id:student["schoolParent"]}, {isActive:false});
+      await updateSchoolParentService({ _id: student["schoolParent"] }, { isActive: false });
     }
 
     return res.status(StatusCodes.OK).send(success(200, "Student deleted successfully"));
