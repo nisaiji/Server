@@ -1,6 +1,6 @@
 import { createSectionAttendanceService, deleteSectionAttendanceService, getSectionAttendanceService, getSectionAttendancesService, getSectionAttendanceStatusService, updateSectionAttendanceService } from "../services/sectionAttendance.services.js";
 import {createAttendanceService,getAttendanceService, getAttendancesService, updateAttendanceService, getMisMatchAttendanceService, getAttendancePipelineService, deleteAttendancesService} from "../services/attendance.service.js";
-import {getParentsByStudentId, getStudentService, getStudentsPipelineService} from "../services/student.service.js";
+import {getParentsByStudentId, getStudentService} from "../services/student.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 import { StatusCodes } from "http-status-codes";
 import { getSectionByIdService, getSectionService } from "../services/section.services.js";

@@ -1,5 +1,4 @@
 import TransferCertificateRequestModel from "../models/TransferCertificateRequest.model.js";
-import { convertToMongoId } from "./mongoose.services.js";
 
 // Basic CRUD Operations
 export async function getTransferCertificateRequestService(paramObj, projection = {}) {

@@ -8,7 +8,7 @@ import { adminControllerResponse } from "../config/httpResponse.js";
 
 export async function registerAdminController(req, res) {
   try {
-    const {schoolName, email, phone, password } = req.body;
+    const {email, phone, password } = req.body;
     const admin = await getAdminService({$or:[{email}, {phone}]});
 
     if (admin && admin?.email === email) {

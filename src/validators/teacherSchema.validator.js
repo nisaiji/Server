@@ -94,7 +94,7 @@ const teacherUpdateSchema = Joi.object({
       "string.pattern.base": "Invalid date format, use DD/MM/YYYY."
     })
     .custom((value, helpers) => {
-      const [day, month, year] = value.split("/").map(Number);
+      const [day, month] = value.split("/").map(Number);
       if (month === 2 && day > 29) {
         return helpers.message("February cannot have more than 29 days.");
       }

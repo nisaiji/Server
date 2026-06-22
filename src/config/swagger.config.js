@@ -1,7 +1,4 @@
 import swaggerJSDoc from "swagger-jsdoc";
-import path from "path";
-
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const swaggerOptions = {
   definition: {

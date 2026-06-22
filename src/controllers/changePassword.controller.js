@@ -55,7 +55,7 @@ export async function registerChangePasswordRequestController(req, res) {
 
 export async function getChangePasswordRequestsController(req, res) {
   try {
-    const { model, reason, status, include, page = 1, limit = 10 } = req.query;
+    const { model, status, page = 1, limit = 10 } = req.query;
     const [receiverModel, receiverId] = getReceiver(req);
 
     if (!receiverModel || !receiverId) {

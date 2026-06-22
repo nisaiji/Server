@@ -7,8 +7,7 @@ import { convertToMongoId } from "../services/mongoose.services.js";
 export async function registerClassController(req, res) {
   try {
     const { name, sessionId } = req.body;
-    const admin = req.adminId;
-    const classInfo = await getClassService({ name, admin: convertToMongoId(admin), session: convertToMongoId(sessionId) });
+    const classInfo = await getClassService({ name, admin: convertToMongoId(req.adminId), session: convertToMongoId(sessionId) });
     const session = await getSessionService({_id: sessionId});
     if(!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));

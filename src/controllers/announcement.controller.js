@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import { createAnnouncementService, deleteAnnouncementService, getAnnouncementCountService, getAnnouncementService, getAnnouncementsPipelineService, updateAnnouncementService } from "../services/announcement.services.js";
 import { error, success } from "../utils/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
-import { getStudentService } from "../services/student.service.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
 import { getAdminService } from "../services/admin.services.js";
 import { sendPushNotification } from "../config/firebase.config.js";
@@ -27,7 +26,7 @@ export async function createAnnouncementByAdminController(req, res) {
     if(new Date() < session.startDate || new Date() > session.endDate) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Announcement date must be within session dates"));
     }
-    const announcement = await createAnnouncementService({
+    await createAnnouncementService({
       title,
       description,
       targetAudience,
@@ -77,7 +76,7 @@ export async function createAnnouncementByTeacherController(req, res) {
     if(new Date() < session.startDate || new Date() > session.endDate) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Announcement date must be within session dates"));
     }
-    const announcement = await createAnnouncementService({
+    await createAnnouncementService({
       title,
       description,
       targetAudience: ['parent'],
