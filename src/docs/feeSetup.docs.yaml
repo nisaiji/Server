@@ -1,0 +1,595 @@
+openapi: 3.0.0
+info:
+  title: Fee Setup API
+  version: 1.0.0
+
+tags:
+  - name: Fee Setup
+    description: Fee cycle, fee head, and fee structure management
+
+paths:
+  /fee-setup/fee-cycle:
+    post:
+      tags:
+        - Fee Setup
+      summary: Create fee cycle
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sessionId
+                - frequency
+                - dueDate
+              properties:
+                sessionId:
+                  type: string
+                  example: "64f1a2b3c4d5e6f7a8b9c0d1"
+                frequency:
+                  type: string
+                  enum: [monthly, quarterly, half-yearly, yearly]
+                  example: monthly
+                dueDate:
+                  type: number
+                  description: Due date of month (1-31)
+                  example: 10
+      responses:
+        "201":
+          description: Fee cycle created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeCycleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /fee-setup/fee-cycle/{sessionId}:
+    get:
+      tags:
+        - Fee Setup
+      summary: Get fee cycle by session
+      security:
+        - Authorization: []
+      parameters:
+        - $ref: "#/components/parameters/sessionIdParam"
+      responses:
+        "200":
+          description: Fee cycle fetched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeCycleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /fee-setup/fee-cycle/{feeCycleId}:
+    put:
+      tags:
+        - Fee Setup
+      summary: Update fee cycle
+      security:
+        - Authorization: []
+      parameters:
+        - name: feeCycleId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d1"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                frequency:
+                  type: string
+                  enum: [monthly, quarterly, half-yearly, yearly]
+                dueDate:
+                  type: number
+                  example: 10
+      responses:
+        "200":
+          description: Fee cycle updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeCycleResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /fee-setup/fee-head:
+    post:
+      tags:
+        - Fee Setup
+      summary: Add fee head
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sessionId
+                - name
+                - label
+                - type
+              properties:
+                sessionId:
+                  type: string
+                  example: "64f1a2b3c4d5e6f7a8b9c0d1"
+                name:
+                  type: string
+                  example: Tuition Fee
+                label:
+                  type: string
+                  example: tuition_fee
+                type:
+                  type: string
+                  enum: [mandatory, optional]
+                  example: mandatory
+                refundable:
+                  type: boolean
+                  example: false
+      responses:
+        "201":
+          description: Fee head added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeHeadResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /fee-setup/fee-head/{sessionId}:
+    get:
+      tags:
+        - Fee Setup
+      summary: Get fee heads by session
+      security:
+        - Authorization: []
+      parameters:
+        - $ref: "#/components/parameters/sessionIdParam"
+      responses:
+        "200":
+          description: Fee heads fetched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeHeadResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /fee-setup/fee-head/{feeHeadId}:
+    put:
+      tags:
+        - Fee Setup
+      summary: Update fee head
+      security:
+        - Authorization: []
+      parameters:
+        - name: feeHeadId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d1"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Tuition Fee
+                label:
+                  type: string
+                  example: tuition_fee
+                type:
+                  type: string
+                  enum: [mandatory, optional]
+                refundable:
+                  type: boolean
+      responses:
+        "200":
+          description: Fee head updated
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    delete:
+      tags:
+        - Fee Setup
+      summary: Delete fee head
+      security:
+        - Authorization: []
+      parameters:
+        - name: feeHeadId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d1"
+      responses:
+        "200":
+          description: Fee head deleted
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /fee-setup/fee-structure:
+    post:
+      tags:
+        - Fee Setup
+      summary: Create fee structure
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeeStructureInput"
+      responses:
+        "201":
+          description: Fee structure created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeStructureResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /fee-setup/fee-structure/list:
+    get:
+      tags:
+        - Fee Setup
+      summary: List fee structures
+      security:
+        - Authorization: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: classId
+          in: query
+          schema:
+            type: string
+        - name: sessionId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [DRAFT, ACTIVE]
+      responses:
+        "200":
+          description: Fee structures listing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  feeStructures:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FeeStructureResponse"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /fee-setup/fee-structure/{feeStructureId}:
+    get:
+      tags:
+        - Fee Setup
+      summary: Get fee structure by ID
+      security:
+        - Authorization: []
+      parameters:
+        - $ref: "#/components/parameters/feeStructureIdParam"
+      responses:
+        "200":
+          description: Fee structure fetched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeStructureResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags:
+        - Fee Setup
+      summary: Update fee structure
+      security:
+        - Authorization: []
+      parameters:
+        - $ref: "#/components/parameters/feeStructureIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeeStructureInput"
+      responses:
+        "200":
+          description: Fee structure updated
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    delete:
+      tags:
+        - Fee Setup
+      summary: Delete fee structure
+      security:
+        - Authorization: []
+      parameters:
+        - $ref: "#/components/parameters/feeStructureIdParam"
+      responses:
+        "200":
+          description: Fee structure deleted
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /fee-setup/verify:
+    put:
+      tags:
+        - Fee Setup
+      summary: Verify fee head or fee structure
+      security:
+        - Authorization: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - type
+                - token
+              properties:
+                id:
+                  type: string
+                  example: "64f1a2b3c4d5e6f7a8b9c0d1"
+                type:
+                  type: string
+                  enum: [VERIFY_FEE_HEAD, VERIFY_FEE_STRUCTURE]
+                  example: VERIFY_FEE_STRUCTURE
+                token:
+                  type: string
+                  description: MSG91 verification token
+                  example: "abc123token"
+      responses:
+        "200":
+          description: Verified successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  parameters:
+    sessionIdParam:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: "64f1a2b3c4d5e6f7a8b9c0d1"
+    feeStructureIdParam:
+      name: feeStructureId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: "64f1a2b3c4d5e6f7a8b9c0d1"
+
+  schemas:
+    FeeCycleResponse:
+      type: object
+      properties:
+        feeCycle:
+          type: object
+          properties:
+            _id:
+              type: string
+            adminId:
+              type: string
+            sessionId:
+              type: string
+            frequency:
+              type: string
+            dueDate:
+              type: number
+            isVerified:
+              type: boolean
+
+    FeeHeadResponse:
+      type: object
+      properties:
+        feeHead:
+          type: object
+          properties:
+            _id:
+              type: string
+            adminId:
+              type: string
+            sessionId:
+              type: string
+            isVerified:
+              type: boolean
+            feeHeads:
+              type: array
+              items:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  name:
+                    type: string
+                  label:
+                    type: string
+                  type:
+                    type: string
+                  refundable:
+                    type: boolean
+
+    FeeStructureInput:
+      type: object
+      required:
+        - sessionId
+        - classId
+        - feeCycleId
+        - applicableSections
+      properties:
+        sessionId:
+          type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d1"
+        classId:
+          type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d2"
+        feeCycleId:
+          type: string
+          example: "64f1a2b3c4d5e6f7a8b9c0d3"
+        applicableSections:
+          type: array
+          items:
+            type: object
+            properties:
+              section:
+                type: object
+                properties:
+                  sectionId:
+                    type: string
+                  name:
+                    type: string
+              feeHeads:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    feeHeadId:
+                      type: string
+                    amount:
+                      type: number
+
+    FeeStructureResponse:
+      type: object
+      properties:
+        feeStructure:
+          type: object
+          properties:
+            _id:
+              type: string
+            adminId:
+              type: string
+            sessionId:
+              type: string
+            classId:
+              type: string
+            feeCycleId:
+              type: string
+            status:
+              type: string
+              enum: [DRAFT, ACTIVE]
+            isVerified:
+              type: boolean
+            applicableSections:
+              type: array
+              items:
+                type: object
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string

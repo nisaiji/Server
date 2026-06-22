@@ -1,13 +1,14 @@
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import express from "express";
 import morgan from "morgan";
-import cors from "cors";
 import swaggerUi from "swagger-ui-express";
-import connectDB from "./src/config/db.config.js";
-import router from "./src/routers/index.router.js";
+
 import { config } from "./src/config/config.js";
-import cookieParser from "cookie-parser";
+import connectDB from "./src/config/db.config.js";
+import { cronManager } from "./src/crons/index.cron.js";
+import router from "./src/routers/index.router.js";
 import swaggerDocs from "./swagger.js";
-import  {cronManager}  from "./src/crons/index.cron.js";
 // import "./src/config/redis.config.js";
 const PORT = config.port || 4000;
 
