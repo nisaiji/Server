@@ -193,8 +193,7 @@ export async function getTagsController(req, res) {
           session: convertToMongoId(sessionId),
           section: convertToMongoId(sectionId),
           subject: convertToMongoId(subjectId),
-          date: { $gte: startTime },
-          date: { $lte: endTime }
+          date: { $gte: startTime, $lte: endTime }
         }
       }
     ]);
@@ -206,14 +205,12 @@ export async function getTagsController(req, res) {
 
 export async function getTagsWithInfoController(req, res) {
   try {
-    const { sessionStudentId, sectionId, startTime, endTime } = req.body;
-    const parentId = req.parentId;
+    const { sectionId, startTime, endTime } = req.body;
     const tags = await getTagsPipelineService([
       {
         $match: {
           section: convertToMongoId(sectionId),
-          date: { $gte: startTime },
-          date: { $lte: endTime }
+          date: { $gte: startTime, $lte: endTime }
         }
       },
       {

@@ -88,7 +88,7 @@ export function endOfWeekDayjs(date, options = {}) {
 // Detect the last working day of the month, assuming working days are Mon-Sat.
 export function detectLastWorkingDayOfMonth(currentDate) {
   let date = new Date(currentDate);
-  while (!isLastDayOfMonth(date) || ![1, 2, 3, 4, 5, 6].includes(getDay(date))) {
+  while (!isLastDayOfMonth(date) || ![1, 2, 3, 4, 5, 6].includes(date.getDay())) {
     // Mon-Sat are working days
     date = new Date(date.getTime() + 24 * 60 * 60 * 1000);
   }

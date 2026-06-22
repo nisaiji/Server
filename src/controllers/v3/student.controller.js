@@ -244,14 +244,12 @@ export async function registerSessionStudentController(req, res) {
       updateSectionService({ _id: sectionId }, { studentCount: (section.studentCount || 0) + 1 })
     ]);
 
-    return res
-      .status(StatusCodes.CREATED)
-      .send(
-        success(201, {
-          message: "Student registered successfully!",
-          student: createdSessionStudent
-        })
-      );
+    return res.status(StatusCodes.CREATED).send(
+      success(201, {
+        message: "Student registered successfully!",
+        student: createdSessionStudent
+      })
+    );
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -1386,6 +1384,8 @@ export async function deleteStudentController(req, res) {
       _id: sessionStudentId,
       isActive: true
     });
+
+    let test;
     if (!sessionStudent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Student doesn't exists"));
     }

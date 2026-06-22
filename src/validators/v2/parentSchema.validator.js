@@ -26,7 +26,7 @@ const parentEmailValidator = Joi.object({
 
 const parentPasswordValidator = Joi.object({
   password: Joi.string()
-    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
+    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^[a-zA-Z0-9!@#$%^&*\?]*?]{3,30}$/))
     .required()
     .min(8)
     .max(16)
@@ -118,7 +118,7 @@ const parentUpdateValidator = Joi.object({
 
 const parentPasswordEditValidator = Joi.object({
   newPassword: Joi.string()
-    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
+    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^[a-zA-Z0-9!@#$%^&*\?]*?]{3,30}$/))
     .required()
     .min(8)
     .max(16)
@@ -132,7 +132,7 @@ const parentPasswordEditValidator = Joi.object({
       "string.base": "Password must be a valid string."
     }),
   oldPassword: Joi.string()
-    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
+    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^[a-zA-Z0-9!@#$%^&*\?]*?]{3,30}$/))
     .required()
     .min(8)
     .max(16)

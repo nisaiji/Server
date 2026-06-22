@@ -192,8 +192,8 @@ export async function assignGuestTeacherController(req, res) {
     const { guestTeacherId, sectionId, teacherId } = req.body;
     const adminId = req.adminId;
     const [teacher, guestTeacher, section, guestTeacherSection] = await Promise.all([
-      getTeacherService({ _id, teacherId, admin: adminId, isActive: true }),
-      getTeacherService({ _id, teacherId, admin: adminId, isActive: true }),
+      getTeacherService({ _id: teacherId, admin: adminId, isActive: true }),
+      getTeacherService({ _id: guestTeacherId, admin: adminId, isActive: true }),
       getSectionService({ _id: sectionId }),
       getSectionService({ guestTeacher: guestTeacherId })
     ]);

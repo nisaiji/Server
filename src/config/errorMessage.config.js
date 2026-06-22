@@ -1,4 +1,4 @@
-{
+export default {
   adminController: {
     existingEmail: "Email already exists",
     existingPhoneNo: "Phone number already exists",
@@ -35,7 +35,7 @@
     otpNotMatched: "OTP not matched",
     deviceMismatch: "Access denied due to device mismatch",
     passwordUpdated: "Password updated successfully",
-    requestCompleted: "Password reset request raised successfully", MODIFIED
+    requestCompleted: "Password reset request raised successfully",
     internalServerError: "Internal server error",
     adminNotFound: "Admin not found",
     requestAlreadyApproved: "Request approved, please change the password",
@@ -45,7 +45,7 @@
     raiseRequestFirst: "Please raise a password reset request first",
     eventUpdated: "Event updated successfully",
     teacherNotFound: "Teacher not found",
-    accessDeniedDeviceMismatch: "Access denied due to device mismatch",
+    accessDeniedDeviceMismatch: "Access denied due to device mismatch"
   },
   classController: {
     classRegistered: "Class registered successfully",
@@ -61,7 +61,7 @@
     queryRegistered: "Query registered successfully",
     internalServerError: "Internal server error"
   },
-  dashboardAdminController:{
+  dashboardAdminController: {
     presentStudentsFetched: "Present students count fetched successfully",
     parentCountFetched: "Parent count fetched successfully",
     teacherCountFetched: "Teacher count fetched successfully",
@@ -70,7 +70,7 @@
     attendanceFetched: "Attendance fetched successfully",
     internalServerError: "Internal server error"
   },
-  dashboardTeacherController:{
+  dashboardTeacherController: {
     presentStudentsFetched: "Present students count fetched successfully",
     parentCountFetched: "Parent count fetched successfully",
     teacherCountFetched: "Teacher count fetched successfully",
@@ -80,7 +80,7 @@
     attendanceFetched: "Attendance fetched successfully",
     internalServerError: "Internal server error"
   },
-  guestTeacherController:{
+  guestTeacherController: {
     unauthorizedUsername: "Unauthorized username",
     unauthorizedUser: "Unauthorized user",
     sectionNotFound: "Section not found",
@@ -96,14 +96,14 @@
     holidayUpdated: "Holiday updated successfully",
     internalServerError: "Internal server error"
   },
-    leaveController: {
-      leaveRequestExists: "Leave already applied from {startDate} to {endDate}.",
-      leaveRequestCreated: "Request sent successfully",
-      leaveRequestNotFound: "Leave Request not found",
-      leaveRequestUpdated: "Leave Request updated successfully",
-      leaveRequestConflict: "Username already exists",
-      leaveRequestForbidden: "Leave request cannot be updated at this time.", MODIFIED
-      invalidTime: "StartTime must be smaller than EndTime",
-      internalServerError: "Internal server error",
-  }  
-}
+  leaveController: {
+    leaveRequestExists: "Leave already applied from {startDate} to {endDate}.",
+    leaveRequestCreated: "Request sent successfully",
+    leaveRequestNotFound: "Leave Request not found",
+    leaveRequestUpdated: "Leave Request updated successfully",
+    leaveRequestConflict: "Username already exists",
+    leaveRequestForbidden: "Leave request cannot be updated at this time.",
+    invalidTime: "StartTime must be smaller than EndTime",
+    internalServerError: "Internal server error"
+  }
+};

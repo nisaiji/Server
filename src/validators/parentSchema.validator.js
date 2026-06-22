@@ -7,7 +7,7 @@ const parentLoginSchema = Joi.object({
     "any.required": "Username is required."
   }),
   password: Joi.string()
-    .pattern(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/)
+    .pattern(/^[a-zA-Z0-9!@#$%^&*?]{3,30}$/)
     .messages({
       "string.pattern.base":
         "Password must be 3-30 characters long and can include letters, numbers, and special characters !@#$%^&*?"

@@ -34,6 +34,6 @@ export async function createCustomerSupportQueryController(req, res) {
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send({ status: "error", statusCode: 500, msg: error.message });
+      .send({ status: "error", statusCode: 500, msg: err.message });
   }
 }

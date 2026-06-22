@@ -25,6 +25,8 @@ export default [
       ...js.configs.recommended.rules,
       "no-undef": "error",
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-useless-catch": "warn",
+      "no-useless-escape": "warn",
       "no-console": "off",
       semi: ["error", "always"],
       "import/order": [

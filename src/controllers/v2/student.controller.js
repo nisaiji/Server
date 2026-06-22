@@ -4,7 +4,9 @@ import { StatusCodes } from "http-status-codes";
 import xlsx from "xlsx";
 
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
+import { calculateSundays, calculateDaysBetweenDates } from "../../services/celender.service.js";
 import { getClassService } from "../../services/class.services.js";
+import { getHolidayCountService } from "../../services/holiday.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import {
@@ -21,6 +23,7 @@ import {
   registerSchoolParentService,
   updateSchoolParentService
 } from "../../services/v2/schoolParent.services.js";
+import { getWorkDayCountService } from "../../services/workDay.services.js";
 import { error, success } from "../../utills/responseWrapper.js";
 
 export async function searchStudentsController(req, res) {

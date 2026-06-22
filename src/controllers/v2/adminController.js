@@ -434,7 +434,7 @@ export async function adminGetStatusController(req, res) {
     };
 
     return res.status(StatusCodes.OK).send(success(200, status));
-  } catch (error) {
+  } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }

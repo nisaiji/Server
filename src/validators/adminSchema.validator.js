@@ -21,7 +21,7 @@ const registerAdminSchema = Joi.object({
     "any.required": "Email is required!"
   }),
   password: Joi.string()
-    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
+    .pattern(/^[a-zA-Z0-9!@#$%^&*?]{3,30}$/)
     .required()
     .min(8)
     .max(16)
@@ -103,7 +103,7 @@ const loginAdminSchema = Joi.object({
     "any.required": "Email is required!"
   }),
   password: Joi.string()
-    .pattern(new RegExp(/^[a-zA-Z0-9!@#$%^&*\?]{3,30}$/))
+    .pattern(/^[a-zA-Z0-9!@#$%^&*?]{3,30}$/)
     .required()
     .min(8)
     .max(16)

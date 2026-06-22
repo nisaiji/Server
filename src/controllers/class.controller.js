@@ -32,7 +32,7 @@ export async function registerClassController(req, res) {
       return res.status(StatusCodes.CONFLICT).send(error(409, "Class already exists"));
     }
 
-    await registerClassService({ name, admin, session: sessionId });
+    await registerClassService({ name, admin: req.adminId, session: sessionId });
     return res.status(StatusCodes.OK).send(success(200, "Class registered successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -42,7 +42,6 @@ export async function registerClassController(req, res) {
 export async function deleteClassController(req, res) {
   try {
     const classId = req.params.classId;
-    const admin = req.adminId;
     const classInfo = await getClassService({ _id: classId });
     const session = await getSessionService({ _id: classInfo["session"] });
     if (!session || session["status"] === "completed") {

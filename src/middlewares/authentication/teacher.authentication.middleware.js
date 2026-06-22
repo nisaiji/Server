@@ -47,11 +47,11 @@ export async function teacherAuthenticate(req, res, next) {
       }
     }
 
-    if (
-      decoded["role"] === "guestTeacher" &&
-      section["guestTeacher"].toString() !== decoded?.teacherId
-    ) {
-      return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
+    if (decoded["role"] === "guestTeacher") {
+      const section = await getSectionService({ _id: decoded?.sectionId });
+      if (section && section["guestTeacher"].toString() !== decoded?.teacherId) {
+        return res.status(StatusCodes.GONE).send(error(410, "User has been replaced"));
+      }
     }
 
     req.teacherId = decoded?.teacherId;
