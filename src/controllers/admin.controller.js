@@ -21,6 +21,7 @@ export async function registerAdminController(req, res) {
 
     if (admin && admin?.email === email) {
       return res
+
         .status(StatusCodes.CONFLICT)
         .send(error(409, adminControllerResponse.registerAdminController.emailExists));
     }
