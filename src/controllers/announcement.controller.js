@@ -24,6 +24,7 @@ export async function createAnnouncementByAdminController(req, res) {
 
     const { title, description, sessionId, targetAudience, startsAt, expiresAt } = req.body;
     const admin = await getAdminService({ _id: adminId });
+
     const session = await getSessionService({ _id: sessionId, school: adminId });
     if (!session) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
