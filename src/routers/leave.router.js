@@ -6,9 +6,9 @@ import { adminAuthenticate } from "../middlewares/authentication/admin.authentic
 
 const leaveRouter = express.Router();
 
-leaveRouter.get("/admin", adminAuthenticate, getLeaveRequestsForAdminValidation, getLeaveRequestsController)
-leaveRouter.post("/teacher", teacherAuthenticate, registerLeaveRequestValidation, registerLeaveRequestController)
-leaveRouter.put("/admin", adminAuthenticate, updateTeacherLeaveRequestByAdminValidation, updateTeacherLeavRequestByAdminController )
-leaveRouter.put("/teacher", teacherAuthenticate, updateTeacherLeaveRequestValidation, updateTeacherLeavRequestController )
+leaveRouter.get("/admin", adminAuthenticate, getLeaveRequestsForAdminValidation, getLeaveRequestsController);
+leaveRouter.post("/teacher", teacherAuthenticate, registerLeaveRequestValidation, registerLeaveRequestController);
+leaveRouter.put("/admin", adminAuthenticate, updateTeacherLeaveRequestByAdminValidation, updateTeacherLeavRequestByAdminController );
+leaveRouter.put("/teacher", teacherAuthenticate, updateTeacherLeaveRequestValidation, updateTeacherLeavRequestController );
 
 export default leaveRouter;

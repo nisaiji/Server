@@ -97,7 +97,7 @@ export async function registerHolidaysController(req, res) {
       if(!currDateHoliday && day!=='Sunday') {
         await createHolidayService({ date:currIstDate.getTime(), day, title, description, admin: adminId, session: sessionId, classId, section: sectionId });
       }
-      currIstDate.setDate(currIstDate.getDate()+1)
+      currIstDate.setDate(currIstDate.getDate()+1);
     }
     const school = await getAdminService({_id: adminId});
     const parents =  await getParentsByAdminIdService(adminId);

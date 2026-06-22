@@ -39,7 +39,7 @@ const updateAttendanceSchema = Joi.object({
     'array.includes': 'Each item in the absent array must be a object.',
     'any.required': 'The absent array is required.'
   })
-})
+});
 
 const attendanceStatusSchema = Joi.object({
   startTime: Joi.number().integer().min(0).required().messages({
@@ -54,7 +54,7 @@ const attendanceStatusSchema = Joi.object({
     'number.min': 'End time must be a positive number',
     'any.required': 'End time is required'
   })
-})
+});
 
 const attendanceCountSchema = Joi.object({
   sessionStudentId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required().messages({
@@ -72,7 +72,7 @@ const attendanceCountSchema = Joi.object({
     'number.min': 'End time must be a positive number',
     'any.required': 'End time is required'
   }),
-})
+});
 
 const getAttendanceSchema = Joi.object({
   startTime: Joi.number().required().messages({
@@ -99,7 +99,7 @@ const getAttendanceSchema = Joi.object({
       'string.base': 'Admin ID must be a valid string.',
       'string.pattern.base': 'Admin id must be a valid  id.',
     }),
-})
+});
 
 
 

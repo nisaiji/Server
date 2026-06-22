@@ -16,7 +16,7 @@ export function getStartAndEndTimeService(startDate, endDate){
 
 export function getFormattedNewDateService(date){
   if(!(date instanceof Date)){
-    return 'invalid date'
+    return 'invalid date';
   }
 
   const day = String(date.getDate()).padStart(2, '0');
@@ -31,7 +31,7 @@ export function getFormattedNewDateService(date){
 
 export function getFormattedDateService(date){
   if(!(date instanceof Date)){
-    return 'invalid date'
+    return 'invalid date';
   }
 
   const day = String(date.getDate()).padStart(2, '0');
@@ -73,12 +73,12 @@ export function calculateDaysBetweenDates(startTime, endTime) {
 
 export const excelDateToJSDate = (date) => {
 return new Date(Math.round((date - 25569)*86400*1000));
-}
+};
 
 export const jsDateToExcelDate = (date) => {
 let returnDateTime = 25569.0 + ((date.getTime()-(date.getTimezoneOffset() * 60 * 1000)) / (1000 * 60 * 60 * 24));
-return Math.floor(returnDateTime)
-}
+return Math.floor(returnDateTime);
+};
 
 export const excelDateToStringDateFormat = (dateNumber, dateFormat) => {
 let jsDate = excelDateToJSDate(dateNumber);
@@ -94,15 +94,15 @@ switch(dateFormat.toLowerCase()){
     case 'dd-mm-yyyy':
       return ("0"+jsDate.getDate().toString()).slice(-2)+'-'+("0"+(jsDate.getMonth()+1).toString()).slice(-2)+"-"+jsDate.getFullYear().toString();
       default:
-       throw new Error("format not matching")
+       throw new Error("format not matching");
 }
-}
+};
 
 export const timestampToIstDate = (timestamp) => {
-  const utcDate = new Date(timestamp)
+  const utcDate = new Date(timestamp);
  
   const offset = 5.5*60*60*1000;
   const istTimestamp = utcDate.getTime() + offset;
-  const istDate = new Date(istTimestamp)
+  const istDate = new Date(istTimestamp);
   return istDate;
-}
+};

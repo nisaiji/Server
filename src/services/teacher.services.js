@@ -64,7 +64,7 @@ export async function getTeachersByAdminIdService(adminId) {
           isActive: true
         }
       }
-    ])
+    ]);
     return teachers;
   } catch (error) {
     throw error;

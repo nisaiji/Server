@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import xlsx from 'xlsx';
-import fs from 'fs/promises'
+import fs from 'fs/promises';
 import { getStudentCountService, getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 import { error, success } from "../../utills/responseWrapper.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
@@ -24,11 +24,11 @@ export async function searchStudentsController(req, res){
     };
 
     if(classId) {
-      filter['classId'] = convertToMongoId(classId)
+      filter['classId'] = convertToMongoId(classId);
     }
 
     if(section) {
-      filter['section'] = convertToMongoId(section)
+      filter['section'] = convertToMongoId(section);
     }
 
     if(search){
@@ -39,14 +39,14 @@ export async function searchStudentsController(req, res){
           { firstname: { $regex: new RegExp(searchFirstname, "i") } },
           { lastname: { $regex: new RegExp(searchLastname, "i") } },
           {isActive: true}
-        ]
+        ];
     } else {
       filter['$or'] = [
         { firstname: { $regex: new RegExp(search, "i") }, isActive: true },
         { lastname: { $regex: new RegExp(search, "i") }, isActive: true },
         { "parentDetails.email": { $regex: new RegExp(search, "i") }, isActive: true },
         { "parentDetails.phone": { $regex: new RegExp(search, "i") }, isActive: true },
-      ]
+      ];
     }
   }
 
@@ -257,7 +257,7 @@ export async function updateStudentBySchoolController(req, res){
     if(req.body["phone"] && schoolParent['phone']!==req.body['phone']){
       const phone = req.body['phone'];
       let parent = await getParentService({_id: schoolParent['parent']});
-      console.log(parent['students'])
+      console.log(parent['students']);
       if (parent && parent['students']?.includes(studentId)) {
         return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Phone number can not be updated'));
       }
@@ -301,13 +301,13 @@ export async function registerStudentsFromExcelController(req, res){
   try {
     const file = req.file;
     const { sectionId, classId } = req.body;
-    console.log({sectionId, classId})
+    console.log({sectionId, classId});
     const adminId = req.adminId;
 
     const[section, classInfo] = await Promise.all([
       getSectionService({ _id: sectionId }),
       getClassService({ _id: classId })
-    ])
+    ]);
 
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "Section not found"));
@@ -321,17 +321,17 @@ export async function registerStudentsFromExcelController(req, res){
       return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Invalid class, section ids"));
     }
 
-    const workbook = xlsx.readFile(file.path)
-    const sheetName = workbook.SheetNames[0]
-    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
-    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, adminId)
+    const workbook = xlsx.readFile(file.path);
+    const sheetName = workbook.SheetNames[0];
+    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, adminId);
     if(registeredStudentsCount===0){
-      throw new Error("Student registration failed")
+      throw new Error("Student registration failed");
     }
-    await fs.unlink(file.path)
-    return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`))
+    await fs.unlink(file.path);
+    return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`));
   } catch(err){
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message));
   }
 }
 
@@ -370,7 +370,7 @@ export async function updateStudentByParentController(req, res) {
     await updateStudentService({ _id:studentId }, studentUpdate);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message));
   }
 }
 
@@ -380,9 +380,9 @@ export async function getAttendancesController(req, res){
     const parentId = req.parentId;
     const student = await getStudentService({_id: studentId});
     if(!student) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"))
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
     }
-    const parent = await getParentService({_id: parentId})
+    const parent = await getParentService({_id: parentId});
     if(!parent['students']?.some(id => id.equals(student._id))) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(400, 'Unauthorized access'));
     }
@@ -593,7 +593,7 @@ export async function getStudentsController(req, res){
                   ],
                   as: 'attendance'
               }
-          })
+          });
           }
           if (includes.includes('parent')) {
             pipeline.push({
@@ -698,7 +698,7 @@ export async function getStudentsController(req, res){
                 path: '$adminDetails',
                 preserveNullAndEmptyArrays: true
               }
-            })
+            });
           }
           if (includes.includes('percentageAttendance')) {
             const currentDate = new Date().getTime();
@@ -878,7 +878,7 @@ export async function deleteStudentController(req, res) {
     await Promise.all([
       updateStudentService({_id:studentId}, {isActive:false}),
       updateSectionService({_id:section["_id"]},{studentCount:section["studentCount"]-1})
-    ])
+    ]);
 
     const siblings = await getStudentsService({schoolParent:student["schoolParent"], isActive:true});
     if (siblings?.length === 0) {

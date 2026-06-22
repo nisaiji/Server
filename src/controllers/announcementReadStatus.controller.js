@@ -25,7 +25,7 @@ export async function markAnnouncementsAsReadForParentController(req, res) {
                 userRole: 'parent',
                 announcement: announcementId,
                 readAt: new Date()
-            }
+            };
         });
         if(announcementsMarkAsRead.length > 0) {
             await createAnnouncementsReadStatusService(announcementsMarkAsRead);
@@ -49,7 +49,7 @@ export async function markAnnouncementsAsReadForTeacherController(req, res) {
                 userRole: 'teacher',
                 announcement: announcementId,
                 readAt: new Date()
-            }
+            };
         });
         if(announcementsMarkAsRead.length > 0) {
             await createAnnouncementsReadStatusService(announcementsMarkAsRead);

@@ -1,10 +1,10 @@
-import { getAdminsService } from "../../services/admin.services.js"
+import { getAdminsService } from "../../services/admin.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { registerSessionService, updateSessionService } from "../../services/session.services.js";
 
 const SessionCreateJob =  async() => {
   try {
-  console.log("session create job")
+  console.log("session create job");
   const schools = await getAdminsService({});
   const currentYear = new Date().getFullYear();
   const march31UTC = new Date(Date.UTC(currentYear + 1, 2, 31, 0, 0, 0));
@@ -25,8 +25,8 @@ const SessionCreateJob =  async() => {
   }
 
 } catch (error) {
-  console.log(error.message)  
+  console.log(error.message);  
 }
-}
+};
 
 export default SessionCreateJob;

@@ -81,7 +81,7 @@ export async function deleteSectionController(req, res) {
       deleteSectionService({ _id:sectionId }), 
       updateClassService({_id:section["classId"]}, {$pull:{section:sectionId}}),
       updateTeacherService({_id:section["teacher"]}, {section:null}) 
-    ])
+    ]);
     
     return res.send(success(200, "section deleted successfully"));
   } catch (err) {
@@ -149,24 +149,24 @@ export async function assignGuestTeacherController(req, res){
       getSectionService({guestTeacher:guestTeacherId}),    
     ]);
     if(!teacher){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found."))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found."));
     }
     if(!guestTeacher){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Guest Teacher not found."))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Guest Teacher not found."));
     }
     if(!guestTeacherSection){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Guest Teacher already assigned to as guest."))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Guest Teacher already assigned to as guest."));
     }
     if(!section){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found."))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found."));
     }
     if((section["teacher"].toString())!==teacherId){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section Teacher mismatch."))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section Teacher mismatch."));
     }
 
-    await updateSectionService({_id: sectionId}, {guestTeacher: guestTeacherId})
+    await updateSectionService({_id: sectionId}, {guestTeacher: guestTeacherId});
 
-    return res.status(StatusCodes.OK).send(error(404, "Section not found."))
+    return res.status(StatusCodes.OK).send(error(404, "Section not found."));
 
         
   } catch (err) {

@@ -55,7 +55,7 @@ export async function updateStudentExamResultController(req, res) {
     if(!studentExamResult) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, 'Student exam result not found'));
     }
-    const params = {}
+    const params = {};
     if(examId) params.exam = examId;
     if(sessionStudentId) params.sessionStudent = sessionStudentId;
     if(subjectId) params.subject = subjectId;
@@ -239,7 +239,7 @@ export async function getStudentsExamMarksForSubjectController(req, res) {
 
         }
       }
-    ]
+    ];
 
     const sessionStudents = await getSessionStudentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
@@ -419,7 +419,7 @@ export async function getStudentExamMarksForSubjectController(req, res) {
 
         }
       }
-    ]
+    ];
 
     const sessionStudents = await getSessionStudentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
@@ -650,10 +650,10 @@ export async function getSectionStudentsExamMarksController(req, res) {
           exam: '$exam'
         }
       }
-    ]
+    ];
 
     const sessionStudents = await getSessionStudentsPipelineService(pipeline);
-    return res.status(StatusCodes.OK).send(success(200, sessionStudents))
+    return res.status(StatusCodes.OK).send(success(200, sessionStudents));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -861,10 +861,10 @@ export async function getStudentExamMarksController(req, res) {
           exam: '$exam'
         }
       }
-    ]
+    ];
 
     const sessionStudent = await getSessionStudentsPipelineService(pipeline);
-    return res.status(StatusCodes.OK).send(success(200, sessionStudent))
+    return res.status(StatusCodes.OK).send(success(200, sessionStudent));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

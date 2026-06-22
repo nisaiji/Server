@@ -38,7 +38,7 @@ export async function getSectionAttendanceStatusService(filter) {
 
 export async function createSectionAttendanceService(paramObj){
   try {
-    const sectionAttendance = await sectionAttendanceModel.create(paramObj)
+    const sectionAttendance = await sectionAttendanceModel.create(paramObj);
     return sectionAttendance;
   } catch (error){
     throw error;    

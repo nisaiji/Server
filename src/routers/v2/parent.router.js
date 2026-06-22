@@ -6,7 +6,7 @@ import { validateImageSizeMiddleware } from "../../middlewares/teacher.middlewar
 
 const parentRouter = express.Router();
 
-parentRouter.get("/", parentAuthenticate, getParentWithStudentsController)
+parentRouter.get("/", parentAuthenticate, getParentWithStudentsController);
 parentRouter.put("/", parentAuthenticate, parentUpdateValidation, updateParentController);
 parentRouter.post("/login", loginParentController);
 parentRouter.post('/status', getParentStatusController);

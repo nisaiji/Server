@@ -38,7 +38,7 @@ export async function getStudentExamResultStatusService(filter) {
 
 export async function createStudentExamResultService(paramObj){
   try {
-    const studentExamResult = await studentExamResultModel.create(paramObj)
+    const studentExamResult = await studentExamResultModel.create(paramObj);
     return studentExamResult;
   } catch (error){
     throw error;    

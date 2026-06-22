@@ -312,7 +312,7 @@ export async function getStudentExamsForParentController(req, res) {
           subjectDocs: 0
         }
       }
-    ]
+    ];
     const exams = await getExamsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, exams));       
   } catch (err) {
@@ -336,7 +336,7 @@ export async function updateExamController(req, res) {
     const schoolId = exam.school?.toString?.() ?? exam.school;
     const sessionId = exam.session?.toString?.() ?? exam.session;
     const sectionId = exam.section?.toString?.() ?? exam.section;
-    let params = {}
+    let params = {};
 
     if(name) params.name = name;
     if(description) params.description = description;

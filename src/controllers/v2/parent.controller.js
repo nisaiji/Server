@@ -25,7 +25,7 @@ export async function parentSendOtpToPhoneController (req, res) {
     const { phone } = req.body;
     const parent = await getParentService({ phone });
     if(!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
     }
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
     //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
@@ -38,7 +38,7 @@ export async function parentSendOtpToPhoneController (req, res) {
     });
     const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
     await sentSMSByTwillio("+91"+phone,sms);
-    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 })
+    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 });
 
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
@@ -51,7 +51,7 @@ export async function parentPhoneVerifyByOtpController (req, res) {
     const { phone, otp } = req.body;
     let parent = await getParentService({ phone });
     if(!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
     }
 
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
@@ -75,7 +75,7 @@ export async function parentPhoneVerifyByOtpController (req, res) {
       {
         $limit: 1
       }
-    ]
+    ];
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
@@ -105,7 +105,7 @@ export async function parentPhoneVerifyByOtpController (req, res) {
       emailVerified: parent['status'] === 'verified',
       passwordUpdated: parent['password'] ? true : false,
       personalInfoUpdated: parent['fullname'] ? true : false
-    })
+    });
 
     res.status(StatusCodes.OK).send(success(200, {message: "OTP verified successfully", token}));
   } catch (err) {
@@ -118,7 +118,7 @@ export async function parentPhoneUpdateSendOtpToPhoneController (req, res) {
     const { phone } = req.body;
     const parent = await getParentService({ phone, isActive: true });
     if(parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number already used"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number already used"));
     }
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
     //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
@@ -131,7 +131,7 @@ export async function parentPhoneUpdateSendOtpToPhoneController (req, res) {
     });
     const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
     await sentSMSByTwillio("+91"+phone,sms);
-    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 })
+    await registerOtpService({otp, identifier: phone, otpType: 'phoneVerification', medium: 'sms', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 });
 
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
@@ -145,7 +145,7 @@ export async function parentPhoneUpdateVerifyByOtpController (req, res) {
     const parentId = req.parentId;
     let parent = await getParentService({ _id:parentId, isActive: true });
     if(!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not found"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not found"));
     }
 
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
@@ -169,7 +169,7 @@ export async function parentPhoneUpdateVerifyByOtpController (req, res) {
       {
         $limit: 1
       }
-    ]
+    ];
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
@@ -214,10 +214,10 @@ export async function parentEmailInsertAndSendEmailOtpController (req, res) {
       specialChars: false
     });
     const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 })
+    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 });
     await updateParentService({_id: parent['_id']}, {email});
 
-    console.log('inside controller')
+    console.log('inside controller');
     const rej = await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
@@ -231,10 +231,10 @@ export async function parentEmailVerifyByOtpController (req, res) {
     const parentId = req.parentId;
     let parent = await getParentService({ _id: parentId });
     if(!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
     }
     if(['verified'].includes(parent['status'])) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Your Email has already verified"))
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Your Email has already verified"));
     }
 
     const getOtpPipeline = [
@@ -254,14 +254,14 @@ export async function parentEmailVerifyByOtpController (req, res) {
       {
         $limit: 1
       }
-    ]
+    ];
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
     if(!storedOtp) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, 'OTP has not been sent yet'));
     }
-    console.log({storedOtp, now: new Date().getTime()})
+    console.log({storedOtp, now: new Date().getTime()});
 
     if(storedOtp['status']==='verified' || storedOtp['status']==='expired' || storedOtp['expiredAt'] < new Date().getTime() ){
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, 'Your OTP has expired'));
@@ -271,7 +271,7 @@ export async function parentEmailVerifyByOtpController (req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, `You entered wrong OTP`));
     }
 
-    console.log("promise: ", {_id: storedOtp['_id']}, {status: 'verified'})
+    console.log("promise: ", {_id: storedOtp['_id']}, {status: 'verified'});
     await Promise.all([
       updateParentService({_id: parent['_id']}, {status: 'verified'}),
       updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
@@ -286,7 +286,7 @@ export async function parentEmailVerifyByOtpController (req, res) {
       emailVerified: parent['status'] === 'verified',
       passwordUpdated: parent['password'] ? true : false,
       personalInfoUpdated: parent['fullname'] ? true : false
-    })
+    });
 
     res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully" , token}));
   } catch (err) {
@@ -365,18 +365,18 @@ export async function updateParentController(req, res) {
     const parentId = req.parentId;
 
     const fieldsToBeUpdated = {};
-    if(req.body['username']) { fieldsToBeUpdated['username'] = req.body['username'] }
-    if(req.body['fullname']) { fieldsToBeUpdated['fullname'] = req.body['fullname'] }
-    if(req.body['gender']) { fieldsToBeUpdated['gender'] = req.body['gender'] }
-    if(req.body['address']) { fieldsToBeUpdated['address'] = req.body['address'] }
-    if(req.body['city']) { fieldsToBeUpdated['city'] = req.body['city'] }
-    if(req.body['district']) { fieldsToBeUpdated['district'] = req.body['district'] }
-    if(req.body['country']) { fieldsToBeUpdated['country'] = req.body['country'] }
-    if(req.body['pincode']) { fieldsToBeUpdated['pincode'] = req.body['pincode'] }
-    if(req.body['qualification']) { fieldsToBeUpdated['qualification'] = req.body['qualification'] }
-    if(req.body['occupation']) { fieldsToBeUpdated['occupation'] = req.body['occupation'] }
-    if(req.body['fcmToken']) { fieldsToBeUpdated['fcmToken'] = req.body['fcmToken'] }
-    if(req.body['dob']) { fieldsToBeUpdated['dob'] = req.body['dob'] }
+    if(req.body['username']) { fieldsToBeUpdated['username'] = req.body['username']; }
+    if(req.body['fullname']) { fieldsToBeUpdated['fullname'] = req.body['fullname']; }
+    if(req.body['gender']) { fieldsToBeUpdated['gender'] = req.body['gender']; }
+    if(req.body['address']) { fieldsToBeUpdated['address'] = req.body['address']; }
+    if(req.body['city']) { fieldsToBeUpdated['city'] = req.body['city']; }
+    if(req.body['district']) { fieldsToBeUpdated['district'] = req.body['district']; }
+    if(req.body['country']) { fieldsToBeUpdated['country'] = req.body['country']; }
+    if(req.body['pincode']) { fieldsToBeUpdated['pincode'] = req.body['pincode']; }
+    if(req.body['qualification']) { fieldsToBeUpdated['qualification'] = req.body['qualification']; }
+    if(req.body['occupation']) { fieldsToBeUpdated['occupation'] = req.body['occupation']; }
+    if(req.body['fcmToken']) { fieldsToBeUpdated['fcmToken'] = req.body['fcmToken']; }
+    if(req.body['dob']) { fieldsToBeUpdated['dob'] = req.body['dob']; }
     if (req.body["password"]) {
       const hashedPassword = await hashPasswordService(req.body["password"]);
       fieldsToBeUpdated.password = hashedPassword;
@@ -397,9 +397,9 @@ export async function updateParentController(req, res) {
 export async function getParentStatusController(req, res) {
   try {
     const { phone } = req.body;
-    const parent = await getParentService({phone: phone, isActive: true})
+    const parent = await getParentService({phone: phone, isActive: true});
     if(!parent){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not registered"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not registered"));
     }
     const parentStatus = {
       isLoginAlready: false,
@@ -407,7 +407,7 @@ export async function getParentStatusController(req, res) {
       emailVerified: false,
       passwordUpdated: false,
       personalInfoUpdated: false,
-    }
+    };
 
     parentStatus['status'] = parent['status'];
     parentStatus['isLoginAlready'] = parent['isLoginAlready'];
@@ -417,7 +417,7 @@ export async function getParentStatusController(req, res) {
     parentStatus['personalInfoUpdated'] = parent['fullname'] ? true : false;
     parentStatus['studentAdded'] = parent['students']?.length > 0 ? true :false;
 
-    return res.status(StatusCodes.OK).send(success(200, parentStatus))
+    return res.status(StatusCodes.OK).send(success(200, parentStatus));
     
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -511,9 +511,9 @@ export async function addStudentController(req, res) {
       ];
 
       const students = await getStudentsPipelineService(pipeline);
-      console.log({students})
+      console.log({students});
       if(students.length === 0 || parent?.students.some(id => id.equals(studentId))){
-        continue
+        continue;
       }
       validStudentIds.push(studentId);    }
 
@@ -689,7 +689,7 @@ export async function getParentController(req, res) {
     
     const parents = await getParentsPipelineService(pipeline);
     if(parents.length <=0){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User details not found"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User details not found"));
     }
 
     return res.status(StatusCodes.OK).send(success(200, parents[0]));
@@ -921,7 +921,7 @@ export async function parentUpdateEmailAndSendEmailOtpController (req, res) {
       specialChars: false
     });
     const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 })
+    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'parent', expiredAt: new Date().getTime()+1000*60*5 });
 
     await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
@@ -936,7 +936,7 @@ export async function parentUpdateEmailVerifyByOtpController (req, res) {
     const parentId = req.parentId;
     let parent = await getParentService({ _id: parentId });
     if(!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
     }
 
     const getOtpPipeline = [
@@ -956,7 +956,7 @@ export async function parentUpdateEmailVerifyByOtpController (req, res) {
       {
         $limit: 1
       }
-    ]
+    ];
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;

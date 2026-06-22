@@ -31,11 +31,11 @@ export async function teacherAuthenticate(req, res, next) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
     if(admin && !admin['isActive']){
-      return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact admin."))
+      return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact admin."));
     }
 
     if (decoded['role']=='classTeacher') {
-      const section = await getSectionService({_id : decoded?.sectionId})
+      const section = await getSectionService({_id : decoded?.sectionId});
       if (!section) {
        return res.status(StatusCodes.GONE).send(error(410, "Section not found"));
       }
@@ -72,7 +72,7 @@ export async function refreshTokenAuthenticate(req, res, next) {
     if (!teacher) {
       return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }
-    const section = await getSectionByIdService(teacher["section"])
+    const section = await getSectionByIdService(teacher["section"]);
     if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }

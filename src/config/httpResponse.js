@@ -16,7 +16,7 @@ const adminControllerResponse = {
       affiliationExists: "Affiliation No already exists",
       adminUpdatedSuccessfully: "Admin Profile updated successfully"
     }
-  }
+  };
 
 const attendanceControllerResponse = {
   attendanceByTeacherController: {
@@ -41,10 +41,10 @@ const attendanceControllerResponse = {
     attendanceMarkedSuccessfully: "Attendance marked sucessfully"
   }
 
-}
+};
 
 
 export {
   adminControllerResponse,
   attendanceControllerResponse
-}
+};

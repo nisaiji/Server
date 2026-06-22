@@ -165,4 +165,4 @@ export {
   parentFcmTokenValidator,
   parentPhoneTokenValidator,
   parentEmailTokenValidator,
-}
+};

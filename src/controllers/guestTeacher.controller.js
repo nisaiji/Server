@@ -50,15 +50,15 @@ export async function updateGuestTeacherController(req, res) {
   try {
     const teacherId = req.teacherId;
     const { username, tagline, password } = req.body;
-    const guestTeacher = await getGuestTeacherService({_id: teacherId})
+    const guestTeacher = await getGuestTeacherService({_id: teacherId});
      if (!guestTeacher) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher not found"));
     }
-    const fieldsToBeUpdated = {}
-    if(username){ fieldsToBeUpdated['username'] = username }
-    if(tagline){ fieldsToBeUpdated['tagline'] = tagline }
-    if(password){ fieldsToBeUpdated['password'] = await hashPasswordService(password) }
-    await updateGuestTeacherService({_id: teacherId}, fieldsToBeUpdated)
+    const fieldsToBeUpdated = {};
+    if(username){ fieldsToBeUpdated['username'] = username; }
+    if(tagline){ fieldsToBeUpdated['tagline'] = tagline; }
+    if(password){ fieldsToBeUpdated['password'] = await hashPasswordService(password); }
+    await updateGuestTeacherService({_id: teacherId}, fieldsToBeUpdated);
  
     return res.status(StatusCodes.OK).send(success(200, "Teacher updated successfully"));
   } catch (err) {

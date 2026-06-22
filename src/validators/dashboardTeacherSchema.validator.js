@@ -15,4 +15,4 @@ const attendancesStatusSchema = Joi.object({
   }),
 });
 
-export { attendancesStatusSchema }
+export { attendancesStatusSchema };

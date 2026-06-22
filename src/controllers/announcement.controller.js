@@ -37,7 +37,7 @@ export async function createAnnouncementByAdminController(req, res) {
       createdByRole: "admin",
       session: sessionId,
       school: adminId
-    })
+    });
 
     const pushTitle = `Post by ${admin.schoolName}`;
     if (targetAudience.includes("teacher")) {
@@ -88,7 +88,7 @@ export async function createAnnouncementByTeacherController(req, res) {
       createdByRole: "teacher",
       section: sectionId,
       school: adminId
-    })
+    });
 
     return res.status(StatusCodes.CREATED).json(success(201, "Announcement created successfully!"));
 
@@ -222,7 +222,7 @@ export async function getAnnouncementsByTeacherController(req, res) {
     const filter = {
       school: convertToMongoId(adminId),
       session: convertToMongoId(sessionId)
-    }
+    };
 
     if (createdBy === "admin") {
       filter.createdBy = convertToMongoId(adminId);
@@ -685,7 +685,7 @@ export async function getUnReadAnnouncementsCountForTeacherController(req, res) 
 
     const filter = {
       school: convertToMongoId(adminId)
-    }
+    };
 
     if (createdBy === "admin") {
       filter.createdBy = convertToMongoId(adminId);

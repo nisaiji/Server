@@ -40,7 +40,7 @@ export const adminEmailValidator = Joi.object({
     "string.email": "Invalid Email Id",
     "any.required": "Email is required"
   }),
-})
+});
 
 export const adminEmailOtpValidator = Joi.object({
   otp: Joi.number().integer().min(10000).max(99999).required().messages({
@@ -50,7 +50,7 @@ export const adminEmailOtpValidator = Joi.object({
     'number.max': 'OTP must be exactly 5 digits',
     'any.required': 'OTP is required'
   }) 
-})
+});
 
 export const adminDetailsValidator = Joi.object({
   affiliationNo: Joi.string().min(5).max(50).required().messages({
@@ -68,4 +68,4 @@ export const adminDetailsValidator = Joi.object({
     "any.required": "Admin name is required"
   }),
   
-})
+});

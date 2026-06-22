@@ -73,7 +73,7 @@ export async function getAllSection() {
   try {
     const sections = await sectionModel
       .find({})
-      .populate("students")
+      .populate("students");
       // .populate("coordinator");
     return sections;
   } catch (error) {

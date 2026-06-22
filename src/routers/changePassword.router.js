@@ -5,10 +5,10 @@ import { adminAuthenticate } from "../middlewares/authentication/admin.authentic
 
 const changePasswordRouter = express.Router();
 
-changePasswordRouter.post("/register", registerChangePasswordRequestValidation, registerChangePasswordRequestController )
-changePasswordRouter.get("/admin", adminAuthenticate, getChangePasswordRequestsForAdminValidation, getChangePasswordRequestsController)
-changePasswordRouter.put("/admin", adminAuthenticate, updateChangePasswordRequestByAdminValidation, updateChangePasswordRequestByAdminController)
-changePasswordRouter.post("/teacher/verify", verfiyTeacherChangePasswordValidation, verifyTeacherForgetPasswordController)
-changePasswordRouter.put("/teacher", changePasswordByVerifiedTeacherValidation, changePasswordByVerifiedTeacherController)
+changePasswordRouter.post("/register", registerChangePasswordRequestValidation, registerChangePasswordRequestController );
+changePasswordRouter.get("/admin", adminAuthenticate, getChangePasswordRequestsForAdminValidation, getChangePasswordRequestsController);
+changePasswordRouter.put("/admin", adminAuthenticate, updateChangePasswordRequestByAdminValidation, updateChangePasswordRequestByAdminController);
+changePasswordRouter.post("/teacher/verify", verfiyTeacherChangePasswordValidation, verifyTeacherForgetPasswordController);
+changePasswordRouter.put("/teacher", changePasswordByVerifiedTeacherValidation, changePasswordByVerifiedTeacherController);
 
 export default changePasswordRouter; 

@@ -45,7 +45,7 @@ export async function getParentCountController(req,res){
       {
         $count: "totalParent"
       }
-    ]
+    ];
     const studentObj = await getStudentsPipelineService(pipeline);
     const parentCount = studentObj.length > 0 ? studentObj[0].totalParent : 0;
     return res.status(StatusCodes.OK).send(success(200,{parentCount}));    

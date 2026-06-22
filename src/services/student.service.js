@@ -23,7 +23,7 @@ export async function registerStudentService( data ){
 export async function registerStudentsService(data)  {
   try{
 
-    const students = await studentModel.insertMany(data)          
+    const students = await studentModel.insertMany(data);          
     return students;
   } catch (error){
     throw error;

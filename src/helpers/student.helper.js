@@ -10,7 +10,7 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
     // validate each student from excel file
     students.shift();
     for (const student of students) {
-      console.log({ student })
+      console.log({ student });
       const studentValidation = registerStudentFromExcelSchema.validate(student);
       if (studentValidation.error) {
         throw new Error(JSON.stringify({
@@ -44,8 +44,8 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
       };
 
       const { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode, parentName, phone, email, qualification, occupation } = normalizedStudent;
-      const parentObj = { fullname: parentName, phone, email, qualification, occupation }
-      const studentObj = { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode }
+      const parentObj = { fullname: parentName, phone, email, qualification, occupation };
+      const studentObj = { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode };
       let parent = await getParentService({ phone, isActive: true });
       if (!parent) {
         const parentNames = parentName.split(" ");
@@ -55,17 +55,17 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
       }
       let studentInfo = await getStudentService({ firstname, parent: parent["_id"] });
       if (!studentInfo) {
-        studentObj['parent'] = parent['_id']
-        studentObj['section'] = sectionId
-        studentObj['classId'] = classId
-        studentObj['admin'] = adminId
-        await registerStudentService(studentObj)
-        const section = await getSectionService({ _id: sectionId })
-        await updateSectionService({ _id: sectionId }, { studentCount: section["studentCount"] + 1 })
-        insertedStudentCount++
+        studentObj['parent'] = parent['_id'];
+        studentObj['section'] = sectionId;
+        studentObj['classId'] = classId;
+        studentObj['admin'] = adminId;
+        await registerStudentService(studentObj);
+        const section = await getSectionService({ _id: sectionId });
+        await updateSectionService({ _id: sectionId }, { studentCount: section["studentCount"] + 1 });
+        insertedStudentCount++;
       }
     }
-    return insertedStudentCount
+    return insertedStudentCount;
   } catch (error) {
     throw error;
   }

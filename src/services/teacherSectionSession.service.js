@@ -20,7 +20,7 @@ export async function registerTeacherSectionSessionService( data ){
 
 export async function registerTeacherSectionSessionsService(data)  {
     try{
-        const teacherSectionSessions = await teacherSectionSessionModel.insertMany(data)
+        const teacherSectionSessions = await teacherSectionSessionModel.insertMany(data);
         return teacherSectionSessions;
     } catch (error){
         throw error;

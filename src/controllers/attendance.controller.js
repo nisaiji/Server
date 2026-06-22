@@ -19,17 +19,17 @@ export async function attendanceByTeacherController(req, res) {
     const { sectionId, present, absent } = req.body;
     const teacherId = req.teacherId;
     const adminId = req.adminId;
-    const section = await getSectionService({ _id: sectionId })
+    const section = await getSectionService({ _id: sectionId });
     const session = await getSessionService({_id:section["session"]});
     if(!session || session['status']==='completed') {
       return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! Can't mark attendance")); 
     }
     if(!section){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, attendanceControllerResponse.attendanceByTeacherController.sectionNotFound))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, attendanceControllerResponse.attendanceByTeacherController.sectionNotFound));
     }
 
     if(section["guestTeacher"] && section["guestTeacher"]?.toString()!==teacherId){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, attendanceControllerResponse.attendanceByTeacherController.teacherUnauthorized))
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, attendanceControllerResponse.attendanceByTeacherController.teacherUnauthorized));
     }
     let date = new Date();
     const { startTime, endTime } = getStartAndEndTimeService(date, date);
@@ -55,7 +55,7 @@ export async function attendanceByTeacherController(req, res) {
     if (holiday) {
       return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.scheduledHoliday));
     }
-    const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}})
+    const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}});
     if(sectionAttendance){
       return res.status(StatusCodes.CONFLICT).send(error(409, attendanceControllerResponse.attendanceByTeacherController.attendanceAlreadyMarked));
     }
@@ -75,7 +75,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([storedSessionStudent['student']]);
-        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}`,"attendance",studentWithParent[0]?.parent?._id)
+        await sendPushNotification(studentWithParent[0]?.parent?.['fcmToken'], `Attendance`, ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}`,"attendance",studentWithParent[0]?.parent?._id);
       } catch (error) {
         throw error;
       }
@@ -96,7 +96,7 @@ export async function attendanceByTeacherController(req, res) {
           await createAttendanceService(attendanceObj);
         }
         const studentWithParent = await getParentsByStudentId([storedSessionStudent['student']]);
-        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}`,"attendance",studentWithParent[0]?.parent?._id)
+        await sendPushNotification(studentWithParent[0]?.parent['fcmToken'], `Attendance`, `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}`,"attendance",studentWithParent[0]?.parent?._id);
       } catch (error) {
         throw error;
       }
@@ -120,13 +120,13 @@ export async function undoAttendanceByTeacherController(req, res) {
     return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Session completed! Can't undo attendance")); 
   }
   const { startTime, endTime } = getStartAndEndTimeService(date, date);
-  const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}})
+  const sectionAttendance = await getSectionAttendanceService({section:sectionId, date:{$gte:startTime,$lte:endTime}});
   if(!sectionAttendance){
     return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Attendance is not marked yet"));
   }
   await deleteSectionAttendanceService({_id: sectionAttendance['_id']});
-  const result = await deleteAttendancesService({section: sectionId, date:{$gte:startTime,$lte:endTime}})
-  console.log({result, sectionAttendance})
+  const result = await deleteAttendancesService({section: sectionId, date:{$gte:startTime,$lte:endTime}});
+  console.log({result, sectionAttendance});
   return res.status(StatusCodes.OK).send(success(200, "Attendance for today deleted successfully"));  
 }
 
@@ -192,9 +192,9 @@ export async function bulkAttendanceMarkController(req, res) {
     const teacherId = req.teacherId;
     const role = req.role;
 
-    const section = await getSectionService({ _id: sectionId })
+    const section = await getSectionService({ _id: sectionId });
     if(!section){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
 
     const session = await getSessionService({_id:section["session"]});
@@ -203,11 +203,11 @@ export async function bulkAttendanceMarkController(req, res) {
     }
 
     if(role==='guestTeacher'){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"))
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher is unauthorized"));
     }
 
     if(role==='teacher' && teacherId){
-      const teacher = await getTeacherService({_id: teacherId})
+      const teacher = await getTeacherService({_id: teacherId});
       if(!teacher){
         return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher not exists"));
       }
@@ -217,7 +217,7 @@ export async function bulkAttendanceMarkController(req, res) {
     }
 
     for (let attendanceTimestamp in studentsAttendances) {
-      attendanceTimestamp = parseInt(attendanceTimestamp)
+      attendanceTimestamp = parseInt(attendanceTimestamp);
       if(attendanceTimestamp < section['startTime']){
         continue;
       }
@@ -265,9 +265,9 @@ export async function bulkAttendanceMarkController(req, res) {
         continue;
       }
       if(sectionAttendance){
-        await updateSectionAttendanceService({_id: sectionAttendance['_id']}, {presentCount, absentCount, teacher: teacherId?teacherId:adminId})
+        await updateSectionAttendanceService({_id: sectionAttendance['_id']}, {presentCount, absentCount, teacher: teacherId?teacherId:adminId});
       } else {
-        await createSectionAttendanceService({section: sectionId, presentCount, absentCount, date: attendanceTimestamp, teacher:teacherId?teacherId:adminId, status:'completed'})
+        await createSectionAttendanceService({section: sectionId, presentCount, absentCount, date: attendanceTimestamp, teacher:teacherId?teacherId:adminId, status:'completed'});
       }
     }
 
@@ -316,14 +316,14 @@ export async function updateAttendanceController(req,res){
     const presentLength = present?.length;
     for(let i=0;i<presentLength; i++){
       const id = present[i]["_id"];
-      const fieldsToBeUpdated = {teacherAttendance:"present"}
+      const fieldsToBeUpdated = {teacherAttendance:"present"};
       await updateAttendanceService({_id: id}, fieldsToBeUpdated);
     }
     
     const absentLength = absent?.length;
     for(let i=0;i<absentLength; i++){
       const id = absent[i]["_id"];
-      const fieldsToBeUpdated = {teacherAttendance:"absent"}
+      const fieldsToBeUpdated = {teacherAttendance:"absent"};
       await updateAttendanceService({_id: id}, fieldsToBeUpdated);
     }
 
@@ -332,7 +332,7 @@ export async function updateAttendanceController(req,res){
     sectionAttendance["presentCount"] = sectionAttendance["presentCount"]-absentLength+presentLength;
     sectionAttendance["absentCount"] = sectionAttendance["absentCount"]-presentLength+absentLength;
     await sectionAttendance.save();
-    return res.send(success(200,"Attendance updated successfully"))
+    return res.send(success(200,"Attendance updated successfully"));
   } catch (err) {
     return res.send(error(500,err.message)) ;   
   }
@@ -350,7 +350,7 @@ export async function checkAttendaceMarkedController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(502, "Section not found"));
     }
     if(section['guestTeacher'] && req.role==='teacher'){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Teacher is not authorized for attendance"))
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Teacher is not authorized for attendance"));
     }
     let date = new Date();
     const {startTime, endTime} = getStartAndEndTimeService(date, date);
@@ -418,7 +418,7 @@ export async function attendanceStatusOfSectionController(req, res) {
  
     const section = await getSectionByIdService(sectionId);
     const totalStudent = section["studentCount"];
-    const sectionAttendance = await getSectionAttendanceStatusService({date:{$gte: startTime, $lte: endTime}, section:sectionId})
+    const sectionAttendance = await getSectionAttendanceStatusService({date:{$gte: startTime, $lte: endTime}, section:sectionId});
 
     return res.status(StatusCodes.OK).send(success(200, {section:sectionId, totalStudent, sectionAttendance}));
   } catch (err) {
@@ -474,8 +474,8 @@ export async function attendanceCountOfStudentController(req, res){
 export async function getAttendancesController(req, res){
   try {
     let { startTime, endTime, sessionStudent, session, section, classId, admin } = req.query;
-    const filter = {isActive: true}
-    const attendanceFilter = {}
+    const filter = {isActive: true};
+    const attendanceFilter = {};
     const role = req.role;
     if(role === 'guestTeacher'){
       return res.status(StatusCodes.FORBIDDEN).send(error(403, "Guest teacher not authorized"));
@@ -485,13 +485,13 @@ export async function getAttendancesController(req, res){
       admin = null;
       section = req.sectionId;
     }
-    if(sessionStudent){ filter['_id'] = convertToMongoId(sessionStudent) }
-    if(section) { filter['section'] = convertToMongoId(section) }
-    if(session) { filter['session'] = convertToMongoId(session) }
-    if(classId){ filter['classId'] = convertToMongoId(classId) }
-    if(admin){ filter['school'] = convertToMongoId(admin) }
+    if(sessionStudent){ filter['_id'] = convertToMongoId(sessionStudent); }
+    if(section) { filter['section'] = convertToMongoId(section); }
+    if(session) { filter['session'] = convertToMongoId(session); }
+    if(classId){ filter['classId'] = convertToMongoId(classId); }
+    if(admin){ filter['school'] = convertToMongoId(admin); }
     if(startTime && endTime){
-      attendanceFilter['date'] = { $gte: Number(startTime), $lte: Number(endTime) }
+      attendanceFilter['date'] = { $gte: Number(startTime), $lte: Number(endTime) };
     }
 
     const pipeline = [

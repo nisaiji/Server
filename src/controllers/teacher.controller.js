@@ -54,7 +54,7 @@ export async function loginTeacherController(req, res) {
     }
 
     if(admin && !admin['isActive']){
-      return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact support."))
+      return res.status(StatusCodes.GONE).send(error(410, "Services are temporarily paused. Please contact support."));
     }
     if (teacher && platform==='app' && !deviceId) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Device Id is required"));
@@ -85,7 +85,7 @@ export async function loginTeacherController(req, res) {
     // }
 
     if(platform=='app' && teacher && teacher['isLoginAlready'] && teacher['deviceId']!==deviceId){
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Access denied due to device mismatch"))
+      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Access denied due to device mismatch"));
     }
 
     const accessToken = getAccessTokenService({

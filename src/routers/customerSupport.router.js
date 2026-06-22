@@ -1,6 +1,6 @@
 import { createCustomerSupportQueryController } from "../controllers/customerSupport.controller.js";
 import { registerCustomerQueryValidation } from "../middlewares/validation/customerSupport.validation.middleware.js";
-import express from "express"
+import express from "express";
 
 const customerSupportRouter = express.Router();
 

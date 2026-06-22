@@ -6,8 +6,8 @@ import { getSectionService, updateSectionService } from "../services/section.ser
 import { getStudentService, registerStudentService, updateStudentService, getStudentsService, getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
 import { error, success } from "../utills/responseWrapper.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
-import xlsx from 'xlsx'
-import fs from 'fs/promises'
+import xlsx from 'xlsx';
+import fs from 'fs/promises';
 import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
 import { getHolidayCountService } from "../services/holiday.service.js";
 import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
@@ -76,7 +76,7 @@ export async function deleteStudentController(req, res) {
     await Promise.all([
       updateStudentService({ _id: studentId }, { isActive: false }),
       updateSectionService({ _id: section["_id"] }, { studentCount: section["studentCount"] - 1 })
-    ])
+    ]);
 
     const siblings = await getStudentsService({ parent: student["parent"], isActive: true });
     if (siblings?.length === 0) {
@@ -256,7 +256,7 @@ export async function getStudentsController(req, res) {
             ],
             as: 'attendance'
           }
-        })
+        });
       }
       if (includes.includes('parent')) {
         pipeline.push({
@@ -361,7 +361,7 @@ export async function getStudentsController(req, res) {
             path: '$adminDetails',
             preserveNullAndEmptyArrays: true
           }
-        })
+        });
       }
       if (includes.includes('percentageAttendance')) {
         const currentDate = new Date().getTime();
@@ -473,7 +473,7 @@ export async function registerStudentsFromExcelController(req, res) {
     const [section, classInfo] = await Promise.all([
       getSectionService({ _id: sectionId }),
       getClassService({ _id: classId })
-    ])
+    ]);
 
     if (!section) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "Section not found"));
@@ -485,16 +485,16 @@ export async function registerStudentsFromExcelController(req, res) {
       return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Invalid class, section ids"));
     }
 
-    const workbook = xlsx.readFile(file.path)
-    const sheetName = workbook.SheetNames[0]
-    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
-    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, adminId)
+    const workbook = xlsx.readFile(file.path);
+    const sheetName = workbook.SheetNames[0];
+    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, adminId);
     if (registeredStudentsCount === 0) {
-      throw new Error("Student registration failed")
+      throw new Error("Student registration failed");
     }
-    await fs.unlink(file.path)
-    return res.status(StatusCodes.OK).send(success(201, `${registeredStudentsCount} Students registered successfully`))
+    await fs.unlink(file.path);
+    return res.status(StatusCodes.OK).send(success(201, `${registeredStudentsCount} Students registered successfully`));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501, err.message))
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501, err.message));
   }
 }

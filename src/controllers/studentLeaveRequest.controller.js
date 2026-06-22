@@ -12,7 +12,7 @@ export async function registerStudentLeaveRequestController(req, res){
     const parentId = req.parentId;
 
     if(startDate > endDate){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start Time must be less than End Time'))
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start Time must be less than End Time'));
     }
 
     const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
@@ -52,7 +52,7 @@ export async function registerStudentLeaveRequestController(req, res){
     school: convertToMongoId(sessionStudent.school),
     startDate,
     endDate
-  }
+  };
   await registerStudentLeaveRequestService(leaveRequestObj);
   return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
 
@@ -73,9 +73,9 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
       section: convertToMongoId(sectionId),
       startDate:{$gte: startDate},
       endDate:{$lte: endDate}
-    }
+    };
 
-    console.log({filter})
+    console.log({filter});
 
     const pipeline = [
       {
@@ -136,7 +136,7 @@ export async function getStudentLeaveRequestForParentController(req, res) {
       sessionStudent: convertToMongoId(sessionStudentId),
       startDate:{$gte: startDate},
       endDate:{$lte: endDate}
-    }
+    };
 
     const pipeline = [
       {

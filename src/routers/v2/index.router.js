@@ -6,7 +6,7 @@ import adminRouter from "./admin.router.js";
 
 const v2Router = express();
 
-v2Router.use("/admin", adminRouter)
+v2Router.use("/admin", adminRouter);
 v2Router.use("/parent", parentRouter);
 // v2Router.use("/student", studentRouter);
 // v2Router.use("/attendance", attendanceRouter);

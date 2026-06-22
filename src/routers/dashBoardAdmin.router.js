@@ -1,4 +1,4 @@
-import express from "express"
+import express from "express";
 import { attendanceStatusController, attendanceStatusOfSectionController, getParentCountController, getPresentStudentsController, getTeacherCountController } from "../controllers/dashboardAdmin.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { attendancesStatusValidation, presentStudentsOfSchoolValidation } from "../middlewares/validation/dashboardAdmin.validation.middleware.js";

@@ -4,6 +4,6 @@ import { loginGuestTeacherValidation } from "../middlewares/validation/guestTeac
 
 const guestTeacherRouter = express.Router();
 
-guestTeacherRouter.put("/", loginGuestTeacherValidation, updateGuestTeacherController)
+guestTeacherRouter.put("/", loginGuestTeacherValidation, updateGuestTeacherController);
 
 export default guestTeacherRouter;

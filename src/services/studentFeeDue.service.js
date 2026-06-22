@@ -1,9 +1,7 @@
 import mongoose from "mongoose";
-import studentModel from "../models/student.model.js";
 import studentFeeDueModel from "../models/fee/studentFeeDue.model.js";
 import { getSessionService } from "./session.services.js";
 import { getFeeCycleService } from "./feeSetup.service.js";
-import { getFeeStructureService } from "./feeSetup.service.js";
 import { getFeeHeadService } from "./feeSetup.service.js";
 import sessionStudentModel from "../models/v2/sessionStudent.model.js";
 
@@ -122,7 +120,6 @@ const dueMonth = dueDate.getMonth();
 const includeOneTime = sessionStartMonth === dueMonth;
   
   for (const student of studentsInCurrentSession) {
-    const sid = String(student.studentId || student.student || "");
     const secId = String(student.sectionId || student.section || "");
 
     const feeHeadsForSection =
@@ -176,7 +173,6 @@ const includeOneTime = sessionStartMonth === dueMonth;
 
   const transaction = await mongoose.startSession();
   try {
-    let result;
     await transaction.withTransaction(async () => {
       await studentFeeDueModel.bulkWrite(operations, {
         session: transaction,

@@ -16,7 +16,7 @@ export async function registerLeaveRequestController(req, res){
     const receiverId = req.adminId;
 
     if(startTime > endTime){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start Time must be less than End Time'))
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start Time must be less than End Time'));
     }
 
     const pipeline = [
@@ -35,7 +35,7 @@ export async function registerLeaveRequestController(req, res){
     const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
     const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime));
     const leaveStatus = leaveRequests[0].status==='accept'?'issued':'applied';
-    return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already ${leaveStatus} from ${startDate} to ${endDate}.`))
+    return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already ${leaveStatus} from ${startDate} to ${endDate}.`));
   }
 
   const leaveRequestObj = {
@@ -51,8 +51,8 @@ export async function registerLeaveRequestController(req, res){
     },
     startTime,
     endTime
-  }
-  await sendPushNotification(req.fcmToken, "Leave Request", `Your leave request from ${getFormattedDateService(new Date(startTime))} to ${getFormattedDateService(new Date(endTime))} has been sent successfully`, "leaveRequest",req?.teacherId)
+  };
+  await sendPushNotification(req.fcmToken, "Leave Request", `Your leave request from ${getFormattedDateService(new Date(startTime))} to ${getFormattedDateService(new Date(endTime))} has been sent successfully`, "leaveRequest",req?.teacherId);
   await registerLeaveRequestService(leaveRequestObj);
   return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
 
@@ -71,7 +71,7 @@ export async function getLeaveRequestsController(req, res){
 
     const filter = {
       receiver: {id: convertToMongoId(req.adminId), model: "admin"}
-    }
+    };
 
     if(senderId){
       filter["sender.id"] = convertToMongoId(senderId);
@@ -227,7 +227,7 @@ export async function getLeaveRequestsController(req, res){
 
     const leaveRequests = await getLeaveRequestsPipelineService(pipeline);
     const totalLeaveRequests = await getLeaveRequestsCountService(filter);
-    const totalPages = Math.ceil(totalLeaveRequests / limitNum)
+    const totalPages = Math.ceil(totalLeaveRequests / limitNum);
 
     return res.status(StatusCodes.OK).send(success(200, {
       leaveRequests,
@@ -246,33 +246,33 @@ export async function updateTeacherLeavRequestByAdminController(req, res){
   try {
     const { leaveRequestId, status, username, password, tagline }  = req.body;
     const adminId = req.adminId;
-    const leaveRequest = await getLeaveRequestService({_id: leaveRequestId, status: 'pending' })
+    const leaveRequest = await getLeaveRequestService({_id: leaveRequestId, status: 'pending' });
     if(!leaveRequest){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
     }
-    const section = await getSectionService({teacher: leaveRequest.sender.id})
-    const teacher = await getTeacherService({_id: leaveRequest.sender.id})
+    const section = await getSectionService({teacher: leaveRequest.sender.id});
+    const teacher = await getTeacherService({_id: leaveRequest.sender.id});
     if(!section){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
     if(status==='accept'){
-      const hashedPassword = await hashPasswordService(password)
+      const hashedPassword = await hashPasswordService(password);
       const [existingTeacher, existingGuestTeacher] = await Promise.all([
         getTeacherService({ username, isActive: true }),
         getGuestTeacherService({ username, isActive: true })      
-      ])
+      ]);
       if(existingTeacher || existingGuestTeacher){
         return res.status(StatusCodes.CONFLICT).send(success(409, "Username already exists. Try a different one"));
       }
-      const guestTeacherObj = { username, password: hashedPassword, secretKey: password, tagline, startTime: leaveRequest['startTime'], endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]}
+      const guestTeacherObj = { username, password: hashedPassword, secretKey: password, tagline, startTime: leaveRequest['startTime'], endTime: leaveRequest["endTime"], leaveRequest: leaveRequestId, admin: adminId, section: section["_id"]};
       const guestTeacher = await registerGuestTeacherService(guestTeacherObj);
-      await updateTeacherService({_id: teacher['_id']}, {leaveRequestCount: teacher['leaveRequestCount']+1 })
+      await updateTeacherService({_id: teacher['_id']}, {leaveRequestCount: teacher['leaveRequestCount']+1 });
     }
     
     await updateLeaveRequestService({_id: leaveRequestId}, {status});
     await sendPushNotification(teacher['fcmToken'], `Your Leave Request is ${status==='accept' ? 'Accepted' : 'Rejected'}`, 'leaveRequest', teacher['_id']);
     const successMessage = status === 'accept' ? "Leave Request Accepted Successfully" : "Leave Request Rejected Successfully";
-    return res.status(StatusCodes.OK).send(success(200, successMessage))
+    return res.status(StatusCodes.OK).send(success(200, successMessage));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500,err.message));
   }
@@ -283,9 +283,9 @@ export async function updateTeacherLeavRequestController(req ,res) {
     const { leaveRequestId, reason, description, startTime, endTime }  = req.body;
     const teacherId = req.teacherId;
     if(startTime > endTime){
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start time must be less than end time'))
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, 'Start time must be less than end time'));
     }
-    const leaveRequest = await getLeaveRequestService({_id: leaveRequestId })
+    const leaveRequest = await getLeaveRequestService({_id: leaveRequestId });
     if(!leaveRequest){
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
     }
@@ -307,8 +307,8 @@ export async function updateTeacherLeavRequestController(req ,res) {
     const leaveRequests = await getLeaveRequestsPipelineService(pipeline);
     if(leaveRequests.length > 0){
       const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
-      const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime))
-      return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already applied from ${startDate} to ${endDate}`))
+      const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime));
+      return res.status(StatusCodes.CONFLICT).send(error(409, `Leave already applied from ${startDate} to ${endDate}`));
     }
 
     await updateLeaveRequestService({ _id: leaveRequestId }, {reason, description, startTime, endTime});

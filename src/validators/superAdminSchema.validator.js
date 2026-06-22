@@ -50,6 +50,6 @@ const updateAdminSchema = Joi.object({
       'any.required': '"active" is a required field.',
       'boolean.base': '"active" must be a boolean value.',
     }),
-})
+});
 
-export { registerSuperAdminSchema, loginSuperAdminSchema, updateSuperAdminSchema, updateAdminSchema }
+export { registerSuperAdminSchema, loginSuperAdminSchema, updateSuperAdminSchema, updateAdminSchema };

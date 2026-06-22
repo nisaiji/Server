@@ -82,7 +82,7 @@ export async function adminPhoneVerifyByOtpController(req, res) {
       {
         $limit: 1
       }
-    ]
+    ];
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
@@ -102,7 +102,7 @@ export async function adminPhoneVerifyByOtpController(req, res) {
      await updateAdminService({_id: admin['_id']}, {status: 'phoneVerified'});
     }
 
-    await updateOtpService({_id: storedOtp['_id']}, {status: 'verified'})
+    await updateOtpService({_id: storedOtp['_id']}, {status: 'verified'});
   
 
     admin = await getAdminService({_id: admin['_id']});
@@ -114,7 +114,7 @@ export async function adminPhoneVerifyByOtpController(req, res) {
       phoneVerified: admin['status'] !== 'unVerified',
       emailVerified: admin['status'] === 'verified',
       passwordUpdated: admin['password'] ? true : false
-    })
+    });
 
 
     res.status(StatusCodes.OK).send(success(200,  { msg: "OTP verified successfully", token}));
@@ -129,10 +129,10 @@ export async function updateAdminController(req, res) {
     const fieldsToBeUpdated = {};
     const adminId = req.adminId;
     const condition = [];
-    if(username){ condition.push({ username })};
-    if(email){ condition.push({ email })};
-    if(phone){ condition.push({ phone })};
-    if(affiliationNo){ condition.push({ affiliationNo })};
+    if(username){ condition.push({ username });};
+    if(email){ condition.push({ email });};
+    if(phone){ condition.push({ phone });};
+    if(affiliationNo){ condition.push({ affiliationNo });};
 
     const admin = await getAdminService({$or: [{username}, {email}, {phone}, {affiliationNo}], _id:{$ne:adminId}});
 
@@ -204,7 +204,7 @@ export async function adminSendOtpToEmailController(req, res) {
       specialChars: false
     });
     const sms =`Your OTP for shareDRI is: ${otp}. This code is valid for 2 minutes. Do not share it with anyone.`;
-    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'admin', expiredAt: new Date().getTime()+1000*60*5 })
+    await registerOtpService({otp, identifier: email, otpType: 'emailVerification', medium: 'email', entityType: 'admin', expiredAt: new Date().getTime()+1000*60*5 });
     await updateAdminService({_id: admin['_id']}, {email});
     await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));    
@@ -222,7 +222,7 @@ export async function adminEmailVerifyByOtpController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
     }
     if(['verified'].includes(admin['status'])) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Your Email has already verified"))
+      return res.status(StatusCodes.CONFLICT).send(error(409, "Your Email has already verified"));
     }
 
     const getOtpPipeline = [
@@ -242,7 +242,7 @@ export async function adminEmailVerifyByOtpController(req, res) {
       {
         $limit: 1
       }
-    ]
+    ];
 
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
@@ -273,7 +273,7 @@ export async function adminEmailVerifyByOtpController(req, res) {
       active: admin["isActive"],
       pincode: admin['pincode'] ? admin['pincode'] : '',
       isLoginAlready: admin['isLoginAlready'],
-    })
+    });
 
     res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully" , token}));
   } catch (err) {
@@ -297,7 +297,7 @@ export async function adminGetStatusController(req, res) {
       status: admin['status'],
       addressUpdated: !!admin['address'],
       isActive: admin["isActive"]
-    }
+    };
 
     return res.status(StatusCodes.OK).send(success(200, status));
   } catch (error) {
@@ -378,7 +378,7 @@ export async function adminPhoneVerifyController(req, res) {
       emailVerified: admin['status'] === 'verified',
       passwordUpdated: admin['password'] ? true : false,
       isSessionCreated: false
-    })
+    });
 
     res.status(StatusCodes.OK).send(success(200,  { msg: "OTP verified successfully", token: jwttoken}));
   } catch (err) {

@@ -63,7 +63,7 @@ export async function createTagController(req, res) {
         let currIstDate = startIstDate;
         while (currIstDate <= endIstDate) {
             await createTagService({teacher: teacherId, subject: subjectId, section: sectionId, session: sessionId, classId, title, description, date: currIstDate, school: schoolId});
-            currIstDate.setDate(currIstDate.getDate() + 1)
+            currIstDate.setDate(currIstDate.getDate() + 1);
         }
 
         const [parentRecipients, teacherRecipients] = await Promise.all([
@@ -110,7 +110,7 @@ export async function updateTagController(req, res) {
         if(!session || session['status'] === 'completed') {
             return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session is completed. You cannot update tag"));
         }
-        const params = {}
+        const params = {};
         if(title)params.title=title;
         if(description)params.description=description;
         if(date)params.date=date;

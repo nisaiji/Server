@@ -78,7 +78,7 @@ export async function getParentsByAdminIdService(adminId){
       {
         $replaceWith: '$parent'
       }
-    ])
+    ]);
     return parents;
   } catch (error) {
     throw error;    

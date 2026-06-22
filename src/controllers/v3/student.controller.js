@@ -10,7 +10,7 @@ import { getStudentService, getStudentsPipelineService, getStudentsService, regi
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getStartAndEndTimeService } from "../../services/celender.service.js";
 import xlsx from 'xlsx';
-import fs from 'fs/promises'
+import fs from 'fs/promises';
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
 import {
@@ -364,7 +364,7 @@ addFieldsIfPresent(studentUpdate, req.body, [
     await updateStudentService({ _id:studentId }, studentUpdate);
     return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));    
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message));
   }
 }
 
@@ -663,9 +663,9 @@ export async function getAttendancesController(req, res){
     const parentId = req.parentId;
     const sessionStudent = await getSessionStudentService({_id: sessionStudentId});
     if(!sessionStudent) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"))
+      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
     }
-    const parent = await getParentService({_id: parentId})
+    const parent = await getParentService({_id: parentId});
     if(!parent['students']?.some(id => id.equals(sessionStudent.student))) {
       return res.status(StatusCodes.UNAUTHORIZED).send(error(400, 'Unauthorized access'));
     }
@@ -899,15 +899,15 @@ export async function searchStudentsController(req, res){
     };
 
     if(classId) {
-      filter['classId'] = convertToMongoId(classId)
+      filter['classId'] = convertToMongoId(classId);
     }
 
     if(section) {
-      filter['section'] = convertToMongoId(section)
+      filter['section'] = convertToMongoId(section);
     }
 
     if(session) {
-      filter['session'] = convertToMongoId(session)
+      filter['session'] = convertToMongoId(session);
     }
 
     if(search){
@@ -918,14 +918,14 @@ export async function searchStudentsController(req, res){
           { "student.firstname": { $regex: new RegExp(searchFirstname, "i") } },
           { "student.lastname": { $regex: new RegExp(searchLastname, "i") } },
           {isActive: true}
-        ]
+        ];
     } else {
       filter['$or'] = [
         { "student.firstname" : { $regex: new RegExp(search, "i") }, isActive: true },
         { "student.lastname": { $regex: new RegExp(search, "i") }, isActive: true },
         { "schoolParent.email": { $regex: new RegExp(search, "i") }, isActive: true },
         { "schoolParent.phone": { $regex: new RegExp(search, "i") }, isActive: true },
-      ]
+      ];
     }
   }
   const {startTime, endTime} = getStartAndEndTimeService(new Date(), new Date());
@@ -1203,17 +1203,17 @@ export async function registerStudentsFromExcelController(req, res){
       return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Invalid class, section ids"));
     }
 
-    const workbook = xlsx.readFile(file.path)
-    const sheetName = workbook.SheetNames[0]
-    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
-    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, sessionId, adminId)
+    const workbook = xlsx.readFile(file.path);
+    const sheetName = workbook.SheetNames[0];
+    const students = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const registeredStudentsCount = await registerStudentsFromExcelHelper(students, sectionId, classId, sessionId, adminId);
     if(registeredStudentsCount===0){
-      throw new Error("Student registration failed")
+      throw new Error("Student registration failed");
     }
-    await fs.unlink(file.path)
-    return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`))
+    await fs.unlink(file.path);
+    return res.status(StatusCodes.OK).send(success(201,`${registeredStudentsCount} Students registered successfully`));
   } catch(err){
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message))
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501,err.message));
   }
 }
 
@@ -1338,7 +1338,7 @@ export async function deleteStudentController(req, res) {
     await Promise.all([
       updateSessionStudentService({_id:sessionStudentId}, {isActive:false}),
       updateSectionService({_id:section["_id"]},{studentCount:section["studentCount"]-1})
-    ])
+    ]);
 
     const siblings = await getStudentsService({schoolParent:student["schoolParent"], isActive:true});
     if (siblings?.length === 0) {

@@ -104,10 +104,10 @@ export async function updateAdminController(req, res) {
     const fieldsToBeUpdated = {};
     const adminId = req.adminId;
     const condition = [];
-    if(username){ condition.push({ username })};
-    if(email){ condition.push({ email })};
-    if(phone){ condition.push({ phone })};
-    if(affiliationNo){ condition.push({ affiliationNo })};
+    if(username){ condition.push({ username });};
+    if(email){ condition.push({ email });};
+    if(phone){ condition.push({ phone });};
+    if(affiliationNo){ condition.push({ affiliationNo });};
 
     const admin = await getAdminService({$or: [{username}, {email}, {phone}, {affiliationNo}], _id:{$ne:adminId}});
 
@@ -175,9 +175,9 @@ export async function getStudentDemoExcelSheetController(req, res){
   try {
     const workbook = constructStudentXlsxTemplate();
     res.setHeader("Content-Type","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", "attachment; filename=" + "student-template.xlsx")
-    await workbook.xlsx.write(res)
-    res.status(StatusCodes.OK).end()
+    res.setHeader("Content-Disposition", "attachment; filename=" + "student-template.xlsx");
+    await workbook.xlsx.write(res);
+    res.status(StatusCodes.OK).end();
 
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -188,9 +188,9 @@ export async function getTeacherDemoExcelSheetController(req, res){
   try {
     const workbook = constructTeacherXlsxTemplate();
     res.setHeader("Content-Type","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", "attachment; filename=" + "teacher-template.xlsx")
-    await workbook.xlsx.write(res)
-    res.status(StatusCodes.OK).end()
+    res.setHeader("Content-Disposition", "attachment; filename=" + "teacher-template.xlsx");
+    await workbook.xlsx.write(res);
+    res.status(StatusCodes.OK).end();
 
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

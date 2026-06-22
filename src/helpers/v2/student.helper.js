@@ -11,7 +11,7 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
      // validate each student from excel file
      students.shift();
     for(const student of students){
-      console.log({student})
+      console.log({student});
     const studentValidation =  registerStudentFromExcelSchema.validate(student);
     if(studentValidation.error){
       throw new Error(JSON.stringify({
@@ -46,7 +46,7 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
 
       const { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode, parentName, phone, email, qualification, occupation } = normalizedStudent;
       let parent = await getParentService({ phone, isActive:true });
-      let schoolParent = await getSchoolParentService({phone, school: adminId, isActive: true})
+      let schoolParent = await getSchoolParentService({phone, school: adminId, isActive: true});
 
       if(!schoolParent) {
         if(!parent) {
@@ -57,7 +57,7 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
       }
 
       let studentInfo = await getStudentService({ firstname, schoolParent: schoolParent["_id"] });
-      const studentObj = { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode }
+      const studentObj = { firstname, lastname, gender, bloodGroup, dob, address, city, district, state, country, pincode };
 
       if(!studentInfo) {
         studentObj['schoolParent'] = schoolParent['_id'];

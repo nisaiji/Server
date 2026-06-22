@@ -22,7 +22,7 @@ export async function registerSubjectService( data ){
 export async function registerSubjectsService(data)  {
     try{
 
-        const subjects = await subjectModel.insertMany(data)
+        const subjects = await subjectModel.insertMany(data);
         return subjects;
     } catch (error){
         throw error;

@@ -17,7 +17,6 @@ import {
   getFeeHeadService,
   getFeeStructureListingService,
   getFeeStructureService,
-  getFeeStructuresService,
   updateFeeCycleService,
   updateFeeHeadService,
   updateFeeStructureService,

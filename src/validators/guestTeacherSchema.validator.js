@@ -13,4 +13,4 @@ const guestTeacherLoginSchema = Joi.object({
   })
 });
 
-export { guestTeacherLoginSchema }
+export { guestTeacherLoginSchema };

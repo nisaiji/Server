@@ -21,7 +21,7 @@ export async function registerSessionService( data ){
 
 export async function registerSessionsService(data)  {
   try{
-    const sessions = await sessionModel.insertMany(data)          
+    const sessions = await sessionModel.insertMany(data);          
     return sessions;
   } catch (error){
     throw error;

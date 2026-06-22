@@ -33,16 +33,16 @@ export async function createSessionController(req, res) {
 export async function getAllSessionsOfSchoolController(req, res) {
   try {
     const adminId  = req.adminId;
-    console.log({adminId})
+    console.log({adminId});
     const pipeline = [
       {
         $match: {
           school: convertToMongoId(adminId)
         }
       }
-    ]
+    ];
     const sessions = await getSessionsPipelineService(pipeline);
-    console.log({sessions})
+    console.log({sessions});
     if (!sessions || sessions.length === 0) {
       return res.status(StatusCodes.NOT_FOUND).send(success(404, "No sessions found"));
     }

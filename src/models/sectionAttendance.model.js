@@ -30,7 +30,7 @@ const sectionAttendanceSchema = mongoose.Schema({
 {
   timestamps:true
 }
-)
+);
 
 const sectionAttendanceModel = mongoose.model("sectionAttendance",sectionAttendanceSchema);
 export default sectionAttendanceModel;

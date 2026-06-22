@@ -123,7 +123,7 @@ const updateTeacherLeaveSchema = Joi.object({
       'any.unknown': "Tagline is forbidden"
     }),
   })
-})
+});
 
 
-export { registerLeaveSchema, updateTeacherLeaveSchema, updateLeaveRequestSchema, getLeaveRequestsForAdminSchema }
+export { registerLeaveSchema, updateTeacherLeaveSchema, updateLeaveRequestSchema, getLeaveRequestsForAdminSchema };

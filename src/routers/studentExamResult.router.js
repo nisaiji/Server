@@ -8,8 +8,8 @@ const studentExamResultRouter = express.Router();
 studentExamResultRouter.post("/", createStudentExamResultController);
 studentExamResultRouter.post("/teacher", teacherAuthenticate, createOrUpdateBulkStudentExamResultController);
 studentExamResultRouter.post("/admin", adminAuthenticate, createOrUpdateBulkStudentExamResultController);
-studentExamResultRouter.post("/student-subject-marks", getStudentsExamMarksForSubjectController)
-studentExamResultRouter.post("/section-student-marks", getSectionStudentsExamMarksController)
+studentExamResultRouter.post("/student-subject-marks", getStudentsExamMarksForSubjectController);
+studentExamResultRouter.post("/section-student-marks", getSectionStudentsExamMarksController);
 studentExamResultRouter.post("/parent-student-marks", parentAuthenticate, getStudentExamMarksController);
 studentExamResultRouter.post("/parent-student-subject-marks", parentAuthenticate, getStudentExamMarksForSubjectController);
 studentExamResultRouter.put("/:studentExamResultId", updateStudentExamResultController);

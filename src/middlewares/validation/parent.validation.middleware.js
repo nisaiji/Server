@@ -20,7 +20,7 @@ export async function authUpdateParentValidation(req, res, next) {
     if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
-    next()
+    next();
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -32,7 +32,7 @@ export async function profileUpdateParentValidation(req, res, next) {
     if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
-    next()
+    next();
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -44,7 +44,7 @@ export async function profileInfoUpdateParentValidation(req, res, next) {
     if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
-    next()
+    next();
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -56,7 +56,7 @@ export async function AddressUpdateParentValidation(req, res, next) {
     if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
-    next()
+    next();
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
@@ -68,7 +68,7 @@ export async function passwordChangeParentValidation(req, res, next) {
     if (schemaError) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, schemaError.details[0].message));
     }
-    next()
+    next();
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

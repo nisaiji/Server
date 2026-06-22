@@ -38,4 +38,4 @@ const queryValidationSchema = Joi.object({
   }),
 });
 
-export { queryValidationSchema }
+export { queryValidationSchema };

@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { getAccessTokenService } from "../services/JWTToken.service.js";
-import { matchPasswordService, hashPasswordService } from "../services/password.service.js"
+import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
 import { StatusCodes } from "http-status-codes";
 import { getSuperAdminService, registerSuperAdminService, updateSuperAdminService } from "../services/superAdmin.service.js";
 import { error, success } from "../utils/responseWrapper.js";
@@ -141,7 +141,7 @@ export async function getAdminsController(req, res){
       {
         $limit: parseInt(limitNum),
       },
-    ])
+    ]);
     const totalAdmins = await getAdminCountService(filter);
     const totalPages = Math.ceil(totalAdmins / limitNum);
 
@@ -151,7 +151,7 @@ export async function getAdminsController(req, res){
       totalPages,
       totalAdmins,
       pageSize: limitNum,
-    }))
+    }));
     
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
@@ -174,23 +174,23 @@ export async function getCustomerQueriesController(req, res){
 export async function updateAdminController(req, res){
   try {
     const adminId = req.params.adminId;
-    const admin = await getAdminService({_id: adminId})
+    const admin = await getAdminService({_id: adminId});
     const { active } = req.body;
     if(!admin){
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"))
+      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
     }
     if(active.toString() === admin['isActive'].toString()){
       return res.status(StatusCodes.BAD_REQUEST).send(success(400, `Admin already ${active ? "activated" : "deactivated"}`));
     }
     let statusChangeCount = admin['statusChangeCount'];
     statusChangeCount += 1;
-    await updateAdminService({ _id: admin["_id"] }, {isActive: active, statusChangeCount, $push: {statusChangeLog: {status: active ? "activated": "deactivated"}}})
+    await updateAdminService({ _id: admin["_id"] }, {isActive: active, statusChangeCount, $push: {statusChangeLog: {status: active ? "activated": "deactivated"}}});
     let successMessage = "Admin updated successfully";
-    if(statusChangeCount===1 && active === true){ successMessage = "The School has been Approved Successfully"}
-    else if(active === true) { successMessage = "The School has been Activated Successfully" }
-    else if(active === false) { successMessage = "The School has been Deactivated Successfully"}
+    if(statusChangeCount===1 && active === true){ successMessage = "The School has been Approved Successfully";}
+    else if(active === true) { successMessage = "The School has been Activated Successfully"; }
+    else if(active === false) { successMessage = "The School has been Deactivated Successfully";}
 
-    return res.status(StatusCodes.OK).send(success(200, successMessage))
+    return res.status(StatusCodes.OK).send(success(200, successMessage));
     
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));

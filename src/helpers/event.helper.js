@@ -22,15 +22,15 @@ export async function getUser(modelType, paramObj) {
 export function getReceiver(reqObj) {
   switch (reqObj.role) {
     case "superAdmin":
-      return ["superAdmin", reqObj.superAdminId]
+      return ["superAdmin", reqObj.superAdminId];
     case "admin":
-      return ["admin", reqObj.adminId]
+      return ["admin", reqObj.adminId];
     case "teacher":
-      return ["tacher", reqObj.teacherId]
+      return ["tacher", reqObj.teacherId];
     case "parent":
-      return ["parent", reqObj.parentId]
+      return ["parent", reqObj.parentId];
     default:
-      return [null, null]
+      return [null, null];
   }
 }
 

@@ -14,9 +14,9 @@ const invalidationCronJob = new CronJob('0 0 2 * * *', async () => {
     // await dailyFeeCalculatorJob();
     // await SessionCreateJob();
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
   }
-})
+});
 
 export { invalidationCronJob };
 

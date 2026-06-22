@@ -5,26 +5,26 @@ import { getLeaveRequestsService, updateLeaveRequestService } from '../../servic
 
 const GuestTeacherStopJob =  async() => {
   try {
-  let date = new Date()
-  date = date.getTime()
-  console.log("guest teacher stop: ",date)
+  let date = new Date();
+  date = date.getTime();
+  console.log("guest teacher stop: ",date);
 
   const leaveRequests = await getLeaveRequestsService({endTime : {$lte: date}, status: {$in: ['accept', 'pending']}});
   const expiredGuestTeachers = await getGuestTeachersService({endTime: {$lte: date}, isActive: true});
 
   for (const leaveRequest of leaveRequests) {
-    const leaveRequestState = leaveRequest['status'] === 'accept' ? 'complete' : 'expired'
-    await updateLeaveRequestService({ _id: leaveRequest['_id'] }, { status: leaveRequestState })
+    const leaveRequestState = leaveRequest['status'] === 'accept' ? 'complete' : 'expired';
+    await updateLeaveRequestService({ _id: leaveRequest['_id'] }, { status: leaveRequestState });
   }
   for (const guestTeacher of expiredGuestTeachers) {
     await Promise.all([
       updateGuestTeacherService({ _id: guestTeacher["_id"] }, { isActive: false }),
       updateSectionService({_id: guestTeacher['section']}, {guestTeacher: null})
-    ])
+    ]);
   }
 } catch (error) {
-  console.log(error.message)  
+  console.log(error.message);  
 }
-}
+};
 
 export default GuestTeacherStopJob;
