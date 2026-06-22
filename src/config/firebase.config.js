@@ -1,13 +1,14 @@
-import admin from "firebase-admin";
+import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { getMessaging } from "firebase-admin/messaging";
 
 import serviceAccount from "../../firebase.json" with { type: "json" };
 import logger from "../logger/index.js";
 
 const imageUrl = "http://localhost:4000/images/logo.jpeg";
 
-if (!admin.apps?.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+if (!getApps().length) {
+  initializeApp({
+    credential: cert(serviceAccount)
   });
 }
 
@@ -62,7 +63,7 @@ export async function sendPushNotification(fcmToken, title, body, route, id) {
       message.data = data;
     }
 
-    const response = await admin.messaging().send(message);
+    const response = await getMessaging().send(message);
     return {
       status: "sent",
       messageId: response
