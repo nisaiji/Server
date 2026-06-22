@@ -21,7 +21,7 @@ export default [
     },
     plugins: {
       import: importPlugin,
-      unusedImports: unusedImportsPlugin,
+      "unused-imports": unusedImportsPlugin,
     },
     rules: {
       ...js.configs.recommended.rules,

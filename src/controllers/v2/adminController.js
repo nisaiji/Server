@@ -19,7 +19,7 @@ import {
   updateOtpService
 } from "../../services/otp.service.js";
 import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
-import { getSessionService, registerSessionService } from "../../services/session.services.js";
+import { getSessionService } from "../../services/session.services.js";
 import { error, success } from "../../utils/responseWrapper.js";
 
 export async function adminSendOtpToPhoneController(req, res) {

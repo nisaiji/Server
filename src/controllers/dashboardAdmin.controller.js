@@ -10,7 +10,6 @@ import {
 import { getSessionService } from "../services/session.services.js";
 import { getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
 import { getTeacherCountService } from "../services/teacher.services.js";
-import { getParentCountService } from "../services/v2/parent.services.js";
 import { getSessionStudentCountService } from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 

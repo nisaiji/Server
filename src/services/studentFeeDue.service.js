@@ -28,7 +28,6 @@ function getAllDueDatesInSession(session, feeCycle) {
   const dates = [];
   let current = new Date();
 
-  let test1234;
   let dueDate = new Date(current.getFullYear(), current.getMonth(), feeCycle.dueDate);
 
   while (dueDate < current) {

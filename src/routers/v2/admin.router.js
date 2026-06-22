@@ -17,10 +17,7 @@ import {
   adminSendOtpToPhoneController,
   updateAdminController
 } from "../../controllers/v2/adminController.js";
-import {
-  adminAuthenticate,
-  deactivatedAdminAuthenticate
-} from "../../middlewares/authentication/admin.authentication.middleware.js";
+import { deactivatedAdminAuthenticate } from "../../middlewares/authentication/admin.authentication.middleware.js";
 import { unVerifiedAdminAuthenticate } from "../../middlewares/authentication/v2/unVerifiedAdmin.authenticate.middleware.js";
 import {
   adminDetailsValidation,

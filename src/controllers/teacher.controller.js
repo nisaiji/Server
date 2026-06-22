@@ -14,7 +14,6 @@ import { getSessionService } from "../services/session.services.js";
 import {
   getTeacherService,
   registerTeacherService,
-  getAllTeacherOfAdminService,
   updateTeacherService,
   getTeachersService,
   getTeachersPipelineService

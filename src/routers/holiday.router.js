@@ -3,7 +3,6 @@ import express from "express";
 import {
   deleteHolidayController,
   getHolidaysController,
-  registerHolidayController,
   registerHolidaysController,
   updateHolidayController
 } from "../controllers/holiday.controller.js";
@@ -11,7 +10,6 @@ import { adminAuthenticate } from "../middlewares/authentication/admin.authentic
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
 import {
   createHolidaysValidation,
-  createHolidayValidation,
   getHolidayValidation,
   updateHolidayValidation
 } from "../middlewares/validation/holiday.validation.middleware.js";

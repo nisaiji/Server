@@ -4,7 +4,6 @@ import { getClassService, updateClassService } from "../services/class.services.
 import {
   deleteSectionService,
   getAllSection,
-  getClassSections,
   getSectionService,
   registerSectionService,
   updateSectionService

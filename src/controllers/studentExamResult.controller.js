@@ -7,7 +7,6 @@ import { getSessionService } from "../services/session.services.js";
 import {
   createStudentExamResultService,
   getStudentExamResultService,
-  getStudentExamResultsPipelineService,
   updateStudentExamResultService
 } from "../services/studentExamResult.service.js";
 import { getSubjectService } from "../services/subject.service.js";

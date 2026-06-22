@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import Jwt, { decode } from "jsonwebtoken";
+import Jwt from "jsonwebtoken";
 
 import { config } from "../../config/config.js";
 import { getAdminService } from "../../services/admin.services.js";

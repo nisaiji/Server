@@ -4,9 +4,7 @@ import {
   getAdminController,
   getStudentDemoExcelSheetController,
   getTeacherDemoExcelSheetController,
-  loginAdminController,
   refreshAccessTokenController,
-  registerAdminController,
   updateAdminController
 } from "../controllers/admin.controller.js";
 import {
@@ -19,9 +17,7 @@ import {
   adminAddressValidation,
   adminDetailsValidation,
   adminFcmTokenValidation,
-  adminLoginValidation,
   adminProfileUpdateValidation,
-  adminRegisterValidation,
   adminSocialProfileUpdateValidation,
   photoUpdateAdminValidation
 } from "../middlewares/validation/admin.validation.middleware.js";

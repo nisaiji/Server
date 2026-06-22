@@ -1,7 +1,6 @@
 import classModel from "../models/class.model.js";
 import sectionModel from "../models/section.model.js";
 import studentModel from "../models/student.model.js";
-import teacherModel from "../models/teacher.model.js";
 
 export async function getSectionService(paramObj, projection) {
   try {

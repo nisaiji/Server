@@ -5,8 +5,7 @@ import {
   getSessionService,
   getSessionsPipelineService,
   registerSessionService,
-  updateSessionService,
-  updateSessionsService
+  updateSessionService
 } from "../services/session.services.js";
 import { success } from "../utils/responseWrapper.js";
 

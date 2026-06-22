@@ -1,7 +1,6 @@
 import StatusCodes from "http-status-codes";
 
 import { getHolidaysService } from "../services/holiday.service.js";
-import { updateLeaveRequestService } from "../services/leave.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import {
   deleteStudentLeaveRequestsService,

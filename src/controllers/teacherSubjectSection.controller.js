@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 
-import { getAdminService, registerAdminService } from "../services/admin.services.js";
 import { getClassService } from "../services/class.services.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSectionService } from "../services/section.services.js";

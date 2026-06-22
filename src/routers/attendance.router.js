@@ -3,12 +3,10 @@ import express from "express";
 import {
   checkAttendaceMarkedController,
   getMisMatchAttendanceController,
-  checkParentAttendaceMarkedController,
   updateAttendanceController,
   attendanceStatusOfSectionController,
   attendanceCountOfStudentController,
   attendanceByTeacherController,
-  attendanceByParentController,
   attendanceStatusOfStudentController,
   getAttendancesController,
   bulkAttendanceMarkController,
@@ -19,11 +17,9 @@ import { teacherAuthenticate } from "../middlewares/authentication/teacher.authe
 import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
 import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
 import {
-  attendanceByParentValidation,
   attendanceByTeacherValidation,
   attendanceCountValidation,
   attendanceStatusValidation,
-  getAttendanceValidation,
   updateAttendanceValidation
 } from "../middlewares/validation/attendance.validation.middleware.js";
 

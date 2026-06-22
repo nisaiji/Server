@@ -1,5 +1,4 @@
 import {
-  deleteGuestTeacherService,
   getGuestTeachersService,
   updateGuestTeacherService
 } from "../../services/guestTeacher.service.js";

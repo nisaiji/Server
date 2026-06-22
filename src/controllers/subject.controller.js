@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 
-import { getSessionService } from "../services/session.services.js";
 import {
   deleteSubjectService,
   getSubjectService,

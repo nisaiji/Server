@@ -10,10 +10,7 @@ import {
   getAnnouncementsPipelineService,
   updateAnnouncementService
 } from "../services/announcement.services.js";
-import {
-  getAnnouncementReadStatusService,
-  getAnnouncementsReadStatusService
-} from "../services/announcementReadStatus.service.js";
+import { getAnnouncementsReadStatusService } from "../services/announcementReadStatus.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSessionService } from "../services/session.services.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";

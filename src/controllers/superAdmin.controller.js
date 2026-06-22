@@ -5,7 +5,6 @@ import {
   getAdminCountService,
   getAdminService,
   getAdminsPipelineService,
-  getAdminsService,
   updateAdminService
 } from "../services/admin.services.js";
 import { getCustomerSupportQueriesService } from "../services/customerSupport.services.js";

@@ -5,7 +5,6 @@ import {
   checkValidStudentController,
   editPasswordController,
   getHolidayAndWorkdayController,
-  getParentController,
   getParentPasswordChangeRequestsController,
   getParentStatusController,
   getParentWithStudentsController,
