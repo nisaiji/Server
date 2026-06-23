@@ -30,7 +30,7 @@ import transferCertificateRequestRouter from "./transferCertificateRequest.route
 import v2Router from "./v2/index.router.js";
 import v3Router from "./v3/index.router.js";
 import workDayRouter from "./workDay.router.js";
-const router = express();
+const router = express.Router();
 
 router.use("/", (req, res, next) => {
   console.log("");

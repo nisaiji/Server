@@ -1385,8 +1385,6 @@ export async function deleteStudentController(req, res) {
       isActive: true
     });
 
-    let test;
-
     if (!sessionStudent) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Student doesn't exists"));
     }

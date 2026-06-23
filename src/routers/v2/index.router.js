@@ -5,7 +5,7 @@ import parentRouter from "./parent.router.js";
 // import studentRouter from "./student.router.js";
 // import attendanceRouter from "./attendance.router.js";
 
-const v2Router = express();
+const v2Router = express.Router();
 
 v2Router.use("/admin", adminRouter);
 v2Router.use("/parent", parentRouter);

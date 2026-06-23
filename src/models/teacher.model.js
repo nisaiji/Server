@@ -103,11 +103,10 @@ const teacherSchema = mongoose.Schema(
   }
 );
 
-teacherSchema.pre("save", async function (next) {
+teacherSchema.pre("save", function () {
   if (!this.teacherId) {
     this.teacherId = generateCustomId("teacher");
   }
-  next();
 });
 
 const teacherModel = mongoose.model("teacher", teacherSchema);

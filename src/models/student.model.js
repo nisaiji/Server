@@ -88,11 +88,10 @@ const studentSchema = mongoose.Schema(
   }
 );
 
-studentSchema.pre("save", async function (next) {
+studentSchema.pre("save", function () {
   if (!this.studentId) {
     this.studentId = generateCustomId("student");
   }
-  next();
 });
 
 const studentModel = mongoose.model("student", studentSchema);
