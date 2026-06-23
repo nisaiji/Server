@@ -70,7 +70,6 @@ const sessionStudentSchema = mongoose.Schema(
 );
 
 sessionStudentSchema.index({ student: 1, session: 1 }, { unique: true });
-sessionStudentSchema.index({ school: 1, session: 1, classId: 1, section: 1 }, { unique: true });
 
 const sessionStudentModel = mongoose.model("sessionStudent", sessionStudentSchema);
 export default sessionStudentModel;

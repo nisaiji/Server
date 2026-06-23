@@ -10,13 +10,10 @@ export async function getStudentService(paramObj, projection = {}) {
   }
 }
 
-export async function registerStudentService(data) {
-  try {
-    const student = await studentModel.create(data);
-    return student;
-  } catch (error) {
-    throw error;
-  }
+export async function registerStudentService(data, transaction) {
+  return transaction
+    ? await studentModel.create(data, { session: transaction })
+    : await studentModel.create(data);
 }
 
 export async function registerStudentsService(data) {

@@ -9,13 +9,10 @@ export async function getSessionStudentService(paramObj) {
   }
 }
 
-export async function registerSessionStudentService(data) {
-  try {
-    const sessionStudent = await sessionStudentModel.create(data);
-    return sessionStudent;
-  } catch (error) {
-    throw error;
-  }
+export async function registerSessionStudentService(data, transaction) {
+  return transaction
+    ? await sessionStudentModel.create(data, { session: transaction })
+    : await sessionStudentModel.create(data);
 }
 
 export async function registerSessionStudentsService(data) {

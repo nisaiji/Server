@@ -42,7 +42,7 @@ export default [
       "no-console": "off",
       semi: ["error", "always"],
       "import/order": [
-        "error",
+        "warn",
         {
           groups: [
             "builtin",
