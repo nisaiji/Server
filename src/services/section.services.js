@@ -46,13 +46,10 @@ export async function deleteSectionService(paramObj) {
   }
 }
 
-export async function updateSectionService(filter, update) {
-  try {
-    const section = await sectionModel.findOneAndUpdate(filter, update);
-    return section;
-  } catch (error) {
-    throw error;
-  }
+export async function updateSectionService(filter, update, transaction) {
+  return transaction
+    ? await sectionModel.findOneAndUpdate(filter, update, { session: transaction })
+    : await sectionModel.findOneAndUpdate(filter, update);
 }
 
 export async function findSectionById(_id) {

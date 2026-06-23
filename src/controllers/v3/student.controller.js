@@ -1,11 +1,13 @@
 import fs from "fs/promises";
 
 import { StatusCodes } from "http-status-codes";
+import mongoose from "mongoose";
 import xlsx from "xlsx";
 
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
 import { getStartAndEndTimeService } from "../../services/celender.service.js";
 import { getClassService } from "../../services/class.services.js";
+import { getFeeStructureService } from "../../services/feeSetup.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
@@ -23,6 +25,7 @@ import {
   buildSubjectSummaryForContext,
   calculateAttendancePercentageForSessionStudent
 } from "../../services/studentDetailSummary.service.js";
+import { createOrUpdateDuesForFeeStructure } from "../../services/studentFeeDue.service.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
 import {
   getParentService,
@@ -64,13 +67,17 @@ export async function registerStudentAndSessionStudentController(req, res) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
     }
 
-    const [classInfo, session, studentWithAadhar, parent, schoolParentFromDb] = await Promise.all([
-      getClassService({ _id: section.classId }),
-      getSessionService({ _id: section.session }),
-      getStudentService({ aadharNumber: studentData.aadharNumber, isActive: true }),
-      getParentService({ phone: studentData.phone, isActive: true }),
-      getSchoolParentService({ phone: studentData.phone, school: adminId, isActive: true })
-    ]);
+    const [classInfo, session, studentWithAadhar, parent, schoolParentFromDb, feeStructureDetails] =
+      await Promise.all([
+        getClassService({ _id: section.classId }),
+        getSessionService({ _id: section.session }),
+        getStudentService({ aadharNumber: studentData.aadharNumber, isActive: true }),
+        getParentService({ phone: studentData.phone, isActive: true }),
+        getSchoolParentService({ phone: studentData.phone, school: adminId, isActive: true }),
+        getFeeStructureService({ adminId, sessionId: section.session, classId: section.classId })
+      ]);
+
+    console.log(feeStructureDetails);
 
     if (!classInfo) {
       return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
@@ -133,27 +140,47 @@ export async function registerStudentAndSessionStudentController(req, res) {
       ...(studentData.dob && { dob: studentData.dob })
     };
 
-    const student = await registerStudentService(studentObj);
+    const transactionSession = await mongoose.startSession();
 
-    const sessionStudentObj = {
-      section: studentData.sectionId,
-      classId: classInfo._id,
-      session: session._id,
-      school: adminId,
-      student: student._id
-    };
+    try {
+      const sessionStudent = await transactionSession.withTransaction(async () => {
+        const [student] = await registerStudentService([studentObj], transactionSession);
 
-    const [sessionStudent] = await Promise.all([
-      registerSessionStudentService(sessionStudentObj),
-      updateSectionService(
-        { _id: studentData.sectionId },
-        { studentCount: (section.studentCount || 0) + 1 }
-      )
-    ]);
+        const sessionStudentObj = {
+          section: studentData.sectionId,
+          classId: classInfo._id,
+          session: session._id,
+          school: adminId,
+          student: student._id
+        };
 
-    return res
-      .status(StatusCodes.CREATED)
-      .send(success(201, { message: "Student registered successfully!", student: sessionStudent }));
+        const [sessionStudent] = await registerSessionStudentService(
+          [sessionStudentObj],
+          transactionSession
+        );
+        await updateSectionService(
+          { _id: studentData.sectionId },
+          { $inc: { studentCount: 1 } },
+          transactionSession
+        );
+        if (feeStructureDetails?.isVerified) {
+          await createOrUpdateDuesForFeeStructure(
+            feeStructureDetails,
+            sessionStudent._id,
+            transactionSession
+          );
+        }
+
+        return sessionStudent;
+      });
+      return res
+        .status(StatusCodes.CREATED)
+        .send(
+          success(201, { message: "Student registered successfully!", student: sessionStudent })
+        );
+    } finally {
+      await transactionSession.endSession();
+    }
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }

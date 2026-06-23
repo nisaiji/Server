@@ -42,14 +42,14 @@ function getAllDueDatesInSession(session, feeCycle) {
   return dates;
 }
 
-function getStudentFilter(feeStructure, studentId) {
+function getStudentFilter(feeStructure, studentSessionId) {
   const baseFilter = {
     school: feeStructure.adminId,
     session: feeStructure.sessionId,
     classId: feeStructure.classId
   };
 
-  return studentId ? { ...baseFilter, studentId } : baseFilter;
+  return studentSessionId ? { _id: studentSessionId } : baseFilter;
 }
 
 function buildSectionMap(feeStructure) {
@@ -74,17 +74,6 @@ function buildFeeHeadTypeMap(feeHeadsDetails) {
   }
 
   return feeHeadTypeMap;
-}
-
-function shouldIncludeOneTime(academicSession, dueDate) {
-  return (
-    dueDate.getMonth() === academicSession.startDate.getMonth() &&
-    dueDate.getFullYear() === academicSession.startDate.getFullYear()
-  );
-}
-
-function getFeeHeadsForSection(sectionMap, feeStructure, secId) {
-  return sectionMap.get(secId) ?? feeStructure.applicableSections[0].feeHeads;
 }
 
 function buildFeeBreakup(feeHeadsForSection, feeHeadTypeMap, includeOneTime) {
@@ -154,17 +143,19 @@ function buildFeeDueOperations({
 
   for (const student of studentsInCurrentSession) {
     const secId = String(student.sectionId || student.section || "");
-    const feeHeadsForSection = getFeeHeadsForSection(sectionMap, feeStructure, secId);
+    const feeHeadsForSection = sectionMap.get(secId) ?? feeStructure.applicableSections[0].feeHeads;
 
     for (const dueDate of dueDates) {
-      const includeOneTime = shouldIncludeOneTime(academicSession, dueDate);
+      const includeOneTime =
+        dueDate.getMonth() === academicSession.startDate.getMonth() &&
+        dueDate.getFullYear() === academicSession.startDate.getFullYear();
       const feeBreakup = buildFeeBreakup(feeHeadsForSection, feeHeadTypeMap, includeOneTime);
       const totalAmount = feeBreakup.reduce((sum, item) => sum + item.amount, 0);
 
       operations.push(
         buildUpdateOperation({
           adminId,
-          studentId: student.studentId,
+          studentId: student.student,
           feeStructureId,
           feeCycleId,
           sessionId,
@@ -179,13 +170,28 @@ function buildFeeDueOperations({
   return operations;
 }
 
-export async function createOrUpdateDuesForFeeStructure(feeStructure, studentId) {
+export async function createOrUpdateDuesForFeeStructure(
+  feeStructure,
+  studentSessionId,
+  dbTransactionInstance
+) {
+  console.log("createOrUpdateDuesForFeeStructure called");
   const adminId = feeStructure.adminId;
   const sessionId = feeStructure.sessionId;
   const feeStructureId = feeStructure._id;
   const feeCycleId = feeStructure.feeCycleId;
 
-  const [academicSession, feeCycle] = await Promise.all([
+  const studentFilter = getStudentFilter(feeStructure, studentSessionId);
+  const studentsInCurrentSession = await sessionStudentModel
+    .find(studentFilter)
+    .session(dbTransactionInstance)
+    .lean();
+
+  if (!studentsInCurrentSession || studentsInCurrentSession.length === 0) {
+    return { created: 0, updated: 0 };
+  }
+
+  const [academicSession, feeCycle, feeHeadsDetails] = await Promise.all([
     getSessionService({
       _id: sessionId,
       school: adminId
@@ -193,20 +199,13 @@ export async function createOrUpdateDuesForFeeStructure(feeStructure, studentId)
     getFeeCycleService({
       _id: feeCycleId,
       adminId
-    })
+    }),
+    getFeeHeadService({ adminId, sessionId })
   ]);
-
-  const studentFilter = getStudentFilter(feeStructure, studentId);
-  const studentsInCurrentSession = await sessionStudentModel.find(studentFilter).lean();
-
-  if (!studentsInCurrentSession || studentsInCurrentSession.length === 0) {
-    return { created: 0, updated: 0 };
-  }
 
   const sectionMap = buildSectionMap(feeStructure);
   const dueDates = getAllDueDatesInSession(academicSession, feeCycle);
 
-  const feeHeadsDetails = await getFeeHeadService({ adminId, sessionId });
   const feeHeadTypeMap = buildFeeHeadTypeMap(feeHeadsDetails);
 
   const operations = buildFeeDueOperations({
@@ -226,14 +225,20 @@ export async function createOrUpdateDuesForFeeStructure(feeStructure, studentId)
     return { created: 0, updated: 0 };
   }
 
-  const transaction = await mongoose.startSession();
-  try {
-    await transaction.withTransaction(async () => {
-      await studentFeeDueModel.bulkWrite(operations, {
-        session: transaction
+  if (!dbTransactionInstance) {
+    const transaction = await mongoose.startSession();
+    try {
+      await transaction.withTransaction(async () => {
+        await studentFeeDueModel.bulkWrite(operations, {
+          session: transaction
+        });
       });
+    } finally {
+      transaction.endSession();
+    }
+  } else {
+    await studentFeeDueModel.bulkWrite(operations, {
+      session: dbTransactionInstance
     });
-  } finally {
-    transaction.endSession();
   }
 }
