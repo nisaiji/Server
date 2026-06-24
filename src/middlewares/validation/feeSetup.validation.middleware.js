@@ -150,3 +150,17 @@ export async function feeSetupVerifyValidation(req, res, next) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
   }
 }
+
+export async function studentFeeDuesParamValidation(req, res, next) {
+  try {
+    const { sessionId, studentId } = req.params;
+    if (!sessionId || !studentId) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "sessionId and studentId are required"));
+    }
+    next();
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+  }
+}

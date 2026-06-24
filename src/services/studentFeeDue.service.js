@@ -170,6 +170,32 @@ function buildFeeDueOperations({
   return operations;
 }
 
+export async function getStudentFeeDuesService({ studentId, sessionId, adminId }) {
+  const dues = await studentFeeDueModel.find({ studentId, sessionId, adminId }).lean();
+
+  if (!dues.length) return [];
+
+  const feeHeadGroup = await getFeeHeadService({ adminId, sessionId });
+  const feeHeadMap = new Map((feeHeadGroup?.feeHeads || []).map((fh) => [String(fh._id), fh]));
+
+  return dues.map((due) => ({
+    ...due,
+    feeBreakup: due.feeBreakup.map((item) => {
+      const feeHead = feeHeadMap.get(String(item.feeHeadId));
+      return {
+        feeHeadId: item.feeHeadId,
+        amount: item.amount,
+        ...(feeHead && {
+          name: feeHead.name,
+          label: feeHead.label,
+          type: feeHead.type,
+          refundable: feeHead.refundable
+        })
+      };
+    })
+  }));
+}
+
 export async function createOrUpdateDuesForFeeStructure(
   feeStructure,
   studentSessionId,

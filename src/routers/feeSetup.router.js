@@ -10,6 +10,7 @@ import {
   getFeeHeadController,
   getFeeStructureListingController,
   getFeeStructureController,
+  getStudentFeeDuesController,
   updateFeeCycleController,
   updateFeeHeadController,
   updateFeeStructureController,
@@ -26,7 +27,8 @@ import {
   feeStructureCreateValidation,
   feeStructureUpdateValidation,
   sessionIdParamValidation,
-  feeSetupVerifyValidation
+  feeSetupVerifyValidation,
+  studentFeeDuesParamValidation
 } from "../middlewares/validation/feeSetup.validation.middleware.js";
 
 const feeSetupRouter = express.Router();
@@ -58,5 +60,10 @@ feeSetupRouter.delete(
   deleteFeeStructureController
 );
 feeSetupRouter.put("/verify", feeSetupVerifyValidation, verifyFeeSetupController);
+feeSetupRouter.get(
+  "/dues/:sessionId/:studentId",
+  studentFeeDuesParamValidation,
+  getStudentFeeDuesController
+);
 
 export default feeSetupRouter;
