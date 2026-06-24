@@ -32,7 +32,7 @@ app.use(
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use("/", router);
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   return res.status(500).send({ error: err.message });
 });
 

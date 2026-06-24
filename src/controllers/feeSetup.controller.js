@@ -865,7 +865,7 @@ export async function verifyFeeSetupController(req, res) {
           _id: id
         },
         {
-          //isVerified: true,
+          isVerified: true,
           status: "ACTIVE"
         }
       );
