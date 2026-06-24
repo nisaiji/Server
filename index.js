@@ -32,8 +32,11 @@ app.use(
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use("/", router);
-app.use((err, req, res) => {
-  return res.status(500).send({ error: err.message });
+app.use((err, req, res, next) => {
+  res.status(500).json({
+    success: false,
+    message: err.message,
+  });
 });
 
 app.listen(PORT, () => {
