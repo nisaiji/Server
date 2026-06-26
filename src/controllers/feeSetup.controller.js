@@ -832,7 +832,7 @@ export async function deleteFeeStructureController(req, res) {
 export async function getStudentFeeDuesController(req, res) {
   try {
     const { sessionId, studentId } = req.params;
-    const adminId = req.adminId;
+    const adminId = req.adminId ?? req.parentId;
 
     if (!isValidMongoId(sessionId)) {
       return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid session Id"));

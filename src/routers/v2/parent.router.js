@@ -1,5 +1,6 @@
 import express from "express";
 
+import { getStudentFeeDuesController } from "../../controllers/feeSetup.controller.js";
 import {
   addStudentController,
   checkValidStudentController,
@@ -29,6 +30,7 @@ import {
   refreshParentTokenAuthenticate
 } from "../../middlewares/authentication/v2/parent.authentication.middleware.js";
 import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
+import { studentFeeDuesParamValidation } from "../../middlewares/validation/feeSetup.validation.middleware.js";
 import {
   parentPhoneValidation,
   parentEmailValidation,
@@ -117,5 +119,10 @@ parentRouter.get(
   parentAuthenticate,
   getParentPasswordChangeRequestsController
 );
-
+parentRouter.get(
+  "/dues/:sessionId/:studentId",
+  parentAuthenticate,
+  studentFeeDuesParamValidation,
+  getStudentFeeDuesController
+);
 export default parentRouter;
