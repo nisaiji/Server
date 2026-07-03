@@ -18,6 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.1079.0",
     "@sendgrid/mail": "^8.1.6",
     "axios": "^1.18.1",
     "bcrypt": "^6.0.0",
