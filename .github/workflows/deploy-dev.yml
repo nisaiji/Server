@@ -65,10 +65,10 @@ jobs:
                   npm ci
 
                   echo "Reloading PM2..." 
-                  if pm2 describe index > /dev/null; then 
-                      NODE_ENV=dev pm2 reload index 
+                  if pm2 describe SIKSHA_BACKEND_DEV > /dev/null; then 
+                      NODE_ENV=dev pm2 reload SIKSHA_BACKEND_DEV 
                   else 
-                     NODE_ENV=dev pm2 start index.js --name index 
+                     NODE_ENV=dev pm2 start index.js --name SIKSHA_BACKEND_DEV 
                   fi 
                   pm2 save 
                   pm2 status
