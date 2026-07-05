@@ -17,12 +17,9 @@ import { adminAuthenticate } from "../../middlewares/authentication/admin.authen
 import { teacherAuthenticate } from "../../middlewares/authentication/teacher.authentication.middleware.js";
 import { uploadStudentPhotoValidation } from "../../middlewares/validation/student.validation.middleware.js";
 import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
-import upload from "../../middlewares/multer.middleware.js";
 import { parentAuthenticate } from "../../middlewares/authentication/parent.authentication.middleware.js";
 import { authorizeTeacherRoles } from "../../middlewares/authorization/teacherRoles.authorization.middleware.js";
 import upload from "../../middlewares/multer.middleware.js";
-import { validateImageSizeMiddleware } from "../../middlewares/teacher.middleware.js";
-import { uploadStudentPhotoValidation } from "../../middlewares/validation/student.validation.middleware.js";
 const studentRouter = express.Router();
 
 studentRouter.post(

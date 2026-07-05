@@ -13,11 +13,6 @@ import {
   getExamTeacherNotificationRecipientsService,
   getSectionParentNotificationRecipientsService
 } from "../services/notificationRecipient.service.js";
-import { getSectionService } from "../services/section.services.js";
-import { getSessionService } from "../services/session.services.js";
-import { getTeacherSubjectSectionsService } from "../services/teacherSubjectSection.service.js";
-import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
-import { error, success } from "../utils/responseWrapper.js";
 
 function parseBooleanFlag(value) {
   if (typeof value === "boolean") {

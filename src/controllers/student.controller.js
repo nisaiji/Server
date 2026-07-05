@@ -22,13 +22,8 @@ import {
   getStudentsPipelineService
 } from "../services/student.service.js";
 import { createOrUpdateDuesForFeeStructure } from "../services/studentFeeDue.service.js";
-import {
-  getParentService,
-  registerParentService,
-  updateParentService
-} from "../services/v2/parent.services.js";
 import { getWorkDayCountService } from "../services/workDay.services.js";
-import { error, success } from "../utills/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
   try {

@@ -2,17 +2,28 @@ import fs from "fs/promises";
 import { StatusCodes } from "http-status-codes";
 import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
-import { getSessionStudentService, getSessionStudentsPipelineService, registerSessionStudentService, updateSessionStudentService } from "../../services/sessionStudent.service.js";
 import { error, success } from "../../utils/responseWrapper.js";
 import { getClassService } from "../../services/class.services.js";
-import { getParentService, registerParentService, updateParentService } from "../../services/parent.services.js";
-import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/schoolParent.services.js";
+import {
+  getParentService,
+  registerParentService,
+  updateParentService
+} from "../../services/parent.services.js";
+import {
+  getSchoolParentService,
+  registerSchoolParentService,
+  updateSchoolParentService
+} from "../../services/schoolParent.services.js";
+import {
+  getSessionStudentService,
+  getSessionStudentsPipelineService,
+  registerSessionStudentService,
+  updateSessionStudentService
+} from "../../services/sessionStudent.service.js";
 import { getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { getStartAndEndTimeService } from "../../services/celender.service.js";
 import xlsx from 'xlsx';
-import fs from 'fs/promises'
-import { registerStudentsFromExcelHelper } from "../../helpers/student.helper.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
 import {
   buildAttendanceSummaryForSessionStudent,
@@ -22,24 +33,6 @@ import {
   calculateAttendancePercentageForSessionStudent
 } from "../../services/studentDetailSummary.service.js";
 import { createOrUpdateDuesForFeeStructure } from "../../services/studentFeeDue.service.js";
-import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
-import {
-  getParentService,
-  registerParentService,
-  updateParentService
-} from "../../services/v2/parent.services.js";
-import {
-  getSchoolParentService,
-  registerSchoolParentService,
-  updateSchoolParentService
-} from "../../services/v2/schoolParent.services.js";
-import {
-  getSessionStudentService,
-  getSessionStudentsPipelineService,
-  registerSessionStudentService,
-  updateSessionStudentService
-} from "../../services/v2/sessionStudent.service.js";
-import { error, success } from "../../utils/responseWrapper.js";
 
 const addFieldsIfPresent = (target, source, fields) => {
   fields.forEach((field) => {

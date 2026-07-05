@@ -9,8 +9,8 @@ import ledgerEntryModel from "../../models/payments/ledgerEntries.model.js";
 import paymentModel from "../../models/payments/payment.model.js";
 import paymentAttemptModel from "../../models/payments/paymentAttempts.model.js";
 import receiptModel from "../../models/payments/receipt.model.js";
-import { getParentService } from "../v2/parent.services.js";
-import { getSessionStudentService } from "../v2/sessionStudent.service.js";
+import { getParentService } from "../parent.services.js";
+import { getSessionStudentService } from "../sessionStudent.service.js";
 
 export async function createPaymentService(data) {
   return paymentModel.create(data);

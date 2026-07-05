@@ -14,7 +14,7 @@ const statusChangeLogSchema = new mongoose.Schema({
   }
 });
 
-const adminSchema = mongoose.Schema({
+const adminSchema = new mongoose.Schema({
   username: {
     type: String,
   },

@@ -37,11 +37,8 @@ import { getTeacherService } from "../services/teacher.services.js";
 import {
   getSessionStudentService,
   getSessionStudentsPipelineService
-} from "../services/v2/sessionStudent.service.js";
+} from "../services/sessionStudent.service.js";
 import { getWorkDayService } from "../services/workDay.services.js";
-import { sendPushNotification } from "../config/firebase.config.js";
-import { getSessionStudentService, getSessionStudentsPipelineService } from "../services/sessionStudent.service.js";
-import { getSessionService } from "../services/session.services.js";
 
 export async function attendanceByTeacherController(req, res) {
   try {

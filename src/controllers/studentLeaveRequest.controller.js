@@ -3,7 +3,6 @@ import { getHolidaysService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { deleteStudentLeaveRequestsService, getStudentLeaveRequestService, getStudentLeaveRequestsPipelineService, registerStudentLeaveRequestService, updateStudentLeaveRequestService } from "../services/studentLeaveRequest.service.js";
 import { getSessionStudentService } from "../services/sessionStudent.service.js";
-import StatusCodes from "http-status-codes";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerStudentLeaveRequestController(req, res) {
