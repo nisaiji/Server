@@ -91,7 +91,6 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
       }
     }
     return insertedStudentCount;
-    return insertedStudentCount;
   } catch (error) {
     throw error;
   }

@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import Jwt from "jsonwebtoken";
 
 import { config } from "../../../config/config.js";
-import { StatusCodes } from "http-status-codes";
+import { error } from "../../../utils/responseWrapper.js";
 import { getParentService } from "../../../services/parent.services.js";
 
 export async function parentAuthenticate(req, res, next) {

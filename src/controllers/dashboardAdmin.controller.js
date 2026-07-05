@@ -9,11 +9,8 @@ import {
 } from "../services/sectionAttendance.services.js";
 import { getSessionService } from "../services/session.services.js";
 import { getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
-import { getParentCountService } from "../services/parent.services.js";
 import { getTeacherCountService } from "../services/teacher.services.js";
-import { convertToMongoId } from "../services/mongoose.services.js";
-import { getSessionService } from "../services/session.services.js";
-import { getSessionStudentCountService } from "../services/v2/sessionStudent.service.js";
+import { getSessionStudentCountService } from "../services/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function getPresentStudentsController(req, res) {

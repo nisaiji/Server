@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
-import { getFeeCycleService } from "./feeSetup.service.js";
-import { getFeeHeadService } from "./feeSetup.service.js";
+import { getFeeCycleService, getFeeHeadService } from "./feeSetup.service.js";
 import sessionStudentModel from "../models/sessionStudent.model.js";
 
 function monthsForFrequency(freq) {

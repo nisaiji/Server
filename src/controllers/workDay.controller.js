@@ -8,10 +8,8 @@ import {
   getStartAndEndTimeService
 } from "../services/celender.service.js";
 import { getSessionService } from "../services/session.services.js";
-import { getAdminService } from "../services/admin.services.js";
 import { getParentsByAdminIdService } from "../services/schoolParent.services.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
-import { sendPushNotification } from "../config/firebase.config.js";
 
 
 export async function registerWorkDayController(req, res) {

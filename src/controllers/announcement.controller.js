@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 
-import { sendPushNotification } from "../config/firebase.config.js";
 import { getAdminService } from "../services/admin.services.js";
 import {
   createAnnouncementService,
@@ -14,12 +13,9 @@ import { getAnnouncementsReadStatusService } from "../services/announcementReadS
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSessionService } from "../services/session.services.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
-import { getAdminService } from "../services/admin.services.js";
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getParentsByAdminIdService } from "../services/schoolParent.services.js";
-import { getAnnouncementReadStatusService, getAnnouncementsReadStatusService } from "../services/announcementReadStatus.service.js";
 import { getSessionStudentService } from "../services/sessionStudent.service.js";
-import { getSessionService } from "../services/session.services.js";
 
 export async function createAnnouncementByAdminController(req, res) {
   try {
