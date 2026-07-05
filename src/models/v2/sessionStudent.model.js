@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const sessionStudentSchema = mongoose.Schema(
+const sessionStudentSchema = new mongoose.Schema(
   {
     rollNumber: {
       type: Number
@@ -71,5 +71,8 @@ const sessionStudentSchema = mongoose.Schema(
 
 sessionStudentSchema.index({ student: 1, session: 1 }, { unique: true });
 
-const sessionStudentModel = mongoose.model("sessionStudent", sessionStudentSchema);
+const sessionStudentModel = mongoose.model(
+  "sessionStudent",
+  sessionStudentSchema
+);
 export default sessionStudentModel;

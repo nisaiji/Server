@@ -1,5 +1,4 @@
 import express from "express";
-
 import adminRouter from "./admin.router.js";
 // import studentRouter from "./student.router.js";
 import announcementRouter from "./announcement.router.js";
@@ -17,6 +16,7 @@ import guestTeacherRouter from "./guestTeacher.router.js";
 import holidayRouter from "./holiday.router.js";
 import leaveRouter from "./leave.router.js";
 import notificationRouter from "./notification.router.js";
+import paymentRouter from "./payment.router.js";
 import sectionRouter from "./section.router.js";
 import sessionRouter from "./session.router.js";
 import studentExamResultRouter from "./studentExamResult.router.js";
@@ -34,7 +34,9 @@ const router = express.Router();
 
 router.use("/", (req, res, next) => {
   console.log("");
-  console.log("*************************REQUEST START*****************************");
+  console.log(
+    "*************************REQUEST START*****************************"
+  );
   console.log(`NEW REQUEST ---> ${req.method} ${req.originalUrl}`);
   console.log("req Type=======>", req.method.toUpperCase());
   console.log("req Path=======>", req.path);
@@ -42,7 +44,9 @@ router.use("/", (req, res, next) => {
   console.log("req Params=====>", req.params);
   console.log("req Query======>", req.query);
   console.log("Authorization======>", req.headers.authorization);
-  console.log("*********************REQUEST ENDS********************************");
+  console.log(
+    "*********************REQUEST ENDS********************************"
+  );
 
   next();
 });
@@ -77,5 +81,6 @@ router.use("/exam", examRouter);
 router.use("/student-exam-result", studentExamResultRouter);
 router.use("/transfer-certificate", transferCertificateRequestRouter);
 router.use("/fee-setup", feeSetupRouter);
+router.use("/payment", paymentRouter);
 
 export default router;
