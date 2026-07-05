@@ -1,5 +1,17 @@
-import { config as conf } from "dotenv";
-conf();
+import dotenv from "dotenv";
+
+// check if NODE_ENV exists, else throw an error
+
+export const SYS_ERR = {
+  NODE_ENV_INVALID: 100,
+  BOOTSTRAP_ERROR: 101,
+  MONGO_CONN_FAILED: 103
+};
+
+if (typeof process.env.NODE_ENV === "undefined")
+  process.exit(SYS_ERR.NODE_ENV_INVALID);
+// configure the environment
+dotenv.config({ path: `bin/.env.${process.env.NODE_ENV}` });
 
 const _config = {
   host: process.env.HOST,

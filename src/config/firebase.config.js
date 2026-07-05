@@ -1,19 +1,25 @@
-import { initializeApp, getApps, cert } from "firebase-admin/app";
+import { createRequire } from "module";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
-import serviceAccount from "../../firebase.json" with { type: "json" };
 import logger from "../logger/index.js";
+const require = createRequire(import.meta.url);
+const serviceAccount = require("../../firebase.json");
 
 const imageUrl = "http://localhost:4000/images/logo.jpeg";
 
 if (!getApps().length) {
   initializeApp({
-    credential: cert(serviceAccount)
+    credential: cert({
+      projectId: serviceAccount.project_id,
+      clientEmail: serviceAccount.client_email,
+      privateKey: serviceAccount.private_key
+    })
   });
 }
 
-function buildNotificationData(route, id) {
+function buildNotificationData(route, id, type) {
   const data = {};
-
+  if (type) data.type = String(type);
   if (route !== undefined && route !== null) {
     data.route = String(route);
   }
@@ -25,7 +31,14 @@ function buildNotificationData(route, id) {
   return data;
 }
 
-export async function sendPushNotification(fcmToken, title, body, route, id) {
+export async function sendPushNotification(
+  fcmToken,
+  title,
+  body,
+  route,
+  id,
+  type
+) {
   try {
     if (!fcmToken) {
       return {
@@ -34,7 +47,7 @@ export async function sendPushNotification(fcmToken, title, body, route, id) {
       };
     }
 
-    const data = buildNotificationData(route, id);
+    const data = buildNotificationData(route, id, type);
     const message = {
       notification: {
         title,
