@@ -1,5 +1,4 @@
 import StatusCodes from "http-status-codes";
-
 import { getHolidaysService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import {
@@ -14,7 +13,8 @@ import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerStudentLeaveRequestController(req, res) {
   try {
-    const { reason, description, startDate, endDate, sessionStudentId } = req.body;
+    const { reason, description, startDate, endDate, sessionStudentId } =
+      req.body;
     const parentId = req.parentId;
 
     if (startDate > endDate) {
@@ -23,9 +23,13 @@ export async function registerStudentLeaveRequestController(req, res) {
         .send(error(400, "Start Time must be less than End Time"));
     }
 
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    const sessionStudent = await getSessionStudentService({
+      _id: sessionStudentId
+    });
     if (!sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Student not found"));
     }
 
     const holidays = await getHolidaysService({
@@ -49,13 +53,16 @@ export async function registerStudentLeaveRequestController(req, res) {
       }
     ];
 
-    const leaveRequests = await getStudentLeaveRequestsPipelineService(pipeline);
+    const leaveRequests =
+      await getStudentLeaveRequestsPipelineService(pipeline);
     if (leaveRequests.length > 0) {
       const startDate = new Date(leaveRequests[0].startTime);
       const endDate = new Date(leaveRequests[0].endTime);
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, `Leave already requested from ${startDate} to ${endDate}.`));
+        .send(
+          error(409, `Leave already requested from ${startDate} to ${endDate}.`)
+        );
     }
 
     const leaveRequestObj = {
@@ -70,9 +77,13 @@ export async function registerStudentLeaveRequestController(req, res) {
       endDate
     };
     await registerStudentLeaveRequestService(leaveRequestObj);
-    return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Request sent successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -131,10 +142,13 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
       }
     ];
 
-    const leaveRequests = await getStudentLeaveRequestsPipelineService(pipeline);
+    const leaveRequests =
+      await getStudentLeaveRequestsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, leaveRequests));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -142,7 +156,9 @@ export async function getStudentLeaveRequestForParentController(req, res) {
   try {
     const { startDate, endDate, sessionStudentId } = req.body;
     const parentId = req.parentId;
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    const sessionStudent = await getSessionStudentService({
+      _id: sessionStudentId
+    });
     if (!sessionStudent) {
       return res
         .status(StatusCodes.NOT_FOUND)
@@ -161,10 +177,13 @@ export async function getStudentLeaveRequestForParentController(req, res) {
       }
     ];
 
-    const leaveRequests = await getStudentLeaveRequestsPipelineService(pipeline);
+    const leaveRequests =
+      await getStudentLeaveRequestsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, leaveRequests));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -173,21 +192,31 @@ export async function deleteStudentLeaveRequestByParentController(req, res) {
     const requestId = req.params.requestId;
     const parentId = req.parentId;
 
-    const request = await getStudentLeaveRequestService({ _id: requestId, parent: parentId });
+    const request = await getStudentLeaveRequestService({
+      _id: requestId,
+      parent: parentId
+    });
     if (!request) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Request not found"));
     }
     deleteStudentLeaveRequestsService({ _id: requestId });
-    return res.status(StatusCodes.OK).send(success(200, "Request deleted successfully!"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Request deleted successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
 export async function updateStudentLeaveRequestController(req, res) {
   try {
     const requestId = req.params.requestId;
-    const { reason, description, startDate, endDate, remark, isRead } = req.body;
+    const { reason, description, startDate, endDate, remark, isRead } =
+      req.body;
     const parentId = req.parentId;
     const fieldsToBeUpdated = {};
     if (reason) fieldsToBeUpdated.reason = reason;
@@ -197,21 +226,31 @@ export async function updateStudentLeaveRequestController(req, res) {
     if (remark) fieldsToBeUpdated.remark = remark;
     if (isRead) fieldsToBeUpdated.isRead = isRead;
 
-    const request = await getStudentLeaveRequestService({ _id: requestId, parent: parentId });
+    const request = await getStudentLeaveRequestService({
+      _id: requestId,
+      parent: parentId
+    });
     if (!request) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Request not found"));
     }
     updateStudentLeaveRequestService({ _id: requestId }, fieldsToBeUpdated);
-    return res.status(StatusCodes.OK).send(success(200, "Request updated successfully!"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Request updated successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
 export async function updateStudentLeaveRequestByTeacherController(req, res) {
   try {
     const requestId = req.params.requestId;
-    const { reason, description, startDate, endDate, remark, isRead } = req.body;
+    const { reason, description, startDate, endDate, remark, isRead } =
+      req.body;
     const teacherId = req.teacherId;
     const fieldsToBeUpdated = {};
     if (reason) fieldsToBeUpdated.reason = reason;
@@ -223,11 +262,17 @@ export async function updateStudentLeaveRequestByTeacherController(req, res) {
 
     const request = await getStudentLeaveRequestService({ _id: requestId });
     if (!request) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Request not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Request not found"));
     }
     updateStudentLeaveRequestService({ _id: requestId }, fieldsToBeUpdated);
-    return res.status(StatusCodes.OK).send(success(200, "Request updated successfully!"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Request updated successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

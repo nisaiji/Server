@@ -25,9 +25,16 @@ export async function registerStudentsService(data) {
   }
 }
 
-export async function getStudentsService(paramObj, projection = {}, populateObj = "") {
+export async function getStudentsService(
+  paramObj,
+  projection = {},
+  populateObj = ""
+) {
   try {
-    const students = await studentModel.find(paramObj).select(projection).populate(populateObj);
+    const students = await studentModel
+      .find(paramObj)
+      .select(projection)
+      .populate(populateObj);
     return students;
   } catch (error) {
     throw error;

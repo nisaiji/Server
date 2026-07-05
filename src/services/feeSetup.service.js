@@ -69,7 +69,12 @@ export async function getFeeStructuresService(paramObj) {
   return await feeStructureModel.find(paramObj).sort({ createdAt: -1 });
 }
 
-export async function getFeeStructureListingService({ match, search, skip, limit }) {
+export async function getFeeStructureListingService({
+  match,
+  search,
+  skip,
+  limit
+}) {
   const searchMatch = search
     ? {
         $or: [
@@ -157,7 +162,9 @@ export async function getFeeStructureListingService({ match, search, skip, limit
 }
 
 export async function updateFeeStructureService(filter, update) {
-  return await feeStructureModel.findOneAndUpdate(filter, update, { new: true });
+  return await feeStructureModel.findOneAndUpdate(filter, update, {
+    new: true
+  });
 }
 
 export async function deleteFeeStructureService(filter) {

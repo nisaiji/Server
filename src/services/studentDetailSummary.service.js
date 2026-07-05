@@ -1,5 +1,11 @@
-import { getAttendanceCountService, getAttendancePipelineService } from "./attendance.service.js";
-import { calculateDaysBetweenDates, calculateSundays } from "./celender.service.js";
+import {
+  getAttendanceCountService,
+  getAttendancePipelineService
+} from "./attendance.service.js";
+import {
+  calculateDaysBetweenDates,
+  calculateSundays
+} from "./celender.service.js";
 import { getExamsPipelineService } from "./exam.services.js";
 import { getHolidayCountService } from "./holiday.service.js";
 import { convertToMongoId } from "./mongoose.services.js";
@@ -97,7 +103,11 @@ function isPassingComponent(component = {}) {
   return component.status === "pass";
 }
 
-function getMarksSummaryForExam(results = [], evaluatedSubjectCount, subjectCount) {
+function getMarksSummaryForExam(
+  results = [],
+  evaluatedSubjectCount,
+  subjectCount
+) {
   if (evaluatedSubjectCount === 0 || evaluatedSubjectCount < subjectCount) {
     return {};
   }
@@ -113,7 +123,10 @@ function getMarksSummaryForExam(results = [], evaluatedSubjectCount, subjectCoun
         return {};
       }
 
-      if (typeof component.marksObtained !== "number" || typeof component.maxMarks !== "number") {
+      if (
+        typeof component.marksObtained !== "number" ||
+        typeof component.maxMarks !== "number"
+      ) {
         return {};
       }
 
@@ -191,7 +204,10 @@ export function getDefaultExamSummary() {
   };
 }
 
-export async function calculateAttendancePercentageForSessionStudent(sessionStudentId, sessionId) {
+export async function calculateAttendancePercentageForSessionStudent(
+  sessionStudentId,
+  sessionId
+) {
   const session = await getSessionService({ _id: convertToMongoId(sessionId) });
   const startTime = session["startDate"].getTime();
   const currentDate = new Date().getTime();
@@ -205,7 +221,8 @@ export async function calculateAttendancePercentageForSessionStudent(sessionStud
     date: { $gte: startTime, $lte: currentDate }
   });
   const dayscount = calculateDaysBetweenDates(startTime, currentDate);
-  const attendancableDays = dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
+  const attendancableDays =
+    dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
   const presentDaysCount = await getAttendanceCountService({
     sessionStudent: convertToMongoId(sessionStudentId),
     teacherAttendance: "present",
@@ -215,7 +232,10 @@ export async function calculateAttendancePercentageForSessionStudent(sessionStud
   return (presentDaysCount / attendancableDays) * 100;
 }
 
-export async function buildAttendanceSummaryForSessionStudent(sessionStudentId, sessionId) {
+export async function buildAttendanceSummaryForSessionStudent(
+  sessionStudentId,
+  sessionId
+) {
   const defaultSummary = getDefaultAttendanceSummary();
   const [attendancePercentage, attendanceStats] = await Promise.all([
     calculateAttendancePercentageForSessionStudent(sessionStudentId, sessionId),
@@ -270,7 +290,12 @@ export async function buildAttendanceSummaryForSessionStudent(sessionStudentId, 
   };
 }
 
-export async function buildSubjectSummaryForContext({ schoolId, sessionId, classId, sectionId }) {
+export async function buildSubjectSummaryForContext({
+  schoolId,
+  sessionId,
+  classId,
+  sectionId
+}) {
   const subjects = await getTeacherSubjectSectionPipelineService([
     {
       $match: {
@@ -331,7 +356,10 @@ export async function buildSubjectSummaryForContext({ schoolId, sessionId, class
       subjectId: subject.subjectId,
       subjectName: subject.subjectName ?? "",
       subjectCode: subject.subjectCode ?? null,
-      teacherName: getTeacherName(subject.teacherFirstName, subject.teacherLastName)
+      teacherName: getTeacherName(
+        subject.teacherFirstName,
+        subject.teacherLastName
+      )
     }));
 
   return {
@@ -365,7 +393,10 @@ export async function buildLeaveSummaryForSessionStudent(sessionStudentId) {
             $add: [
               {
                 $floor: {
-                  $divide: [{ $subtract: ["$endDate", "$startDate"] }, DAY_IN_MS]
+                  $divide: [
+                    { $subtract: ["$endDate", "$startDate"] },
+                    DAY_IN_MS
+                  ]
                 }
               },
               1
@@ -435,7 +466,10 @@ export async function buildLeaveSummaryForSessionStudent(sessionStudentId) {
   };
 }
 
-export function resolveExamSummaryForStudent(exams = [], examResultsByExamId = {}) {
+export function resolveExamSummaryForStudent(
+  exams = [],
+  examResultsByExamId = {}
+) {
   const defaultSummary = getDefaultExamSummary();
   const stats = {
     ...defaultSummary.stats,
@@ -446,15 +480,23 @@ export function resolveExamSummaryForStudent(exams = [], examResultsByExamId = {
   const sortedExams = [...exams].sort(compareExams);
   for (const exam of sortedExams) {
     const examId = getIdString(exam?._id);
-    const latestResults = getLatestResultsBySubject(examResultsByExamId[examId] || []);
-    const evaluatedResults = latestResults.filter((result) =>
-      (result?.components || []).some((component) => isEvaluatedComponent(component))
+    const latestResults = getLatestResultsBySubject(
+      examResultsByExamId[examId] || []
     );
-    const subjectCount = Array.isArray(exam?.subjects) ? exam.subjects.length : 0;
+    const evaluatedResults = latestResults.filter((result) =>
+      (result?.components || []).some((component) =>
+        isEvaluatedComponent(component)
+      )
+    );
+    const subjectCount = Array.isArray(exam?.subjects)
+      ? exam.subjects.length
+      : 0;
     const evaluatedSubjectCount = evaluatedResults.length;
     const hasMissingSubjects = subjectCount > evaluatedSubjectCount;
     const hasFail = evaluatedResults.some((result) =>
-      (result?.components || []).some((component) => isFailingComponent(component))
+      (result?.components || []).some((component) =>
+        isFailingComponent(component)
+      )
     );
     const allEvaluatedPass =
       evaluatedSubjectCount > 0 &&

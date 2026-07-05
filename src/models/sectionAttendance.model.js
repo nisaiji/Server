@@ -33,5 +33,8 @@ const sectionAttendanceSchema = mongoose.Schema(
   }
 );
 
-const sectionAttendanceModel = mongoose.model("sectionAttendance", sectionAttendanceSchema);
+const sectionAttendanceModel = mongoose.model(
+  "sectionAttendance",
+  sectionAttendanceSchema
+);
 export default sectionAttendanceModel;

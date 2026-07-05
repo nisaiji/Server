@@ -1,10 +1,12 @@
 import { StatusCodes } from "http-status-codes";
 import otpGenerator from "otp-generator";
-
 import { sendEmailService } from "../../config/sendGrid.config.js";
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
 import { getHolidayPipelineService } from "../../services/holiday.service.js";
-import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
+import {
+  getAccessTokenService,
+  getRefreshTokenService
+} from "../../services/JWTToken.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
 import {
@@ -18,8 +20,14 @@ import {
   getParentPasswordChangeRequestsService,
   updateParentPasswordChangeRequestService
 } from "../../services/parentPasswordChangeRequest.service.js";
-import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
-import { getStudentService, getStudentsPipelineService } from "../../services/student.service.js";
+import {
+  hashPasswordService,
+  matchPasswordService
+} from "../../services/password.service.js";
+import {
+  getStudentService,
+  getStudentsPipelineService
+} from "../../services/student.service.js";
 import {
   getParentService,
   getParentsPipelineService,
@@ -34,7 +42,9 @@ export async function parentSendOtpToPhoneController(req, res) {
     const { phone } = req.body;
     const parent = await getParentService({ phone });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User is not registered"));
     }
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
     //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
@@ -58,7 +68,9 @@ export async function parentSendOtpToPhoneController(req, res) {
 
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -67,7 +79,9 @@ export async function parentPhoneVerifyByOtpController(req, res) {
     const { phone, otp } = req.body;
     let parent = await getParentService({ phone });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User is not registered"));
     }
 
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
@@ -96,7 +110,9 @@ export async function parentPhoneVerifyByOtpController(req, res) {
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
     if (!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "OTP has not been sent yet"));
     }
 
     if (
@@ -104,11 +120,15 @@ export async function parentPhoneVerifyByOtpController(req, res) {
       storedOtp["status"] === "expired" ||
       storedOtp["expiredAt"] < new Date().getTime()
     ) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Your OTP has expired"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Your OTP has expired"));
     }
 
     if (otp !== storedOtp["otp"]) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, `You entered wrong OTP`));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, `You entered wrong OTP`));
     }
 
     await Promise.all([
@@ -127,9 +147,13 @@ export async function parentPhoneVerifyByOtpController(req, res) {
       personalInfoUpdated: parent["fullname"] ? true : false
     });
 
-    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully", token }));
+    res
+      .status(StatusCodes.OK)
+      .send(success(200, { message: "OTP verified successfully", token }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -138,7 +162,9 @@ export async function parentPhoneUpdateSendOtpToPhoneController(req, res) {
     const { phone } = req.body;
     const parent = await getParentService({ phone, isActive: true });
     if (parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number already used"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Phone number already used"));
     }
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
     //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
@@ -162,7 +188,9 @@ export async function parentPhoneUpdateSendOtpToPhoneController(req, res) {
 
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -172,7 +200,9 @@ export async function parentPhoneUpdateVerifyByOtpController(req, res) {
     const parentId = req.parentId;
     let parent = await getParentService({ _id: parentId, isActive: true });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User is not found"));
     }
 
     // if(['phoneVerified', 'verified'].includes(parent['status'])) {
@@ -201,7 +231,9 @@ export async function parentPhoneUpdateVerifyByOtpController(req, res) {
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
     if (!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "OTP has not been sent yet"));
     }
 
     if (
@@ -209,11 +241,15 @@ export async function parentPhoneUpdateVerifyByOtpController(req, res) {
       storedOtp["status"] === "expired" ||
       storedOtp["expiredAt"] < new Date().getTime()
     ) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Your OTP has expired"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Your OTP has expired"));
     }
 
     if (otp !== storedOtp["otp"]) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, `You entered wrong OTP`));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, `You entered wrong OTP`));
     }
 
     await Promise.all([
@@ -224,7 +260,9 @@ export async function parentPhoneUpdateVerifyByOtpController(req, res) {
 
     res.status(StatusCodes.OK).send(success(200, "Phone updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -234,7 +272,9 @@ export async function parentEmailInsertAndSendEmailOtpController(req, res) {
     const parentId = req.parentId;
     const parent = await getParentService({ _id: parentId });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User not found"));
     }
     if (parent["status"] === "verified") {
       return res
@@ -261,7 +301,9 @@ export async function parentEmailInsertAndSendEmailOtpController(req, res) {
     const rej = await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -271,10 +313,14 @@ export async function parentEmailVerifyByOtpController(req, res) {
     const parentId = req.parentId;
     let parent = await getParentService({ _id: parentId });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User is not registered"));
     }
     if (["verified"].includes(parent["status"])) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Your Email has already verified"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Your Email has already verified"));
     }
 
     const getOtpPipeline = [
@@ -299,7 +345,9 @@ export async function parentEmailVerifyByOtpController(req, res) {
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
     if (!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "OTP has not been sent yet"));
     }
     console.log({ storedOtp, now: new Date().getTime() });
 
@@ -308,11 +356,15 @@ export async function parentEmailVerifyByOtpController(req, res) {
       storedOtp["status"] === "expired" ||
       storedOtp["expiredAt"] < new Date().getTime()
     ) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Your OTP has expired"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(404, "Your OTP has expired"));
     }
 
     if (otp !== storedOtp["otp"]) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, `You entered wrong OTP`));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(404, `You entered wrong OTP`));
     }
 
     console.log("promise: ", { _id: storedOtp["_id"] }, { status: "verified" });
@@ -332,9 +384,13 @@ export async function parentEmailVerifyByOtpController(req, res) {
       personalInfoUpdated: parent["fullname"] ? true : false
     });
 
-    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully", token }));
+    res
+      .status(StatusCodes.OK)
+      .send(success(200, { message: "OTP verified successfully", token }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -345,16 +401,22 @@ export async function loginParentController(req, res) {
       $or: [{ username: user }, { email: user }, { phone: user }]
     });
     if (!parent) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(404, "Unauthorized user"));
     }
     if (parent["isActive"] === false) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Services are temporarily paused. Please contact support"));
+        .send(
+          error(404, "Services are temporarily paused. Please contact support")
+        );
     }
 
     if (parent["status"] === "unVerified") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User verification is pending"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(404, "User verification is pending"));
     }
 
     // if(parent['status']==='phoneVerified') {
@@ -363,9 +425,14 @@ export async function loginParentController(req, res) {
 
     const enteredPassword = password;
     const storedPassword = parent.password;
-    const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
+    const matchPassword = await matchPasswordService({
+      enteredPassword,
+      storedPassword
+    });
     if (!matchPassword) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Unauthorized user"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(404, "Unauthorized user"));
     }
 
     const accessToken = getAccessTokenService({
@@ -388,13 +455,18 @@ export async function loginParentController(req, res) {
 
     const isLoginAlready = parent["isLoginAlready"];
     if (!isLoginAlready) {
-      await updateParentService({ _id: parent["_id"] }, { isLoginAlready: true });
+      await updateParentService(
+        { _id: parent["_id"] },
+        { isLoginAlready: true }
+      );
     }
     return res
       .status(StatusCodes.OK)
       .send(success(200, { accessToken, refreshToken, isLoginAlready }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -403,9 +475,13 @@ export async function parentPasswordUpdateController(req, res) {
     const { password } = req.body;
     const parentId = req.parentId;
     await updateParentService({ _id: parentId }, { password });
-    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Password updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -455,14 +531,19 @@ export async function updateParentController(req, res) {
       fieldsToBeUpdated.password = hashedPassword;
     }
     if (req.body["photo"] || req.body["method"] === "DELETE") {
-      fieldsToBeUpdated["photo"] = req.body["method"] === "DELETE" ? "" : req.body["photo"];
+      fieldsToBeUpdated["photo"] =
+        req.body["method"] === "DELETE" ? "" : req.body["photo"];
     }
 
     await updateParentService({ _id: parentId }, fieldsToBeUpdated);
 
-    return res.status(StatusCodes.OK).send(success(200, "User updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "User updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -471,7 +552,9 @@ export async function getParentStatusController(req, res) {
     const { phone } = req.body;
     const parent = await getParentService({ phone: phone, isActive: true });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not registered"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User not registered"));
     }
     const parentStatus = {
       isLoginAlready: false,
@@ -487,11 +570,14 @@ export async function getParentStatusController(req, res) {
     parentStatus["emailVerified"] = parent["status"] === "verified";
     parentStatus["passwordUpdated"] = parent["password"] ? true : false;
     parentStatus["personalInfoUpdated"] = parent["fullname"] ? true : false;
-    parentStatus["studentAdded"] = parent["students"]?.length > 0 ? true : false;
+    parentStatus["studentAdded"] =
+      parent["students"]?.length > 0 ? true : false;
 
     return res.status(StatusCodes.OK).send(success(200, parentStatus));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -529,18 +615,24 @@ export async function checkValidStudentController(req, res) {
 
     const students = await getStudentsPipelineService(pipeline);
     if (students.length === 0) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found!"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found!"));
     }
     const parent = await getParentService({ _id: parentId });
 
     const student = students[0];
     if (parent?.students.some((id) => id.equals(student._id))) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student already added"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Student already added"));
     }
     // await updateParentService({_id: parentId},  { $push: { students: student['_id'] } });
     return res.status(StatusCodes.OK).send(success(200, students[0]));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -550,7 +642,9 @@ export async function addStudentController(req, res) {
     const parentId = req.parentId;
     const parent = await getParentService({ _id: parentId });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent not found"));
     }
 
     const validStudentIds = [];
@@ -583,7 +677,10 @@ export async function addStudentController(req, res) {
 
       const students = await getStudentsPipelineService(pipeline);
       console.log({ students });
-      if (students.length === 0 || parent?.students.some((id) => id.equals(studentId))) {
+      if (
+        students.length === 0 ||
+        parent?.students.some((id) => id.equals(studentId))
+      ) {
         continue;
       }
       validStudentIds.push(studentId);
@@ -594,9 +691,13 @@ export async function addStudentController(req, res) {
       { $addToSet: { students: { $each: validStudentIds } } }
     );
 
-    return res.status(StatusCodes.OK).send(success(200, "Students added successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Students added successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -618,7 +719,10 @@ export async function getParentController(req, res) {
             {
               $match: {
                 $expr: {
-                  $and: [{ $in: ["$_id", "$$studentIds"] }, { $eq: ["$isActive", true] }]
+                  $and: [
+                    { $in: ["$_id", "$$studentIds"] },
+                    { $eq: ["$isActive", true] }
+                  ]
                 }
               }
             }
@@ -706,7 +810,10 @@ export async function getParentController(req, res) {
         $unwind: { path: "$students.admin", preserveNullAndEmptyArrays: true }
       },
       {
-        $unwind: { path: "$students.sessionStudents", preserveNullAndEmptyArrays: true }
+        $unwind: {
+          path: "$students.sessionStudents",
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $group: {
@@ -731,23 +838,49 @@ export async function getParentController(req, res) {
       },
       {
         $project: {
-          username: { $cond: [{ $ne: ["$username", null] }, "$username", "$$REMOVE"] },
-          fullname: { $cond: [{ $ne: ["$fullname", null] }, "$fullname", "$$REMOVE"] },
+          username: {
+            $cond: [{ $ne: ["$username", null] }, "$username", "$$REMOVE"]
+          },
+          fullname: {
+            $cond: [{ $ne: ["$fullname", null] }, "$fullname", "$$REMOVE"]
+          },
           phone: { $cond: [{ $ne: ["$phone", null] }, "$phone", "$$REMOVE"] },
-          gender: { $cond: [{ $ne: ["$gender", null] }, "$gender", "$$REMOVE"] },
-          address: { $cond: [{ $ne: ["$address", null] }, "$address", "$$REMOVE"] },
+          gender: {
+            $cond: [{ $ne: ["$gender", null] }, "$gender", "$$REMOVE"]
+          },
+          address: {
+            $cond: [{ $ne: ["$address", null] }, "$address", "$$REMOVE"]
+          },
           photo: { $cond: [{ $ne: ["$photo", null] }, "$photo", "$$REMOVE"] },
           city: { $cond: [{ $ne: ["$city", null] }, "$city", "$$REMOVE"] },
-          district: { $cond: [{ $ne: ["$district", null] }, "$district", "$$REMOVE"] },
-          status: { $cond: [{ $ne: ["$status", null] }, "$status", "$$REMOVE"] },
-          country: { $cond: [{ $ne: ["$country", null] }, "$country", "$$REMOVE"] },
-          pincode: { $cond: [{ $ne: ["$pincode", null] }, "$pincode", "$$REMOVE"] },
-          qualification: {
-            $cond: [{ $ne: ["$qualification", null] }, "$qualification", "$$REMOVE"]
+          district: {
+            $cond: [{ $ne: ["$district", null] }, "$district", "$$REMOVE"]
           },
-          occupation: { $cond: [{ $ne: ["$occupation", null] }, "$occupation", "$$REMOVE"] },
+          status: {
+            $cond: [{ $ne: ["$status", null] }, "$status", "$$REMOVE"]
+          },
+          country: {
+            $cond: [{ $ne: ["$country", null] }, "$country", "$$REMOVE"]
+          },
+          pincode: {
+            $cond: [{ $ne: ["$pincode", null] }, "$pincode", "$$REMOVE"]
+          },
+          qualification: {
+            $cond: [
+              { $ne: ["$qualification", null] },
+              "$qualification",
+              "$$REMOVE"
+            ]
+          },
+          occupation: {
+            $cond: [{ $ne: ["$occupation", null] }, "$occupation", "$$REMOVE"]
+          },
           isLoginAlready: {
-            $cond: [{ $ne: ["$isLoginAlready", null] }, "$isLoginAlready", "$$REMOVE"]
+            $cond: [
+              { $ne: ["$isLoginAlready", null] },
+              "$isLoginAlready",
+              "$$REMOVE"
+            ]
           },
           email: { $cond: [{ $ne: ["$email", null] }, "$email", "$$REMOVE"] },
           students: 1
@@ -762,12 +895,16 @@ export async function getParentController(req, res) {
 
     const parents = await getParentsPipelineService(pipeline);
     if (parents.length <= 0) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User details not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User details not found"));
     }
 
     return res.status(StatusCodes.OK).send(success(200, parents[0]));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -948,7 +1085,9 @@ export async function getParentWithStudentsController(req, res) {
     const students = await getParentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, students));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -958,7 +1097,9 @@ export async function editPasswordController(req, res) {
     const { newPassword, oldPassword } = req.body;
     const parent = await getParentService({ _id: parentId });
     if (!parent["password"]) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Please complete your profile"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Please complete your profile"));
     }
     const matchPassword = await matchPasswordService({
       enteredPassword: oldPassword,
@@ -972,9 +1113,13 @@ export async function editPasswordController(req, res) {
 
     const hashedPassword = await hashPasswordService(newPassword);
     await updateParentService({ _id: parentId }, { password: hashedPassword });
-    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Password updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -985,10 +1130,14 @@ export async function parentUpdateEmailAndSendEmailOtpController(req, res) {
     const emailParent = await getParentService({ email, isActive: true });
     const parent = await getParentService({ _id: parentId });
     if (emailParent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Email already used"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Email already used"));
     }
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User not found"));
     }
 
     const otp = otpGenerator.generate(5, {
@@ -1009,7 +1158,9 @@ export async function parentUpdateEmailAndSendEmailOtpController(req, res) {
     await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1019,7 +1170,9 @@ export async function parentUpdateEmailVerifyByOtpController(req, res) {
     const parentId = req.parentId;
     let parent = await getParentService({ _id: parentId });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User is not registered"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User is not registered"));
     }
 
     const getOtpPipeline = [
@@ -1044,7 +1197,9 @@ export async function parentUpdateEmailVerifyByOtpController(req, res) {
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
     if (!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "OTP has not been sent yet"));
     }
 
     if (
@@ -1052,11 +1207,15 @@ export async function parentUpdateEmailVerifyByOtpController(req, res) {
       storedOtp["status"] === "expired" ||
       storedOtp["expiredAt"] < new Date().getTime()
     ) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Your OTP has expired"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(404, "Your OTP has expired"));
     }
 
     if (otp !== storedOtp["otp"]) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, `You entered wrong OTP`));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(404, `You entered wrong OTP`));
     }
 
     await Promise.all([
@@ -1067,7 +1226,9 @@ export async function parentUpdateEmailVerifyByOtpController(req, res) {
 
     res.status(StatusCodes.OK).send(success(200, "Email updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1077,7 +1238,9 @@ export async function getHolidayAndWorkdayController(req, res) {
     const { studentId, startTime, endTime } = req.body;
     const student = await getStudentService({ _id: studentId, isActive: true });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
     const pipeline = [
       {
@@ -1091,9 +1254,13 @@ export async function getHolidayAndWorkdayController(req, res) {
     const holidays = await getHolidayPipelineService(pipeline);
     const workdays = await getWorkdayPipelineService(pipeline);
 
-    return res.status(StatusCodes.OK).send(success(200, { holidays, workdays }));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { holidays, workdays }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1103,7 +1270,9 @@ export async function verifyPhoneController(req, res) {
 
     let parent = await getParentService({ phone: phone, isActive: true });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number not registered"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Phone number not registered"));
     }
 
     // const response =  await verifyMsg91Token(token);
@@ -1113,7 +1282,10 @@ export async function verifyPhoneController(req, res) {
     // }
 
     if (parent["status"] === "unVerified") {
-      await updateParentService({ _id: parent["_id"] }, { status: "phoneVerified" });
+      await updateParentService(
+        { _id: parent["_id"] },
+        { status: "phoneVerified" }
+      );
     }
     parent = await getParentService({ _id: parent["_id"] });
     const jwtToken = getAccessTokenService({
@@ -1129,7 +1301,9 @@ export async function verifyPhoneController(req, res) {
       .status(StatusCodes.OK)
       .send(success(200, { message: "OTP verified successfully", jwtToken }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1160,7 +1334,9 @@ export async function verifyEmailController(req, res) {
       .status(StatusCodes.OK)
       .send(success(200, { message: "OTP verified successfully", jwtToken }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1180,7 +1356,9 @@ export async function requestParentPasswordChangeController(req, res) {
 
     const parent = await getParentService({ phone, isActive: true });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent not found"));
     }
 
     // Check for existing pending request
@@ -1201,7 +1379,8 @@ export async function requestParentPasswordChangeController(req, res) {
       ...(description && { description })
     };
 
-    const passwordChangeRequest = await registerParentPasswordChangeRequestService(requestObj);
+    const passwordChangeRequest =
+      await registerParentPasswordChangeRequestService(requestObj);
 
     return res.status(StatusCodes.OK).send(
       success(200, {
@@ -1210,7 +1389,9 @@ export async function requestParentPasswordChangeController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1238,21 +1419,33 @@ export async function verifyAndChangePasswordController(req, res) {
           .send(error(400, response?.message || "Token can't verified"));
       }
     } catch (verifyError) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Token verification failed"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(401, "Token verification failed"));
     }
 
     // Hash new password
     const hashedPassword = await hashPasswordService(newPassword);
 
     // Update parent password
-    await updateParentService({ _id: passwordChangeRequest.parent }, { password: hashedPassword });
+    await updateParentService(
+      { _id: passwordChangeRequest.parent },
+      { password: hashedPassword }
+    );
 
     // Mark request as used
-    await updateParentPasswordChangeRequestService({ _id: requestId }, { status: "completed" });
+    await updateParentPasswordChangeRequestService(
+      { _id: requestId },
+      { status: "completed" }
+    );
 
-    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Password updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1283,6 +1476,8 @@ export async function getParentPasswordChangeRequestsController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

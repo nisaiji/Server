@@ -1,8 +1,6 @@
 import crypto from "crypto";
-
 import { StatusCodes } from "http-status-codes";
 import otpGenerator from "otp-generator";
-
 import { adminControllerResponse } from "../../config/httpResponse.js";
 import { sendEmailService } from "../../config/sendGrid.config.js";
 import { sentSMSByTwillio } from "../../config/twilio.config.js";
@@ -11,14 +9,20 @@ import {
   registerAdminService,
   updateAdminService
 } from "../../services/admin.services.js";
-import { getAccessTokenService, getRefreshTokenService } from "../../services/JWTToken.service.js";
+import {
+  getAccessTokenService,
+  getRefreshTokenService
+} from "../../services/JWTToken.service.js";
 import { verifyMsg91Token } from "../../services/msg91.service.js";
 import {
   getOtpsPipelineService,
   registerOtpService,
   updateOtpService
 } from "../../services/otp.service.js";
-import { hashPasswordService, matchPasswordService } from "../../services/password.service.js";
+import {
+  hashPasswordService,
+  matchPasswordService
+} from "../../services/password.service.js";
 import { getSessionService } from "../../services/session.services.js";
 import { error, success } from "../../utils/responseWrapper.js";
 
@@ -27,7 +31,9 @@ export async function adminSendOtpToPhoneController(req, res) {
     const { phone } = req.body;
     const admin = await getAdminService({ phone });
     if (admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Phone number already used"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Phone number already used"));
     }
 
     const otp = otpGenerator.generate(5, {
@@ -57,7 +63,9 @@ export async function adminReSendOtpToPhoneController(req, res) {
     const { phone } = req.body;
     const admin = await getAdminService({ phone });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid Phone number"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Invalid Phone number"));
     }
 
     const otp = otpGenerator.generate(5, {
@@ -77,7 +85,9 @@ export async function adminReSendOtpToPhoneController(req, res) {
     });
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -86,7 +96,9 @@ export async function adminPhoneVerifyByOtpController(req, res) {
     const { phone, otp } = req.body;
     let admin = await getAdminService({ phone });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User not found"));
     }
 
     const getOtpPipeline = [
@@ -111,7 +123,9 @@ export async function adminPhoneVerifyByOtpController(req, res) {
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
     if (!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "OTP has not been sent yet"));
     }
 
     if (
@@ -119,15 +133,22 @@ export async function adminPhoneVerifyByOtpController(req, res) {
       storedOtp["status"] === "expired" ||
       storedOtp["expiredAt"] < new Date().getTime()
     ) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Your OTP has expired"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Your OTP has expired"));
     }
 
     if (otp !== storedOtp["otp"]) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, `You entered wrong OTP`));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, `You entered wrong OTP`));
     }
 
     if (admin["status"] === "unVerified") {
-      await updateAdminService({ _id: admin["_id"] }, { status: "phoneVerified" });
+      await updateAdminService(
+        { _id: admin["_id"] },
+        { status: "phoneVerified" }
+      );
     }
 
     await updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" });
@@ -143,9 +164,13 @@ export async function adminPhoneVerifyByOtpController(req, res) {
       passwordUpdated: admin["password"] ? true : false
     });
 
-    res.status(StatusCodes.OK).send(success(200, { msg: "OTP verified successfully", token }));
+    res
+      .status(StatusCodes.OK)
+      .send(success(200, { msg: "OTP verified successfully", token }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -198,20 +223,34 @@ export async function updateAdminController(req, res) {
       _id: { $ne: adminId }
     });
 
-    if (admin && username && admin["username"] && admin["username"] == username) {
+    if (
+      admin &&
+      username &&
+      admin["username"] &&
+      admin["username"] == username
+    ) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.updateAdminController.usernameExists));
+        .send(
+          error(
+            409,
+            adminControllerResponse.updateAdminController.usernameExists
+          )
+        );
     }
     if (admin && email && admin["email"] == email) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.updateAdminController.emailExists));
+        .send(
+          error(409, adminControllerResponse.updateAdminController.emailExists)
+        );
     }
     if (admin && phone && admin["phone"] == phone) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.updateAdminController.phoneExists));
+        .send(
+          error(409, adminControllerResponse.updateAdminController.phoneExists)
+        );
     }
     if (
       admin &&
@@ -221,7 +260,12 @@ export async function updateAdminController(req, res) {
     ) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.updateAdminController.affiliationExists));
+        .send(
+          error(
+            409,
+            adminControllerResponse.updateAdminController.affiliationExists
+          )
+        );
     }
 
     if (password) {
@@ -301,9 +345,16 @@ export async function updateAdminController(req, res) {
 
     return res
       .status(StatusCodes.OK)
-      .send(success(200, adminControllerResponse.updateAdminController.adminUpdatedSuccessfully));
+      .send(
+        success(
+          200,
+          adminControllerResponse.updateAdminController.adminUpdatedSuccessfully
+        )
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -313,7 +364,9 @@ export async function adminSendOtpToEmailController(req, res) {
     const adminId = req.adminId;
     const admin = await getAdminService({ _id: adminId });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Admin not found"));
     }
 
     if (admin["status"] === "verified") {
@@ -339,7 +392,9 @@ export async function adminSendOtpToEmailController(req, res) {
     await sendEmailService(email, sms);
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -349,10 +404,14 @@ export async function adminEmailVerifyByOtpController(req, res) {
     const adminId = req.adminId;
     let admin = await getAdminService({ _id: adminId });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User not found"));
     }
     if (["verified"].includes(admin["status"])) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Your Email has already verified"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Your Email has already verified"));
     }
 
     const getOtpPipeline = [
@@ -377,7 +436,9 @@ export async function adminEmailVerifyByOtpController(req, res) {
     const otps = await getOtpsPipelineService(getOtpPipeline);
     const storedOtp = otps.length >= 1 ? otps[0] : null;
     if (!storedOtp) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "OTP has not been sent yet"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "OTP has not been sent yet"));
     }
 
     if (
@@ -385,11 +446,15 @@ export async function adminEmailVerifyByOtpController(req, res) {
       storedOtp["status"] === "expired" ||
       storedOtp["expiredAt"] < new Date().getTime()
     ) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "Your OTP has expired"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(404, "Your OTP has expired"));
     }
 
     if (otp !== storedOtp["otp"]) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, `You entered wrong OTP`));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(404, `You entered wrong OTP`));
     }
 
     await Promise.all([
@@ -409,9 +474,13 @@ export async function adminEmailVerifyByOtpController(req, res) {
       isLoginAlready: admin["isLoginAlready"]
     });
 
-    res.status(StatusCodes.OK).send(success(200, { message: "OTP verified successfully", token }));
+    res
+      .status(StatusCodes.OK)
+      .send(success(200, { message: "OTP verified successfully", token }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -420,7 +489,9 @@ export async function adminGetStatusController(req, res) {
     const { phone } = req.body;
     const admin = await getAdminService({ phone });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Admin not found"));
     }
 
     const status = {
@@ -435,7 +506,9 @@ export async function adminGetStatusController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, status));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -457,18 +530,26 @@ export async function adminLoginController(req, res) {
     if (!admin["isActive"]) {
       return res
         .status(StatusCodes.FORBIDDEN)
-        .send(error(403, "Services are temporarily paused. Please contact support."));
+        .send(
+          error(403, "Services are temporarily paused. Please contact support.")
+        );
     }
     const storedPassword = admin.password;
     const enteredPassword = password;
-    const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
+    const matchPassword = await matchPasswordService({
+      enteredPassword,
+      storedPassword
+    });
     if (!matchPassword) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .send(error(401, adminControllerResponse.loginController.unathorized));
     }
 
-    const session = await getSessionService({ school: admin["_id"], status: "active" });
+    const session = await getSessionService({
+      school: admin["_id"],
+      status: "active"
+    });
     const accessToken = getAccessTokenService({
       role: "admin",
       username: admin["username"] ? admin["username"] : "",
@@ -495,9 +576,13 @@ export async function adminLoginController(req, res) {
     });
     return res
       .status(StatusCodes.OK)
-      .send(success(200, { accessToken, refreshToken, username: admin.username }));
+      .send(
+        success(200, { accessToken, refreshToken, username: admin.username })
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -531,9 +616,13 @@ export async function adminPhoneVerifyController(req, res) {
 
     res
       .status(StatusCodes.OK)
-      .send(success(200, { msg: "OTP verified successfully", token: jwttoken }));
+      .send(
+        success(200, { msg: "OTP verified successfully", token: jwttoken })
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -544,7 +633,9 @@ export async function adminEmailVerifyController(req, res) {
 
     let admin = await getAdminService({ _id: adminId });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Admin not found"));
     }
     const response = await verifyMsg91Token(token);
 
@@ -554,7 +645,10 @@ export async function adminEmailVerifyController(req, res) {
         .send(error(400, response?.message || "Token can't verified"));
     }
 
-    await updateAdminService({ _id: admin["_id"] }, { email, status: "verified" });
+    await updateAdminService(
+      { _id: admin["_id"] },
+      { email, status: "verified" }
+    );
 
     admin = await getAdminService({ _id: admin["_id"] });
     const jwtToken = getAccessTokenService({
@@ -589,9 +683,13 @@ export async function adminEmailVerifyController(req, res) {
 
     return res
       .status(StatusCodes.OK)
-      .send(success(200, { message: "Email updated successfully", token: jwtToken }));
+      .send(
+        success(200, { message: "Email updated successfully", token: jwtToken })
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -600,7 +698,9 @@ export async function adminChangePasswordRequestByPhoneController(req, res) {
     const { phone } = req.body;
     const admin = await getAdminService({ phone, isActive: true });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid phone number"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Invalid phone number"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
     await updateAdminService(
@@ -611,7 +711,9 @@ export async function adminChangePasswordRequestByPhoneController(req, res) {
       .status(StatusCodes.OK)
       .send(success(200, { resetToken, phone, message: "Phone verified" }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -625,13 +727,17 @@ export async function adminChangePasswordHandlerByPhoneController(req, res) {
       resetPasswordStatus: "requested"
     });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Invalid request"));
     }
 
     const phoneResponse = await verifyMsg91Token(phoneToken);
 
     if (phoneResponse?.type !== "success") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Token can't verified"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Token can't verified"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -641,9 +747,13 @@ export async function adminChangePasswordHandlerByPhoneController(req, res) {
     );
     return res
       .status(StatusCodes.OK)
-      .send(success(200, { resetToken, message: "Phone verified successfully" }));
+      .send(
+        success(200, { resetToken, message: "Phone verified successfully" })
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -657,15 +767,22 @@ export async function adminChangePasswordRequestByEmailController(req, res) {
       resetPasswordStatus: "phoneVerified"
     });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid email"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Invalid email"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
-    await updateAdminService({ _id: admin["_id"] }, { resetPasswordToken: resetToken });
+    await updateAdminService(
+      { _id: admin["_id"] },
+      { resetPasswordToken: resetToken }
+    );
     return res
       .status(StatusCodes.OK)
       .send(success(200, { resetToken, email, message: "Email verified" }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -679,13 +796,17 @@ export async function adminChangePasswordHandlerByEmailController(req, res) {
       resetPasswordStatus: "phoneVerified"
     });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User not found"));
     }
 
     const emailResponse = await verifyMsg91Token(emailToken);
 
     if (emailResponse?.type !== "success") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Token can't verified"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Token can't verified"));
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -695,9 +816,13 @@ export async function adminChangePasswordHandlerByEmailController(req, res) {
     );
     return res
       .status(StatusCodes.OK)
-      .send(success(200, { resetToken, message: "Email verified successfully" }));
+      .send(
+        success(200, { resetToken, message: "Email verified successfully" })
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -710,16 +835,26 @@ export async function adminChangePasswordHandlerController(req, res) {
       resetPasswordToken
     });
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Invalid request"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Invalid request"));
     }
 
     const hashedPassword = await hashPasswordService(password);
     await updateAdminService(
       { _id: admin["_id"] },
-      { password: hashedPassword, resetPasswordToken: "", resetPasswordStatus: "" }
+      {
+        password: hashedPassword,
+        resetPasswordToken: "",
+        resetPasswordStatus: ""
+      }
     );
-    return res.status(StatusCodes.OK).send(success(200, "Password updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Password updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

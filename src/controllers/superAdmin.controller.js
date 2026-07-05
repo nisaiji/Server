@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
 import { StatusCodes } from "http-status-codes";
-
 import {
   getAdminCountService,
   getAdminService,
@@ -9,7 +8,10 @@ import {
 } from "../services/admin.services.js";
 import { getCustomerSupportQueriesService } from "../services/customerSupport.services.js";
 import { getAccessTokenService } from "../services/JWTToken.service.js";
-import { matchPasswordService, hashPasswordService } from "../services/password.service.js";
+import {
+  matchPasswordService,
+  hashPasswordService
+} from "../services/password.service.js";
 import {
   getSuperAdminService,
   registerSuperAdminService,
@@ -22,15 +24,25 @@ export async function registerSuperAdminController(req, res) {
     const { username, email, password } = req.body;
     let superAdmin = await getSuperAdminService({});
     if (superAdmin) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Super Admin already exists"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Super Admin already exists"));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    superAdmin = await registerSuperAdminService({ username, email, password: hashedPassword });
+    superAdmin = await registerSuperAdminService({
+      username,
+      email,
+      password: hashedPassword
+    });
 
-    return res.status(StatusCodes.CREATED).send(success(201, "User registered successfully"));
+    return res
+      .status(StatusCodes.CREATED)
+      .send(success(201, "User registered successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -39,14 +51,18 @@ export async function loginSuperAdminController(req, res) {
     const { email, password } = req.body;
     const superAdmin = await getSuperAdminService({ email });
     if (!superAdmin) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(401, "Unauthorized user"));
     }
     const matchPassword = await matchPasswordService({
       enteredPassword: password,
       storedPassword: superAdmin["password"]
     });
     if (!matchPassword) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(401, "Unauthorized user"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(401, "Unauthorized user"));
     }
 
     const accessToken = getAccessTokenService({
@@ -60,7 +76,9 @@ export async function loginSuperAdminController(req, res) {
       .status(StatusCodes.OK)
       .send(success(200, { accessToken, username: superAdmin["username"] }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -69,7 +87,9 @@ export async function updateSuperAdminController(req, res) {
     const superAdminId = req.superAdminId;
     const superAdmin = await getSuperAdminService({ _id: superAdminId });
     if (!superAdmin) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "User not exists"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "User not exists"));
     }
 
     const updateFields = {};
@@ -81,31 +101,52 @@ export async function updateSuperAdminController(req, res) {
       updateFields["username"] = req.body["username"];
     }
     if (req.body["password"]) {
-      updateFields["password"] = await hashPasswordService(req.body["password"]);
+      updateFields["password"] = await hashPasswordService(
+        req.body["password"]
+      );
     }
     await updateSuperAdminService({ _id: superAdminId }, updateFields);
-    return res.status(StatusCodes.OK).send(success(200, "User updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "User updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
 export async function getSuperAdminController(req, res) {
   try {
     const superAdminId = req.superAdminId;
-    const superAdmin = await getSuperAdminService({ _id: superAdminId }, { email: 1, username: 1 });
+    const superAdmin = await getSuperAdminService(
+      { _id: superAdminId },
+      { email: 1, username: 1 }
+    );
     if (!superAdmin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Super Admin not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Super Admin not found"));
     }
     return res.status(StatusCodes.OK).send(success(200, superAdmin));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
 export async function getAdminsController(req, res) {
   try {
-    const { nation, state, district, city, username, page = 1, limit = 1000 } = req.query;
+    const {
+      nation,
+      state,
+      district,
+      city,
+      username,
+      page = 1,
+      limit = 1000
+    } = req.query;
 
     const filter = {};
     if (nation) {
@@ -181,7 +222,9 @@ export async function getAdminsController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -191,7 +234,9 @@ export async function getCustomerQueriesController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, { queries }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -201,12 +246,16 @@ export async function updateAdminController(req, res) {
     const admin = await getAdminService({ _id: adminId });
     const { active } = req.body;
     if (!admin) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Admin not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Admin not found"));
     }
     if (active.toString() === admin["isActive"].toString()) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .send(success(400, `Admin already ${active ? "activated" : "deactivated"}`));
+        .send(
+          success(400, `Admin already ${active ? "activated" : "deactivated"}`)
+        );
     }
     let statusChangeCount = admin["statusChangeCount"];
     statusChangeCount += 1;
@@ -215,7 +264,9 @@ export async function updateAdminController(req, res) {
       {
         isActive: active,
         statusChangeCount,
-        $push: { statusChangeLog: { status: active ? "activated" : "deactivated" } }
+        $push: {
+          statusChangeLog: { status: active ? "activated" : "deactivated" }
+        }
       }
     );
     let successMessage = "Admin updated successfully";
@@ -229,6 +280,8 @@ export async function updateAdminController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, successMessage));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

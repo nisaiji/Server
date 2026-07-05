@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getAdminService } from "../services/admin.services.js";
 import {
@@ -18,7 +17,10 @@ import {
 import { getSessionService } from "../services/session.services.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
 import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
-import { deleteWorkDayService, getWorkDayService } from "../services/workDay.services.js";
+import {
+  deleteWorkDayService,
+  getWorkDayService
+} from "../services/workDay.services.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerHolidayController(req, res) {
@@ -29,7 +31,9 @@ export async function registerHolidayController(req, res) {
     const day = getDayNameService(date.getDay());
 
     if (day === "Sunday") {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Sunday can't marked as holiday"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Sunday can't marked as holiday"));
     }
 
     const { startTime, endTime } = getStartAndEndTimeService(date, date);
@@ -40,7 +44,9 @@ export async function registerHolidayController(req, res) {
       date: { $gte: startTime, $lte: endTime }
     });
     if (holiday) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Holiday event already exists"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Holiday event already exists"));
     }
     const data = { date, day, title, description, admin: adminId };
     await createHolidayService(data);
@@ -77,7 +83,9 @@ export async function registerHolidayController(req, res) {
         throw error;
       }
     }
-    return res.status(StatusCodes.OK).send(success(200, "Holiday created sucessfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Holiday created sucessfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -86,14 +94,30 @@ export async function registerHolidayController(req, res) {
 export async function registerHolidaysController(req, res) {
   try {
     // expect startTime, endTime timestamps as timeset zero. eg: 2025:03:22T00:00:00
-    let { title, description, startTime, endTime, sessionId, classId, sectionId } = req.body;
+    let {
+      title,
+      description,
+      startTime,
+      endTime,
+      sessionId,
+      classId,
+      sectionId
+    } = req.body;
     const adminId = req.adminId;
     if (startTime > endTime) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Please select valid dates"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Please select valid dates"));
     }
-    const session = await getSessionService({ _id: sessionId, school: adminId, status: "active" });
+    const session = await getSessionService({
+      _id: sessionId,
+      school: adminId,
+      status: "active"
+    });
     if (!session) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Please select valid session"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Please select valid session"));
     }
 
     let startIstDate = timestampToIstDate(startTime);
@@ -105,18 +129,18 @@ export async function registerHolidaysController(req, res) {
         .send(error(400, "Holiday dates must be within session dates"));
     }
 
-    const { startTime: tempStartTimestamp, endTime: tempEndTimestamp } = getStartAndEndTimeService(
-      startIstDate,
-      endIstDate
-    );
+    const { startTime: tempStartTimestamp, endTime: tempEndTimestamp } =
+      getStartAndEndTimeService(startIstDate, endIstDate);
 
     startIstDate = timestampToIstDate(tempStartTimestamp);
     endIstDate = timestampToIstDate(tempEndTimestamp);
 
     let currIstDate = startIstDate;
     while (currIstDate <= endIstDate) {
-      const { startTime: currIstDateStartTimestamp, endTime: currIstDateEndTimestamp } =
-        getStartAndEndTimeService(currIstDate, currIstDate);
+      const {
+        startTime: currIstDateStartTimestamp,
+        endTime: currIstDateEndTimestamp
+      } = getStartAndEndTimeService(currIstDate, currIstDate);
       const currDateHoliday = await getHolidayService({
         admin: adminId,
         date: { $gte: currIstDateStartTimestamp, $lte: currIstDateEndTimestamp }
@@ -126,7 +150,10 @@ export async function registerHolidaysController(req, res) {
       if (day === "Sunday") {
         const currDateWorkday = await getWorkDayService({
           admin: adminId,
-          date: { $gte: currIstDateStartTimestamp, $lte: currIstDateEndTimestamp }
+          date: {
+            $gte: currIstDateStartTimestamp,
+            $lte: currIstDateEndTimestamp
+          }
         });
         if (currDateWorkday) {
           await deleteWorkDayService({ _id: currDateWorkday["_id"] });
@@ -180,7 +207,9 @@ export async function registerHolidaysController(req, res) {
         throw error;
       }
     }
-    return res.status(StatusCodes.OK).send(success(200, "Holidays created successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Holidays created successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -197,7 +226,9 @@ export async function getHolidaysController(req, res) {
     });
     return res.status(StatusCodes.OK).send(success(200, holidays));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -208,7 +239,9 @@ export async function updateHolidayController(req, res) {
     let holiday = await getHolidayService({ _id: id });
 
     if (!holiday) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(400, "holiday not found."));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(400, "holiday not found."));
     }
     const fieldsToBeUpdated = {};
     if (title) {
@@ -219,9 +252,13 @@ export async function updateHolidayController(req, res) {
     }
 
     await updateHolidayService({ _id: id }, fieldsToBeUpdated);
-    return res.status(StatusCodes.OK).send(success(200, "Holiday updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Holiday updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -230,9 +267,14 @@ export async function deleteHolidayController(req, res) {
     const id = req.params.eventId;
     const holiday = await getHolidayService({ _id: id });
     if (!holiday) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(400, "Holiday doesn't exists"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(400, "Holiday doesn't exists"));
     }
-    const session = await getSessionService({ _id: holiday["session"], school: req.adminId });
+    const session = await getSessionService({
+      _id: holiday["session"],
+      school: req.adminId
+    });
     if (session && session["status"] === "completed") {
       return res
         .status(StatusCodes.BAD_REQUEST)
@@ -240,12 +282,18 @@ export async function deleteHolidayController(req, res) {
     }
 
     if (holiday.date < Date.now()) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "You can't delete past holiday"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "You can't delete past holiday"));
     }
 
     await deleteHolidayService({ _id: id });
-    return res.status(StatusCodes.OK).send(success(200, "Holiday deleted successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Holiday deleted successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

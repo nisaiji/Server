@@ -24,7 +24,11 @@ export async function registerSessionStudentsService(data) {
   }
 }
 
-export async function getSessionStudentsService(paramObj, projection = {}, populateObj = "") {
+export async function getSessionStudentsService(
+  paramObj,
+  projection = {},
+  populateObj = ""
+) {
   try {
     const sessionStudent = await sessionStudentModel
       .find(paramObj)
@@ -47,7 +51,10 @@ export async function deleteSessionStudentService(paramObj) {
 
 export async function updateSessionStudentService(filter, update) {
   try {
-    const sessionStudent = await sessionStudentModel.findOneAndUpdate(filter, update);
+    const sessionStudent = await sessionStudentModel.findOneAndUpdate(
+      filter,
+      update
+    );
     return sessionStudent;
   } catch (error) {
     throw error;
@@ -56,7 +63,9 @@ export async function updateSessionStudentService(filter, update) {
 
 export async function getSessionStudentsPipelineService(pipeline) {
   try {
-    const sessionStudents = await sessionStudentModel.aggregate(pipeline).exec();
+    const sessionStudents = await sessionStudentModel
+      .aggregate(pipeline)
+      .exec();
     return sessionStudents;
   } catch (error) {
     throw error;

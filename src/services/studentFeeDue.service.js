@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 import { getFeeCycleService } from "./feeSetup.service.js";
 import { getFeeHeadService } from "./feeSetup.service.js";
 import { getSessionService } from "./session.services.js";
@@ -28,15 +27,27 @@ function getAllDueDatesInSession(session, feeCycle) {
   const dates = [];
   let current = new Date();
 
-  let dueDate = new Date(current.getFullYear(), current.getMonth(), feeCycle.dueDate);
+  let dueDate = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    feeCycle.dueDate
+  );
 
   while (dueDate < current) {
-    dueDate = new Date(dueDate.getFullYear(), dueDate.getMonth() + frequency, feeCycle.dueDate);
+    dueDate = new Date(
+      dueDate.getFullYear(),
+      dueDate.getMonth() + frequency,
+      feeCycle.dueDate
+    );
   }
 
   while (dueDate <= session.endDate) {
     dates.push(new Date(dueDate));
-    dueDate = new Date(dueDate.getFullYear(), dueDate.getMonth() + frequency, feeCycle.dueDate);
+    dueDate = new Date(
+      dueDate.getFullYear(),
+      dueDate.getMonth() + frequency,
+      feeCycle.dueDate
+    );
   }
 
   return dates;
@@ -143,14 +154,22 @@ function buildFeeDueOperations({
 
   for (const student of studentsInCurrentSession) {
     const secId = String(student.sectionId || student.section || "");
-    const feeHeadsForSection = sectionMap.get(secId) ?? feeStructure.applicableSections[0].feeHeads;
+    const feeHeadsForSection =
+      sectionMap.get(secId) ?? feeStructure.applicableSections[0].feeHeads;
 
     for (const dueDate of dueDates) {
       const includeOneTime =
         dueDate.getMonth() === academicSession.startDate.getMonth() &&
         dueDate.getFullYear() === academicSession.startDate.getFullYear();
-      const feeBreakup = buildFeeBreakup(feeHeadsForSection, feeHeadTypeMap, includeOneTime);
-      const totalAmount = feeBreakup.reduce((sum, item) => sum + item.amount, 0);
+      const feeBreakup = buildFeeBreakup(
+        feeHeadsForSection,
+        feeHeadTypeMap,
+        includeOneTime
+      );
+      const totalAmount = feeBreakup.reduce(
+        (sum, item) => sum + item.amount,
+        0
+      );
 
       operations.push(
         buildUpdateOperation({
@@ -170,13 +189,21 @@ function buildFeeDueOperations({
   return operations;
 }
 
-export async function getStudentFeeDuesService({ studentId, sessionId, adminId }) {
-  const dues = await studentFeeDueModel.find({ studentId, sessionId, adminId }).lean();
+export async function getStudentFeeDuesService({
+  studentId,
+  sessionId,
+  adminId
+}) {
+  const dues = await studentFeeDueModel
+    .find({ studentId, sessionId, adminId })
+    .lean();
 
   if (!dues.length) return [];
 
   const feeHeadGroup = await getFeeHeadService({ adminId, sessionId });
-  const feeHeadMap = new Map((feeHeadGroup?.feeHeads || []).map((fh) => [String(fh._id), fh]));
+  const feeHeadMap = new Map(
+    (feeHeadGroup?.feeHeads || []).map((fh) => [String(fh._id), fh])
+  );
 
   return dues.map((due) => ({
     ...due,

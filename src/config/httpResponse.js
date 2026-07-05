@@ -35,7 +35,8 @@ const attendanceControllerResponse = {
     unathorizedParent: "Parent is not authorized to mark attendance",
     todayIsSunday: "Today is Sunday",
     scheduledHoliday: "Today is scheduled as holiday",
-    parentCantMarkAttendance: "Parent can't mark attendance,teacher already marked",
+    parentCantMarkAttendance:
+      "Parent can't mark attendance,teacher already marked",
     attendanceAlreadyMarkedByParent: "Attendance already marked by parent",
     parentUnableToMarkAttendance: "Parent is unable to mark attendance",
     attendanceMarkedSuccessfully: "Attendance marked sucessfully"

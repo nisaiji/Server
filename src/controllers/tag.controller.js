@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { sendPushNotification } from "../config/firebase.config.js";
 import {
   getFormattedDateService,
@@ -37,8 +36,16 @@ function getTagNotificationRangeLabel(startDate, endDate) {
 
 export async function createTagController(req, res) {
   try {
-    let { subjectId, sectionId, sessionId, startDate, endDate, classId, title, description } =
-      req.body;
+    let {
+      subjectId,
+      sectionId,
+      sessionId,
+      startDate,
+      endDate,
+      classId,
+      title,
+      description
+    } = req.body;
     const teacherId = req.teacherId;
     const schoolId = req.adminId;
     startDate = parseInt(startDate);
@@ -60,7 +67,9 @@ export async function createTagController(req, res) {
 
     const subject = await getSubjectService({ _id: subjectId });
     if (!subject) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Subject not found"));
     }
     const teacherSubjectSection = await getTeacherSubjectSectionService({
       teacher: teacherId,
@@ -77,10 +86,8 @@ export async function createTagController(req, res) {
 
     let startIstDate = timestampToIstDate(startDate);
     let endIstDate = timestampToIstDate(endDate);
-    const { startTime: tempStartTimestamp, endTime: tempEndTimestamp } = getStartAndEndTimeService(
-      startIstDate,
-      endIstDate
-    );
+    const { startTime: tempStartTimestamp, endTime: tempEndTimestamp } =
+      getStartAndEndTimeService(startIstDate, endIstDate);
 
     startIstDate = timestampToIstDate(tempStartTimestamp);
     endIstDate = timestampToIstDate(tempEndTimestamp);
@@ -104,7 +111,11 @@ export async function createTagController(req, res) {
     }
 
     const [parentRecipients, teacherRecipients] = await Promise.all([
-      getSectionParentNotificationRecipientsService({ sectionId, sessionId, schoolId }),
+      getSectionParentNotificationRecipientsService({
+        sectionId,
+        sessionId,
+        schoolId
+      }),
       getTagTeacherNotificationRecipientsService({
         sectionId,
         subjectId,
@@ -123,13 +134,22 @@ export async function createTagController(req, res) {
 
     await Promise.allSettled(
       recipients.map((recipient) =>
-        sendPushNotification(recipient.fcmToken, "New Tag Added", notificationBody, "tag")
+        sendPushNotification(
+          recipient.fcmToken,
+          "New Tag Added",
+          notificationBody,
+          "tag"
+        )
       )
     );
 
-    return res.status(StatusCodes.CREATED).send(success(201, "Tag created successfully"));
+    return res
+      .status(StatusCodes.CREATED)
+      .send(success(201, "Tag created successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -139,10 +159,16 @@ export async function updateTagController(req, res) {
     const { title, description, date } = req.body;
     const teacherId = req.teacherId;
     const schoolId = req.adminId;
-    const tag = await getTagService({ _id: tagId, teacher: teacherId, school: schoolId });
+    const tag = await getTagService({
+      _id: tagId,
+      teacher: teacherId,
+      school: schoolId
+    });
     const session = await getSessionService({ _id: tag.session });
     if (!tag) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Tag not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Tag not found"));
     }
     if (!session || session["status"] === "completed") {
       return res
@@ -154,9 +180,13 @@ export async function updateTagController(req, res) {
     if (description) params.description = description;
     if (date) params.date = date;
     await updateTagService({ _id: convertToMongoId(tagId) }, params);
-    return res.status(StatusCodes.CREATED).send(success(200, "Tag updated successfully"));
+    return res
+      .status(StatusCodes.CREATED)
+      .send(success(200, "Tag updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -165,10 +195,16 @@ export async function deleteTagController(req, res) {
     const tagId = req.params.tagId;
     const teacherId = req.teacherId;
     const schoolId = req.adminId;
-    const tag = await getTagService({ _id: tagId, teacher: teacherId, school: schoolId });
+    const tag = await getTagService({
+      _id: tagId,
+      teacher: teacherId,
+      school: schoolId
+    });
     const session = await getSessionService({ _id: tag.session });
     if (!tag) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Tag not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Tag not found"));
     }
     if (!session || session["status"] === "completed") {
       return res
@@ -176,9 +212,13 @@ export async function deleteTagController(req, res) {
         .send(error(404, "Session is completed. You cannot update event"));
     }
     await deleteTagService({ _id: convertToMongoId(tagId) });
-    return res.status(StatusCodes.CREATED).send(success(200, "Tag deleted successfully"));
+    return res
+      .status(StatusCodes.CREATED)
+      .send(success(200, "Tag deleted successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -199,7 +239,9 @@ export async function getTagsController(req, res) {
     ]);
     return res.status(StatusCodes.OK).send(success(200, tags));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -343,6 +385,8 @@ export async function getTagsWithInfoController(req, res) {
     ]);
     return res.status(StatusCodes.OK).send(success(200, tags));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

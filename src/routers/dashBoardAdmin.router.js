@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   attendanceStatusController,
   attendanceStatusOfSectionController,
@@ -21,8 +20,16 @@ adminDashboardRouter.post(
   presentStudentsOfSchoolValidation,
   getPresentStudentsController
 );
-adminDashboardRouter.get("/parent-count", adminAuthenticate, getParentCountController);
-adminDashboardRouter.get("/teacher-count", adminAuthenticate, getTeacherCountController);
+adminDashboardRouter.get(
+  "/parent-count",
+  adminAuthenticate,
+  getParentCountController
+);
+adminDashboardRouter.get(
+  "/teacher-count",
+  adminAuthenticate,
+  getTeacherCountController
+);
 adminDashboardRouter.post(
   "/attendance-status",
   adminAuthenticate,

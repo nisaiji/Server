@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   deleteClassController,
   getClassController,
@@ -11,9 +10,18 @@ import { classRegisterValidation } from "../middlewares/validation/class.validat
 
 const classRouter = express.Router();
 
-classRouter.post("/", adminAuthenticate, classRegisterValidation, registerClassController);
+classRouter.post(
+  "/",
+  adminAuthenticate,
+  classRegisterValidation,
+  registerClassController
+);
 classRouter.delete("/:classId", adminAuthenticate, deleteClassController);
-classRouter.get("/session/:sessionId", adminAuthenticate, getClassListController);
+classRouter.get(
+  "/session/:sessionId",
+  adminAuthenticate,
+  getClassListController
+);
 classRouter.get("/:classId", adminAuthenticate, getClassController);
 
 export default classRouter;

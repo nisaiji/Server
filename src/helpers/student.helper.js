@@ -1,17 +1,32 @@
 import { excelDateToStringDateFormat } from "../services/celender.service.js";
 import { hashPasswordService } from "../services/password.service.js";
-import { getSectionService, updateSectionService } from "../services/section.services.js";
-import { getStudentService, registerStudentService } from "../services/student.service.js";
-import { getParentService, registerParentService } from "../services/v2/parent.services.js";
+import {
+  getSectionService,
+  updateSectionService
+} from "../services/section.services.js";
+import {
+  getStudentService,
+  registerStudentService
+} from "../services/student.service.js";
+import {
+  getParentService,
+  registerParentService
+} from "../services/v2/parent.services.js";
 import { registerStudentFromExcelSchema } from "../validators/studentSchema.validator.js";
 
-export async function registerStudentsFromExcelHelper(students, sectionId, classId, adminId) {
+export async function registerStudentsFromExcelHelper(
+  students,
+  sectionId,
+  classId,
+  adminId
+) {
   try {
     // validate each student from excel file
     students.shift();
     for (const student of students) {
       console.log({ student });
-      const studentValidation = registerStudentFromExcelSchema.validate(student);
+      const studentValidation =
+        registerStudentFromExcelSchema.validate(student);
       if (studentValidation.error) {
         throw new Error(
           JSON.stringify({
@@ -33,7 +48,10 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
         bloodGroup: student["Blood Group"],
         dob:
           typeof student["DOB (dd-mm-yyyy)"] === "number"
-            ? excelDateToStringDateFormat(student["DOB (dd-mm-yyyy)"], "dd-mm-yyyy")
+            ? excelDateToStringDateFormat(
+                student["DOB (dd-mm-yyyy)"],
+                "dd-mm-yyyy"
+              )
             : student["DOB (dd-mm-yyyy)"],
         address: student["Address"],
         city: student["City"],
@@ -66,7 +84,13 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
         qualification,
         occupation
       } = normalizedStudent;
-      const parentObj = { fullname: parentName, phone, email, qualification, occupation };
+      const parentObj = {
+        fullname: parentName,
+        phone,
+        email,
+        qualification,
+        occupation
+      };
       const studentObj = {
         firstname,
         lastname,
@@ -87,7 +111,10 @@ export async function registerStudentsFromExcelHelper(students, sectionId, class
         parentObj["password"] = await hashPasswordService(password);
         parent = await registerParentService(parentObj);
       }
-      let studentInfo = await getStudentService({ firstname, parent: parent["_id"] });
+      let studentInfo = await getStudentService({
+        firstname,
+        parent: parent["_id"]
+      });
       if (!studentInfo) {
         studentObj["parent"] = parent["_id"];
         studentObj["section"] = sectionId;

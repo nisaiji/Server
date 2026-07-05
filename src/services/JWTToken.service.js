@@ -1,9 +1,10 @@
 import Jwt from "jsonwebtoken";
-
 import { config } from "../config/config.js";
 
-const accessTokenSecretKey = config.accessTokenSecretKey || "ThisIsASecretKeyForJWTToken";
-const refreshTokenSecretKey = config.refreshTokenSecretKey || "ThisIsASecretKeyForJWTToken";
+const accessTokenSecretKey =
+  config.accessTokenSecretKey || "ThisIsASecretKeyForJWTToken";
+const refreshTokenSecretKey =
+  config.refreshTokenSecretKey || "ThisIsASecretKeyForJWTToken";
 
 export function getAccessTokenService(data) {
   try {

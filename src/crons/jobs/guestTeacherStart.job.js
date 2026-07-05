@@ -17,7 +17,10 @@ const GuestTeacherStartJob = async () => {
     });
     for (const guestTeacher of startableGuestTeachers) {
       await Promise.all([
-        updateGuestTeacherService({ _id: guestTeacher["_id"] }, { isActive: true }),
+        updateGuestTeacherService(
+          { _id: guestTeacher["_id"] },
+          { isActive: true }
+        ),
         updateSectionService(
           { _id: guestTeacher["section"] },
           { guestTeacher: guestTeacher["_id"] }

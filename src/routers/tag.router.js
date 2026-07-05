@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createTagController,
   deleteTagController,
@@ -16,7 +15,11 @@ tagRouter.post("/", teacherAuthenticate, createTagController);
 tagRouter.post("/get-teacher", teacherAuthenticate, getTagsController);
 tagRouter.post("/get-parent", parentAuthenticate, getTagsWithInfoController);
 tagRouter.post("/get-admin", adminAuthenticate, getTagsWithInfoController);
-tagRouter.post("/get-class-teacher", teacherAuthenticate, getTagsWithInfoController);
+tagRouter.post(
+  "/get-class-teacher",
+  teacherAuthenticate,
+  getTagsWithInfoController
+);
 tagRouter.put("/teacher/:tagId", teacherAuthenticate, updateTagController);
 tagRouter.delete("/teacher/:tagId", teacherAuthenticate, deleteTagController);
 export default tagRouter;

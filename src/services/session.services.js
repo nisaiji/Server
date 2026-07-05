@@ -27,9 +27,16 @@ export async function registerSessionsService(data) {
   }
 }
 
-export async function getSessionsService(paramObj, projection = {}, populateObj = "") {
+export async function getSessionsService(
+  paramObj,
+  projection = {},
+  populateObj = ""
+) {
   try {
-    const sessions = await sessionModel.find(paramObj).select(projection).populate(populateObj);
+    const sessions = await sessionModel
+      .find(paramObj)
+      .select(projection)
+      .populate(populateObj);
     return sessions;
   } catch (error) {
     throw error;

@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createExambyAdminController,
   getExamsForSectionController,
@@ -14,8 +13,16 @@ const examRouter = express.Router();
 
 examRouter.post("/", adminAuthenticate, createExambyAdminController);
 examRouter.get("/:sectionId", adminAuthenticate, getExamsForSectionController);
-examRouter.post("/teacher", teacherAuthenticate, getSectionExamsForTeacherController);
-examRouter.post("/parent", parentAuthenticate, getStudentExamsForParentController);
+examRouter.post(
+  "/teacher",
+  teacherAuthenticate,
+  getSectionExamsForTeacherController
+);
+examRouter.post(
+  "/parent",
+  parentAuthenticate,
+  getStudentExamsForParentController
+);
 examRouter.put("/:examId", adminAuthenticate, updateExamController);
 
 export default examRouter;

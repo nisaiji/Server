@@ -2,14 +2,19 @@ import announcementReadStatusModel from "../models/announcementReadStatus.model.
 
 export async function getAnnouncementReadStatusService(filter) {
   try {
-    const announcementReadStatus = await announcementReadStatusModel.findOne(filter).lean();
+    const announcementReadStatus = await announcementReadStatusModel
+      .findOne(filter)
+      .lean();
     return announcementReadStatus;
   } catch (error) {
     throw error;
   }
 }
 
-export async function getAnnouncementsReadStatusService(filter, projection = {}) {
+export async function getAnnouncementsReadStatusService(
+  filter,
+  projection = {}
+) {
   try {
     const announcementReadStatus = await announcementReadStatusModel
       .find(filter)
@@ -31,7 +36,9 @@ export async function getAnnouncementReadStatusCountService(filter) {
 
 export async function getAnnouncementReadStatusPipelineService(pipeline) {
   try {
-    const announcementReadStatus = await announcementReadStatusModel.aggregate(pipeline).exec();
+    const announcementReadStatus = await announcementReadStatusModel
+      .aggregate(pipeline)
+      .exec();
     return announcementReadStatus;
   } catch (error) {
     throw error;
@@ -40,10 +47,8 @@ export async function getAnnouncementReadStatusPipelineService(pipeline) {
 
 export async function updateAnnouncementReadStatusService(filter, update) {
   try {
-    const announcementReadStatus = await announcementReadStatusModel.findByIdAndUpdate(
-      filter,
-      update
-    );
+    const announcementReadStatus =
+      await announcementReadStatusModel.findByIdAndUpdate(filter, update);
     return announcementReadStatus;
   } catch (error) {
     throw error;
@@ -52,7 +57,8 @@ export async function updateAnnouncementReadStatusService(filter, update) {
 
 export async function createAnnouncementReadStatusService(data) {
   try {
-    const announcementReadStatus = await announcementReadStatusModel.create(data);
+    const announcementReadStatus =
+      await announcementReadStatusModel.create(data);
     return announcementReadStatus;
   } catch (error) {
     throw error;
@@ -61,7 +67,8 @@ export async function createAnnouncementReadStatusService(data) {
 
 export async function createAnnouncementsReadStatusService(data) {
   try {
-    const announcementReadStatus = await announcementReadStatusModel.insertMany(data);
+    const announcementReadStatus =
+      await announcementReadStatusModel.insertMany(data);
     return announcementReadStatus;
   } catch (error) {
     throw error;

@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createAnnouncementByAdminController,
   createAnnouncementByTeacherController,
@@ -19,13 +18,33 @@ import { parentAuthenticate } from "../middlewares/authentication/v2/parent.auth
 
 const announcementRouter = express.Router();
 
-announcementRouter.post("/admin", adminAuthenticate, createAnnouncementByAdminController);
-announcementRouter.post("/teacher", teacherAuthenticate, createAnnouncementByTeacherController);
-announcementRouter.get("/admin", adminAuthenticate, getAnnouncementsByAdminController);
+announcementRouter.post(
+  "/admin",
+  adminAuthenticate,
+  createAnnouncementByAdminController
+);
+announcementRouter.post(
+  "/teacher",
+  teacherAuthenticate,
+  createAnnouncementByTeacherController
+);
+announcementRouter.get(
+  "/admin",
+  adminAuthenticate,
+  getAnnouncementsByAdminController
+);
 // announcementRouter.get("/admin/teacher", adminAuthenticate, getTeacherAnnouncementsByAdminController);
-announcementRouter.get("/teacher", teacherAuthenticate, getAnnouncementsByTeacherController);
+announcementRouter.get(
+  "/teacher",
+  teacherAuthenticate,
+  getAnnouncementsByTeacherController
+);
 // announcementRouter.get("/teacher/admin", teacherAuthenticate, getAdminAnnouncementsByTeacherController);
-announcementRouter.get("/parent", parentAuthenticate, getAnnouncementsByParentController);
+announcementRouter.get(
+  "/parent",
+  parentAuthenticate,
+  getAnnouncementsByParentController
+);
 announcementRouter.put(
   "/admin/:announcementId",
   adminAuthenticate,

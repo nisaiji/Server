@@ -2,7 +2,9 @@ import studentLeaveRequestModel from "../models/studentLeaveRequest.model.js";
 
 export async function getStudentLeaveRequestsPipelineService(pipeline) {
   try {
-    const leaveRequests = await studentLeaveRequestModel.aggregate(pipeline).exec();
+    const leaveRequests = await studentLeaveRequestModel
+      .aggregate(pipeline)
+      .exec();
     return leaveRequests;
   } catch (error) {
     throw error;
@@ -11,7 +13,9 @@ export async function getStudentLeaveRequestsPipelineService(pipeline) {
 
 export async function getStudentLeaveRequestService(filter, projection = {}) {
   try {
-    const leaveRequest = await studentLeaveRequestModel.findOne(filter).select(projection);
+    const leaveRequest = await studentLeaveRequestModel
+      .findOne(filter)
+      .select(projection);
     return leaveRequest;
   } catch (error) {
     throw error;
@@ -20,7 +24,9 @@ export async function getStudentLeaveRequestService(filter, projection = {}) {
 
 export async function getStudentLeaveRequestsService(filter, projection = {}) {
   try {
-    const leaveRequests = await studentLeaveRequestModel.find(filter).select(projection);
+    const leaveRequests = await studentLeaveRequestModel
+      .find(filter)
+      .select(projection);
     return leaveRequests;
   } catch (error) {
     throw error;
@@ -29,7 +35,8 @@ export async function getStudentLeaveRequestsService(filter, projection = {}) {
 
 export async function deleteStudentLeaveRequestsService(filter) {
   try {
-    const leaveRequests = await studentLeaveRequestModel.findOneAndDelete(filter);
+    const leaveRequests =
+      await studentLeaveRequestModel.findOneAndDelete(filter);
     return leaveRequests;
   } catch (error) {
     throw error;
@@ -47,7 +54,10 @@ export async function registerStudentLeaveRequestService(paramObj) {
 
 export async function updateStudentLeaveRequestService(filter, update) {
   try {
-    const leaveRequest = await studentLeaveRequestModel.updateOne(filter, update);
+    const leaveRequest = await studentLeaveRequestModel.updateOne(
+      filter,
+      update
+    );
     return leaveRequest;
   } catch (error) {
     throw error;

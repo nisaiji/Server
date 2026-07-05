@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import Jwt from "jsonwebtoken";
-
 import { config } from "../../config/config.js";
 import { getSuperAdminService } from "../../services/superAdmin.service.js";
 import { error } from "../../utils/responseWrapper.js";

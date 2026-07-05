@@ -16,7 +16,8 @@ const registerSuperAdminSchema = Joi.object({
     .pattern(new RegExp("^[a-zA-Z0-9!@#$%^&*]{3,30}$"))
     .required()
     .messages({
-      "string.pattern.base": "Password must contain alphanumeric characters and special symbols",
+      "string.pattern.base":
+        "Password must contain alphanumeric characters and special symbols",
       "string.min": "Password should be at least 8 characters long",
       "string.max": "Password should not exceed 16 characters",
       "any.required": "Password is required"
@@ -49,7 +50,8 @@ const updateSuperAdminSchema = Joi.object({
     .max(16)
     .pattern(new RegExp("^[a-zA-Z0-9!@#$%^&*]{3,30}$"))
     .messages({
-      "string.pattern.base": "Password must contain alphanumeric characters and special symbols",
+      "string.pattern.base":
+        "Password must contain alphanumeric characters and special symbols",
       "string.min": "Password should be at least 8 characters long",
       "string.max": "Password should not exceed 16 characters"
     })

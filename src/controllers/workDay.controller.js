@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getAdminService } from "../services/admin.services.js";
 import {
@@ -26,16 +25,25 @@ export async function registerWorkDayController(req, res) {
     const adminId = req.adminId;
     const day = getDayNameService(date.getDay());
 
-    const session = await getSessionService({ _id: sessionId, school: adminId });
+    const session = await getSessionService({
+      _id: sessionId,
+      school: adminId
+    });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
 
     if (day !== "Sunday") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "It is already working day"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "It is already working day"));
     }
     const { startTime, endTime } = getStartAndEndTimeService(date, date);
     date = date.getTime();
@@ -46,9 +54,18 @@ export async function registerWorkDayController(req, res) {
       date: { $gte: startTime, $lte: endTime }
     });
     if (workDay) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Already marked as working day"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Already marked as working day"));
     }
-    const data = { date, day, title, description, admin: adminId, session: sessionId };
+    const data = {
+      date,
+      day,
+      title,
+      description,
+      admin: adminId,
+      session: sessionId
+    };
     await createWorkDayService(data);
 
     const school = await getAdminService({ _id: adminId });
@@ -84,7 +101,9 @@ export async function registerWorkDayController(req, res) {
         throw error;
       }
     }
-    return res.status(StatusCodes.OK).send(success(200, "Marked as working day successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Marked as working day successfully"));
   } catch (err) {
     return res.send(error(500, err.message));
   }
@@ -101,7 +120,9 @@ export async function getWorkDaysController(req, res) {
     });
     return res.status(StatusCodes.OK).send(success(200, workDays));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -112,14 +133,20 @@ export async function updateWorkDayController(req, res) {
     let workDay = await getWorkDayService({ _id: id });
     const session = await getSessionService({ _id: workDay.session });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
 
     if (!workDay) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(400, "Work day not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(400, "Work day not found"));
     }
     const fieldsToBeUpdated = {};
     if (title) {
@@ -130,9 +157,13 @@ export async function updateWorkDayController(req, res) {
     }
 
     await updateWorkDayService({ _id: id }, fieldsToBeUpdated);
-    return res.status(StatusCodes.OK).send(success(200, "Workday updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Workday updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -141,18 +172,28 @@ export async function deleteWorkDayController(req, res) {
     const id = req.params.workDayId;
     const workday = await getWorkDayService({ _id: id });
     if (!workday) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(400, "Workday not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(400, "Workday not found"));
     }
     const session = await getSessionService({ _id: workday.session });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
     await deleteWorkDayService({ _id: id });
-    return res.status(StatusCodes.OK).send(success(200, "Workday deleted successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Workday deleted successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

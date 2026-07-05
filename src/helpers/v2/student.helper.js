@@ -1,7 +1,16 @@
 import { excelDateToStringDateFormat } from "../../services/celender.service.js";
-import { getSectionService, updateSectionService } from "../../services/section.services.js";
-import { getStudentService, registerStudentService } from "../../services/student.service.js";
-import { getParentService, registerParentService } from "../../services/v2/parent.services.js";
+import {
+  getSectionService,
+  updateSectionService
+} from "../../services/section.services.js";
+import {
+  getStudentService,
+  registerStudentService
+} from "../../services/student.service.js";
+import {
+  getParentService,
+  registerParentService
+} from "../../services/v2/parent.services.js";
 import {
   getSchoolParentService,
   registerSchoolParentService
@@ -21,7 +30,8 @@ export async function registerStudentsFromExcelHelper(
     students.shift();
     for (const student of students) {
       console.log({ student });
-      const studentValidation = registerStudentFromExcelSchema.validate(student);
+      const studentValidation =
+        registerStudentFromExcelSchema.validate(student);
       if (studentValidation.error) {
         throw new Error(
           JSON.stringify({
@@ -43,7 +53,10 @@ export async function registerStudentsFromExcelHelper(
         bloodGroup: student["Blood Group"],
         dob:
           typeof student["DOB (dd-mm-yyyy)"] === "number"
-            ? excelDateToStringDateFormat(student["DOB (dd-mm-yyyy)"], "dd-mm-yyyy")
+            ? excelDateToStringDateFormat(
+                student["DOB (dd-mm-yyyy)"],
+                "dd-mm-yyyy"
+              )
             : student["DOB (dd-mm-yyyy)"],
         address: student["Address"],
         city: student["City"],
@@ -77,7 +90,11 @@ export async function registerStudentsFromExcelHelper(
         occupation
       } = normalizedStudent;
       let parent = await getParentService({ phone, isActive: true });
-      let schoolParent = await getSchoolParentService({ phone, school: adminId, isActive: true });
+      let schoolParent = await getSchoolParentService({
+        phone,
+        school: adminId,
+        isActive: true
+      });
 
       if (!schoolParent) {
         if (!parent) {
@@ -95,7 +112,10 @@ export async function registerStudentsFromExcelHelper(
         schoolParent = await registerSchoolParentService(parentObj);
       }
 
-      let studentInfo = await getStudentService({ firstname, schoolParent: schoolParent["_id"] });
+      let studentInfo = await getStudentService({
+        firstname,
+        schoolParent: schoolParent["_id"]
+      });
       const studentObj = {
         firstname,
         lastname,

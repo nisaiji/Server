@@ -10,7 +10,9 @@ const registerStudentSchema = Joi.object({
   parentName: Joi.string().required().messages({
     "any.required": "Parent name is required."
   }),
-  gender: Joi.string().required().messages({ "any.required": "Gender is required." }),
+  gender: Joi.string()
+    .required()
+    .messages({ "any.required": "Gender is required." }),
   phone: Joi.string()
     .pattern(/^[6-9][0-9]{9}$/)
     .length(10)
@@ -36,10 +38,15 @@ const registerStudentFromExcelSchema = Joi.object({
   "Last Name": Joi.string().required().messages({
     "any.required": "Last name is required."
   }),
-  Gender: Joi.string().required().messages({ "any.required": "Gender is required." }),
+  Gender: Joi.string()
+    .required()
+    .messages({ "any.required": "Gender is required." }),
   "Blood Group": Joi.string().optional(),
   "DOB (dd-mm-yyyy)": Joi.alternatives()
-    .try(Joi.string().pattern(/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/), Joi.number())
+    .try(
+      Joi.string().pattern(/^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/),
+      Joi.number()
+    )
     .optional(),
   Address: Joi.string().optional(),
   City: Joi.string().optional(),
@@ -51,12 +58,17 @@ const registerStudentFromExcelSchema = Joi.object({
   "Guardian Name": Joi.string().required().messages({
     "any.required": "Guardian name is required"
   }),
-  Phone: Joi.number().integer().min(6000000000).max(9999999999).required().messages({
-    "number.base": "Phone number must be a valid number.",
-    "number.min": "Phone number must have exactly 10 digits.",
-    "number.max": "Phone number must have exactly 10 digits.",
-    "any.required": "Phone number is required."
-  }),
+  Phone: Joi.number()
+    .integer()
+    .min(6000000000)
+    .max(9999999999)
+    .required()
+    .messages({
+      "number.base": "Phone number must be a valid number.",
+      "number.min": "Phone number must have exactly 10 digits.",
+      "number.max": "Phone number must have exactly 10 digits.",
+      "any.required": "Phone number is required."
+    }),
   Email: Joi.string().optional(),
   Qualification: Joi.string().optional(),
   Occupation: Joi.string().optional()
@@ -124,12 +136,18 @@ const getStudentsSchema = Joi.object({
     "number.base": "Include must be string."
   }),
 
-  limit: Joi.number().integer().min(1).max(100).default(10).optional().messages({
-    "number.base": "Limit must be a number.",
-    "number.integer": "Limit must be an integer.",
-    "number.min": "Limit must be at least 1.",
-    "number.max": "Limit must not exceed 100."
-  })
+  limit: Joi.number()
+    .integer()
+    .min(1)
+    .max(100)
+    .default(10)
+    .optional()
+    .messages({
+      "number.base": "Limit must be a number.",
+      "number.integer": "Limit must be an integer.",
+      "number.min": "Limit must be at least 1.",
+      "number.max": "Limit must not exceed 100."
+    })
 });
 
 const updateStudentByTeacherSchema = Joi.object({

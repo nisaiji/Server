@@ -27,9 +27,16 @@ export async function createTagsService(data) {
   }
 }
 
-export async function getTagsService(paramObj, projection = {}, populateObj = "") {
+export async function getTagsService(
+  paramObj,
+  projection = {},
+  populateObj = ""
+) {
   try {
-    const tags = await tagModel.find(paramObj).select(projection).populate(populateObj);
+    const tags = await tagModel
+      .find(paramObj)
+      .select(projection)
+      .populate(populateObj);
     return tags;
   } catch (error) {
     throw error;

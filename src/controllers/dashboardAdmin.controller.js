@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { getAttendanceCountService } from "../services/attendance.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSectionService } from "../services/section.services.js";
@@ -8,7 +7,10 @@ import {
   getSectionAttendancesPipelineService
 } from "../services/sectionAttendance.services.js";
 import { getSessionService } from "../services/session.services.js";
-import { getStudentCountService, getStudentsPipelineService } from "../services/student.service.js";
+import {
+  getStudentCountService,
+  getStudentsPipelineService
+} from "../services/student.service.js";
 import { getTeacherCountService } from "../services/teacher.services.js";
 import { getSessionStudentCountService } from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
@@ -17,12 +19,19 @@ export async function getPresentStudentsController(req, res) {
   try {
     const adminId = req.adminId;
     const { startTime, endTime, sessionId } = req.body;
-    const session = await getSessionService({ _id: sessionId, school: adminId });
+    const session = await getSessionService({
+      _id: sessionId,
+      school: adminId
+    });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
     const [presentCount, absentCount, totalCount] = await Promise.all([
       getAttendanceCountService({
@@ -37,11 +46,19 @@ export async function getPresentStudentsController(req, res) {
         date: { $gte: startTime, $lte: endTime },
         teacherAttendance: "absent"
       }),
-      getSessionStudentCountService({ school: adminId, session: sessionId, isActive: true })
+      getSessionStudentCountService({
+        school: adminId,
+        session: sessionId,
+        isActive: true
+      })
     ]);
-    return res.status(StatusCodes.OK).send(success(200, { presentCount, absentCount, totalCount }));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { presentCount, absentCount, totalCount }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -63,7 +80,9 @@ export async function getParentCountController(req, res) {
     const parentCount = studentObj.length > 0 ? studentObj[0].totalParent : 0;
     return res.status(StatusCodes.OK).send(success(200, { parentCount }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -73,7 +92,9 @@ export async function getTeacherCountController(req, res) {
     const teacherCount = await getTeacherCountService({ admin: adminId });
     return res.status(StatusCodes.OK).send(success(200, { teacherCount }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -83,7 +104,9 @@ export async function attendanceStatusOfSectionController(req, res) {
     const { startTime, endTime } = req.body;
     const section = await getSectionService({ _id: sectionId });
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
     const totalStudent = section["studentCount"];
     const sectionAttendance = await getSectionAttendanceStatusService({
@@ -92,9 +115,13 @@ export async function attendanceStatusOfSectionController(req, res) {
     });
     return res
       .status(StatusCodes.OK)
-      .send(success(200, { section: sectionId, totalStudent, sectionAttendance }));
+      .send(
+        success(200, { section: sectionId, totalStudent, sectionAttendance })
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -160,10 +187,17 @@ export async function attendanceStatusController(req, res) {
     ];
 
     const attendances = await getSectionAttendancesPipelineService(pipeline);
-    const totalStudents = await getStudentCountService({ admin: adminId, isActive: true });
+    const totalStudents = await getStudentCountService({
+      admin: adminId,
+      isActive: true
+    });
 
-    return res.status(StatusCodes.OK).send(success(200, { totalStudents, attendances }));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { totalStudents, attendances }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

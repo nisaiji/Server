@@ -59,6 +59,9 @@ const teacherLeaveRequestSchema = mongoose.Schema(
   }
 );
 
-const teacherLeaveRequestModel = mongoose.model("teacherLeaveRequest", teacherLeaveRequestSchema);
+const teacherLeaveRequestModel = mongoose.model(
+  "teacherLeaveRequest",
+  teacherLeaveRequestSchema
+);
 
 export default teacherLeaveRequestModel;

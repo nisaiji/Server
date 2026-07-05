@@ -9,18 +9,28 @@ export async function registerParentPasswordChangeRequestService(paramObj) {
   }
 }
 
-export async function getParentPasswordChangeRequestService(paramObj, projection = {}) {
+export async function getParentPasswordChangeRequestService(
+  paramObj,
+  projection = {}
+) {
   try {
-    const request = await parentPasswordChangeRequestModel.findOne(paramObj).select(projection);
+    const request = await parentPasswordChangeRequestModel
+      .findOne(paramObj)
+      .select(projection);
     return request;
   } catch (error) {
     throw error;
   }
 }
 
-export async function getParentPasswordChangeRequestsService(paramObj, projection = {}) {
+export async function getParentPasswordChangeRequestsService(
+  paramObj,
+  projection = {}
+) {
   try {
-    const requests = await parentPasswordChangeRequestModel.find(paramObj).select(projection);
+    const requests = await parentPasswordChangeRequestModel
+      .find(paramObj)
+      .select(projection);
     return requests;
   } catch (error) {
     throw error;
@@ -29,7 +39,10 @@ export async function getParentPasswordChangeRequestsService(paramObj, projectio
 
 export async function updateParentPasswordChangeRequestService(filter, update) {
   try {
-    const request = await parentPasswordChangeRequestModel.updateOne(filter, update);
+    const request = await parentPasswordChangeRequestModel.updateOne(
+      filter,
+      update
+    );
     return request;
   } catch (error) {
     throw error;
@@ -38,7 +51,8 @@ export async function updateParentPasswordChangeRequestService(filter, update) {
 
 export async function getParentPasswordChangeRequestCountService(filter) {
   try {
-    const requestCount = await parentPasswordChangeRequestModel.countDocuments(filter);
+    const requestCount =
+      await parentPasswordChangeRequestModel.countDocuments(filter);
     return requestCount;
   } catch (error) {
     throw error;

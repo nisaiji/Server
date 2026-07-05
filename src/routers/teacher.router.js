@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   registerTeacherController,
   deleteTeacherController,
@@ -33,9 +32,19 @@ import {
 
 const teacherRouter = express.Router();
 
-teacherRouter.post("/", adminAuthenticate, registerTeacherValidation, registerTeacherController);
+teacherRouter.post(
+  "/",
+  adminAuthenticate,
+  registerTeacherValidation,
+  registerTeacherController
+);
 
-teacherRouter.post("/bulk", adminAuthenticate, upload, registerTeachersFromExcelController);
+teacherRouter.post(
+  "/bulk",
+  adminAuthenticate,
+  upload,
+  registerTeachersFromExcelController
+);
 
 teacherRouter.post("/login", loginTeacherValidation, loginTeacherController);
 
@@ -48,9 +57,17 @@ teacherRouter.get(
 
 teacherRouter.post("/all", adminAuthenticate, getAllTeacherOfAdminController);
 
-teacherRouter.get("/unassigned/:sessionId", adminAuthenticate, getAllNonSectionTeacherController);
+teacherRouter.get(
+  "/unassigned/:sessionId",
+  adminAuthenticate,
+  getAllNonSectionTeacherController
+);
 
-teacherRouter.get("/refresh", refreshTokenAuthenticate, refreshAccessTokenController);
+teacherRouter.get(
+  "/refresh",
+  refreshTokenAuthenticate,
+  refreshAccessTokenController
+);
 
 teacherRouter.get("/:teacherId", adminAuthenticate, getTeacherController);
 

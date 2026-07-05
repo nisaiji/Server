@@ -27,9 +27,16 @@ export async function registerSubjectsService(data) {
   }
 }
 
-export async function getSubjectsService(paramObj, projection = {}, populateObj = "") {
+export async function getSubjectsService(
+  paramObj,
+  projection = {},
+  populateObj = ""
+) {
   try {
-    const subjects = await subjectModel.find(paramObj).select(projection).populate(populateObj);
+    const subjects = await subjectModel
+      .find(paramObj)
+      .select(projection)
+      .populate(populateObj);
     return subjects;
   } catch (error) {
     throw error;

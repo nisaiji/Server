@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   deleteHolidayController,
   getHolidaysController,
@@ -23,9 +22,24 @@ holidayRouter.post(
   createHolidaysValidation,
   registerHolidaysController
 );
-holidayRouter.post("/", adminAuthenticate, getHolidayValidation, getHolidaysController);
-holidayRouter.post("/teacher", teacherAuthenticate, getHolidayValidation, getHolidaysController);
-holidayRouter.put("/:eventId", adminAuthenticate, updateHolidayValidation, updateHolidayController);
+holidayRouter.post(
+  "/",
+  adminAuthenticate,
+  getHolidayValidation,
+  getHolidaysController
+);
+holidayRouter.post(
+  "/teacher",
+  teacherAuthenticate,
+  getHolidayValidation,
+  getHolidaysController
+);
+holidayRouter.put(
+  "/:eventId",
+  adminAuthenticate,
+  updateHolidayValidation,
+  updateHolidayController
+);
 holidayRouter.delete("/:eventId", adminAuthenticate, deleteHolidayController);
 
 export default holidayRouter;

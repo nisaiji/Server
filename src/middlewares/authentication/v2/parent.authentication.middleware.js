@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import Jwt from "jsonwebtoken";
-
 import { config } from "../../../config/config.js";
 import { getParentService } from "../../../services/v2/parent.services.js";
 import { error } from "../../../utils/responseWrapper.js";
@@ -16,17 +15,23 @@ export async function parentAuthenticate(req, res, next) {
     const _id = decoded.parentId;
     const parent = await getParentService({ _id });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "User not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "User not found"));
     }
 
     if (parent["isActive"] === false) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Services are temporarily paused. Please contact support"));
+        .send(
+          error(404, "Services are temporarily paused. Please contact support")
+        );
     }
 
     if (parent["status"] === "unVerified") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User verification is pending"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(404, "User verification is pending"));
     }
 
     // if(parent['status']==='phoneVerified') {
@@ -37,7 +42,9 @@ export async function parentAuthenticate(req, res, next) {
     req.role = "parent";
     next();
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -51,7 +58,10 @@ export async function refreshParentTokenAuthenticate(req, res, next) {
     const decoded = Jwt.verify(parsedToken, config.refreshTokenSecretKey);
     delete decoded.iat;
     delete decoded.exp;
-    const parent = await getParentService({ _id: decoded.parentId, isActive: true });
+    const parent = await getParentService({
+      _id: decoded.parentId,
+      isActive: true
+    });
     if (!parent) {
       return res.status(StatusCodes.GONE).send(error(410, "User not found"));
     }

@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 import statusChangeLogSchema from "./schema/statusChangeLog.schema.js";
 
 const adminSchema = mongoose.Schema(

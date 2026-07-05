@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { sendPushNotification } from "../config/firebase.config.js";
 import { error, success } from "../utils/responseWrapper.js";
 
@@ -24,8 +23,12 @@ export async function sendNotificationByAdminController(req, res) {
       "notification",
       req?.adminId
     );
-    return res.status(StatusCodes.OK).send(success(200, "Notification send successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Notification send successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

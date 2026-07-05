@@ -1,5 +1,4 @@
 import winston from "winston";
-
 import { formatLog } from "../format.js";
 import { LogLevel } from "../levels.js";
 
@@ -8,14 +7,19 @@ const winstonLogger = winston.createLogger({
   format: winston.format.json(),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/error.log", level: LogLevel.ERROR }),
+    new winston.transports.File({
+      filename: "logs/error.log",
+      level: LogLevel.ERROR
+    }),
     new winston.transports.File({ filename: "logs/app.log" })
   ]
 });
 
 class WinstonLogger {
   error(message, context = {}, error = null) {
-    winstonLogger.log(formatLog({ level: LogLevel.ERROR, message, context, error }));
+    winstonLogger.log(
+      formatLog({ level: LogLevel.ERROR, message, context, error })
+    );
   }
 
   warn(message, context = {}) {

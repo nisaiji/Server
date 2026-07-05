@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   applyTransferCertificateController,
   getChildrenTCRequestsController,
@@ -32,6 +31,10 @@ transferCertificateRequestRouter.put(
 );
 
 // Admin Routes
-transferCertificateRequestRouter.get("/admin", adminAuthenticate, getAdminTCRequestsController);
+transferCertificateRequestRouter.get(
+  "/admin",
+  adminAuthenticate,
+  getAdminTCRequestsController
+);
 
 export default transferCertificateRequestRouter;

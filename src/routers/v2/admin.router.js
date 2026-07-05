@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   adminChangePasswordHandlerByEmailController,
   adminChangePasswordHandlerByPhoneController,
@@ -33,9 +32,21 @@ const adminRouter = express.Router();
 adminRouter.post("/status", adminPhoneValidation, adminGetStatusController);
 adminRouter.post("/login", adminLoginController);
 
-adminRouter.post("/phoneVerify", adminPhoneValidation, adminSendOtpToPhoneController);
-adminRouter.post("/phoneVerify/resend-otp", adminPhoneValidation, adminReSendOtpToPhoneController);
-adminRouter.put("/phoneVerify", adminPhoneAndOtpValidation, adminPhoneVerifyByOtpController);
+adminRouter.post(
+  "/phoneVerify",
+  adminPhoneValidation,
+  adminSendOtpToPhoneController
+);
+adminRouter.post(
+  "/phoneVerify/resend-otp",
+  adminPhoneValidation,
+  adminReSendOtpToPhoneController
+);
+adminRouter.put(
+  "/phoneVerify",
+  adminPhoneAndOtpValidation,
+  adminPhoneVerifyByOtpController
+);
 
 adminRouter.post(
   "/emailVerify",
@@ -51,7 +62,11 @@ adminRouter.put(
 );
 
 adminRouter.post("/phone/verify", adminPhoneVerifyController);
-adminRouter.post("/email/verify", unVerifiedAdminAuthenticate, adminEmailVerifyController);
+adminRouter.post(
+  "/email/verify",
+  unVerifiedAdminAuthenticate,
+  adminEmailVerifyController
+);
 
 adminRouter.put(
   "/password",
@@ -66,11 +81,23 @@ adminRouter.put(
   updateAdminController
 );
 
-adminRouter.post("/reset-password/phone", adminChangePasswordRequestByPhoneController);
-adminRouter.put("/reset-password/phone", adminChangePasswordHandlerByPhoneController);
+adminRouter.post(
+  "/reset-password/phone",
+  adminChangePasswordRequestByPhoneController
+);
+adminRouter.put(
+  "/reset-password/phone",
+  adminChangePasswordHandlerByPhoneController
+);
 
-adminRouter.post("/reset-password/email", adminChangePasswordRequestByEmailController);
-adminRouter.put("/reset-password/email", adminChangePasswordHandlerByEmailController);
+adminRouter.post(
+  "/reset-password/email",
+  adminChangePasswordRequestByEmailController
+);
+adminRouter.put(
+  "/reset-password/email",
+  adminChangePasswordHandlerByEmailController
+);
 
 adminRouter.put("/reset-password", adminChangePasswordHandlerController);
 export default adminRouter;

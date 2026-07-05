@@ -14,13 +14,17 @@ const registerChangePasswordRequestSchema = Joi.object({
       .pattern(/^[6-9][0-9]{9}$/)
       .length(10)
       .messages({
-        "string.pattern.base": "Phone number must have 10-digit number starting with 1-5.",
+        "string.pattern.base":
+          "Phone number must have 10-digit number starting with 1-5.",
         "string.length": "Phone number must be exactly 10 characters long."
       }),
-    model: Joi.string().valid("parent", "teacher", "admin").required().messages({
-      "any.required": "Model is required.",
-      "string.valid": "Model can be parent, teacher"
-    })
+    model: Joi.string()
+      .valid("parent", "teacher", "admin")
+      .required()
+      .messages({
+        "any.required": "Model is required.",
+        "string.valid": "Model can be parent, teacher"
+      })
   })
     .required()
     .messages({
@@ -33,10 +37,13 @@ const getChangePasswordRequestsForAdminSchema = Joi.object({
     "any.required": "Model is required.",
     "string.base": "Model must be a string."
   }),
-  reason: Joi.string().valid("forgetPassword", "changeDevice").required().messages({
-    "any.required": "Reason is required",
-    "string.valid": "Invalid reason"
-  }),
+  reason: Joi.string()
+    .valid("forgetPassword", "changeDevice")
+    .required()
+    .messages({
+      "any.required": "Reason is required",
+      "string.valid": "Invalid reason"
+    }),
   status: Joi.string().required().messages({
     "any.required": "Status is required",
     "string.base": "Status must be a string"
@@ -63,7 +70,8 @@ const verifyTeacherChangePasswordSchema = Joi.object({
     .pattern(/^[6-9][0-9]{9}$/)
     .length(10)
     .messages({
-      "string.pattern.base": "Phone number must have a 10-digit number starting with 6-9",
+      "string.pattern.base":
+        "Phone number must have a 10-digit number starting with 6-9",
       "string.length": "Phone number must be exactly 10 characters long"
     }),
   otp: Joi.number().integer().min(10000).max(99999).required().messages({

@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getFormattedDateService } from "../services/celender.service.js";
 import {
@@ -16,7 +15,10 @@ import {
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { hashPasswordService } from "../services/password.service.js";
 import { getSectionService } from "../services/section.services.js";
-import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
+import {
+  getTeacherService,
+  updateTeacherService
+} from "../services/teacher.services.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerLeaveRequestController(req, res) {
@@ -44,12 +46,22 @@ export async function registerLeaveRequestController(req, res) {
 
     const leaveRequests = await getLeaveRequestsPipelineService(pipeline);
     if (leaveRequests.length > 0) {
-      const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
-      const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime));
-      const leaveStatus = leaveRequests[0].status === "accept" ? "issued" : "applied";
+      const startDate = getFormattedDateService(
+        new Date(leaveRequests[0].startTime)
+      );
+      const endDate = getFormattedDateService(
+        new Date(leaveRequests[0].endTime)
+      );
+      const leaveStatus =
+        leaveRequests[0].status === "accept" ? "issued" : "applied";
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, `Leave already ${leaveStatus} from ${startDate} to ${endDate}.`));
+        .send(
+          error(
+            409,
+            `Leave already ${leaveStatus} from ${startDate} to ${endDate}.`
+          )
+        );
     }
 
     const leaveRequestObj = {
@@ -74,9 +86,13 @@ export async function registerLeaveRequestController(req, res) {
       req?.teacherId
     );
     await registerLeaveRequestService(leaveRequestObj);
-    return res.status(StatusCodes.OK).send(success(200, "Request sent successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Request sent successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -102,7 +118,9 @@ export async function getLeaveRequestsController(req, res) {
     }
 
     if (status) {
-      const statusArray = status.split(",").map((statusVal) => statusVal.trim());
+      const statusArray = status
+        .split(",")
+        .map((statusVal) => statusVal.trim());
       filter["status"] = { $in: statusArray };
     }
 
@@ -254,7 +272,9 @@ export async function getLeaveRequestsController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -262,14 +282,23 @@ export async function updateTeacherLeavRequestByAdminController(req, res) {
   try {
     const { leaveRequestId, status, username, password, tagline } = req.body;
     const adminId = req.adminId;
-    const leaveRequest = await getLeaveRequestService({ _id: leaveRequestId, status: "pending" });
+    const leaveRequest = await getLeaveRequestService({
+      _id: leaveRequestId,
+      status: "pending"
+    });
     if (!leaveRequest) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Leave Request not found"));
     }
-    const section = await getSectionService({ teacher: leaveRequest.sender.id });
+    const section = await getSectionService({
+      teacher: leaveRequest.sender.id
+    });
     const teacher = await getTeacherService({ _id: leaveRequest.sender.id });
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
     if (status === "accept") {
       const hashedPassword = await hashPasswordService(password);
@@ -313,13 +342,16 @@ export async function updateTeacherLeavRequestByAdminController(req, res) {
         : "Leave Request Rejected Successfully";
     return res.status(StatusCodes.OK).send(success(200, successMessage));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
 export async function updateTeacherLeavRequestController(req, res) {
   try {
-    const { leaveRequestId, reason, description, startTime, endTime } = req.body;
+    const { leaveRequestId, reason, description, startTime, endTime } =
+      req.body;
     const teacherId = req.teacherId;
     if (startTime > endTime) {
       return res
@@ -328,12 +360,19 @@ export async function updateTeacherLeavRequestController(req, res) {
     }
     const leaveRequest = await getLeaveRequestService({ _id: leaveRequestId });
     if (!leaveRequest) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Leave Request not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Leave Request not found"));
     }
     if (leaveRequest["status"] !== "pending") {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "Can't update leave request now as action has been taken by Admin."));
+        .send(
+          error(
+            400,
+            "Can't update leave request now as action has been taken by Admin."
+          )
+        );
     }
     const pipeline = [
       {
@@ -349,19 +388,29 @@ export async function updateTeacherLeavRequestController(req, res) {
 
     const leaveRequests = await getLeaveRequestsPipelineService(pipeline);
     if (leaveRequests.length > 0) {
-      const startDate = getFormattedDateService(new Date(leaveRequests[0].startTime));
-      const endDate = getFormattedDateService(new Date(leaveRequests[0].endTime));
+      const startDate = getFormattedDateService(
+        new Date(leaveRequests[0].startTime)
+      );
+      const endDate = getFormattedDateService(
+        new Date(leaveRequests[0].endTime)
+      );
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, `Leave already applied from ${startDate} to ${endDate}`));
+        .send(
+          error(409, `Leave already applied from ${startDate} to ${endDate}`)
+        );
     }
 
     await updateLeaveRequestService(
       { _id: leaveRequestId },
       { reason, description, startTime, endTime }
     );
-    return res.status(StatusCodes.OK).send(success(200, "Leave Request updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Leave Request updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

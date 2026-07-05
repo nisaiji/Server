@@ -25,7 +25,10 @@ const announcementReadStatusSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-announcementReadStatusSchema.index({ userId: 1, announcementId: 1 }, { unique: true });
+announcementReadStatusSchema.index(
+  { userId: 1, announcementId: 1 },
+  { unique: true }
+);
 
 const announcementReadStatusModel = mongoose.model(
   "announcementReadStatus",

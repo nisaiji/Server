@@ -104,12 +104,24 @@ const transferCertificateRequestSchema = new mongoose.Schema(
     // Conduct and Character
     conduct: {
       type: String,
-      enum: ["excellent", "verygood", "good", "satisfactory", "needsImprovement"],
+      enum: [
+        "excellent",
+        "verygood",
+        "good",
+        "satisfactory",
+        "needsImprovement"
+      ],
       default: "good"
     },
     character: {
       type: String,
-      enum: ["excellent", "verygood", "good", "satisfactory", "needsImprovement"],
+      enum: [
+        "excellent",
+        "verygood",
+        "good",
+        "satisfactory",
+        "needsImprovement"
+      ],
       default: "good"
     },
     clearanceStatus: [
@@ -128,7 +140,12 @@ const transferCertificateRequestSchema = new mongoose.Schema(
     // Request Status and Workflow
     status: {
       type: String,
-      enum: ["submitted", "approvedByParent", "rejectedByParent", "certificateIssued"],
+      enum: [
+        "submitted",
+        "approvedByParent",
+        "rejectedByParent",
+        "certificateIssued"
+      ],
       default: "submitted"
     },
 

@@ -11,7 +11,9 @@ export async function getLeaveRequestsPipelineService(pipeline) {
 
 export async function getLeaveRequestService(filter, projection = {}) {
   try {
-    const leaveRequest = await leaveRequestModel.findOne(filter).select(projection);
+    const leaveRequest = await leaveRequestModel
+      .findOne(filter)
+      .select(projection);
     return leaveRequest;
   } catch (error) {
     throw error;
@@ -20,7 +22,9 @@ export async function getLeaveRequestService(filter, projection = {}) {
 
 export async function getLeaveRequestsService(filter, projection = {}) {
   try {
-    const leaveRequests = await leaveRequestModel.find(filter).select(projection);
+    const leaveRequests = await leaveRequestModel
+      .find(filter)
+      .select(projection);
     return leaveRequests;
   } catch (error) {
     throw error;

@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { adminControllerResponse } from "../config/httpResponse.js";
 import {
   constructStudentXlsxTemplate,
@@ -10,8 +9,14 @@ import {
   registerAdminService,
   updateAdminService
 } from "../services/admin.services.js";
-import { getAccessTokenService, getRefreshTokenService } from "../services/JWTToken.service.js";
-import { hashPasswordService, matchPasswordService } from "../services/password.service.js";
+import {
+  getAccessTokenService,
+  getRefreshTokenService
+} from "../services/JWTToken.service.js";
+import {
+  hashPasswordService,
+  matchPasswordService
+} from "../services/password.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerAdminController(req, res) {
@@ -23,13 +28,23 @@ export async function registerAdminController(req, res) {
       return res
 
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.registerAdminController.emailExists));
+        .send(
+          error(
+            409,
+            adminControllerResponse.registerAdminController.emailExists
+          )
+        );
     }
 
     if (admin && admin?.phone === phone) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.registerAdminController.phoneExists));
+        .send(
+          error(
+            409,
+            adminControllerResponse.registerAdminController.phoneExists
+          )
+        );
     }
     const hashedPassword = await hashPasswordService(password);
     req.body["password"] = hashedPassword;
@@ -55,11 +70,14 @@ export async function registerAdminController(req, res) {
       success(201, {
         accessToken,
         refreshToken,
-        msg: adminControllerResponse.registerAdminController.adminResiteredSuccessfully
+        msg: adminControllerResponse.registerAdminController
+          .adminResiteredSuccessfully
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -78,7 +96,10 @@ export async function loginAdminController(req, res) {
     // }
     const storedPassword = admin.password;
     const enteredPassword = password;
-    const matchPassword = await matchPasswordService({ enteredPassword, storedPassword });
+    const matchPassword = await matchPasswordService({
+      enteredPassword,
+      storedPassword
+    });
     if (!matchPassword) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
@@ -107,9 +128,13 @@ export async function loginAdminController(req, res) {
     });
     return res
       .status(StatusCodes.OK)
-      .send(success(200, { accessToken, refreshToken, username: admin.username }));
+      .send(
+        success(200, { accessToken, refreshToken, username: admin.username })
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -172,20 +197,34 @@ export async function updateAdminController(req, res) {
       _id: { $ne: adminId }
     });
 
-    if (admin && username && admin["username"] && admin["username"] == username) {
+    if (
+      admin &&
+      username &&
+      admin["username"] &&
+      admin["username"] == username
+    ) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.updateAdminController.usernameExists));
+        .send(
+          error(
+            409,
+            adminControllerResponse.updateAdminController.usernameExists
+          )
+        );
     }
     if (admin && email && admin["email"] == email) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.updateAdminController.emailExists));
+        .send(
+          error(409, adminControllerResponse.updateAdminController.emailExists)
+        );
     }
     if (admin && phone && admin["phone"] == phone) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.updateAdminController.phoneExists));
+        .send(
+          error(409, adminControllerResponse.updateAdminController.phoneExists)
+        );
     }
     if (
       admin &&
@@ -195,7 +234,12 @@ export async function updateAdminController(req, res) {
     ) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, adminControllerResponse.updateAdminController.affiliationExists));
+        .send(
+          error(
+            409,
+            adminControllerResponse.updateAdminController.affiliationExists
+          )
+        );
     }
 
     if (schoolName) {
@@ -275,9 +319,16 @@ export async function updateAdminController(req, res) {
 
     return res
       .status(StatusCodes.OK)
-      .send(success(200, adminControllerResponse.updateAdminController.adminUpdatedSuccessfully));
+      .send(
+        success(
+          200,
+          adminControllerResponse.updateAdminController.adminUpdatedSuccessfully
+        )
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -287,7 +338,9 @@ export async function getAdminController(req, res) {
     const admin = await getAdminService({ _id: adminId });
     return res.status(StatusCodes.OK).send(success(200, admin));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -298,11 +351,16 @@ export async function getStudentDemoExcelSheetController(req, res) {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-    res.setHeader("Content-Disposition", "attachment; filename=" + "student-template.xlsx");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "student-template.xlsx"
+    );
     await workbook.xlsx.write(res);
     res.status(StatusCodes.OK).end();
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -313,10 +371,15 @@ export async function getTeacherDemoExcelSheetController(req, res) {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-    res.setHeader("Content-Disposition", "attachment; filename=" + "teacher-template.xlsx");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "teacher-template.xlsx"
+    );
     await workbook.xlsx.write(res);
     res.status(StatusCodes.OK).end();
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

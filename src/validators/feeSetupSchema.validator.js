@@ -38,7 +38,8 @@ const createFeeCycleSchema = Joi.object({
     .valid("MONTHLY", "QUARTERLY", "BY_MONTHLY", "HALF_YEARLY", "YEARLY")
     .required()
     .messages({
-      "any.only": "Frequency must be one of MONTHLY, QUARTERLY, BY_MONTHLY, HALF_YEARLY, YEARLY.",
+      "any.only":
+        "Frequency must be one of MONTHLY, QUARTERLY, BY_MONTHLY, HALF_YEARLY, YEARLY.",
       "any.required": "Frequency is required.",
       "string.base": "Frequency must be a string."
     }),
@@ -56,7 +57,8 @@ const updateFeeCycleSchema = Joi.object({
     .valid("MONTHLY", "QUARTERLY", "BY_MONTHLY", "HALF_YEARLY", "YEARLY")
     .required()
     .messages({
-      "any.only": "Frequency must be one of MONTHLY, QUARTERLY, BY_MONTHLY, HALF_YEARLY, YEARLY.",
+      "any.only":
+        "Frequency must be one of MONTHLY, QUARTERLY, BY_MONTHLY, HALF_YEARLY, YEARLY.",
       "any.required": "Frequency is required.",
       "string.base": "Frequency must be a string."
     }),
@@ -150,10 +152,14 @@ const feeStructurePayloadSchema = {
   amountForAllSections: Joi.boolean().default(false).messages({
     "boolean.base": "Amount for all sections must be a boolean."
   }),
-  applicableSections: Joi.array().items(feeStructureSectionSchema).min(1).required().messages({
-    "array.min": "At least one section is required.",
-    "any.required": "Applicable sections are required."
-  })
+  applicableSections: Joi.array()
+    .items(feeStructureSectionSchema)
+    .min(1)
+    .required()
+    .messages({
+      "array.min": "At least one section is required.",
+      "any.required": "Applicable sections are required."
+    })
 };
 
 const feeSetupVerifySchema = Joi.object({
@@ -167,11 +173,14 @@ const feeSetupVerifySchema = Joi.object({
     "any.required": "Token is required.",
     "string.base": "Token must be a string."
   }),
-  type: Joi.string().valid("VERIFY_FEE_STRUCTURE", "VERIFY_FEE_HEAD").required().messages({
-    "any.only": "Type must be VERIFY_FEE_STRUCTURE or VERIFY_FEE_HEAD.",
-    "any.required": "Type is required.",
-    "string.base": "Type must be a string."
-  })
+  type: Joi.string()
+    .valid("VERIFY_FEE_STRUCTURE", "VERIFY_FEE_HEAD")
+    .required()
+    .messages({
+      "any.only": "Type must be VERIFY_FEE_STRUCTURE or VERIFY_FEE_HEAD.",
+      "any.required": "Type is required.",
+      "string.base": "Type must be a string."
+    })
 });
 
 const createFeeStructureSchema = Joi.object(feeStructurePayloadSchema);

@@ -1,10 +1,14 @@
 import sendGrid from "@sendgrid/mail";
-
 import { config } from "./config.js";
 
 sendGrid.setApiKey(config.sendGridApiKey);
 
-export async function sendEmailBySendGrid({ fromEmail, toEmail, subject, html }) {
+export async function sendEmailBySendGrid({
+  fromEmail,
+  toEmail,
+  subject,
+  html
+}) {
   try {
     const msg = {
       to: toEmail,

@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { registerCustomerSupportQueryService } from "../services/customerSupport.services.js";
 
 export async function createCustomerSupportQueryController(req, res) {
@@ -28,9 +27,11 @@ export async function createCustomerSupportQueryController(req, res) {
       phone,
       message
     });
-    return res
-      .status(StatusCodes.OK)
-      .send({ status: "success", statusCode: 200, msg: "Your Query save successfully" });
+    return res.status(StatusCodes.OK).send({
+      status: "success",
+      statusCode: 200,
+      msg: "Your Query save successfully"
+    });
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import {
   deleteClassService,
   getClassService,
@@ -21,7 +20,9 @@ export async function registerClassController(req, res) {
     });
     const session = await getSessionService({ _id: sessionId });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
       return res
@@ -29,13 +30,23 @@ export async function registerClassController(req, res) {
         .send(error(404, "Session completed! can't register class"));
     }
     if (classInfo) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Class already exists"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Class already exists"));
     }
 
-    await registerClassService({ name, admin: req.adminId, session: sessionId });
-    return res.status(StatusCodes.OK).send(success(200, "Class registered successfully"));
+    await registerClassService({
+      name,
+      admin: req.adminId,
+      session: sessionId
+    });
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Class registered successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -50,26 +61,38 @@ export async function deleteClassController(req, res) {
         .send(error(404, "Session completed! can't delete class"));
     }
     if (!classInfo) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(400, "Class doesn't exists"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(400, "Class doesn't exists"));
     }
 
     if (classInfo["section"].length > 0) {
-      return res.status(StatusCodes.NOT_ACCEPTABLE).send(error(406, "Class has sections."));
+      return res
+        .status(StatusCodes.NOT_ACCEPTABLE)
+        .send(error(406, "Class has sections."));
     }
     await deleteClassService({ _id: classId });
-    return res.status(StatusCodes.OK).send(success(200, "Class deleted successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Class deleted successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
 export async function getClassController(req, res) {
   try {
     const id = req.params.classId;
-    const classInfo = await customGetClassWithSectionTeacherService({ _id: id });
+    const classInfo = await customGetClassWithSectionTeacherService({
+      _id: id
+    });
     return res.status(StatusCodes.OK).send(success(200, { class: classInfo }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -80,7 +103,9 @@ export async function getClassListController(req, res) {
     console.log({ _id: sessionId, school: admin });
     const session = await getSessionService({ _id: sessionId, school: admin });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
 
     const pipeline = [
@@ -102,6 +127,8 @@ export async function getClassListController(req, res) {
     const classes = await getClassesPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, classes));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

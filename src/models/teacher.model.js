@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 import { generateCustomId } from "../helpers/idGenerator.helper.js";
 const teacherSchema = mongoose.Schema(
   {

@@ -1,5 +1,4 @@
 import express from "express";
-
 import studentRouter from "./student.router.js";
 const v3Router = express.Router();
 

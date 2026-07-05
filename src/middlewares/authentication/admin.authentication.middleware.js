@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import Jwt from "jsonwebtoken";
-
 import { config } from "../../config/config.js";
 import { getAdminService } from "../../services/admin.services.js";
 import { error } from "../../utils/responseWrapper.js";
@@ -21,18 +20,24 @@ export async function adminAuthenticate(req, res, next) {
     const _id = decoded.adminId;
     const admin = await getAdminService({ _id });
     if (!admin) {
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Admin not exists"));
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .send(error(403, "Admin not exists"));
     }
 
     if (admin && !admin["isActive"] && admin["statusChangeCount"] === 0) {
       return res
         .status(StatusCodes.FORBIDDEN)
-        .send(error(403, "Services are temporarily paused. Please contact support."));
+        .send(
+          error(403, "Services are temporarily paused. Please contact support.")
+        );
     }
     if (admin && !admin["isActive"]) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "Services are temporarily paused. Please contact support."));
+        .send(
+          error(400, "Services are temporarily paused. Please contact support.")
+        );
     }
     req.adminId = _id;
     req.role = "admin";

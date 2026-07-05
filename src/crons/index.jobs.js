@@ -1,5 +1,4 @@
 import { CronJob } from "cron";
-
 import changePasswordRequestExpireJob from "./jobs/changePasswordRequestExpire.job.js";
 import GuestTeacherStartJob from "./jobs/guestTeacherStart.job.js";
 import GuestTeacherStopJob from "./jobs/guestTeacherStop.job.js";

@@ -28,7 +28,8 @@ export default {
   changePasswordController: {
     requestSent: "Password reset request sent successfully",
     requestApproved: "Password reset request approved successfully",
-    requestPending: "Your password reset request is being processed by the admin",
+    requestPending:
+      "Your password reset request is being processed by the admin",
     requestNotFound: "Password reset request not found",
     unauthorizedUser: "Unauthorized user",
     userNotFound: "User not found",

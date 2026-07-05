@@ -74,4 +74,9 @@ const updateHolidaySchema = Joi.object({
   description: Joi.string().allow("").optional()
 });
 
-export { createHolidaySchema, createHolidaysSchema, getHolidaySchema, updateHolidaySchema };
+export {
+  createHolidaySchema,
+  createHolidaysSchema,
+  getHolidaySchema,
+  updateHolidaySchema
+};

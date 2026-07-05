@@ -1,6 +1,9 @@
 import { getAdminsService } from "../../services/admin.services.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
-import { registerSessionService, updateSessionService } from "../../services/session.services.js";
+import {
+  registerSessionService,
+  updateSessionService
+} from "../../services/session.services.js";
 
 const SessionCreateJob = async () => {
   try {

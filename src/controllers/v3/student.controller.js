@@ -1,15 +1,16 @@
 import fs from "fs/promises";
-
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import xlsx from "xlsx";
-
 import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
 import { getStartAndEndTimeService } from "../../services/celender.service.js";
 import { getClassService } from "../../services/class.services.js";
 import { getFeeStructureService } from "../../services/feeSetup.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
-import { getSectionService, updateSectionService } from "../../services/section.services.js";
+import {
+  getSectionService,
+  updateSectionService
+} from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
 import {
   getStudentService,
@@ -59,40 +60,69 @@ export async function registerStudentAndSessionStudentController(req, res) {
     const adminId = req.adminId;
 
     if (!studentData.sectionId) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "sectionId is required"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "sectionId is required"));
     }
 
     const section = await getSectionService({ _id: studentData.sectionId });
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
 
-    const [classInfo, session, studentWithAadhar, parent, schoolParentFromDb, feeStructureDetails] =
-      await Promise.all([
-        getClassService({ _id: section.classId }),
-        getSessionService({ _id: section.session }),
-        getStudentService({ aadharNumber: studentData.aadharNumber, isActive: true }),
-        getParentService({ phone: studentData.phone, isActive: true }),
-        getSchoolParentService({ phone: studentData.phone, school: adminId, isActive: true }),
-        getFeeStructureService({ adminId, sessionId: section.session, classId: section.classId })
-      ]);
+    const [
+      classInfo,
+      session,
+      studentWithAadhar,
+      parent,
+      schoolParentFromDb,
+      feeStructureDetails
+    ] = await Promise.all([
+      getClassService({ _id: section.classId }),
+      getSessionService({ _id: section.session }),
+      getStudentService({
+        aadharNumber: studentData.aadharNumber,
+        isActive: true
+      }),
+      getParentService({ phone: studentData.phone, isActive: true }),
+      getSchoolParentService({
+        phone: studentData.phone,
+        school: adminId,
+        isActive: true
+      }),
+      getFeeStructureService({
+        adminId,
+        sessionId: section.session,
+        classId: section.classId
+      })
+    ]);
 
     console.log(feeStructureDetails);
 
     if (!classInfo) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Class not found"));
     }
 
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
 
     if (session.status === "completed") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session is already completed"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Session is already completed"));
     }
 
     if (studentWithAadhar) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Aadhar number already registered"));
     }
 
     let parentObj = parent;
@@ -101,16 +131,23 @@ export async function registerStudentAndSessionStudentController(req, res) {
     if (!schoolParentFromDb) {
       parentObj = parentObj
         ? parentObj
-        : await registerParentService({ phone: studentData.phone, status: "unVerified" });
+        : await registerParentService({
+            phone: studentData.phone,
+            status: "unVerified"
+          });
 
       schoolParent = await registerSchoolParentService({
         fullname: studentData.parentName,
         phone: studentData.phone,
         school: adminId,
         parent: parentObj._id,
-        ...(studentData.qualification && { qualification: studentData.qualification }),
+        ...(studentData.qualification && {
+          qualification: studentData.qualification
+        }),
         ...(studentData.occupation && { occupation: studentData.occupation }),
-        ...(studentData.parentAddress && { address: studentData.parentAddress }),
+        ...(studentData.parentAddress && {
+          address: studentData.parentAddress
+        }),
         ...(studentData.parentGender && { gender: studentData.parentGender }),
         ...(studentData.age && { age: studentData.age }),
         ...(studentData.email && { email: studentData.email })
@@ -122,7 +159,9 @@ export async function registerStudentAndSessionStudentController(req, res) {
       schoolParent: schoolParent._id
     });
     if (existingStudent) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Student already exists"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Student already exists"));
     }
 
     const studentObj = {
@@ -143,46 +182,54 @@ export async function registerStudentAndSessionStudentController(req, res) {
     const transactionSession = await mongoose.startSession();
 
     try {
-      const sessionStudent = await transactionSession.withTransaction(async () => {
-        const [student] = await registerStudentService([studentObj], transactionSession);
-
-        const sessionStudentObj = {
-          section: studentData.sectionId,
-          classId: classInfo._id,
-          session: session._id,
-          school: adminId,
-          student: student._id
-        };
-
-        const [sessionStudent] = await registerSessionStudentService(
-          [sessionStudentObj],
-          transactionSession
-        );
-        await updateSectionService(
-          { _id: studentData.sectionId },
-          { $inc: { studentCount: 1 } },
-          transactionSession
-        );
-        if (feeStructureDetails?.isVerified) {
-          await createOrUpdateDuesForFeeStructure(
-            feeStructureDetails,
-            sessionStudent._id,
+      const sessionStudent = await transactionSession.withTransaction(
+        async () => {
+          const [student] = await registerStudentService(
+            [studentObj],
             transactionSession
           );
-        }
 
-        return sessionStudent;
-      });
-      return res
-        .status(StatusCodes.CREATED)
-        .send(
-          success(201, { message: "Student registered successfully!", student: sessionStudent })
-        );
+          const sessionStudentObj = {
+            section: studentData.sectionId,
+            classId: classInfo._id,
+            session: session._id,
+            school: adminId,
+            student: student._id
+          };
+
+          const [sessionStudent] = await registerSessionStudentService(
+            [sessionStudentObj],
+            transactionSession
+          );
+          await updateSectionService(
+            { _id: studentData.sectionId },
+            { $inc: { studentCount: 1 } },
+            transactionSession
+          );
+          if (feeStructureDetails?.isVerified) {
+            await createOrUpdateDuesForFeeStructure(
+              feeStructureDetails,
+              sessionStudent._id,
+              transactionSession
+            );
+          }
+
+          return sessionStudent;
+        }
+      );
+      return res.status(StatusCodes.CREATED).send(
+        success(201, {
+          message: "Student registered successfully!",
+          student: sessionStudent
+        })
+      );
     } finally {
       await transactionSession.endSession();
     }
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -194,7 +241,9 @@ export async function registerSessionStudentController(req, res) {
     if (!studentId || !sectionId || !classId || !sessionId) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "studentId, sectionId, classId and sessionId are required"));
+        .send(
+          error(400, "studentId, sectionId, classId and sessionId are required")
+        );
     }
 
     const [section, student, classInfo, session] = await Promise.all([
@@ -205,23 +254,33 @@ export async function registerSessionStudentController(req, res) {
     ]);
 
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
 
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
 
     if (!classInfo) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Class not found"));
     }
 
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
 
     if (session.status === "completed") {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Session is completed"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Session is completed"));
     }
 
     if (
@@ -229,21 +288,29 @@ export async function registerSessionStudentController(req, res) {
       section.session.toString() !== session._id.toString() ||
       section.classId.toString() !== classInfo._id.toString()
     ) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid class or section"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Invalid class or section"));
     }
 
     const [studentWithAadhar, parent, schoolParent] = await Promise.all([
-      aadharNumber ? getStudentService({ aadharNumber, isActive: true }) : Promise.resolve(null),
+      aadharNumber
+        ? getStudentService({ aadharNumber, isActive: true })
+        : Promise.resolve(null),
       getParentService({ _id: student.parent }),
       getSchoolParentService({ _id: student.schoolParent })
     ]);
 
     if (studentWithAadhar && studentWithAadhar._id.toString() !== studentId) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Aadhar number already registered"));
     }
 
     if (!parent || !schoolParent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent not found"));
     }
 
     const sessionStudent = await getSessionStudentService({
@@ -268,7 +335,10 @@ export async function registerSessionStudentController(req, res) {
 
     const [createdSessionStudent] = await Promise.all([
       registerSessionStudentService(sessionStudentObj),
-      updateSectionService({ _id: sectionId }, { studentCount: (section.studentCount || 0) + 1 })
+      updateSectionService(
+        { _id: sectionId },
+        { studentCount: (section.studentCount || 0) + 1 }
+      )
     ]);
 
     return res.status(StatusCodes.CREATED).send(
@@ -278,7 +348,9 @@ export async function registerSessionStudentController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -292,21 +364,35 @@ export async function updateStudentBySchoolController(req, res) {
 
     const student = await getStudentService({ _id: studentId, isActive: true });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
-    let schoolParent = await getSchoolParentService({ _id: student["schoolParent"] });
+    let schoolParent = await getSchoolParentService({
+      _id: student["schoolParent"]
+    });
     if (!schoolParent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent not found"));
     }
-    let parent = await getParentService({ _id: student["parent"], isActive: true });
+    let parent = await getParentService({
+      _id: student["parent"],
+      isActive: true
+    });
     if (!parent && schoolParent["parent"]) {
-      parent = await getParentService({ _id: schoolParent["parent"], isActive: true });
+      parent = await getParentService({
+        _id: schoolParent["parent"],
+        isActive: true
+      });
       if (parent) {
         studentUpdate.parent = parent["_id"];
       }
     }
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent not found"));
     }
 
     addFieldsIfPresent(studentUpdate, req.body, [
@@ -335,7 +421,9 @@ export async function updateStudentBySchoolController(req, res) {
     });
     // If a student with same Aadhar exists AND it's not the same student
     if (studentWithAadhar && studentWithAadhar._id.toString() !== studentId) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Aadhar number already registered"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Aadhar number already registered"));
     }
     if (req.body["phone"] && schoolParent["phone"] !== req.body["phone"]) {
       const phone = req.body["phone"];
@@ -356,7 +444,9 @@ export async function updateStudentBySchoolController(req, res) {
       ]);
 
       if (parentWithPhone || schoolParentWithPhone) {
-        return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
+        return res
+          .status(StatusCodes.CONFLICT)
+          .send(error(409, "Phone number already registered"));
       }
 
       if (phone !== schoolParent.phone) {
@@ -391,16 +481,25 @@ export async function updateStudentBySchoolController(req, res) {
 
     const updatePromises = [
       updateStudentService({ _id: studentId }, studentUpdate),
-      updateSchoolParentService({ _id: schoolParent["_id"] }, schoolParentUpdate)
+      updateSchoolParentService(
+        { _id: schoolParent["_id"] },
+        schoolParentUpdate
+      )
     ];
     if (Object.keys(parentProfileUpdate).length) {
-      updatePromises.push(updateParentService({ _id: parent["_id"] }, parentProfileUpdate));
+      updatePromises.push(
+        updateParentService({ _id: parent["_id"] }, parentProfileUpdate)
+      );
     }
 
     await Promise.all(updatePromises);
-    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Student updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -412,15 +511,21 @@ export async function updateStudentByParentController(req, res) {
 
     const student = await getStudentService({ _id: studentId, isActive: true });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
     const parent = await getParentService({ _id: parentId });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent not found"));
     }
 
     if (!parent["students"]?.some((id) => id.equals(studentId))) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "User is not authorized"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "User is not authorized"));
     }
 
     addFieldsIfPresent(studentUpdate, req.body, [
@@ -443,9 +548,13 @@ export async function updateStudentByParentController(req, res) {
     }
 
     await updateStudentService({ _id: studentId }, studentUpdate);
-    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Student updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(501, err.message));
   }
 }
 
@@ -546,7 +655,14 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         as: "attendances",
         pipeline: [
           { $match: { date: { $gte: startTime, $lte: endTime } } },
-          { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } }
+          {
+            $project: {
+              date: 1,
+              day: 1,
+              parentAttendance: 1,
+              teacherAttendance: 1
+            }
+          }
         ]
       }
     },
@@ -663,7 +779,10 @@ export async function getSessionStudentSController(req, res) {
     if (classId) filter["classId"] = convertToMongoId(classId);
     if (section) filter["section"] = convertToMongoId(section);
     if (sessionStudentId) filter["_id"] = convertToMongoId(sessionStudentId);
-    const { startTime, endTime } = getStartAndEndTimeService(new Date(), new Date());
+    const { startTime, endTime } = getStartAndEndTimeService(
+      new Date(),
+      new Date()
+    );
 
     const sessionStudents = await getSessionStudentsPipelineService(
       buildSessionStudentDetailPipeline(filter, startTime, endTime)
@@ -671,17 +790,20 @@ export async function getSessionStudentSController(req, res) {
 
     await Promise.all(
       sessionStudents.map((student) =>
-        calculateAttendancePercentageForSessionStudent(student._id, student.sessionId).then(
-          (percentage) => {
-            student.attendancePercentage = percentage;
-          }
-        )
+        calculateAttendancePercentageForSessionStudent(
+          student._id,
+          student.sessionId
+        ).then((percentage) => {
+          student.attendancePercentage = percentage;
+        })
       )
     );
 
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -690,7 +812,9 @@ export async function getAdminStudentDetailController(req, res) {
     const sessionStudentId = req.params.sessionStudentId;
 
     if (!sessionStudentId) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "sessionStudentId is required"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "sessionStudentId is required"));
     }
 
     const filter = {
@@ -698,32 +822,38 @@ export async function getAdminStudentDetailController(req, res) {
       school: convertToMongoId(req.adminId),
       isActive: true
     };
-    const { startTime, endTime } = getStartAndEndTimeService(new Date(), new Date());
+    const { startTime, endTime } = getStartAndEndTimeService(
+      new Date(),
+      new Date()
+    );
     const sessionStudents = await getSessionStudentsPipelineService(
       buildSessionStudentDetailPipeline(filter, startTime, endTime)
     );
     const student = sessionStudents[0];
 
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
 
-    const [attendanceSummary, subjectSummary, leaveSummary, examSummary] = await Promise.all([
-      buildAttendanceSummaryForSessionStudent(student._id, student.sessionId),
-      buildSubjectSummaryForContext({
-        schoolId: req.adminId,
-        sessionId: student.sessionId,
-        classId: student.classId,
-        sectionId: student.sectionId
-      }),
-      buildLeaveSummaryForSessionStudent(student._id),
-      buildExamSummaryForSessionStudent({
-        schoolId: req.adminId,
-        sessionId: student.sessionId,
-        sectionId: student.sectionId,
-        sessionStudentId: student._id
-      })
-    ]);
+    const [attendanceSummary, subjectSummary, leaveSummary, examSummary] =
+      await Promise.all([
+        buildAttendanceSummaryForSessionStudent(student._id, student.sessionId),
+        buildSubjectSummaryForContext({
+          schoolId: req.adminId,
+          sessionId: student.sessionId,
+          classId: student.classId,
+          sectionId: student.sectionId
+        }),
+        buildLeaveSummaryForSessionStudent(student._id),
+        buildExamSummaryForSessionStudent({
+          schoolId: req.adminId,
+          sessionId: student.sessionId,
+          sectionId: student.sectionId,
+          sessionStudentId: student._id
+        })
+      ]);
 
     student.attendanceSummary = attendanceSummary;
     student.attendancePercentage = attendanceSummary.currentSessionPercentage;
@@ -733,7 +863,9 @@ export async function getAdminStudentDetailController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, student));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -741,17 +873,25 @@ export async function getAttendancesController(req, res) {
   try {
     let { startTime, endTime, sessionStudentId } = req.body;
     const parentId = req.parentId;
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    const sessionStudent = await getSessionStudentService({
+      _id: sessionStudentId
+    });
     if (!sessionStudent) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Student not found"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Student not found"));
     }
     const parent = await getParentService({ _id: parentId });
     if (!parent["students"]?.some((id) => id.equals(sessionStudent.student))) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(400, "Unauthorized access"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(400, "Unauthorized access"));
     }
 
     const filter = { isActive: true, _id: convertToMongoId(sessionStudentId) };
-    const attendanceFilter = { date: { $gte: Number(startTime), $lte: Number(endTime) } };
+    const attendanceFilter = {
+      date: { $gte: Number(startTime), $lte: Number(endTime) }
+    };
 
     const pipeline = [
       {
@@ -858,7 +998,9 @@ export async function getAttendancesController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -867,7 +1009,9 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
     const studentId = req.params.studentId;
     const student = await getStudentService({ _id: studentId, isActive: true });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
 
     const pipeline = [
@@ -960,7 +1104,9 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
     const students = await getStudentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, students));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1001,14 +1147,29 @@ export async function searchStudentsController(req, res) {
         ];
       } else {
         filter["$or"] = [
-          { "student.firstname": { $regex: new RegExp(search, "i") }, isActive: true },
-          { "student.lastname": { $regex: new RegExp(search, "i") }, isActive: true },
-          { "schoolParent.email": { $regex: new RegExp(search, "i") }, isActive: true },
-          { "schoolParent.phone": { $regex: new RegExp(search, "i") }, isActive: true }
+          {
+            "student.firstname": { $regex: new RegExp(search, "i") },
+            isActive: true
+          },
+          {
+            "student.lastname": { $regex: new RegExp(search, "i") },
+            isActive: true
+          },
+          {
+            "schoolParent.email": { $regex: new RegExp(search, "i") },
+            isActive: true
+          },
+          {
+            "schoolParent.phone": { $regex: new RegExp(search, "i") },
+            isActive: true
+          }
         ];
       }
     }
-    const { startTime, endTime } = getStartAndEndTimeService(new Date(), new Date());
+    const { startTime, endTime } = getStartAndEndTimeService(
+      new Date(),
+      new Date()
+    );
 
     const pipeline = [
       // Join students with parents
@@ -1096,7 +1257,14 @@ export async function searchStudentsController(req, res) {
           as: "attendances",
           pipeline: [
             { $match: { date: { $gte: startTime, $lte: endTime } } },
-            { $project: { date: 1, day: 1, parentAttendance: 1, teacherAttendance: 1 } }
+            {
+              $project: {
+                date: 1,
+                day: 1,
+                parentAttendance: 1,
+                teacherAttendance: 1
+              }
+            }
           ]
         }
       },
@@ -1235,11 +1403,12 @@ export async function searchStudentsController(req, res) {
 
     await Promise.all(
       students.map((student) =>
-        calculateAttendancePercentageForSessionStudent(student._id, student.sessionId).then(
-          (percentage) => {
-            student.attendancePercentage = percentage;
-          }
-        )
+        calculateAttendancePercentageForSessionStudent(
+          student._id,
+          student.sessionId
+        ).then((percentage) => {
+          student.attendancePercentage = percentage;
+        })
       )
     );
 
@@ -1253,7 +1422,9 @@ export async function searchStudentsController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1270,19 +1441,27 @@ export async function registerStudentsFromExcelController(req, res) {
     ]);
 
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
 
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
 
     if (!classInfo) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Class not found"));
     }
 
     if (section["classId"].toString() !== classInfo["_id"].toString()) {
-      return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Invalid class, section ids"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(success(400, "Invalid class, section ids"));
     }
 
     const workbook = xlsx.readFile(file.path);
@@ -1301,18 +1480,29 @@ export async function registerStudentsFromExcelController(req, res) {
     await fs.unlink(file.path);
     return res
       .status(StatusCodes.OK)
-      .send(success(201, `${registeredStudentsCount} Students registered successfully`));
+      .send(
+        success(
+          201,
+          `${registeredStudentsCount} Students registered successfully`
+        )
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(501, err.message));
   }
 }
 
 export async function getSubjectsForStudentSectionController(req, res) {
   try {
     const sessionStudentId = req.params.sessionStudentId;
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    const sessionStudent = await getSessionStudentService({
+      _id: sessionStudentId
+    });
     if (!sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session student not found"));
     }
     const pipeline = [
       {
@@ -1397,10 +1587,15 @@ export async function getSubjectsForStudentSectionController(req, res) {
       }
     ];
 
-    const teacherSubjectSections = await getTeacherSubjectSectionPipelineService(pipeline);
-    return res.status(StatusCodes.OK).send(success(200, teacherSubjectSections));
+    const teacherSubjectSections =
+      await getTeacherSubjectSectionPipelineService(pipeline);
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, teacherSubjectSections));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -1413,11 +1608,15 @@ export async function deleteStudentController(req, res) {
     });
 
     if (!sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Student doesn't exists"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Student doesn't exists"));
     }
     const student = await getStudentService({ _id: sessionStudent["student"] });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student doesn't exists"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student doesn't exists"));
     }
 
     const [parent, section] = await Promise.all([
@@ -1426,12 +1625,20 @@ export async function deleteStudentController(req, res) {
     ]);
 
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent doesn't exists"));
     }
 
     await Promise.all([
-      updateSessionStudentService({ _id: sessionStudentId }, { isActive: false }),
-      updateSectionService({ _id: section["_id"] }, { studentCount: section["studentCount"] - 1 })
+      updateSessionStudentService(
+        { _id: sessionStudentId },
+        { isActive: false }
+      ),
+      updateSectionService(
+        { _id: section["_id"] },
+        { studentCount: section["studentCount"] - 1 }
+      )
     ]);
 
     const siblings = await getStudentsService({
@@ -1439,11 +1646,18 @@ export async function deleteStudentController(req, res) {
       isActive: true
     });
     if (siblings?.length === 0) {
-      await updateSchoolParentService({ _id: student["schoolParent"] }, { isActive: false });
+      await updateSchoolParentService(
+        { _id: student["schoolParent"] },
+        { isActive: false }
+      );
     }
 
-    return res.status(StatusCodes.OK).send(success(200, "Student deleted successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Student deleted successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

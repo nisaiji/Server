@@ -3,7 +3,9 @@ import { convertToMongoId } from "../mongoose.services.js";
 
 export async function getSchoolParentService(filter, projection = {}) {
   try {
-    const schoolParent = await schoolParentModel.findOne(filter).select(projection);
+    const schoolParent = await schoolParentModel
+      .findOne(filter)
+      .select(projection);
     return schoolParent;
   } catch (error) {
     throw error;

@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createSubjectController,
   deleteSubjectController,
@@ -15,8 +14,16 @@ import { teacherAuthenticate } from "../middlewares/authentication/teacher.authe
 const subjectRouter = express.Router();
 
 subjectRouter.post("/", superAdminAuthenticate, createSubjectController);
-subjectRouter.put("/:subjectId", superAdminAuthenticate, updateSubjectController);
-subjectRouter.get("/super-admin", superAdminAuthenticate, getAllSubjectsController);
+subjectRouter.put(
+  "/:subjectId",
+  superAdminAuthenticate,
+  updateSubjectController
+);
+subjectRouter.get(
+  "/super-admin",
+  superAdminAuthenticate,
+  getAllSubjectsController
+);
 subjectRouter.get(
   "/admin/:sectionId",
   adminAuthenticate,
@@ -27,7 +34,11 @@ subjectRouter.get(
   teacherAuthenticate,
   getUnassignedSubjectsForSectionController
 );
-subjectRouter.delete("/:subjectId", superAdminAuthenticate, deleteSubjectController);
+subjectRouter.delete(
+  "/:subjectId",
+  superAdminAuthenticate,
+  deleteSubjectController
+);
 subjectRouter.get("/admin", adminAuthenticate, getSubjectsController);
 
 // subjectRouter.get("/:sessionId", adminAuthenticate, getSubjectsController);

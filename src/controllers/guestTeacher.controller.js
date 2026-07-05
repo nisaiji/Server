@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import {
   getGuestTeacherService,
   updateGuestTeacherService
@@ -55,7 +54,9 @@ export async function updateGuestTeacherController(req, res) {
     const { username, tagline, password } = req.body;
     const guestTeacher = await getGuestTeacherService({ _id: teacherId });
     if (!guestTeacher) {
-      return res.status(StatusCodes.UNAUTHORIZED).send(error(404, "Teacher not found"));
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .send(error(404, "Teacher not found"));
     }
     const fieldsToBeUpdated = {};
     if (username) {
@@ -69,8 +70,12 @@ export async function updateGuestTeacherController(req, res) {
     }
     await updateGuestTeacherService({ _id: teacherId }, fieldsToBeUpdated);
 
-    return res.status(StatusCodes.OK).send(success(200, "Teacher updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Teacher updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

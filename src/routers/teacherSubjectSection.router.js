@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createTeacherSubjectSectionController,
   deleteTeacherSubjectSectionController,
@@ -13,7 +12,11 @@ import { teacherAuthenticate } from "../middlewares/authentication/teacher.authe
 
 const teacherSubjectSectionRouter = express.Router();
 
-teacherSubjectSectionRouter.post("/", adminAuthenticate, createTeacherSubjectSectionController);
+teacherSubjectSectionRouter.post(
+  "/",
+  adminAuthenticate,
+  createTeacherSubjectSectionController
+);
 // teacherSubjectSectionRouter.post("/", teacherAuthenticate, createTeacherSubjectSectionController );
 teacherSubjectSectionRouter.get(
   "/teacher",

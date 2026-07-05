@@ -108,6 +108,9 @@ const sessionTeacherSchema = mongoose.Schema(
   }
 );
 
-const sessionTeacherModel = mongoose.model("sessionTeacher", sessionTeacherSchema);
+const sessionTeacherModel = mongoose.model(
+  "sessionTeacher",
+  sessionTeacherSchema
+);
 
 export default sessionTeacherModel;

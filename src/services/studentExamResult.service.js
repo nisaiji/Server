@@ -20,7 +20,9 @@ export async function getStudentExamResultsService(paramObj) {
 
 export async function getStudentExamResultsPipelineService(pipeline) {
   try {
-    const StudentExamResults = await studentExamResultModel.aggregate(pipeline).exec();
+    const StudentExamResults = await studentExamResultModel
+      .aggregate(pipeline)
+      .exec();
     return StudentExamResults;
   } catch (error) {
     throw error;
@@ -50,7 +52,10 @@ export async function createStudentExamResultService(paramObj) {
 
 export async function updateStudentExamResultService(filter, update) {
   try {
-    const studentExamResult = await studentExamResultModel.findOneAndUpdate(filter, update);
+    const studentExamResult = await studentExamResultModel.findOneAndUpdate(
+      filter,
+      update
+    );
     return studentExamResult;
   } catch (error) {
     throw error;
@@ -59,7 +64,8 @@ export async function updateStudentExamResultService(filter, update) {
 
 export async function deleteStudentExamResultService(filter) {
   try {
-    const studentExamResult = await studentExamResultModel.findOneAndDelete(filter);
+    const studentExamResult =
+      await studentExamResultModel.findOneAndDelete(filter);
     return studentExamResult;
   } catch (error) {
     throw error;

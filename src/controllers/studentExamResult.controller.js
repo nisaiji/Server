@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { getExamService } from "../services/exam.services.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSectionService } from "../services/section.services.js";
@@ -29,19 +28,37 @@ export async function createStudentExamResultController(req, res) {
       .status(StatusCodes.CREATED)
       .send(success(201, "Student exam result created successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
-export async function createOrUpdateStudentExamResultByTeacherController(req, res) {
+export async function createOrUpdateStudentExamResultByTeacherController(
+  req,
+  res
+) {
   try {
-    const { studentExamResultId, examId, sessionStudentId, subjectId, components } = req.body;
+    const {
+      studentExamResultId,
+      examId,
+      sessionStudentId,
+      subjectId,
+      components
+    } = req.body;
     if (studentExamResultId) {
-      const studentExamResult = await getStudentExamResultService({ _id: studentExamResultId });
+      const studentExamResult = await getStudentExamResultService({
+        _id: studentExamResultId
+      });
       if (!studentExamResult) {
-        return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student exam result not found"));
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .send(error(404, "Student exam result not found"));
       }
-      await updateStudentExamResultService({ _id: studentExamResultId }, { components });
+      await updateStudentExamResultService(
+        { _id: studentExamResultId },
+        { components }
+      );
       return res
         .status(StatusCodes.OK)
         .send(success(200, "Student exam result updated successfully"));
@@ -56,7 +73,9 @@ export async function createOrUpdateStudentExamResultByTeacherController(req, re
       .status(StatusCodes.CREATED)
       .send(success(201, "Student exam result created successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -66,7 +85,9 @@ export async function updateStudentExamResultController(req, res) {
     const { examId, sessionStudentId, subjectId, components } = req.body;
     const studentExamResult = await getStudentExamResultService({ _id: id });
     if (!studentExamResult) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student exam result not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student exam result not found"));
     }
     const params = {};
     if (examId) params.exam = examId;
@@ -74,12 +95,15 @@ export async function updateStudentExamResultController(req, res) {
     if (subjectId) params.subject = subjectId;
     if (components) params.components = components;
 
-    const updatedStudentExamResult = await updateStudentExamResultService(params);
+    const updatedStudentExamResult =
+      await updateStudentExamResultService(params);
     return res
       .status(StatusCodes.CREATED)
       .send(success(201, "Student exam result updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -93,13 +117,19 @@ export async function getStudentsExamMarksForSubjectController(req, res) {
     ]);
 
     if (!subject) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Subject not found"));
     }
     if (!exam) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Exam not found"));
     }
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
 
     const pipeline = [
@@ -257,7 +287,9 @@ export async function getStudentsExamMarksForSubjectController(req, res) {
     const sessionStudents = await getSessionStudentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -271,13 +303,19 @@ export async function getStudentExamMarksForSubjectController(req, res) {
     ]);
 
     if (!subject) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Subject not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Subject not found"));
     }
     if (!exam) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Exam not found"));
     }
     if (!sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session student not found"));
     }
 
     const pipeline = [
@@ -435,7 +473,9 @@ export async function getStudentExamMarksForSubjectController(req, res) {
     const sessionStudents = await getSessionStudentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -507,7 +547,10 @@ export async function getSectionStudentsExamMarksController(req, res) {
       {
         $lookup: {
           from: "exams",
-          let: { examId: convertToMongoId(examId), sectionId: convertToMongoId(sectionId) },
+          let: {
+            examId: convertToMongoId(examId),
+            sectionId: convertToMongoId(sectionId)
+          },
           pipeline: [
             {
               $match: {
@@ -520,7 +563,10 @@ export async function getSectionStudentsExamMarksController(req, res) {
             {
               $lookup: {
                 from: "teachersubjectsections",
-                let: { subjectId: "$subjects.subject", sectionId: "$$sectionId" },
+                let: {
+                  subjectId: "$subjects.subject",
+                  sectionId: "$$sectionId"
+                },
                 pipeline: [
                   {
                     $match: {
@@ -546,7 +592,9 @@ export async function getSectionStudentsExamMarksController(req, res) {
               $addFields: {
                 "subjects.isMainSubject": {
                   $cond: {
-                    if: { $ifNull: ["$teacherSubjectSection.isMainSubject", false] },
+                    if: {
+                      $ifNull: ["$teacherSubjectSection.isMainSubject", false]
+                    },
                     then: true,
                     else: false
                   }
@@ -665,7 +713,9 @@ export async function getSectionStudentsExamMarksController(req, res) {
     const sessionStudents = await getSessionStudentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, sessionStudents));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -674,11 +724,15 @@ export async function getStudentExamMarksController(req, res) {
     const { sessionStudentId, examId } = req.body;
     const exam = await getExamService({ _id: examId });
     if (!exam) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Exam not found"));
     }
 
     if (!exam.resultPublished) {
-      return res.status(StatusCodes.OK).send(success(200, "Exam result is not published yet"));
+      return res
+        .status(StatusCodes.OK)
+        .send(success(200, "Exam result is not published yet"));
     }
 
     const pipeline = [
@@ -876,7 +930,9 @@ export async function getStudentExamMarksController(req, res) {
     const sessionStudent = await getSessionStudentsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, sessionStudent));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -889,19 +945,27 @@ export async function createOrUpdateBulkStudentExamResultController(req, res) {
     ]);
 
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
     if (!exam) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Exam not found"));
     }
 
     if (exam["section"].toString() !== sectionId) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found for this section"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Exam not found for this section"));
     }
 
     const session = await getSessionService({ _id: section["session"] });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
       return res
@@ -910,7 +974,8 @@ export async function createOrUpdateBulkStudentExamResultController(req, res) {
     }
 
     for (const studentExamResult of studentExamResults) {
-      const { studentExamResultId, sessionStudentId, subjectId, components } = studentExamResult;
+      const { studentExamResultId, sessionStudentId, subjectId, components } =
+        studentExamResult;
       console.log({
         sessionStudentId,
         sectionId,
@@ -936,7 +1001,10 @@ export async function createOrUpdateBulkStudentExamResultController(req, res) {
           subject: subjectId
         });
         if (existingStudentExamResult) {
-          await updateStudentExamResultService({ _id: studentExamResultId }, { components });
+          await updateStudentExamResultService(
+            { _id: studentExamResultId },
+            { components }
+          );
         } else {
           await createStudentExamResultService({
             exam: examId,
@@ -954,7 +1022,9 @@ export async function createOrUpdateBulkStudentExamResultController(req, res) {
         });
       }
     }
-    return res.status(StatusCodes.OK).send(success(200, "Student Exam results saved successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Student Exam results saved successfully"));
   } catch (err) {
     return res.status(StatusCodes.NOT_FOUND).send(error(500, err.message));
   }

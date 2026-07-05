@@ -1,5 +1,13 @@
 export function getDayNameService(dayNumber) {
-  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ];
 
   if (dayNumber < 0 || dayNumber > 6 || typeof dayNumber !== "number") {
     throw new Error("Invalid day number");
@@ -83,7 +91,9 @@ export function calculateDaysBetweenDates(startTime, endTime) {
 
   const millisecondsPerDay = 1000 * 60 * 60 * 24;
 
-  const differenceInDays = Math.floor((endOfDay - startOfDay) / millisecondsPerDay);
+  const differenceInDays = Math.floor(
+    (endOfDay - startOfDay) / millisecondsPerDay
+  );
   return differenceInDays + 1;
 }
 
@@ -93,7 +103,9 @@ export const excelDateToJSDate = (date) => {
 
 export const jsDateToExcelDate = (date) => {
   let returnDateTime =
-    25569.0 + (date.getTime() - date.getTimezoneOffset() * 60 * 1000) / (1000 * 60 * 60 * 24);
+    25569.0 +
+    (date.getTime() - date.getTimezoneOffset() * 60 * 1000) /
+      (1000 * 60 * 60 * 24);
   return Math.floor(returnDateTime);
 };
 

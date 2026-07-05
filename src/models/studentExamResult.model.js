@@ -78,6 +78,9 @@ const examResultSchema = new mongoose.Schema(
 // Unique per exam-student-subject
 // examResultSchema.index({ exam: 1, sessionStudent: 1, subject: 1 }, { unique: true });
 
-const studentExamResultModel = mongoose.model("studentExamResult", examResultSchema);
+const studentExamResultModel = mongoose.model(
+  "studentExamResult",
+  examResultSchema
+);
 
 export default studentExamResultModel;

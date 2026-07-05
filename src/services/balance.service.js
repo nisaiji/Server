@@ -216,7 +216,10 @@ export async function processPayment(txn) {
     });
 
     inst.amountPaid += apply;
-    inst.status = inst.amountPaid >= inst.totalPayable + inst.lateFeeApplied ? "paid" : "partial";
+    inst.status =
+      inst.amountPaid >= inst.totalPayable + inst.lateFeeApplied
+        ? "paid"
+        : "partial";
 
     await updateStudentFeeInstallmentService(
       { _id: inst._id },
@@ -280,7 +283,11 @@ export async function recalcDashboard(school, session) {
     session = convertToMongoId(session);
     const now = new Date();
     const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const dayEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1
+    );
     const thisWeekStart = new Date(now);
     thisWeekStart.setDate(now.getDate() - 7);
 
@@ -329,7 +336,10 @@ export async function recalcDashboard(school, session) {
             school: school,
             session: session,
             status: "overdue",
-            $or: [{ createdAt: { $gte: thisWeekStart } }, { updatedAt: { $gte: thisWeekStart } }]
+            $or: [
+              { createdAt: { $gte: thisWeekStart } },
+              { updatedAt: { $gte: thisWeekStart } }
+            ]
           }
         },
         {
@@ -365,7 +375,10 @@ export async function recalcDashboard(school, session) {
             school: school,
             session: session,
             status: { $in: ["pending", "partial"] },
-            $or: [{ createdAt: { $gte: thisWeekStart } }, { updatedAt: { $gte: thisWeekStart } }]
+            $or: [
+              { createdAt: { $gte: thisWeekStart } },
+              { updatedAt: { $gte: thisWeekStart } }
+            ]
           }
         },
         {
@@ -464,7 +477,10 @@ export async function recalcDashboard(school, session) {
       }
     ]);
 
-    const [pending, overdue] = [result.pending[0]?.total || 0, result.overdue[0]?.total || 0];
+    const [pending, overdue] = [
+      result.pending[0]?.total || 0,
+      result.overdue[0]?.total || 0
+    ];
 
     const updateObj = {
       totals: {
@@ -533,19 +549,24 @@ export async function storeDailySnapshot(req, res) {
     session = convertToMongoId(session);
     const now = new Date();
     const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const dayEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1
+    );
     /**
      /get all active schools in a session
      * Loop through schools
      /TODO kuldeep add active session check
      */
-    const schoolsWithSnapshotsToday = await getStudentFeeInstallmentDistinctService("school", {
-      session,
-      generatedAt: {
-        $gte: dayStart,
-        $lt: dayEnd
-      }
-    });
+    const schoolsWithSnapshotsToday =
+      await getStudentFeeInstallmentDistinctService("school", {
+        session,
+        generatedAt: {
+          $gte: dayStart,
+          $lt: dayEnd
+        }
+      });
     // Get ALL schools, TODO kuldeep add session filter
     //if dashboard data is generated, then skip, else call recalcDashboard for the schools
     const remainingSchools = await getAdminsService(
@@ -574,14 +595,21 @@ export async function storeDailySnapshot(req, res) {
 }
 // 3. payment process, when a payment is done/failed, update data in dashboard data
 
-export async function getTotalFeesAndStudents(session, school, options = {}, studentCount = false) {
+export async function getTotalFeesAndStudents(
+  session,
+  school,
+  options = {},
+  studentCount = false
+) {
   const matchQuery = {
     school: convertToMongoId(school),
     session: convertToMongoId(session)
   };
   if (options.classId) matchQuery.classId = convertToMongoId(options.classId);
-  if (options.sectionId) matchQuery.section = convertToMongoId(options.sectionId);
-  if (options.studentId) matchQuery.student = convertToMongoId(options.studentId);
+  if (options.sectionId)
+    matchQuery.section = convertToMongoId(options.sectionId);
+  if (options.studentId)
+    matchQuery.student = convertToMongoId(options.studentId);
 
   let groupQuery = {
     _id: "null",

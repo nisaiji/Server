@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getClassService } from "../services/class.services.js";
 import {
@@ -42,28 +41,51 @@ function parseBooleanFlag(value) {
 
 function extractExamSubjectIds(subjects = []) {
   return subjects
-    .map((subjectInfo) => subjectInfo?.subject?.toString?.() ?? subjectInfo?.subject)
+    .map(
+      (subjectInfo) =>
+        subjectInfo?.subject?.toString?.() ?? subjectInfo?.subject
+    )
     .filter(Boolean);
 }
 
 export async function createExambyAdminController(req, res) {
   try {
-    let { sessionId, classId, sectionId, name, description, type, startDate, endDate, subjects } =
-      req.body;
+    let {
+      sessionId,
+      classId,
+      sectionId,
+      name,
+      description,
+      type,
+      startDate,
+      endDate,
+      subjects
+    } = req.body;
     const adminId = req.adminId;
     const [session, classinfo, section] = await Promise.all([
       getSessionService({ _id: sessionId, school: adminId }),
       getClassService({ _id: classId, admin: adminId, session: sessionId }),
-      getSectionService({ _id: sectionId, classId: classId, session: sessionId, admin: adminId })
+      getSectionService({
+        _id: sectionId,
+        classId: classId,
+        session: sessionId,
+        admin: adminId
+      })
     ]);
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (!classinfo) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Class not found"));
     }
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
     if (session["status"] === "completed") {
       return res
@@ -82,7 +104,9 @@ export async function createExambyAdminController(req, res) {
     });
 
     if (assignedSubjects.length !== subjects.length) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Provided invalid subjects"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Provided invalid subjects"));
     }
     const exam = await createExamService({
       school: adminId,
@@ -96,9 +120,13 @@ export async function createExambyAdminController(req, res) {
       endDate,
       subjects
     });
-    return res.status(StatusCodes.CREATED).send(success(201, "Exam created successfully"));
+    return res
+      .status(StatusCodes.CREATED)
+      .send(success(201, "Exam created successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -131,7 +159,10 @@ export async function getExamsForSectionController(req, res) {
             {
               $match: {
                 $expr: {
-                  $and: [{ $in: ["$subject", "$$subjectId"] }, { $eq: ["$section", "$$sectionId"] }]
+                  $and: [
+                    { $in: ["$subject", "$$subjectId"] },
+                    { $eq: ["$section", "$$sectionId"] }
+                  ]
                 }
               }
             }
@@ -188,7 +219,9 @@ export async function getExamsForSectionController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, exams));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -257,20 +290,28 @@ export async function getSectionExamsForTeacherController(req, res) {
     const exams = await getExamsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, exams));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
 export async function getStudentExamsForParentController(req, res) {
   try {
     const { sessionStudentId } = req.body;
-    const sessionStudent = await getSessionStudentService({ _id: sessionStudentId });
+    const sessionStudent = await getSessionStudentService({
+      _id: sessionStudentId
+    });
     if (!sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session student not found"));
     }
     const section = await getSectionService({ _id: sessionStudent["section"] });
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
 
     const pipeline = [
@@ -322,24 +363,33 @@ export async function getStudentExamsForParentController(req, res) {
     const exams = await getExamsPipelineService(pipeline);
     return res.status(StatusCodes.OK).send(success(200, exams));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(err.message));
   }
 }
 
 export async function updateExamController(req, res) {
   try {
     const examId = req.params.examId;
-    let { name, description, type, resultPublished, status, subjects } = req.body;
+    let { name, description, type, resultPublished, status, subjects } =
+      req.body;
     const exam = await getExamService({ _id: examId });
     if (!exam) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Exam not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Exam not found"));
     }
 
-    const hasResultPublished = Object.prototype.hasOwnProperty.call(req.body, "resultPublished");
+    const hasResultPublished = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "resultPublished"
+    );
     const parsedResultPublished = hasResultPublished
       ? parseBooleanFlag(resultPublished)
       : undefined;
-    const shouldPublishResults = parsedResultPublished === true && !exam.resultPublished;
+    const shouldPublishResults =
+      parsedResultPublished === true && !exam.resultPublished;
     const shouldUnpublishResults = parsedResultPublished === false;
     const schoolId = exam.school?.toString?.() ?? exam.school;
     const sessionId = exam.session?.toString?.() ?? exam.session;
@@ -365,7 +415,9 @@ export async function updateExamController(req, res) {
 
     if (shouldPublishResults) {
       const examName = params.name ?? exam.name;
-      const examSubjects = extractExamSubjectIds(params.subjects ?? exam.subjects);
+      const examSubjects = extractExamSubjectIds(
+        params.subjects ?? exam.subjects
+      );
       const [parentRecipients, teacherRecipients] = await Promise.all([
         getSectionParentNotificationRecipientsService({
           sectionId,
@@ -400,8 +452,12 @@ export async function updateExamController(req, res) {
       );
     }
 
-    return res.status(StatusCodes.OK).send(success(200, "Exam updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Exam updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

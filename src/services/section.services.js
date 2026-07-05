@@ -48,7 +48,9 @@ export async function deleteSectionService(paramObj) {
 
 export async function updateSectionService(filter, update, transaction) {
   return transaction
-    ? await sectionModel.findOneAndUpdate(filter, update, { session: transaction })
+    ? await sectionModel.findOneAndUpdate(filter, update, {
+        session: transaction
+      })
     : await sectionModel.findOneAndUpdate(filter, update);
 }
 
@@ -73,7 +75,9 @@ export async function getAllSection() {
 
 export async function getClassSections(classId) {
   try {
-    const sections = await sectionModel.find({ classId: classId }).populate("classTeacher");
+    const sections = await sectionModel
+      .find({ classId: classId })
+      .populate("classTeacher");
     return sections;
   } catch (error) {
     return error;
@@ -128,7 +132,10 @@ export async function getSectionsPipelineService(pipeline) {
 export async function deleteSection({ sectionId }) {
   try {
     const section = await sectionModel.findByIdAndDelete(sectionId);
-    await classModel.updateOne({ _id: section.classId }, { $pull: { section: sectionId } });
+    await classModel.updateOne(
+      { _id: section.classId },
+      { $pull: { section: sectionId } }
+    );
     return section;
   } catch (error) {
     return error;
@@ -136,6 +143,9 @@ export async function deleteSection({ sectionId }) {
 }
 
 export async function getSectionStudents({ sectionId, adminId }) {
-  const students = await studentModel.find({ section: sectionId, admin: adminId });
+  const students = await studentModel.find({
+    section: sectionId,
+    admin: adminId
+  });
   return students;
 }

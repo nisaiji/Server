@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   createOrUpdateBulkStudentExamResultController,
   createStudentExamResultController,
@@ -25,8 +24,14 @@ studentExamResultRouter.post(
   adminAuthenticate,
   createOrUpdateBulkStudentExamResultController
 );
-studentExamResultRouter.post("/student-subject-marks", getStudentsExamMarksForSubjectController);
-studentExamResultRouter.post("/section-student-marks", getSectionStudentsExamMarksController);
+studentExamResultRouter.post(
+  "/student-subject-marks",
+  getStudentsExamMarksForSubjectController
+);
+studentExamResultRouter.post(
+  "/section-student-marks",
+  getSectionStudentsExamMarksController
+);
 studentExamResultRouter.post(
   "/parent-student-marks",
   parentAuthenticate,
@@ -37,6 +42,9 @@ studentExamResultRouter.post(
   parentAuthenticate,
   getStudentExamMarksForSubjectController
 );
-studentExamResultRouter.put("/:studentExamResultId", updateStudentExamResultController);
+studentExamResultRouter.put(
+  "/:studentExamResultId",
+  updateStudentExamResultController
+);
 
 export default studentExamResultRouter;

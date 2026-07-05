@@ -1,11 +1,16 @@
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-
 import { getClassService } from "../services/class.services.js";
-import { convertToMongoId, isValidMongoId } from "../services/mongoose.services.js";
+import {
+  convertToMongoId,
+  isValidMongoId
+} from "../services/mongoose.services.js";
 import { getSectionService } from "../services/section.services.js";
 import { getSessionService } from "../services/session.services.js";
-import { getStudentService, updateStudentService } from "../services/student.service.js";
+import {
+  getStudentService,
+  updateStudentService
+} from "../services/student.service.js";
 import {
   registerTransferCertificateRequestService,
   getTransferCertificateRequestService,
@@ -22,7 +27,10 @@ import { error, success } from "../utils/responseWrapper.js";
 // Generate unique TC number
 function generateUniqueTCNumber() {
   const year = new Date().getFullYear();
-  const randomId = new mongoose.Types.ObjectId().toString().slice(-8).toUpperCase();
+  const randomId = new mongoose.Types.ObjectId()
+    .toString()
+    .slice(-8)
+    .toUpperCase();
   return `TC-${year}-${randomId}`;
 }
 
@@ -46,7 +54,9 @@ export async function applyTransferCertificateController(req, res) {
     // Validate student
     const student = await getStudentService({ _id: studentId, isActive: true });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
 
     const sessionStudent = await getSessionStudentService({
@@ -55,7 +65,9 @@ export async function applyTransferCertificateController(req, res) {
       student: studentId
     });
     if (!sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session student not found"));
     }
 
     // Get student's academic information
@@ -76,13 +88,20 @@ export async function applyTransferCertificateController(req, res) {
       student: studentId,
       sessionStudent: sessionStudentId,
       school: adminId,
-      status: { $in: ["submitted", "underReview", "pendingClearance", "approved"] }
+      status: {
+        $in: ["submitted", "underReview", "pendingClearance", "approved"]
+      }
     });
 
     if (existingRequest) {
       return res
         .status(StatusCodes.CONFLICT)
-        .send(error(409, "Transfer certificate request already exists for this student"));
+        .send(
+          error(
+            409,
+            "Transfer certificate request already exists for this student"
+          )
+        );
     }
 
     // Generate unique TC number
@@ -108,7 +127,8 @@ export async function applyTransferCertificateController(req, res) {
       certificateNumber
     };
 
-    const tcRequest = await registerTransferCertificateRequestService(requestData);
+    const tcRequest =
+      await registerTransferCertificateRequestService(requestData);
 
     return res.status(StatusCodes.CREATED).send(
       success(201, {
@@ -118,7 +138,9 @@ export async function applyTransferCertificateController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -131,7 +153,9 @@ export async function getChildrenTCRequestsController(req, res) {
     // Validate parent
     const parent = await getParentService({ _id: parentId, isActive: true });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent not found"));
     }
 
     // Get TC requests for parent's children
@@ -158,7 +182,9 @@ export async function getChildrenTCRequestsController(req, res) {
 
     return res.status(StatusCodes.OK).send(success(200, result));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -171,7 +197,9 @@ export async function approveParentConsentController(req, res) {
     const parentId = req.parentId;
 
     if (!isValidMongoId(requestId)) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request ID"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Invalid request ID"));
     }
 
     // Get TC request
@@ -192,10 +220,14 @@ export async function approveParentConsentController(req, res) {
         .send(error(400, "Cannot modify completed or rejected request"));
     }
     const student = await getStudentService({ _id: tcRequest.student });
-    const sessionStudent = await getSessionStudentService({ _id: tcRequest.sessionStudent });
+    const sessionStudent = await getSessionStudentService({
+      _id: tcRequest.sessionStudent
+    });
 
     if (!student || !sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student information not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student information not found"));
     }
 
     await updateStudentService(
@@ -209,11 +241,19 @@ export async function approveParentConsentController(req, res) {
 
     await updateTransferCertificateRequestService(
       { _id: requestId },
-      { status: consent, parentApproved: consent === "approvedByParent", parentNotified: true }
+      {
+        status: consent,
+        parentApproved: consent === "approvedByParent",
+        parentNotified: true
+      }
     );
-    return res.status(StatusCodes.OK).send(success(200, "TC request updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "TC request updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -549,6 +589,8 @@ export async function getAdminTCRequestsController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

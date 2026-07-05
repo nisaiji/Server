@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   deleteWorkDayController,
   getWorkDaysController,
@@ -22,8 +21,18 @@ workDayRouter.post(
   createWorkDayValidation,
   registerWorkDayController
 );
-workDayRouter.post("/", adminAuthenticate, getWorkDayValidation, getWorkDaysController);
-workDayRouter.post("/teacher", teacherAuthenticate, getWorkDayValidation, getWorkDaysController);
+workDayRouter.post(
+  "/",
+  adminAuthenticate,
+  getWorkDayValidation,
+  getWorkDaysController
+);
+workDayRouter.post(
+  "/teacher",
+  teacherAuthenticate,
+  getWorkDayValidation,
+  getWorkDaysController
+);
 workDayRouter.put(
   "/:workDayId",
   adminAuthenticate,

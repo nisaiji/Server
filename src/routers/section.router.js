@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   deleteSectionController,
   getSectionController,
@@ -11,9 +10,22 @@ import { registerSectionValidation } from "../middlewares/validation/section.val
 
 const sectionRouter = express.Router();
 
-sectionRouter.post("/", adminAuthenticate, registerSectionValidation, registerSectionController);
-sectionRouter.put("/replace-teacher", adminAuthenticate, replaceTeacherController);
-sectionRouter.put("/guest-teacher", adminAuthenticate, replaceTeacherController);
+sectionRouter.post(
+  "/",
+  adminAuthenticate,
+  registerSectionValidation,
+  registerSectionController
+);
+sectionRouter.put(
+  "/replace-teacher",
+  adminAuthenticate,
+  replaceTeacherController
+);
+sectionRouter.put(
+  "/guest-teacher",
+  adminAuthenticate,
+  replaceTeacherController
+);
 sectionRouter.get("/:sectionId", adminAuthenticate, getSectionController);
 sectionRouter.delete("/:sectionId", adminAuthenticate, deleteSectionController);
 

@@ -24,13 +24,23 @@ const GuestTeacherStopJob = async () => {
     });
 
     for (const leaveRequest of leaveRequests) {
-      const leaveRequestState = leaveRequest["status"] === "accept" ? "complete" : "expired";
-      await updateLeaveRequestService({ _id: leaveRequest["_id"] }, { status: leaveRequestState });
+      const leaveRequestState =
+        leaveRequest["status"] === "accept" ? "complete" : "expired";
+      await updateLeaveRequestService(
+        { _id: leaveRequest["_id"] },
+        { status: leaveRequestState }
+      );
     }
     for (const guestTeacher of expiredGuestTeachers) {
       await Promise.all([
-        updateGuestTeacherService({ _id: guestTeacher["_id"] }, { isActive: false }),
-        updateSectionService({ _id: guestTeacher["section"] }, { guestTeacher: null })
+        updateGuestTeacherService(
+          { _id: guestTeacher["_id"] },
+          { isActive: false }
+        ),
+        updateSectionService(
+          { _id: guestTeacher["section"] },
+          { guestTeacher: null }
+        )
       ]);
     }
   } catch (error) {

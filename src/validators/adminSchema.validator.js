@@ -26,7 +26,8 @@ const registerAdminSchema = Joi.object({
     .min(8)
     .max(16)
     .messages({
-      "string.pattern": "Password should contains alpha-numberic special symbols",
+      "string.pattern":
+        "Password should contains alpha-numberic special symbols",
       "any.required": "Password is required!"
     })
 });
@@ -108,7 +109,8 @@ const loginAdminSchema = Joi.object({
     .min(8)
     .max(16)
     .messages({
-      "string.pattern": "Password should contains alpha-numberic special symbols",
+      "string.pattern":
+        "Password should contains alpha-numberic special symbols",
       "any.required": "Password is required!"
     })
 });

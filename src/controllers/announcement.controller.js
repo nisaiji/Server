@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-
 import { sendPushNotification } from "../config/firebase.config.js";
 import { getAdminService } from "../services/admin.services.js";
 import {
@@ -22,15 +21,29 @@ export async function createAnnouncementByAdminController(req, res) {
   try {
     const adminId = req.adminId;
 
-    const { title, description, sessionId, targetAudience, startsAt, expiresAt } = req.body;
+    const {
+      title,
+      description,
+      sessionId,
+      targetAudience,
+      startsAt,
+      expiresAt
+    } = req.body;
     const admin = await getAdminService({ _id: adminId });
 
-    const session = await getSessionService({ _id: sessionId, school: adminId });
+    const session = await getSessionService({
+      _id: sessionId,
+      school: adminId
+    });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
     if (new Date() < session.startDate || new Date() > session.endDate) {
       return res
@@ -75,9 +88,13 @@ export async function createAnnouncementByAdminController(req, res) {
         );
       }
     }
-    return res.status(StatusCodes.CREATED).json(success(201, "Announcement created successfully!"));
+    return res
+      .status(StatusCodes.CREATED)
+      .json(success(201, "Announcement created successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(error(500, err.message));
   }
 }
 
@@ -88,12 +105,19 @@ export async function createAnnouncementByTeacherController(req, res) {
     const adminId = req.adminId;
 
     const { title, description, sessionId, startsAt, expiresAt } = req.body;
-    const session = await getSessionService({ _id: sessionId, school: adminId });
+    const session = await getSessionService({
+      _id: sessionId,
+      school: adminId
+    });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
     if (new Date() < session.startDate || new Date() > session.endDate) {
       return res
@@ -113,9 +137,13 @@ export async function createAnnouncementByTeacherController(req, res) {
       school: adminId
     });
 
-    return res.status(StatusCodes.CREATED).json(success(201, "Announcement created successfully!"));
+    return res
+      .status(StatusCodes.CREATED)
+      .json(success(201, "Announcement created successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(error(500, err.message));
   }
 }
 
@@ -227,9 +255,13 @@ export async function getAnnouncementsByAdminController(req, res) {
     const announcements = await getAnnouncementsPipelineService(pipeline);
     const total = await getAnnouncementCountService(filter);
 
-    return res.status(200).json(success(200, { announcements, page, limit, total }));
+    return res
+      .status(200)
+      .json(success(200, { announcements, page, limit, total }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(success(500, err.message));
   }
 }
 
@@ -251,7 +283,9 @@ export async function getAnnouncementsByTeacherController(req, res) {
     const sortOrder = order === "asc" ? 1 : -1;
 
     if (!["admin", "teacher", "all"].includes(createdBy)) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Invalid Request"));
     }
 
     const filter = {
@@ -345,26 +379,39 @@ export async function getAnnouncementsByTeacherController(req, res) {
 
     const announcements = await getAnnouncementsPipelineService(pipeline);
     const total = await getAnnouncementCountService(filter);
-    return res.status(200).json(success(200, { announcements, page, limit, total }));
+    return res
+      .status(200)
+      .json(success(200, { announcements, page, limit, total }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(success(500, err.message));
   }
 }
 
 export async function getAnnouncementsByParentController(req, res) {
   try {
     const parentId = req.parentId;
-    const { sessionStudentId, page = 1, limit = 10, createdBy = "admin" } = req.query;
+    const {
+      sessionStudentId,
+      page = 1,
+      limit = 10,
+      createdBy = "admin"
+    } = req.query;
     const sessionStudent = await getSessionStudentService({
       _id: sessionStudentId,
       isActive: true
     });
     if (!sessionStudent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
 
     if (!["admin", "teacher", "all"].includes(createdBy)) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Invalid Request"));
     }
     const adminId = sessionStudent["school"];
     const sectionId = sessionStudent["section"];
@@ -473,9 +520,13 @@ export async function getAnnouncementsByParentController(req, res) {
     const announcements = await getAnnouncementsPipelineService(pipeline);
     const total = await getAnnouncementCountService(filter);
 
-    return res.status(200).json(success(200, { announcements, page, limit, total }));
+    return res
+      .status(200)
+      .json(success(200, { announcements, page, limit, total }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -483,7 +534,14 @@ export async function updateAnnouncementByAdminController(req, res) {
   try {
     const adminId = req.adminId;
     const announcementId = req.params.announcementId;
-    const { title, description, targetAudience, startsAt, expiresAt, isActive } = req.body;
+    const {
+      title,
+      description,
+      targetAudience,
+      startsAt,
+      expiresAt,
+      isActive
+    } = req.body;
 
     const filter = {
       _id: convertToMongoId(announcementId),
@@ -492,27 +550,42 @@ export async function updateAnnouncementByAdminController(req, res) {
     };
     const announcement = await getAnnouncementService(filter);
     if (!announcement) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found!"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Announcement not found!"));
     }
-    const session = await getSessionService({ _id: announcement.session, school: adminId });
+    const session = await getSessionService({
+      _id: announcement.session,
+      school: adminId
+    });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
     const fieldToBeUpdated = {};
     if (title) fieldToBeUpdated.title = title;
     if (description) fieldToBeUpdated.description = description;
-    if (targetAudience.length > 0) fieldToBeUpdated.targetAudience = targetAudience;
+    if (targetAudience.length > 0)
+      fieldToBeUpdated.targetAudience = targetAudience;
     if (startsAt) fieldToBeUpdated.startsAt = startsAt;
     if (expiresAt) fieldToBeUpdated.expiresAt = expiresAt;
-    if (isActive === true || isActive === false) fieldToBeUpdated.isActive = isActive;
+    if (isActive === true || isActive === false)
+      fieldToBeUpdated.isActive = isActive;
 
     await updateAnnouncementService({ _id: announcementId }, fieldToBeUpdated);
-    return res.status(StatusCodes.OK).send(success(200, "Announcement updated successfully!"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Announcement updated successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -524,7 +597,9 @@ export async function updateAnnouncementByTeacherController(req, res) {
 
     const announcement = await getAnnouncementService({ _id: announcementId });
     if (!announcement) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Announcement not found"));
     }
 
     const session = await getSessionService({
@@ -532,11 +607,15 @@ export async function updateAnnouncementByTeacherController(req, res) {
       school: announcement.school
     });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
 
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
 
     const fieldToBeUpdated = {};
@@ -555,12 +634,18 @@ export async function updateAnnouncementByTeacherController(req, res) {
     const result = await updateAnnouncementService(filter, fieldToBeUpdated);
 
     if (result.modifiedCount === 0) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found."));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Announcement not found."));
     }
 
-    return res.status(StatusCodes.OK).send(success(200, "Announcement updated successfully!"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Announcement updated successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -577,7 +662,9 @@ export async function deleteAnnouncementByAdminController(req, res) {
 
     const announcement = await getAnnouncementService(filter);
     if (!announcement) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Announcement not found"));
     }
 
     const session = await getSessionService({
@@ -585,18 +672,26 @@ export async function deleteAnnouncementByAdminController(req, res) {
       school: announcement.school
     });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
 
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
 
     await deleteAnnouncementService(filter);
 
-    return res.status(StatusCodes.OK).send(success(200, "Announcement deleted successfully!"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Announcement deleted successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -613,7 +708,9 @@ export async function deleteAnnouncementByTeacherController(req, res) {
 
     const announcement = await getAnnouncementService(filter);
     if (!announcement) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Announcement not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Announcement not found"));
     }
 
     const session = await getSessionService({
@@ -621,18 +718,26 @@ export async function deleteAnnouncementByTeacherController(req, res) {
       school: announcement.school
     });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
 
     if (session["status"] === "completed") {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session Completed"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session Completed"));
     }
 
     await deleteAnnouncementService(filter);
 
-    return res.status(StatusCodes.OK).send(success(200, "Announcement deleted successfully!"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Announcement deleted successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -640,13 +745,20 @@ export async function getUnReadAnnouncementsCountForParentController(req, res) {
   try {
     const parentId = req.parentId;
     const { studentId, createdBy = "admin" } = req.query;
-    const student = await getSessionStudentService({ _id: studentId, isActive: true });
+    const student = await getSessionStudentService({
+      _id: studentId,
+      isActive: true
+    });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
 
     if (!["admin", "teacher", "all"].includes(createdBy)) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Invalid Request"));
     }
     const adminId = student["school"];
     const sectionId = student["section"];
@@ -697,18 +809,25 @@ export async function getUnReadAnnouncementsCountForParentController(req, res) {
       { announcement: 1 }
     );
 
-    const readAnnouncementIds = readAnnouncements.map((r) => r.announcement.toString());
+    const readAnnouncementIds = readAnnouncements.map((r) =>
+      r.announcement.toString()
+    );
     const unreadCount = announcementIds.filter(
       (id) => !readAnnouncementIds.includes(id.toString())
     ).length;
 
     return res.status(200).json(success(200, { unreadCount }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
-export async function getUnReadAnnouncementsCountForTeacherController(req, res) {
+export async function getUnReadAnnouncementsCountForTeacherController(
+  req,
+  res
+) {
   try {
     const adminId = req.adminId;
     const teacherId = req.teacherId;
@@ -717,7 +836,9 @@ export async function getUnReadAnnouncementsCountForTeacherController(req, res) 
     const { createdBy = "teacher" } = req.query;
 
     if (!["admin", "teacher", "all"].includes(createdBy)) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid Request"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Invalid Request"));
     }
 
     const filter = {
@@ -759,13 +880,17 @@ export async function getUnReadAnnouncementsCountForTeacherController(req, res) 
       { announcement: 1 }
     );
 
-    const readAnnouncementIds = readAnnouncements.map((r) => r.announcement.toString());
+    const readAnnouncementIds = readAnnouncements.map((r) =>
+      r.announcement.toString()
+    );
     const unreadCount = announcementIds.filter(
       (id) => !readAnnouncementIds.includes(id.toString())
     ).length;
 
     return res.status(200).json(success(200, { unreadCount }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(success(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(success(500, err.message));
   }
 }

@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-
-import { getClassService, updateClassService } from "../services/class.services.js";
+import {
+  getClassService,
+  updateClassService
+} from "../services/class.services.js";
 import {
   deleteSectionService,
   getAllSection,
@@ -9,7 +11,10 @@ import {
   updateSectionService
 } from "../services/section.services.js";
 import { getSessionService } from "../services/session.services.js";
-import { getTeacherService, updateTeacherService } from "../services/teacher.services.js";
+import {
+  getTeacherService,
+  updateTeacherService
+} from "../services/teacher.services.js";
 import {
   getTeacherSectionSessionService,
   registerTeacherSectionSessionService,
@@ -23,7 +28,9 @@ export async function registerSectionController(req, res) {
     const adminId = req.adminId;
     const session = await getSessionService({ _id: sessionId });
     if (!session) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
     if (session["status"] === "completed") {
       return res
@@ -32,15 +39,25 @@ export async function registerSectionController(req, res) {
     }
     const classInfo = await getClassService({ _id: classId });
     if (!classInfo) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Class not found"));
     }
     let section = await getSectionService({ name, classId, admin: adminId });
     if (section) {
-      return res.status(StatusCodes.CONFLICT).send(error(409, "Section already exists"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(409, "Section already exists"));
     }
-    const teacher = await getTeacherService({ _id: teacherId, isActive: true, admin: adminId });
+    const teacher = await getTeacherService({
+      _id: teacherId,
+      isActive: true,
+      admin: adminId
+    });
     if (!teacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Teacher not found"));
     }
 
     const teacherSectionSession = await getTeacherSectionSessionService({
@@ -73,9 +90,13 @@ export async function registerSectionController(req, res) {
     await classInfo.save();
     return res
       .status(StatusCodes.OK)
-      .send(success(201, "Section created and Class Teacher assigned successfully"));
+      .send(
+        success(201, "Section created and Class Teacher assigned successfully")
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -87,11 +108,15 @@ export async function getSectionController(req, res) {
       getTeacherService({ section: _id }, { firstname: 1, lastname: 1 })
     ]);
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
     return res.status(StatusCodes.OK).send(success(200, { section, teacher }));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -107,20 +132,29 @@ export async function deleteSectionController(req, res) {
         .send(error(404, "Session completed! Can't delete section"));
     }
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
     if (section["studentCount"] > 0) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "section contains students"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "section contains students"));
     }
     const [sectionInfo, classInfo, teacher] = await Promise.all([
       deleteSectionService({ _id: sectionId }),
-      updateClassService({ _id: section["classId"] }, { $pull: { section: sectionId } }),
+      updateClassService(
+        { _id: section["classId"] },
+        { $pull: { section: sectionId } }
+      ),
       updateTeacherService({ _id: section["teacher"] }, { section: null })
     ]);
 
     return res.send(success(200, "section deleted successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -129,7 +163,9 @@ export async function getAllSectionsController(req, res) {
     const sectionlist = await getAllSection();
     return res.send(success(200, sectionlist));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -140,7 +176,9 @@ export async function replaceTeacherController(req, res) {
 
     const section = await getSectionService({ _id: sectionId });
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
 
     const session = await getSessionService({ _id: section["session"] });
@@ -152,7 +190,9 @@ export async function replaceTeacherController(req, res) {
 
     const teacher = await getTeacherService({ _id: teacherId });
     if (!teacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Teacher not found"));
     }
 
     const teacherSession = await getTeacherSectionSessionService({
@@ -171,7 +211,9 @@ export async function replaceTeacherController(req, res) {
     }
 
     if (!sectionSession) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section session not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section session not found"));
     }
 
     await updateTeacherSectionSessionService(
@@ -180,9 +222,13 @@ export async function replaceTeacherController(req, res) {
     );
     await updateSectionService({ _id: sectionId }, { teacher: teacherId });
 
-    return res.status(StatusCodes.OK).send(success(200, "Teacher changed successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Teacher changed successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -190,17 +236,26 @@ export async function assignGuestTeacherController(req, res) {
   try {
     const { guestTeacherId, sectionId, teacherId } = req.body;
     const adminId = req.adminId;
-    const [teacher, guestTeacher, section, guestTeacherSection] = await Promise.all([
-      getTeacherService({ _id: teacherId, admin: adminId, isActive: true }),
-      getTeacherService({ _id: guestTeacherId, admin: adminId, isActive: true }),
-      getSectionService({ _id: sectionId }),
-      getSectionService({ guestTeacher: guestTeacherId })
-    ]);
+    const [teacher, guestTeacher, section, guestTeacherSection] =
+      await Promise.all([
+        getTeacherService({ _id: teacherId, admin: adminId, isActive: true }),
+        getTeacherService({
+          _id: guestTeacherId,
+          admin: adminId,
+          isActive: true
+        }),
+        getSectionService({ _id: sectionId }),
+        getSectionService({ guestTeacher: guestTeacherId })
+      ]);
     if (!teacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Teacher not found."));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Teacher not found."));
     }
     if (!guestTeacher) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Guest Teacher not found."));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Guest Teacher not found."));
     }
     if (!guestTeacherSection) {
       return res
@@ -208,16 +263,25 @@ export async function assignGuestTeacherController(req, res) {
         .send(error(404, "Guest Teacher already assigned to as guest."));
     }
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found."));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found."));
     }
     if (section["teacher"].toString() !== teacherId) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section Teacher mismatch."));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section Teacher mismatch."));
     }
 
-    await updateSectionService({ _id: sectionId }, { guestTeacher: guestTeacherId });
+    await updateSectionService(
+      { _id: sectionId },
+      { guestTeacher: guestTeacherId }
+    );
 
     return res.status(StatusCodes.OK).send(error(404, "Section not found."));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }

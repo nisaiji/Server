@@ -71,5 +71,8 @@ const studentLeaveRequestSchema = mongoose.Schema(
   }
 );
 
-const studentLeaveRequestModel = mongoose.model("studentLeaveRequest", studentLeaveRequestSchema);
+const studentLeaveRequestModel = mongoose.model(
+  "studentLeaveRequest",
+  studentLeaveRequestSchema
+);
 export default studentLeaveRequestModel;

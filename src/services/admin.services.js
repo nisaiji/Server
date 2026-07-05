@@ -9,7 +9,12 @@ export async function getAdminService(filter) {
   }
 }
 
-export async function getAdminsService(filter, sortingLogic, skipNumber, limitNumber) {
+export async function getAdminsService(
+  filter,
+  sortingLogic,
+  skipNumber,
+  limitNumber
+) {
   try {
     const admins = await adminModel
       .find(filter)

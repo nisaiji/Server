@@ -1,9 +1,15 @@
 import TransferCertificateRequestModel from "../models/TransferCertificateRequest.model.js";
 
 // Basic CRUD Operations
-export async function getTransferCertificateRequestService(paramObj, projection = {}) {
+export async function getTransferCertificateRequestService(
+  paramObj,
+  projection = {}
+) {
   try {
-    const request = await TransferCertificateRequestModel.findOne(paramObj).select(projection);
+    const request =
+      await TransferCertificateRequestModel.findOne(paramObj).select(
+        projection
+      );
     return request;
   } catch (error) {
     throw error;
@@ -45,7 +51,10 @@ export async function registerTransferCertificateRequestsService(data) {
 
 export async function updateTransferCertificateRequestService(filter, update) {
   try {
-    const request = await TransferCertificateRequestModel.findOneAndUpdate(filter, update);
+    const request = await TransferCertificateRequestModel.findOneAndUpdate(
+      filter,
+      update
+    );
     return request;
   } catch (error) {
     throw error;
@@ -63,7 +72,8 @@ export async function deleteTransferCertificateRequestService(paramObj) {
 
 export async function getTransferCertificateRequestCountService(filter) {
   try {
-    const requestCount = await TransferCertificateRequestModel.countDocuments(filter);
+    const requestCount =
+      await TransferCertificateRequestModel.countDocuments(filter);
     return requestCount;
   } catch (error) {
     throw error;
@@ -72,7 +82,8 @@ export async function getTransferCertificateRequestCountService(filter) {
 
 export async function getTransferCertificateRequestsPipelineService(pipeline) {
   try {
-    const result = await TransferCertificateRequestModel.aggregate(pipeline).exec();
+    const result =
+      await TransferCertificateRequestModel.aggregate(pipeline).exec();
     return result;
   } catch (error) {
     throw error;

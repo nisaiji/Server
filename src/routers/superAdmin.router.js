@@ -1,5 +1,4 @@
 import express from "express";
-
 import {
   getAdminsController,
   getCustomerQueriesController,
@@ -18,17 +17,33 @@ import {
 
 const superAdminRouter = express.Router();
 
-superAdminRouter.post("/register", registerSuperAdminValidation, registerSuperAdminController);
-superAdminRouter.post("/login", loginSuperAdminValidation, loginSuperAdminController);
+superAdminRouter.post(
+  "/register",
+  registerSuperAdminValidation,
+  registerSuperAdminController
+);
+superAdminRouter.post(
+  "/login",
+  loginSuperAdminValidation,
+  loginSuperAdminController
+);
 superAdminRouter.put(
   "/update",
   superAdminAuthenticate,
   updateSuperAdminValidation,
   updateSuperAdminController
 );
-superAdminRouter.get("/profile", superAdminAuthenticate, getSuperAdminController);
+superAdminRouter.get(
+  "/profile",
+  superAdminAuthenticate,
+  getSuperAdminController
+);
 superAdminRouter.get("/admins", getAdminsController);
-superAdminRouter.get("/customer-queries", superAdminAuthenticate, getCustomerQueriesController);
+superAdminRouter.get(
+  "/customer-queries",
+  superAdminAuthenticate,
+  getCustomerQueriesController
+);
 superAdminRouter.put("/admins/:adminId", updateAdminController);
 
 export default superAdminRouter;

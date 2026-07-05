@@ -1,5 +1,4 @@
 import express from "express";
-
 import adminRouter from "./admin.router.js";
 import parentRouter from "./parent.router.js";
 // import studentRouter from "./student.router.js";

@@ -1,15 +1,19 @@
 import fs from "fs/promises";
-
 import { StatusCodes } from "http-status-codes";
 import xlsx from "xlsx";
-
 import { registerStudentsFromExcelHelper } from "../helpers/student.helper.js";
-import { calculateDaysBetweenDates, calculateSundays } from "../services/celender.service.js";
+import {
+  calculateDaysBetweenDates,
+  calculateSundays
+} from "../services/celender.service.js";
 import { getClassService } from "../services/class.services.js";
 import { getHolidayCountService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
 import { hashPasswordService } from "../services/password.service.js";
-import { getSectionService, updateSectionService } from "../services/section.services.js";
+import {
+  getSectionService,
+  updateSectionService
+} from "../services/section.services.js";
 import {
   getStudentService,
   registerStudentService,
@@ -29,16 +33,21 @@ import { error, success } from "../utills/responseWrapper.js";
 
 export async function registerStudentController(req, res) {
   try {
-    const { firstname, lastname, gender, parentName, phone, sectionId } = req.body;
+    const { firstname, lastname, gender, parentName, phone, sectionId } =
+      req.body;
     const adminId = req.adminId;
 
     const section = await getSectionService({ _id: sectionId });
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Section not found"));
     }
     const classInfo = await getClassService({ _id: section["classId"] });
     if (!classInfo) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Class not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Class not found"));
     }
 
     const parentNames = parentName.split(" ");
@@ -55,7 +64,9 @@ export async function registerStudentController(req, res) {
 
     let student = await getStudentService({ firstname, parent: parent["_id"] });
     if (student) {
-      return res.status(StatusCodes.CONFLICT).send(error(400, "Student already exists"));
+      return res
+        .status(StatusCodes.CONFLICT)
+        .send(error(400, "Student already exists"));
     }
     const studentObj = {
       firstname,
@@ -68,7 +79,10 @@ export async function registerStudentController(req, res) {
     };
     student = await registerStudentService(studentObj);
 
-    await updateSectionService({ _id: sectionId }, { studentCount: section["studentCount"] + 1 });
+    await updateSectionService(
+      { _id: sectionId },
+      { studentCount: section["studentCount"] + 1 }
+    );
 
     await createOrUpdateDuesForFeeStructure(
       student["feeStructureId"],
@@ -77,9 +91,13 @@ export async function registerStudentController(req, res) {
       student["_id"]
     );
 
-    return res.status(StatusCodes.OK).send(success(201, "Student registered successfully!"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(201, "Student registered successfully!"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -88,7 +106,9 @@ export async function deleteStudentController(req, res) {
     const studentId = req.params.studentId;
     const student = await getStudentService({ _id: studentId, isActive: true });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student doesn't exists"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student doesn't exists"));
     }
 
     const [parent, section] = await Promise.all([
@@ -97,22 +117,37 @@ export async function deleteStudentController(req, res) {
     ]);
 
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent doesn't exists"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent doesn't exists"));
     }
 
     await Promise.all([
       updateStudentService({ _id: studentId }, { isActive: false }),
-      updateSectionService({ _id: section["_id"] }, { studentCount: section["studentCount"] - 1 })
+      updateSectionService(
+        { _id: section["_id"] },
+        { studentCount: section["studentCount"] - 1 }
+      )
     ]);
 
-    const siblings = await getStudentsService({ parent: student["parent"], isActive: true });
+    const siblings = await getStudentsService({
+      parent: student["parent"],
+      isActive: true
+    });
     if (siblings?.length === 0) {
-      await updateParentService({ _id: student["parent"] }, { isActive: false });
+      await updateParentService(
+        { _id: student["parent"] },
+        { isActive: false }
+      );
     }
 
-    return res.status(StatusCodes.OK).send(success(200, "Student deleted successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Student deleted successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -124,11 +159,15 @@ export async function updateStudentController(req, res) {
 
     const student = await getStudentService({ _id: studentId });
     if (!student) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Student not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Student not found"));
     }
     const parent = await getParentService({ _id: student["parent"] });
     if (!parent) {
-      return res.status(StatusCodes.NOT_FOUND).send(error(404, "Parent not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Parent not found"));
     }
 
     if (req.body["firstname"]) {
@@ -147,7 +186,8 @@ export async function updateStudentController(req, res) {
       studentUpdate.dob = req.body["dob"];
     }
     if (req.body["photo"] || req.body["method"] === "DELETE") {
-      studentUpdate.photo = req.body["method"] === "DELETE" ? "" : req.body["photo"];
+      studentUpdate.photo =
+        req.body["method"] === "DELETE" ? "" : req.body["photo"];
     }
     if (req.body["address"]) {
       studentUpdate.address = req.body["address"];
@@ -178,7 +218,9 @@ export async function updateStudentController(req, res) {
         _id: { $ne: parent["_id"] }
       });
       if (parentWithPhone) {
-        return res.status(StatusCodes.CONFLICT).send(error(409, "Phone number already registered"));
+        return res
+          .status(StatusCodes.CONFLICT)
+          .send(error(409, "Phone number already registered"));
       }
       parentUpdate.phone = req.body["phone"];
     }
@@ -223,9 +265,13 @@ export async function updateStudentController(req, res) {
       updateStudentService({ _id: studentId }, studentUpdate),
       updateParentService({ _id: student["parent"] }, parentUpdate)
     ]);
-    return res.status(StatusCodes.OK).send(success(200, "Student updated successfully"));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, "Student updated successfully"));
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -257,15 +303,21 @@ export async function getStudentsController(req, res) {
       !lastname &&
       !gender
     ) {
-      return res.status(StatusCodes.BAD_REQUEST).send(error(400, "Invalid request"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Invalid request"));
     }
 
     if (admin && req.adminId !== admin) {
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .send(error(403, "Forbidden access"));
     }
 
     if (req.role === "parent" && !parent && parent !== req.parentId) {
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .send(error(403, "Forbidden access"));
     }
 
     if (req.role == "teacher" && !section) {
@@ -280,8 +332,13 @@ export async function getStudentsController(req, res) {
       parent = req.parentId;
     }
 
-    if (req.role === "teacher" && (admin || classId || (section && req.sectionId !== section))) {
-      return res.status(StatusCodes.FORBIDDEN).send(error(403, "Forbidden access"));
+    if (
+      req.role === "teacher" &&
+      (admin || classId || (section && req.sectionId !== section))
+    ) {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .send(error(403, "Forbidden access"));
     }
     const filter = { isActive: true };
     if (admin) {
@@ -495,7 +552,8 @@ export async function getStudentsController(req, res) {
           date: { $gte: startDate, $lte: currentDate }
         });
         const dayscount = calculateDaysBetweenDates(startDate, currentDate);
-        const attendancableDays = dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
+        const attendancableDays =
+          dayscount - holidaysCount - sundayCount + sundayAsWorkDayCount;
 
         pipeline.push({
           $lookup: {
@@ -586,7 +644,9 @@ export async function getStudentsController(req, res) {
       })
     );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
   }
 }
 
@@ -602,13 +662,17 @@ export async function registerStudentsFromExcelController(req, res) {
     ]);
 
     if (!section) {
-      return res.status(StatusCodes.NOT_FOUND).send(success(404, "Section not found"));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(success(404, "Section not found"));
     }
     if (!classInfo) {
       return res.status(StatusCodes.NOT_FOUND).send(404, "Class not found");
     }
     if (section["classId"].toString() !== classInfo["_id"].toString()) {
-      return res.status(StatusCodes.BAD_REQUEST).send(success(400, "Invalid class, section ids"));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(success(400, "Invalid class, section ids"));
     }
 
     const workbook = xlsx.readFile(file.path);
@@ -626,8 +690,15 @@ export async function registerStudentsFromExcelController(req, res) {
     await fs.unlink(file.path);
     return res
       .status(StatusCodes.OK)
-      .send(success(201, `${registeredStudentsCount} Students registered successfully`));
+      .send(
+        success(
+          201,
+          `${registeredStudentsCount} Students registered successfully`
+        )
+      );
   } catch (err) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(501, err.message));
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(501, err.message));
   }
 }

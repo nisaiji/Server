@@ -142,7 +142,10 @@ async function getTeacherNotificationRecipientsService({
     return [];
   }
 
-  const teacherRecipientMatch = buildRecipientMatch("teacher", excludeTeacherId);
+  const teacherRecipientMatch = buildRecipientMatch(
+    "teacher",
+    excludeTeacherId
+  );
 
   try {
     const recipients = await teacherSubjectSectionModel.aggregate([

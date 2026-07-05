@@ -1,5 +1,4 @@
 import axios from "axios";
-
 import { config } from "../config/config.js";
 
 const url = config?.msg91Url;
@@ -19,7 +18,10 @@ export async function verifyMsg91Token(accessToken) {
     );
     return response?.data;
   } catch (error) {
-    console.error("Error verifying access token:", error.response?.data || error.message);
+    console.error(
+      "Error verifying access token:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 }

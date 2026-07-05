@@ -50,7 +50,10 @@ export async function createSectionAttendanceService(paramObj) {
 
 export async function updateSectionAttendanceService(filter, update) {
   try {
-    const sectionAttendance = await sectionAttendanceModel.findOneAndUpdate(filter, update);
+    const sectionAttendance = await sectionAttendanceModel.findOneAndUpdate(
+      filter,
+      update
+    );
     return sectionAttendance;
   } catch (error) {
     throw error;
@@ -59,7 +62,8 @@ export async function updateSectionAttendanceService(filter, update) {
 
 export async function deleteSectionAttendanceService(filter) {
   try {
-    const sectionAttendance = await sectionAttendanceModel.findOneAndDelete(filter);
+    const sectionAttendance =
+      await sectionAttendanceModel.findOneAndDelete(filter);
     return sectionAttendance;
   } catch (error) {
     throw error;
