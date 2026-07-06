@@ -23,7 +23,7 @@ const paymentSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     currency: { type: String, default: "INR" },
     gateway: { type: String, enum: ["ZOHO"], default: "ZOHO" },
-    paymentsSessionId: { type: String, index: true, sparse: true },
+    paymentSessionId: { type: String, index: true, sparse: true },
     status: {
       type: String,
       enum: ["CREATED", "PENDING", "SUCCESS", "FAILED"],

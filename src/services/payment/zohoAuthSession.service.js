@@ -13,3 +13,10 @@ export async function createZohoAuthSessionService(data) {
 export async function getZohoAuthSessionService(schoolId) {
   return zohoAuthSessionModel.findOne({ schoolId });
 }
+
+export async function updateZohoAuthSessionService(schoolId, update) {
+  return zohoAuthSessionModel.findOneAndUpdate({ schoolId }, update, {
+    upsert: true,
+    new: true
+  });
+}

@@ -3,6 +3,7 @@ import {
   getAdminPaymentHistoryController,
   getAdminReceiptController,
   paymentCallbackController,
+  setZohoSecretController,
   zohoWebhookController
 } from "../controllers/payment.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
@@ -12,6 +13,12 @@ const paymentRouter = express.Router();
 
 paymentRouter.post("/webhook/zoho", zohoWebhookController);
 paymentRouter.get("/callback", paymentCallbackController);
+
+paymentRouter.put(
+  "/admin/zoho/secret",
+  adminAuthenticate,
+  setZohoSecretController
+);
 
 paymentRouter.get(
   "/admin/history/:sessionStudentId",

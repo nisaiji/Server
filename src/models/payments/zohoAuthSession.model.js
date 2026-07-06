@@ -13,14 +13,15 @@ const zohoAuthSessionSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    accountId: {
+      type: String,
+      required: true
+    },
     paymentSecretKey: {
       type: String,
       required: true
     },
     expiresAt: {
-      type: Date
-    },
-    lastUsedAt: {
       type: Date
     },
     status: {

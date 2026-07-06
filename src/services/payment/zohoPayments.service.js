@@ -54,7 +54,7 @@ async function zohoRequest({
  * @param {number} args.amount
  * @param {string} args.currency
  * @param {string} args.description
- * @param {string} args.internalPaymentId - Our internal payment ID to be stored in metadata.
+ * @param {string} args.accountId
  * @returns {Promise<any>}
  */
 export async function createZohoPaymentSession({
@@ -62,7 +62,7 @@ export async function createZohoPaymentSession({
   amount,
   currency = "INR",
   description,
-  internalPaymentId
+  accountId
 }) {
   return zohoRequest({
     accessToken,
@@ -71,13 +71,10 @@ export async function createZohoPaymentSession({
     data: {
       amount,
       currency,
-      description,
-      custom_fields: [
-        {
-          label: "paymentId",
-          value: internalPaymentId
-        }
-      ]
+      description
+    },
+    params: {
+      account_id: accountId
     }
   });
 }

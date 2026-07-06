@@ -32,15 +32,10 @@ const _config = {
   zohoAccountUrl: process.env.ZOHO_ACCOUNT_URL,
   zohoPayUrl: process.env.ZOHO_PAY_ROOT_URL,
   zohoPaySandBoxUrl: process.env.ZOHO_PAY_SANDBOX_ROOT_URL,
-  zohoRedirectUrl: process.env.ZOHO_REDIRECT_URL,
-  zohoSandboxRedirectUrl: process.env.ZOHO_SANDBOX_REDIRECT_URL,
-  zohoClientId: process.env.ZOHO_CLIENT_ID,
-  zohoClientSecret: process.env.ZOHO_CLIENT_SECRET,
-  zohoRefreshToken: process.env.ZOHO_REFRESH_TOKEN,
   zohoWebhookAuthSecret: process.env.ZOHO_WEBHOOK_AUTH_SECRET,
-  zohoWebhookRefundAuthSecret: process.env.ZOHO_WEBHOOK_REFUND_AUTH_SECRET,
   isSandbox: process.env.ZOHO_IS_SANDBOX === "true",
   bypassToken: process.env.BYPASS_TOKEN,
+
   awsRegion: process.env.AWS_REGION || "ap-south-1"
 };
 

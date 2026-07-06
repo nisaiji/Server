@@ -298,9 +298,7 @@ export async function initiatePaymentFlow({
   });
 
   // 4. Get tenant-specific payment gateway credentials
-  const paymentSettings = await getZohoAuthSessionService({
-    schoolId: sessionStudent.school
-  });
+  const paymentSettings = await getZohoAuthSessionService(payment.adminId);
   if (!paymentSettings?.paymentSecretKey) {
     await processFailedPayment({
       payment,
@@ -332,18 +330,22 @@ export async function initiatePaymentFlow({
       cacheKey: sessionStudent.school.toString() // Use schoolId as cache key
     });
 
+    console.log("Zoho access token refreshed.", {
+      schoolId: sessionStudent.school,
+      accessToken: zohoToken.accessToken,
+      expiresAt: zohoToken.expiresAt,
+      zohoToken
+    });
     // Update the access token and its expiry in the database
-    await getZohoAuthSessionService({ schoolId: sessionStudent.school }).then(
-      async (session) => {
-        if (session) {
-          session.accessToken = zohoToken.accessToken;
-          session.expiresAt = new Date(
-            Date.now() + (zohoToken.expiresAt - Date.now())
-          );
-          await session.save();
-        }
+    await getZohoAuthSessionService(payment.adminId).then(async (session) => {
+      if (session) {
+        session.accessToken = zohoToken.accessToken;
+        session.expiresAt = new Date(
+          Date.now() + (zohoToken.expiresAt - Date.now())
+        );
+        await session.save();
       }
-    );
+    });
 
     console.info("Zoho access token refreshed and updated in DB.", {
       schoolId: sessionStudent.school
@@ -356,7 +358,7 @@ export async function initiatePaymentFlow({
     amount,
     currency: payment.currency ?? "INR",
     description: paymentDescription,
-    internalPaymentId: payment._id.toString()
+    accountId: paymentSettings.accountId
   });
 
   const paymentSessionId = zohoResponse?.payments_session?.payments_session_id;
@@ -392,7 +394,7 @@ export async function initiatePaymentFlow({
 
   await updatePaymentService(
     { _id: payment._id },
-    { status: "PENDING", paymentSessionId }
+    { status: "PENDING", paymentSessionId, gatewayResponse: zohoResponse }
   );
 
   // 8. Return data for frontend

@@ -42,26 +42,22 @@ export async function getZohoCredentials(secretId) {
     // 3. Parse and Validate
     const rawSecret = JSON.parse(response.SecretString);
 
-    const {
-      clientId: clientId,
-      clientSecret: clientSecret,
-      refreshToken: refreshToken,
-      accountId: accountId,
-      webhookSecret: webhookSecret
-    } = rawSecret;
-
-    if (!clientId || !clientSecret || !refreshToken) {
+    if (
+      !rawSecret.zohoClientId ||
+      !rawSecret.zohoClientSecret ||
+      !rawSecret.zohoRefreshToken
+    ) {
       throw new Error(
         "Secret is missing one or more required fields (client_id, client_secret, refresh_token)."
       );
     }
 
     const credentials = {
-      clientId,
-      clientSecret,
-      refreshToken,
-      accountId,
-      webhookSecret
+      clientId: rawSecret.zohoClientId,
+      clientSecret: rawSecret.zohoClientSecret,
+      refreshToken: rawSecret.zohoRefreshToken,
+      accountId: rawSecret.zohoAccountId,
+      webhookSecret: rawSecret.zohoWebhookSecret
     };
 
     // 4. Cache the result

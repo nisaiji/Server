@@ -10,7 +10,10 @@ import {
   processSuccessfulPayment
 } from "../services/payment/payment.service.js";
 import { verifyZohoWebhookSignature } from "../services/payment/webhook.service.js";
-import { getZohoAuthSessionService } from "../services/payment/zohoAuthSession.service.js";
+import {
+  getZohoAuthSessionService,
+  updateZohoAuthSessionService
+} from "../services/payment/zohoAuthSession.service.js";
 import { getParentService } from "../services/v2/parent.services.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
@@ -396,6 +399,28 @@ export async function paymentCallbackController(req, res) {
         paidAt: payment.paidAt
       })
     );
+  } catch (err) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
+  }
+}
+
+export async function setZohoSecretController(req, res) {
+  try {
+    const { paymentSecretKey, accessToken, expiresAt } = req.body;
+    if (!paymentSecretKey) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "paymentSecretKey is required"));
+    }
+    const schoolId = req.adminId;
+    await updateZohoAuthSessionService(schoolId, {
+      paymentSecretKey,
+      accessToken,
+      expiresAt
+    });
+    return res.status(StatusCodes.OK).send(success(200, null));
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

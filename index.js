@@ -3,12 +3,13 @@ import cors from "cors";
 import express from "express";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
-
 import { config } from "./src/config/config.js";
 import connectDB from "./src/config/db.config.js";
 import { cronManager } from "./src/crons/index.cron.js";
 import router from "./src/routers/index.router.js";
 import swaggerDocs from "./swagger.js";
+import { setupAxiosInterceptors } from "./src/config/axios.interceptor.js";
+setupAxiosInterceptors();
 // import "./src/config/redis.config.js";
 const PORT = config.port || 4000;
 

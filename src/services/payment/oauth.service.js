@@ -1,3 +1,4 @@
+import querystring from "querystring";
 import axios from "axios";
 import { config } from "../../config/config.js";
 
@@ -32,15 +33,19 @@ export async function getAccessToken({
   }
 
   try {
+    const formData = querystring.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+      grant_type: "refresh_token"
+    });
+
     const response = await axios.post(
       `${config.zohoAccountUrl}/oauth/v2/token`,
-      null,
+      formData,
       {
-        params: {
-          client_id: clientId,
-          client_secret: clientSecret,
-          refresh_token: refreshToken,
-          grant_type: "refresh_token"
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
         }
       }
     );
