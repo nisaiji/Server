@@ -1040,7 +1040,11 @@ export async function verifyFeeSetupController(req, res) {
 
       if (updatedFeeStructure) {
         try {
-          await createOrUpdateDuesForFeeStructure(updatedFeeStructure);
+          await createOrUpdateDuesForFeeStructure(
+            updatedFeeStructure,
+            null,
+            null
+          );
         } catch (err) {
           return res
             .status(StatusCodes.INTERNAL_SERVER_ERROR)

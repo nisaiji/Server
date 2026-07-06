@@ -15,7 +15,17 @@ export async function registerParentService(data) {
   return parent;
 }
 
-export async function updateParentService(filter, update) {
+export async function updateParentService(
+  filter,
+  update,
+  dbTransactionInstance
+) {
+  if (dbTransactionInstance) {
+    const parent = await parentModel
+      .updateOne(filter, update)
+      .session(dbTransactionInstance);
+    return parent;
+  }
   const parent = await parentModel.updateOne(filter, update);
   return parent;
 }

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import { getFeeCycleService } from "./feeSetup.service.js";
-import { getFeeHeadService } from "./feeSetup.service.js";
+import { getFeeCycleService, getFeeHeadService } from "./feeSetup.service.js";
 import { getSessionService } from "./session.services.js";
 import studentFeeDueModel from "../models/fee/studentFeeDue.model.js";
 import sessionStudentModel from "../models/v2/sessionStudent.model.js";
@@ -223,6 +222,11 @@ export async function getStudentFeeDuesService({
   }));
 }
 
+/**
+ * @param {Object} feeStructure
+ * @param {string|import("mongoose").Types.ObjectId|undefined} studentSessionId
+ * @param {import("mongoose").ClientSession|undefined} dbTransactionInstance
+ */
 export async function createOrUpdateDuesForFeeStructure(
   feeStructure,
   studentSessionId,
@@ -282,16 +286,24 @@ export async function createOrUpdateDuesForFeeStructure(
     const transaction = await mongoose.startSession();
     try {
       await transaction.withTransaction(async () => {
-        await studentFeeDueModel.bulkWrite(operations, {
-          session: transaction
-        });
+        await studentFeeDueModel.bulkWrite(
+          /** @type {import("mongoose").AnyBulkWriteOperation[]} */ (
+            operations
+          ),
+          {
+            session: transaction
+          }
+        );
       });
     } finally {
       transaction.endSession();
     }
   } else {
-    await studentFeeDueModel.bulkWrite(operations, {
-      session: dbTransactionInstance
-    });
+    await studentFeeDueModel.bulkWrite(
+      /** @type {import("mongoose").AnyBulkWriteOperation[]} */ (operations),
+      {
+        session: dbTransactionInstance
+      }
+    );
   }
 }

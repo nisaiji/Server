@@ -95,7 +95,8 @@ export async function registerStudentAndSessionStudentController(req, res) {
       getFeeStructureService({
         adminId,
         sessionId: section.session,
-        classId: section.classId
+        classId: section.classId,
+        isVerified: true
       })
     ]);
 
@@ -206,6 +207,11 @@ export async function registerStudentAndSessionStudentController(req, res) {
             { $inc: { studentCount: 1 } },
             transactionSession
           );
+          await updateParentService(
+            { _id: parentObj._id },
+            { $push: { students: student._id } },
+            transactionSession
+          );
           if (feeStructureDetails?.isVerified) {
             await createOrUpdateDuesForFeeStructure(
               feeStructureDetails,
@@ -213,7 +219,6 @@ export async function registerStudentAndSessionStudentController(req, res) {
               transactionSession
             );
           }
-
           return sessionStudent;
         }
       );
@@ -334,7 +339,7 @@ export async function registerSessionStudentController(req, res) {
     };
 
     const [createdSessionStudent] = await Promise.all([
-      registerSessionStudentService(sessionStudentObj),
+      registerSessionStudentService([sessionStudentObj]),
       updateSectionService(
         { _id: sectionId },
         { studentCount: (section.studentCount || 0) + 1 }

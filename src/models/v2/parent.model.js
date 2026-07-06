@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const parentSchema = mongoose.Schema(
+const parentSchema = new mongoose.Schema(
   {
     username: {
       type: String
