@@ -55,6 +55,7 @@ async function zohoRequest({
  * @param {string} args.currency
  * @param {string} args.description
  * @param {string} args.accountId
+ * @param {string} args.internalPaymentId
  * @returns {Promise<any>}
  */
 export async function createZohoPaymentSession({
@@ -62,7 +63,8 @@ export async function createZohoPaymentSession({
   amount,
   currency = "INR",
   description,
-  accountId
+  accountId,
+  internalPaymentId
 }) {
   return zohoRequest({
     accessToken,
@@ -71,7 +73,13 @@ export async function createZohoPaymentSession({
     data: {
       amount,
       currency,
-      description
+      description,
+      meta_data: [
+        {
+          key: "paymentId",
+          value: internalPaymentId
+        }
+      ]
     },
     params: {
       account_id: accountId

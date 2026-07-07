@@ -41,7 +41,7 @@ async function assertParentOwnsSessionStudent(parentId, sessionStudent) {
 
   return { ok: true, parent };
 }
-
+//checked
 function resolveWebhookStatus(payload) {
   const status = (
     payload?.status ??
@@ -63,7 +63,7 @@ function resolveWebhookStatus(payload) {
 
   return null;
 }
-
+//checked
 function resolveWebhookPaymentId(payload) {
   return (
     payload?.payment_id ??
@@ -73,14 +73,9 @@ function resolveWebhookPaymentId(payload) {
     null
   );
 }
-
+//checked
 function resolveWebhookInternalPaymentId(payload) {
-  return (
-    payload?.metadata?.paymentId ??
-    payload?.custom_fields?.paymentId ??
-    payload?.reference_id ??
-    null
-  );
+  return payload?.meta_data?.paymentId ?? null;
 }
 
 //checked
@@ -287,7 +282,7 @@ export async function zohoWebhookController(req, res) {
     const signature =
       req.headers["x-zoho-signature"] ||
       req.headers["x-zoho-webhook-signature"];
-    const rawPayload = req.rawBody || JSON.stringify(req.body);
+    const rawPayload = JSON.stringify(req.body);
 
     const payload = req.body;
     const paymentSessionId = resolveWebhookPaymentId(payload);
@@ -406,9 +401,10 @@ export async function paymentCallbackController(req, res) {
   }
 }
 
+//checked
 export async function setZohoSecretController(req, res) {
   try {
-    const { paymentSecretKey, accessToken, expiresAt } = req.body;
+    const { paymentSecretKey, accessToken, expiresAt, accountId } = req.body;
     if (!paymentSecretKey) {
       return res
         .status(StatusCodes.BAD_REQUEST)
@@ -418,7 +414,8 @@ export async function setZohoSecretController(req, res) {
     await updateZohoAuthSessionService(schoolId, {
       paymentSecretKey,
       accessToken,
-      expiresAt
+      expiresAt,
+      accountId
     });
     return res.status(StatusCodes.OK).send(success(200, null));
   } catch (err) {

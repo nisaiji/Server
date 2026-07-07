@@ -358,7 +358,8 @@ export async function initiatePaymentFlow({
     amount,
     currency: payment.currency ?? "INR",
     description: paymentDescription,
-    accountId: paymentSettings.accountId
+    accountId: paymentSettings.accountId,
+    internalPaymentId: payment._id.toString() // Pass internal payment ID for metadata
   });
 
   const paymentSessionId = zohoResponse?.payments_session?.payments_session_id;
