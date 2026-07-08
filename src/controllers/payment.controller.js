@@ -1,5 +1,10 @@
 import { StatusCodes } from "http-status-codes";
-import { getZohoCredentials } from "../config/aws/secrets.service.js";
+import {
+  getZohoCredentials,
+  updateZohoCredentials
+} from "../config/aws/secrets.service.js";
+import { config } from "../config/config.js";
+import { getAccessToken } from "../services/payment/oauth.service.js";
 import {
   getPaymentService,
   getPaymentsService,
@@ -14,6 +19,7 @@ import {
   getZohoAuthSessionService,
   updateZohoAuthSessionService
 } from "../services/payment/zohoAuthSession.service.js";
+import { createZohoWebhook } from "../services/payment/zohoPayments.service.js";
 import { getParentService } from "../services/v2/parent.services.js";
 import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
@@ -404,18 +410,45 @@ export async function paymentCallbackController(req, res) {
 //checked
 export async function setZohoSecretController(req, res) {
   try {
-    const { paymentSecretKey, accessToken, expiresAt, accountId } = req.body;
-    if (!paymentSecretKey) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "paymentSecretKey is required"));
-    }
     const schoolId = req.adminId;
-    await updateZohoAuthSessionService(schoolId, {
-      paymentSecretKey,
+
+    // fetch the secret from AWS Secrets Manager
+    const secretId = `${config.environment}/school/${schoolId}/payment`;
+    const credentials = await getZohoCredentials(secretId);
+
+    // create a new access token using the refresh token
+    const { accessToken, expiresAt } = await getAccessToken({
+      clientId: credentials.clientId,
+      clientSecret: credentials.clientSecret,
+      refreshToken: credentials.refreshToken,
+      cacheKey: schoolId.toString()
+    });
+
+    // create zoho webhook
+    const webhookData = await createZohoWebhook({
       accessToken,
-      expiresAt,
-      accountId
+      accountId: credentials.accountId,
+      webhookData: {
+        name: "Payment notifications",
+        url: config.zohoWebhookUrl,
+        description:
+          "Forwards payment and refund events to our order management system.",
+        enabled_events: ["payment.succeeded", "payment.failed"]
+      }
+    });
+
+    // update aws secretes with zoho webhook secret
+    await updateZohoCredentials(secretId, {
+      ...credentials,
+      webhookSecret: webhookData.webhook_url.signing_key
+    });
+
+    await updateZohoAuthSessionService(schoolId, {
+      paymentSecretKey: secretId,
+      accessToken,
+      expiresAt: new Date(Date.now() + (expiresAt - Date.now())),
+      accountId: credentials.accountId,
+      zohoWebhookUrlId: webhookData.webhook_url.webhook_url_id
     });
     return res.status(StatusCodes.OK).send(success(200, null));
   } catch (err) {

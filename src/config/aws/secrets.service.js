@@ -46,9 +46,9 @@ export async function getZohoCredentials(secretId) {
     const rawSecret = JSON.parse(response.SecretString);
 
     if (
-      !rawSecret.zohoClientId ||
-      !rawSecret.zohoClientSecret ||
-      !rawSecret.zohoRefreshToken
+      !rawSecret.clientId ||
+      !rawSecret.clientSecret ||
+      !rawSecret.refreshToken
     ) {
       throw new Error(
         "Secret is missing one or more required fields (client_id, client_secret, refresh_token)."
@@ -56,11 +56,11 @@ export async function getZohoCredentials(secretId) {
     }
 
     const credentials = {
-      clientId: rawSecret.zohoClientId,
-      clientSecret: rawSecret.zohoClientSecret,
-      refreshToken: rawSecret.zohoRefreshToken,
-      accountId: rawSecret.zohoAccountId,
-      webhookSecret: rawSecret.zohoWebhookSecret
+      clientId: rawSecret.clientId,
+      clientSecret: rawSecret.clientSecret,
+      refreshToken: rawSecret.refreshToken,
+      accountId: rawSecret.accountId,
+      webhookSecret: rawSecret.webhookSecret
     };
 
     // 4. Cache the result
@@ -95,19 +95,10 @@ export async function getZohoCredentials(secretId) {
 export async function updateZohoCredentials(secretId, credentials) {
   console.info("Updating secret in AWS Secrets Manager.", { secretId });
 
-  // 1. Prepare the secret string in snake_case format for storing in AWS.
-  const secretData = {
-    zohoClientId: credentials.clientId,
-    zohoClientSecret: credentials.clientSecret,
-    zohoRefreshToken: credentials.refreshToken,
-    zohoAccountId: credentials.accountId,
-    zohoWebhookSecret: credentials.webhookSecret
-  };
-
   // 2. Create the command to update the secret.
   const command = new UpdateSecretCommand({
     SecretId: secretId,
-    SecretString: JSON.stringify(secretData, null, 2) // Pretty-print JSON
+    SecretString: JSON.stringify(credentials, null, 2) // Pretty-print JSON
   });
 
   try {
@@ -115,7 +106,7 @@ export async function updateZohoCredentials(secretId, credentials) {
     await secretsManagerClient.send(command);
 
     // 4. Invalidate the cache for this secret to force a fresh read on next `get`.
-    secretsCache.set(secretId, secretData);
+    secretsCache.set(secretId, credentials);
 
     console.info("Successfully updated secret in AWS Secrets Manager.", {
       secretId

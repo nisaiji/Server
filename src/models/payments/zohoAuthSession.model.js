@@ -29,6 +29,10 @@ const zohoAuthSessionSchema = new mongoose.Schema(
       enum: ["ACTIVE", "INACTIVE", "EXPIRED"],
       default: "ACTIVE",
       index: true
+    },
+    zohoWebhookUrlId: {
+      type: String,
+      required: true
     }
   },
   { timestamps: true, versionKey: false, collection: "zoho_auth_sessions" }

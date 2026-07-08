@@ -118,11 +118,13 @@ async function refreshZohoAccessToken({ paymentSettings, schoolId }) {
     return paymentSettings.accessToken;
   }
 
-  const zohoCreds = await getZohoCredentials(paymentSettings.paymentSecretKey);
+  const zohoCredentials = await getZohoCredentials(
+    paymentSettings.paymentSecretKey
+  );
   const zohoToken = await getAccessToken({
-    clientId: zohoCreds.clientId,
-    clientSecret: zohoCreds.clientSecret,
-    refreshToken: zohoCreds.refreshToken,
+    clientId: zohoCredentials.clientId,
+    clientSecret: zohoCredentials.clientSecret,
+    refreshToken: zohoCredentials.refreshToken,
     cacheKey: schoolId.toString()
   });
 

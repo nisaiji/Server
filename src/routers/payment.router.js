@@ -11,7 +11,7 @@ import { sessionStudentIdParamValidation } from "../middlewares/validation/payme
 
 const paymentRouter = express.Router();
 
-paymentRouter.post("/webhook/zoho", zohoWebhookController);
+paymentRouter.post("/zoho/webhook", zohoWebhookController);
 paymentRouter.get("/callback", paymentCallbackController);
 
 paymentRouter.put(
