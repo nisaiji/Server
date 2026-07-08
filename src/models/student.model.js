@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
 import { generateCustomId } from "../helpers/idGenerator.helper.js";
+import { STUDENT_GENDER, STUDENT_BLOOD_GROUP } from "../enums/student.enums.js";
 
 const studentSchema = mongoose.Schema(
   {
-    firstname: {
+    firstName: {
       type: String,
       required: true
     },
-    lastname: {
+    lastName: {
       type: String,
       required: true
     },
@@ -19,8 +20,7 @@ const studentSchema = mongoose.Schema(
     },
     aadharNumber: {
       type: Number,
-      required: true,
-      unique: true
+      required: true
     },
     aadharVerified: {
       type: Boolean,
@@ -32,10 +32,12 @@ const studentSchema = mongoose.Schema(
     },
     gender: {
       type: String,
+      enum: Object.values(STUDENT_GENDER),
       required: true
     },
     bloodGroup: {
-      type: String
+      type: String,
+      enum: Object.values(STUDENT_BLOOD_GROUP)
     },
     dob: {
       type: String

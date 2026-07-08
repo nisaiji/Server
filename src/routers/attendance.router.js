@@ -13,14 +13,14 @@ import {
 } from "../controllers/attendance.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
-import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
-import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
+import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
 import {
   attendanceByTeacherValidation,
   attendanceCountValidation,
   attendanceStatusValidation,
   updateAttendanceValidation
 } from "../middlewares/validation/attendance.validation.middleware.js";
+import { authorizeTeacherRoles } from "../middlewares/authorization/teacherRoles.authorization.middleware.js";
 
 const attendanceRouter = express.Router();
 

@@ -9,29 +9,19 @@ import {
 import { getClassService } from "../../services/class.services.js";
 import { getHolidayCountService } from "../../services/holiday.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
+import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import {
-  getSectionService,
-  updateSectionService
-} from "../../services/section.services.js";
-import {
-  getStudentCountService,
   getStudentService,
-  getStudentsPipelineService,
-  getStudentsService,
   registerStudentService,
-  updateStudentService
+  updateStudentService,
+  getStudentsService,
+  getStudentCountService,
+  getStudentsPipelineService
 } from "../../services/student.service.js";
-import {
-  getParentService,
-  registerParentService
-} from "../../services/v2/parent.services.js";
-import {
-  getSchoolParentService,
-  registerSchoolParentService,
-  updateSchoolParentService
-} from "../../services/v2/schoolParent.services.js";
+import { getParentService, registerParentService } from "../../services/parent.services.js";
+import { getSchoolParentService, registerSchoolParentService, updateSchoolParentService } from "../../services/schoolParent.services.js";
 import { getWorkDayCountService } from "../../services/workDay.services.js";
-import { error, success } from "../../utills/responseWrapper.js";
+import { error, success } from "../../utils/responseWrapper.js";
 
 export async function searchStudentsController(req, res) {
   try {
@@ -40,7 +30,7 @@ export async function searchStudentsController(req, res) {
     const adminId = req.adminId;
 
     const pageNum = parseInt(page);
-    const limitNum = limit ? parseInt(limit) : "no limit";
+    const limitNum = limit ? parseInt(limit) : 0;
     const skipNum = (pageNum - 1) * limitNum;
     let filter = {
       admin: convertToMongoId(adminId)

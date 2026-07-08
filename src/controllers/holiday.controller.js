@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
-import { sendPushNotification } from "../config/firebase.config.js";
+import { getParentsByAdminIdService } from "../services/schoolParent.services.js";
+import { getTeachersByAdminIdService } from "../services/teacher.services.js";
 import { getAdminService } from "../services/admin.services.js";
+import { sendPushNotification } from "../config/firebase.config.js";
 import {
   getDayNameService,
   getFormattedDateService,
@@ -15,12 +17,7 @@ import {
   getHolidayService
 } from "../services/holiday.service.js";
 import { getSessionService } from "../services/session.services.js";
-import { getTeachersByAdminIdService } from "../services/teacher.services.js";
-import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
-import {
-  deleteWorkDayService,
-  getWorkDayService
-} from "../services/workDay.services.js";
+import { deleteWorkDayService, getWorkDayService } from "../services/workDay.services.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerHolidayController(req, res) {

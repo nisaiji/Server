@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { ENROLLMENT_STATUS, FEE_STATUS } from "../enums/sessionStudent.enums.js";
 
 const sessionStudentSchema = new mongoose.Schema(
   {
@@ -7,7 +8,7 @@ const sessionStudentSchema = new mongoose.Schema(
     },
     enrollmentStatus: {
       type: String,
-      enum: ["newAdmission", "promoted", "failed"]
+      enum: Object.values(ENROLLMENT_STATUS)
     },
     student: {
       type: mongoose.Schema.Types.ObjectId,
@@ -47,8 +48,8 @@ const sessionStudentSchema = new mongoose.Schema(
     },
     feeStatus: {
       type: String,
-      enum: ["pending", "partial", "paid"],
-      default: "pending"
+      enum: Object.values(FEE_STATUS),
+      default: FEE_STATUS.PENDING
     },
     feeDetails: {
       type: mongoose.Schema.Types.Mixed,
@@ -65,7 +66,7 @@ const sessionStudentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: "session_students"
+    collection: "sessionStudents"
   }
 );
 

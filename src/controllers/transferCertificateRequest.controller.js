@@ -17,12 +17,8 @@ import {
   updateTransferCertificateRequestService,
   getTransferCertificateRequestsPipelineService
 } from "../services/transferCertificateRequest.service.js";
-import { getParentService } from "../services/v2/parent.services.js";
-import {
-  getSessionStudentService,
-  updateSessionStudentService
-} from "../services/v2/sessionStudent.service.js";
-import { error, success } from "../utils/responseWrapper.js";
+import { getParentService } from "../services/parent.services.js";
+import { getSessionStudentService, updateSessionStudentService } from "../services/sessionStudent.service.js";
 
 // Generate unique TC number
 function generateUniqueTCNumber() {

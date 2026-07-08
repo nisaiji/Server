@@ -1,5 +1,5 @@
-import schoolParentModel from "../../models/v2/schoolParent.model.js";
-import { convertToMongoId } from "../mongoose.services.js";
+import schoolParentModel from "../models/schoolParent.model.js";
+import { convertToMongoId } from "./mongoose.services.js";
 
 export async function getSchoolParentService(filter, projection = {}) {
   try {

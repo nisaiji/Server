@@ -1,24 +1,30 @@
 import fs from "fs/promises";
 import { StatusCodes } from "http-status-codes";
-import mongoose from "mongoose";
-import xlsx from "xlsx";
-import { registerStudentsFromExcelHelper } from "../../helpers/v2/student.helper.js";
-import { getStartAndEndTimeService } from "../../services/celender.service.js";
-import { getClassService } from "../../services/class.services.js";
-import { getFeeStructureService } from "../../services/feeSetup.service.js";
-import { convertToMongoId } from "../../services/mongoose.services.js";
-import {
-  getSectionService,
-  updateSectionService
-} from "../../services/section.services.js";
+import { getSectionService, updateSectionService } from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
+import { error, success } from "../../utils/responseWrapper.js";
+import { getClassService } from "../../services/class.services.js";
 import {
-  getStudentService,
-  getStudentsPipelineService,
-  getStudentsService,
-  registerStudentService,
-  updateStudentService
-} from "../../services/student.service.js";
+  getParentService,
+  registerParentService,
+  updateParentService
+} from "../../services/parent.services.js";
+import {
+  getSchoolParentService,
+  registerSchoolParentService,
+  updateSchoolParentService
+} from "../../services/schoolParent.services.js";
+import {
+  getSessionStudentService,
+  getSessionStudentsPipelineService,
+  registerSessionStudentService,
+  updateSessionStudentService
+} from "../../services/sessionStudent.service.js";
+import { getStudentService, getStudentsPipelineService, getStudentsService, registerStudentService, updateStudentService } from "../../services/student.service.js";
+import { convertToMongoId } from "../../services/mongoose.services.js";
+import { getStartAndEndTimeService } from "../../services/celender.service.js";
+import xlsx from 'xlsx';
+import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
 import {
   buildAttendanceSummaryForSessionStudent,
   buildExamSummaryForSessionStudent,
@@ -27,24 +33,6 @@ import {
   calculateAttendancePercentageForSessionStudent
 } from "../../services/studentDetailSummary.service.js";
 import { createOrUpdateDuesForFeeStructure } from "../../services/studentFeeDue.service.js";
-import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
-import {
-  getParentService,
-  registerParentService,
-  updateParentService
-} from "../../services/v2/parent.services.js";
-import {
-  getSchoolParentService,
-  registerSchoolParentService,
-  updateSchoolParentService
-} from "../../services/v2/schoolParent.services.js";
-import {
-  getSessionStudentService,
-  getSessionStudentsPipelineService,
-  registerSessionStudentService,
-  updateSessionStudentService
-} from "../../services/v2/sessionStudent.service.js";
-import { error, success } from "../../utils/responseWrapper.js";
 
 const addFieldsIfPresent = (target, source, fields) => {
   fields.forEach((field) => {
