@@ -7,8 +7,8 @@ import { getZohoCredentials } from "../../config/aws/secrets.service.js";
 import studentFeeDueModel from "../../models/fee/studentFeeDue.model.js";
 import paymentModel from "../../models/payments/payment.model.js";
 import paymentAttemptModel from "../../models/payments/paymentAttempts.model.js";
-import { getParentService } from "../v2/parent.services.js";
-import { getSessionStudentService } from "../v2/sessionStudent.service.js";
+import { getParentService } from "../parent.services.js";
+import { getSessionStudentService } from "../sessionStudent.service.js";
 
 async function validateSessionStudentOwnership({ sessionStudent, parentId }) {
   const parent = await getParentService({ _id: parentId });
