@@ -55,6 +55,7 @@ async function zohoRequest({
  * @param {string} args.currency
  * @param {string} args.description
  * @param {string} args.accountId
+ * @param {string} args.internalPaymentId
  * @returns {Promise<any>}
  */
 export async function createZohoPaymentSession({
@@ -62,7 +63,8 @@ export async function createZohoPaymentSession({
   amount,
   currency = "INR",
   description,
-  accountId
+  accountId,
+  internalPaymentId
 }) {
   return zohoRequest({
     accessToken,
@@ -71,8 +73,38 @@ export async function createZohoPaymentSession({
     data: {
       amount,
       currency,
-      description
+      description,
+      meta_data: [
+        {
+          key: "paymentId",
+          value: internalPaymentId
+        }
+      ]
     },
+    params: {
+      account_id: accountId
+    }
+  });
+}
+
+/**
+ * Creates a webhook subscription with Zoho Payments.
+ * @param {object} args
+ * @param {string} args.accessToken
+ * @param {string} args.accountId
+ * @param {object} args.webhookData - The webhook configuration data (e.g., { url, events }).
+ * @returns {Promise<any>}
+ */
+export async function createZohoWebhook({
+  accessToken,
+  accountId,
+  webhookData
+}) {
+  return zohoRequest({
+    accessToken,
+    method: "post",
+    endpoint: "webhooks",
+    data: webhookData,
     params: {
       account_id: accountId
     }

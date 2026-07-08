@@ -1,4 +1,7 @@
-import { GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+import {
+  GetSecretValueCommand,
+  UpdateSecretCommand
+} from "@aws-sdk/client-secrets-manager";
 import { secretsManagerClient } from "./aws.config.js";
 import { secretsCache } from "./secrets.cache.js";
 
@@ -77,5 +80,52 @@ export async function getZohoCredentials(secretId) {
 
     // Do not expose detailed AWS errors to the caller.
     throw new Error("Could not retrieve payment gateway credentials.");
+  }
+}
+
+/**
+ * Updates a secret in AWS Secrets Manager with new Zoho credentials.
+ * After updating, it invalidates the cache to ensure fresh data is fetched on the next request.
+ *
+ * @param {string} secretId - The ID or ARN of the secret in AWS Secrets Manager.
+ * @param {ZohoCredentials} credentials - The new Zoho credentials to store.
+ * @returns {Promise<void>}
+ * @throws {Error} Throws a generic error if the update fails.
+ */
+export async function updateZohoCredentials(secretId, credentials) {
+  console.info("Updating secret in AWS Secrets Manager.", { secretId });
+
+  // 1. Prepare the secret string in snake_case format for storing in AWS.
+  const secretData = {
+    zohoClientId: credentials.clientId,
+    zohoClientSecret: credentials.clientSecret,
+    zohoRefreshToken: credentials.refreshToken,
+    zohoAccountId: credentials.accountId,
+    zohoWebhookSecret: credentials.webhookSecret
+  };
+
+  // 2. Create the command to update the secret.
+  const command = new UpdateSecretCommand({
+    SecretId: secretId,
+    SecretString: JSON.stringify(secretData, null, 2) // Pretty-print JSON
+  });
+
+  try {
+    // 3. Send the command to AWS.
+    await secretsManagerClient.send(command);
+
+    // 4. Invalidate the cache for this secret to force a fresh read on next `get`.
+    secretsCache.set(secretId, secretData);
+
+    console.info("Successfully updated secret in AWS Secrets Manager.", {
+      secretId
+    });
+  } catch (error) {
+    console.error("Failed to update secret in AWS Secrets Manager.", {
+      secretId,
+      errorName: error.name,
+      errorMessage: error.message
+    });
+    throw new Error("Could not update payment gateway credentials.");
   }
 }

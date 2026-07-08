@@ -24,16 +24,27 @@ const paymentSchema = new mongoose.Schema(
     currency: { type: String, default: "INR" },
     gateway: { type: String, enum: ["ZOHO"], default: "ZOHO" },
     paymentSessionId: { type: String, index: true, sparse: true },
+    zohoWebhookPaymentId: { type: String },
     status: {
       type: String,
-      enum: ["CREATED", "PENDING", "SUCCESS", "FAILED"],
-      default: "CREATED",
-      index: true
+      enum: ["CREATED", "PENDING", "SUCCESS", "FAILED", "EXPIRED"],
+      default: "CREATED"
     },
+    paymentHash: { type: String, index: true, unique: true, sparse: true },
     paidAt: { type: Date },
+    expiresAt: { type: Date },
     gatewayResponse: { type: mongoose.Schema.Types.Mixed }
   },
   { timestamps: true, versionKey: false, collection: "payments" }
 );
 
+paymentSchema.index({
+  sessionStudentId: 1,
+  status: 1
+});
+
+paymentSchema.index({
+  paymentHash: 1,
+  status: 1
+});
 export default mongoose.model("payment", paymentSchema);
