@@ -1,4 +1,10 @@
 import mongoose from "mongoose";
+import {
+  OTP_TYPE,
+  OTP_MEDIUM,
+  OTP_ENTITY_TYPE,
+  OTP_STATUS
+} from "../enums/otp.enums.js";
 
 const otpSchema = mongoose.Schema(
   {
@@ -18,23 +24,23 @@ const otpSchema = mongoose.Schema(
     },
     otpType: {
       type: String,
-      enum: ["phoneVerification", "emailVerification", "forgetPassword"],
+      enum: Object.values(OTP_TYPE),
       required: true
     },
     medium: {
       type: String,
-      enum: ["sms", "email"],
+      enum: Object.values(OTP_MEDIUM),
       required: true
     },
     entityType: {
       type: String,
-      enum: ["admin", "teacher", "parent"],
+      enum: Object.values(OTP_ENTITY_TYPE),
       required: true
     },
     status: {
       type: String,
-      enum: ["pending", "verified", "expired"],
-      default: "pending"
+      enum: Object.values(OTP_STATUS),
+      default: OTP_STATUS.PENDING
     }
   },
   {

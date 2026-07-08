@@ -1,4 +1,4 @@
-import sessionStudentModel from "../../models/v2/sessionStudent.model.js";
+import sessionStudentModel from "../models/sessionStudent.model.js";
 
 export async function getSessionStudentService(paramObj) {
   try {

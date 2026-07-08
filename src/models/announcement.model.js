@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import {
+  ANNOUNCEMENT_CREATOR_ROLE,
+  ANNOUNCEMENT_TARGET_AUDIENCE
+} from "../enums/announcement.enums.js";
 
 const announcementSchema = new mongoose.Schema(
   {
@@ -16,11 +20,11 @@ const announcementSchema = new mongoose.Schema(
     createdByRole: {
       type: String,
       required: true,
-      enum: ["admin", "teacher"]
+      enum: Object.values(ANNOUNCEMENT_CREATOR_ROLE)
     },
     targetAudience: {
       type: [String],
-      enum: ["teacher", "parent"],
+      enum: Object.values(ANNOUNCEMENT_TARGET_AUDIENCE),
       required: true
     },
     startsAt: {
@@ -43,7 +47,7 @@ const announcementSchema = new mongoose.Schema(
     },
     school: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "school"
+      ref: "admin"
     }
   },
   {

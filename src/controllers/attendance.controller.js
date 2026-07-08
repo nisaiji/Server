@@ -1,3 +1,4 @@
+import { error } from "console";
 import { StatusCodes } from "http-status-codes";
 import { sendPushNotification } from "../config/firebase.config.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
@@ -30,16 +31,16 @@ import {
 } from "../services/sectionAttendance.services.js";
 import { getSessionService } from "../services/session.services.js";
 import {
+  getSessionStudentService,
+  getSessionStudentsPipelineService
+} from "../services/sessionStudent.service.js";
+import {
   getParentsByStudentId,
   getStudentService
 } from "../services/student.service.js";
 import { getTeacherService } from "../services/teacher.services.js";
-import {
-  getSessionStudentService,
-  getSessionStudentsPipelineService
-} from "../services/v2/sessionStudent.service.js";
 import { getWorkDayService } from "../services/workDay.services.js";
-import { error, success } from "../utils/responseWrapper.js";
+import { success } from "../utils/responseWrapper.js";
 
 export async function attendanceByTeacherController(req, res) {
   try {

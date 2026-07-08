@@ -7,8 +7,8 @@ import {
   updateTagController
 } from "../controllers/tag.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
+import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
 import { teacherAuthenticate } from "../middlewares/authentication/teacher.authentication.middleware.js";
-import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
 
 const tagRouter = express.Router();
 tagRouter.post("/", teacherAuthenticate, createTagController);

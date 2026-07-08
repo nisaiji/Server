@@ -1,6 +1,6 @@
-import { convertToMongoId } from "./mongoose.services.js";
+import sessionStudentModel from "../models/sessionStudent.model.js";
 import teacherSubjectSectionModel from "../models/teacherSubjectSection.model.js";
-import sessionStudentModel from "../models/v2/sessionStudent.model.js";
+import { convertToMongoId } from "../services/mongoose.services.js";
 
 function buildRecipientMatch(fieldName, excludeRecipientId) {
   const match = {};

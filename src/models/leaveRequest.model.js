@@ -1,4 +1,9 @@
 import mongoose from "mongoose";
+import {
+  LEAVE_SENDER_MODEL,
+  LEAVE_RECEIVER_MODEL,
+  LEAVE_REQUEST_STATUS
+} from "../enums/leave.enums.js";
 
 const leaveRequestSchema = mongoose.Schema(
   {
@@ -23,7 +28,7 @@ const leaveRequestSchema = mongoose.Schema(
       model: {
         type: String,
         required: true,
-        enum: ["teacher", "student"]
+        enum: Object.values(LEAVE_SENDER_MODEL)
       }
     },
 
@@ -35,14 +40,14 @@ const leaveRequestSchema = mongoose.Schema(
       model: {
         type: String,
         required: true,
-        enum: ["admin", "teacher"]
+        enum: Object.values(LEAVE_RECEIVER_MODEL)
       }
     },
 
     status: {
       type: String,
-      enum: ["accept", "reject", "pending", "complete", "expired"],
-      default: "pending"
+      enum: Object.values(LEAVE_REQUEST_STATUS),
+      default: LEAVE_REQUEST_STATUS.PENDING
     },
 
     startTime: {

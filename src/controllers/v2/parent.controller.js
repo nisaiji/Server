@@ -15,6 +15,11 @@ import {
   updateOtpService
 } from "../../services/otp.service.js";
 import {
+  getParentService,
+  getParentsPipelineService,
+  updateParentService
+} from "../../services/parent.services.js";
+import {
   registerParentPasswordChangeRequestService,
   getParentPasswordChangeRequestService,
   getParentPasswordChangeRequestsService,
@@ -24,16 +29,11 @@ import {
   hashPasswordService,
   matchPasswordService
 } from "../../services/password.service.js";
+import { updateSchoolParentsService } from "../../services/schoolParent.services.js";
 import {
   getStudentService,
   getStudentsPipelineService
 } from "../../services/student.service.js";
-import {
-  getParentService,
-  getParentsPipelineService,
-  updateParentService
-} from "../../services/v2/parent.services.js";
-import { updateSchoolParentsService } from "../../services/v2/schoolParent.services.js";
 import { getWorkdayPipelineService } from "../../services/workDay.services.js";
 import { error, success } from "../../utils/responseWrapper.js";
 

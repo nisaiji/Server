@@ -4,15 +4,15 @@ import { convertToMongoId } from "../services/mongoose.services.js";
 import { getSectionService } from "../services/section.services.js";
 import { getSessionService } from "../services/session.services.js";
 import {
+  getSessionStudentService,
+  getSessionStudentsPipelineService
+} from "../services/sessionStudent.service.js";
+import {
   createStudentExamResultService,
   getStudentExamResultService,
   updateStudentExamResultService
 } from "../services/studentExamResult.service.js";
 import { getSubjectService } from "../services/subject.service.js";
-import {
-  getSessionStudentService,
-  getSessionStudentsPipelineService
-} from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function createStudentExamResultController(req, res) {

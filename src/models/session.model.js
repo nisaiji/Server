@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { SESSION_STATUS } from "../enums/session.enums.js";
 
 const sessionSchema = mongoose.Schema(
   {
@@ -24,8 +25,8 @@ const sessionSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["upcoming", "active", "completed"],
-      default: "active"
+      enum: Object.values(SESSION_STATUS),
+      default: SESSION_STATUS.ACTIVE
     },
     academicStartYear: {
       type: Number,

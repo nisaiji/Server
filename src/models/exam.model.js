@@ -1,4 +1,12 @@
 import mongoose from "mongoose";
+import {
+  EXAM_TYPE,
+  EXAM_MODE,
+  SUBJECT_TYPE,
+  GRADING_TYPE,
+  COMPONENT_EXAM_TYPE,
+  EXAM_STATUS
+} from "../enums/exam.enums.js";
 
 const examSchema = new mongoose.Schema(
   {
@@ -31,15 +39,15 @@ const examSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["test", "exam"]
+      enum: Object.values(EXAM_TYPE)
     },
     academicYear: {
       type: String
     },
     mode: {
       type: String,
-      enum: ["online", "offline", "both"],
-      default: "offline"
+      enum: Object.values(EXAM_MODE),
+      default: EXAM_MODE.OFFLINE
     },
     startDate: {
       type: Date
@@ -56,17 +64,17 @@ const examSchema = new mongoose.Schema(
         },
         subjectType: {
           type: String,
-          enum: ["mainSubject", "gradeOnlySubject"]
+          enum: Object.values(SUBJECT_TYPE)
         },
         components: [
           {
             gradingType: {
               type: String,
-              enum: ["marks", "grades"]
+              enum: Object.values(GRADING_TYPE)
             },
             examType: {
               type: String,
-              enum: ["theory", "practical", "grade"]
+              enum: Object.values(COMPONENT_EXAM_TYPE)
             },
             maxMarks: { type: Number },
             maxGrade: { type: String },
@@ -102,8 +110,8 @@ const examSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["scheduled", "ongoing", "completed", "cancelled"],
-      default: "scheduled"
+      enum: Object.values(EXAM_STATUS),
+      default: EXAM_STATUS.SCHEDULED
     },
     resultPublished: {
       type: Boolean,

@@ -1,18 +1,21 @@
 import mongoose from "mongoose";
+import { VERIFICATION_STATUS } from "../enums/authentication.enums.js";
+import { PARENT_GENDER } from "../enums/parent.enums.js";
 
-const parentSchema = new mongoose.Schema(
+const parentSchema = mongoose.Schema(
   {
     username: {
       type: String
     },
-    fullname: {
+    fullName: {
       type: String
     },
     dob: {
       type: String
     },
     gender: {
-      type: String
+      type: String,
+      enum: Object.values(PARENT_GENDER)
     },
     isActive: {
       type: Boolean,
@@ -32,10 +35,8 @@ const parentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      // phone: phoneVerified
-      // phone + email: verified
-      enum: ["unVerified", "phoneVerified", "verified"],
-      default: "unVerified"
+      enum: Object.values(VERIFICATION_STATUS),
+      default: VERIFICATION_STATUS.UNVERIFIED
     },
     fcmToken: {
       type: String

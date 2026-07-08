@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import {
+  PASSWORD_CHANGE_REASON,
+  PARENT_PASSWORD_CHANGE_STATUS
+} from "../enums/password.enums.js";
 
 const parentPasswordChangeRequestSchema = new mongoose.Schema(
   {
@@ -9,7 +13,7 @@ const parentPasswordChangeRequestSchema = new mongoose.Schema(
     },
     reason: {
       type: String,
-      enum: ["forgetPassword", "changeDevice", "technical", "other"],
+      enum: Object.values(PASSWORD_CHANGE_REASON),
       required: true
     },
     description: {
@@ -17,8 +21,8 @@ const parentPasswordChangeRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "expired", "completed"],
-      default: "pending"
+      enum: Object.values(PARENT_PASSWORD_CHANGE_STATUS),
+      default: PARENT_PASSWORD_CHANGE_STATUS.PENDING
     }
   },
   {

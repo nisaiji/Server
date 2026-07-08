@@ -1,7 +1,7 @@
 import { getAdminService } from "../services/admin.services.js";
+import { getParentService } from "../services/parent.services.js";
 import { getSuperAdminService } from "../services/superAdmin.service.js";
 import { getTeacherService } from "../services/teacher.services.js";
-import { getParentService } from "../services/v2/parent.services.js";
 
 export async function getUser(modelType, paramObj) {
   switch (modelType) {

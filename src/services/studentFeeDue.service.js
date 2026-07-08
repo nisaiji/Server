@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import { getFeeCycleService, getFeeHeadService } from "./feeSetup.service.js";
-import { getSessionService } from "./session.services.js";
 import studentFeeDueModel from "../models/fee/studentFeeDue.model.js";
-import sessionStudentModel from "../models/v2/sessionStudent.model.js";
-
+import sessionStudentModel from "../models/sessionStudent.model.js";
+import { getSessionService } from "../services/session.services.js";
 function monthsForFrequency(freq) {
   switch (freq) {
     case "MONTHLY":

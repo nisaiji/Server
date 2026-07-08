@@ -1,18 +1,20 @@
 import mongoose from "mongoose";
+import { PARENT_GENDER, PARENT_STATUS } from "../enums/parent.enums.js";
 
 const schoolParentSchema = mongoose.Schema(
   {
     username: {
       type: String
     },
-    fullname: {
+    fullName: {
       type: String
     },
     age: {
       type: Number
     },
     gender: {
-      type: String
+      type: String,
+      enum: Object.values(PARENT_GENDER)
     },
     isActive: {
       type: Boolean,
@@ -29,7 +31,7 @@ const schoolParentSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["unVerified", "phoneVerified", "verified"]
+      enum: Object.values(PARENT_STATUS)
     },
     country: {
       type: String

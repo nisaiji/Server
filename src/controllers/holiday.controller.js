@@ -14,9 +14,9 @@ import {
   updateHolidayService,
   getHolidayService
 } from "../services/holiday.service.js";
+import { getParentsByAdminIdService } from "../services/schoolParent.services.js";
 import { getSessionService } from "../services/session.services.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
-import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
 import {
   deleteWorkDayService,
   getWorkDayService

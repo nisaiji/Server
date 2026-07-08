@@ -1,4 +1,10 @@
 import mongoose from "mongoose";
+import {
+  TRANSFER_REQUEST_TYPE,
+  TRANSFER_REASON,
+  CONDUCT_CHARACTER_RATING,
+  TRANSFER_STATUS
+} from "../enums/transfer.enums.js";
 
 const transferCertificateRequestSchema = new mongoose.Schema(
   {
@@ -49,22 +55,13 @@ const transferCertificateRequestSchema = new mongoose.Schema(
     // Request Details
     requestType: {
       type: String,
-      enum: ["transfer", "migration", "leaving"],
+      enum: Object.values(TRANSFER_REQUEST_TYPE),
       required: true,
-      default: "transfer"
+      default: TRANSFER_REQUEST_TYPE.TRANSFER
     },
     reason: {
       type: String,
-      enum: [
-        "parentTransfer",
-        "familyRelocation",
-        "betterOpportunity",
-        "financial",
-        "academic",
-        "disciplinary",
-        "medical",
-        "other"
-      ]
+      enum: Object.values(TRANSFER_REASON)
     },
     reasonDescription: {
       type: String,
@@ -104,25 +101,13 @@ const transferCertificateRequestSchema = new mongoose.Schema(
     // Conduct and Character
     conduct: {
       type: String,
-      enum: [
-        "excellent",
-        "verygood",
-        "good",
-        "satisfactory",
-        "needsImprovement"
-      ],
-      default: "good"
+      enum: Object.values(CONDUCT_CHARACTER_RATING),
+      default: CONDUCT_CHARACTER_RATING.GOOD
     },
     character: {
       type: String,
-      enum: [
-        "excellent",
-        "verygood",
-        "good",
-        "satisfactory",
-        "needsImprovement"
-      ],
-      default: "good"
+      enum: Object.values(CONDUCT_CHARACTER_RATING),
+      default: CONDUCT_CHARACTER_RATING.GOOD
     },
     clearanceStatus: [
       {
@@ -140,13 +125,8 @@ const transferCertificateRequestSchema = new mongoose.Schema(
     // Request Status and Workflow
     status: {
       type: String,
-      enum: [
-        "submitted",
-        "approvedByParent",
-        "rejectedByParent",
-        "certificateIssued"
-      ],
-      default: "submitted"
+      enum: Object.values(TRANSFER_STATUS),
+      default: TRANSFER_STATUS.SUBMITTED
     },
 
     // Certificate Details

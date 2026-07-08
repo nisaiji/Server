@@ -6,7 +6,7 @@ import {
   getAdminTCRequestsController
 } from "../controllers/transferCertificateRequest.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
-import { parentAuthenticate } from "../middlewares/authentication/v2/parent.authentication.middleware.js";
+import { parentAuthenticate } from "../middlewares/authentication/parent.authentication.middleware.js";
 
 const transferCertificateRequestRouter = express.Router();
 

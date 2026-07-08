@@ -1,7 +1,24 @@
 import mongoose from "mongoose";
-import statusChangeLogSchema from "./schema/statusChangeLog.schema.js";
+import {
+  ADMIN_STATUS,
+  ADMIN_STATUS_CHANGE_LOG,
+  ADMIN_RESET_PASSWORD_STATUS
+} from "../enums/admin.enums.js";
 
-const adminSchema = mongoose.Schema(
+const statusChangeLogSchema = new mongoose.Schema({
+  changedAt: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
+  status: {
+    type: String,
+    enum: Object.values(ADMIN_STATUS_CHANGE_LOG),
+    required: true
+  }
+});
+
+const adminSchema = new mongoose.Schema(
   {
     username: {
       type: String
@@ -38,8 +55,8 @@ const adminSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["unVerified", "phoneVerified", "verified"],
-      default: "unVerified"
+      enum: Object.values(ADMIN_STATUS),
+      default: ADMIN_STATUS.UNVERIFIED
     },
     password: {
       type: String
@@ -74,8 +91,8 @@ const adminSchema = mongoose.Schema(
     },
     resetPasswordStatus: {
       type: String,
-      enum: ["", "requested", "phoneVerified", "emailVerified", "completed"],
-      default: ""
+      enum: Object.values(ADMIN_RESET_PASSWORD_STATUS),
+      default: ADMIN_RESET_PASSWORD_STATUS.EMPTY
     },
     statusChangeLog: [statusChangeLogSchema],
 
@@ -100,9 +117,9 @@ const adminSchema = mongoose.Schema(
     youtube: {
       type: String
     },
-    marchantPaymentConfig: {
+    merchantPaymentConfig: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "marchantPaymentConfig"
+      ref: "merchantPaymentConfig"
     }
   },
   {

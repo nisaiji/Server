@@ -11,10 +11,10 @@ import {
 } from "../services/announcement.services.js";
 import { getAnnouncementsReadStatusService } from "../services/announcementReadStatus.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
+import { getParentsByAdminIdService } from "../services/schoolParent.services.js";
 import { getSessionService } from "../services/session.services.js";
+import { getSessionStudentService } from "../services/sessionStudent.service.js";
 import { getTeachersByAdminIdService } from "../services/teacher.services.js";
-import { getParentsByAdminIdService } from "../services/v2/schoolParent.services.js";
-import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function createAnnouncementByAdminController(req, res) {

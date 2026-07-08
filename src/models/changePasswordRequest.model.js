@@ -1,10 +1,16 @@
 import mongoose from "mongoose";
+import {
+  PASSWORD_CHANGE_REASON,
+  PASSWORD_CHANGE_SENDER_MODEL,
+  PASSWORD_CHANGE_RECEIVER_MODEL,
+  PASSWORD_CHANGE_STATUS
+} from "../enums/password.enums.js";
 
 const changePasswordRequestSchema = mongoose.Schema(
   {
     reason: {
       type: String,
-      enum: ["forgetPassword", "changeDevice", "technical", "other"]
+      enum: Object.values(PASSWORD_CHANGE_REASON)
     },
 
     description: {
@@ -19,7 +25,7 @@ const changePasswordRequestSchema = mongoose.Schema(
       model: {
         type: String,
         required: true,
-        enum: ["teacher", "parent", "admin"]
+        enum: Object.values(PASSWORD_CHANGE_SENDER_MODEL)
       }
     },
 
@@ -31,14 +37,14 @@ const changePasswordRequestSchema = mongoose.Schema(
       model: {
         type: String,
         required: true,
-        enum: ["admin", "superAdmin"]
+        enum: Object.values(PASSWORD_CHANGE_RECEIVER_MODEL)
       }
     },
 
     status: {
       type: String,
-      enum: ["accept", "reject", "pending", "expired", "complete"],
-      default: "pending"
+      enum: Object.values(PASSWORD_CHANGE_STATUS),
+      default: PASSWORD_CHANGE_STATUS.PENDING
     },
 
     otp: {

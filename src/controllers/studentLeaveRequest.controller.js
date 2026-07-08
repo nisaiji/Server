@@ -1,6 +1,7 @@
 import StatusCodes from "http-status-codes";
 import { getHolidaysService } from "../services/holiday.service.js";
 import { convertToMongoId } from "../services/mongoose.services.js";
+import { getSessionStudentService } from "../services/sessionStudent.service.js";
 import {
   deleteStudentLeaveRequestsService,
   getStudentLeaveRequestService,
@@ -8,7 +9,6 @@ import {
   registerStudentLeaveRequestService,
   updateStudentLeaveRequestService
 } from "../services/studentLeaveRequest.service.js";
-import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 export async function registerStudentLeaveRequestController(req, res) {

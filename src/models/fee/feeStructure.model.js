@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { FEE_STRUCTURE_STATUS } from "../../enums/fee.enums.js";
 
 const feeStructureSchema = new mongoose.Schema(
   {
@@ -72,14 +73,14 @@ const feeStructureSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["DRAFT", "ACTIVE"],
-      default: "DRAFT"
+      enum: Object.values(FEE_STRUCTURE_STATUS),
+      default: FEE_STRUCTURE_STATUS.DRAFT
     }
   },
   {
     timestamps: true,
     versionKey: false,
-    collection: "fee_structures"
+    collection: "feeStructures"
   }
 );
 

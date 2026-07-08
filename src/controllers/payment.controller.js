@@ -4,6 +4,7 @@ import {
   updateZohoCredentials
 } from "../config/aws/secrets.service.js";
 import { config } from "../config/config.js";
+import { getParentService } from "../services/parent.services.js";
 import { getAccessToken } from "../services/payment/oauth.service.js";
 import {
   getPaymentService,
@@ -20,8 +21,7 @@ import {
   updateZohoAuthSessionService
 } from "../services/payment/zohoAuthSession.service.js";
 import { createZohoWebhook } from "../services/payment/zohoPayments.service.js";
-import { getParentService } from "../services/v2/parent.services.js";
-import { getSessionStudentService } from "../services/v2/sessionStudent.service.js";
+import { getSessionStudentService } from "../services/sessionStudent.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 //checked
 async function assertParentOwnsSessionStudent(parentId, sessionStudent) {

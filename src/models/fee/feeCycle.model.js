@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { FEE_FREQUENCY } from "../../enums/fee.enums.js";
 
 const FeeCycleSchema = new mongoose.Schema(
   {
@@ -18,7 +19,7 @@ const FeeCycleSchema = new mongoose.Schema(
 
     frequency: {
       type: String,
-      enum: ["MONTHLY", "QUARTERLY", "BY_MONTHLY", "HALF_YEARLY", "YEARLY"],
+      enum: Object.values(FEE_FREQUENCY),
       required: true
     },
 
@@ -37,7 +38,7 @@ const FeeCycleSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-    collection: "fee_cycles"
+    collection: "feeCycles"
   }
 );
 

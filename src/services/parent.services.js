@@ -1,4 +1,4 @@
-import parentModel from "../../models/v2/parent.model.js";
+import parentModel from "../models/parent.model.js";
 
 export async function getParentService(filter, projection = {}) {
   const parent = await parentModel.findOne(filter).select(projection);

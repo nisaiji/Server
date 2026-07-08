@@ -1,23 +1,28 @@
 import { excelDateToStringDateFormat } from "../services/celender.service.js";
-import { hashPasswordService } from "../services/password.service.js";
+import {
+  getParentService,
+  registerParentService
+} from "../services/parent.services.js";
+import {
+  getSchoolParentService,
+  registerSchoolParentService
+} from "../services/schoolParent.services.js";
 import {
   getSectionService,
   updateSectionService
 } from "../services/section.services.js";
+import { registerSessionStudentService } from "../services/sessionStudent.service.js";
 import {
   getStudentService,
   registerStudentService
 } from "../services/student.service.js";
-import {
-  getParentService,
-  registerParentService
-} from "../services/v2/parent.services.js";
 import { registerStudentFromExcelSchema } from "../validators/studentSchema.validator.js";
 
 export async function registerStudentsFromExcelHelper(
   students,
   sectionId,
   classId,
+  sessionId,
   adminId
 ) {
   try {
@@ -42,8 +47,8 @@ export async function registerStudentsFromExcelHelper(
     let insertedStudentCount = 0;
     for (const student of students) {
       const normalizedStudent = {
-        firstname: student["First Name"],
-        lastname: student["Last Name"],
+        firstName: student["First Name"],
+        lastName: student["Last Name"],
         gender: student["Gender"],
         bloodGroup: student["Blood Group"],
         dob:
@@ -67,8 +72,8 @@ export async function registerStudentsFromExcelHelper(
       };
 
       const {
-        firstname,
-        lastname,
+        firstName,
+        lastName,
         gender,
         bloodGroup,
         dob,
@@ -84,16 +89,39 @@ export async function registerStudentsFromExcelHelper(
         qualification,
         occupation
       } = normalizedStudent;
-      const parentObj = {
-        fullname: parentName,
+
+      // Handle parent creation/retrieval
+      let parent = await getParentService({ phone, isActive: true });
+      let schoolParent = await getSchoolParentService({
         phone,
-        email,
-        qualification,
-        occupation
-      };
+        school: adminId,
+        isActive: true
+      });
+
+      if (!schoolParent) {
+        if (!parent) {
+          parent = await registerParentService({ phone, status: "unVerified" });
+        }
+        const parentObj = {
+          fullName: parentName,
+          phone,
+          email,
+          qualification,
+          occupation,
+          school: adminId,
+          parent: parent["_id"]
+        };
+        schoolParent = await registerSchoolParentService(parentObj);
+      }
+
+      // Handle student creation
+      let studentInfo = await getStudentService({
+        firstName,
+        schoolParent: schoolParent["_id"]
+      });
       const studentObj = {
-        firstname,
-        lastname,
+        firstName,
+        lastName,
         gender,
         bloodGroup,
         dob,
@@ -104,23 +132,27 @@ export async function registerStudentsFromExcelHelper(
         country,
         pincode
       };
-      let parent = await getParentService({ phone, isActive: true });
-      if (!parent) {
-        const parentNames = parentName.split(" ");
-        const password = parentNames[0] + "@" + phone;
-        parentObj["password"] = await hashPasswordService(password);
-        parent = await registerParentService(parentObj);
-      }
-      let studentInfo = await getStudentService({
-        firstname,
-        parent: parent["_id"]
-      });
+
       if (!studentInfo) {
+        studentObj["schoolParent"] = schoolParent["_id"];
         studentObj["parent"] = parent["_id"];
-        studentObj["section"] = sectionId;
-        studentObj["classId"] = classId;
         studentObj["admin"] = adminId;
-        await registerStudentService(studentObj);
+
+        const registeredStudent = await registerStudentService(studentObj);
+
+        // Create session student if sessionId is provided
+        if (sessionId) {
+          await registerSessionStudentService({
+            student: registeredStudent._id,
+            session: sessionId,
+            classId,
+            section: sectionId,
+            school: adminId,
+            schoolParent: schoolParent._id,
+            parent: parent._id
+          });
+        }
+
         const section = await getSectionService({ _id: sectionId });
         await updateSectionService(
           { _id: sectionId },
