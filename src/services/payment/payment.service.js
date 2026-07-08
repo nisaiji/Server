@@ -1,16 +1,10 @@
-import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-import { getAccessToken } from "./oauth.service.js";
-import { getZohoAuthSessionService } from "./zohoAuthSession.service.js";
-import { createZohoPaymentSession } from "./zohoPayments.service.js";
-import { getZohoCredentials } from "../../config/aws/secrets.service.js";
+import { initiatePaymentFlow as initiatePaymentFlowService } from "./paymentInitiation.service.js";
 import studentFeeDueModel from "../../models/fee/studentFeeDue.model.js";
 import ledgerEntryModel from "../../models/payments/ledgerEntries.model.js";
 import paymentModel from "../../models/payments/payment.model.js";
 import paymentAttemptModel from "../../models/payments/paymentAttempts.model.js";
 import receiptModel from "../../models/payments/receipt.model.js";
-import { getParentService } from "../v2/parent.services.js";
-import { getSessionStudentService } from "../v2/sessionStudent.service.js";
 
 export async function createPaymentService(data) {
   return paymentModel.create(data);
@@ -200,30 +194,6 @@ export async function processFailedPayment({
   return { alreadyProcessed: false };
 }
 
-//checked
-export async function validateFeeDuesForPayment({
-  feeDueIds,
-  studentId,
-  adminId
-}) {
-  const dues = await studentFeeDueModel
-    .find({
-      _id: { $in: feeDueIds },
-      studentId,
-      adminId,
-      status: { $in: ["PENDING", "PARTIAL", "OVERDUE"] }
-    })
-    .lean();
-
-  if (dues.length !== feeDueIds.length) {
-    return { valid: false, dues: [], amount: 0 };
-  }
-
-  const amount = dues.reduce((sum, due) => sum + (due.totalAmount || 0), 0);
-  return { valid: true, dues, amount };
-}
-
-//checked
 /**
  * Orchestrates the entire payment initiation flow.
  * @param {object} args
@@ -232,176 +202,6 @@ export async function validateFeeDuesForPayment({
  * @param {string} args.parentId
  * @returns {Promise<object>}
  */
-export async function initiatePaymentFlow({
-  sessionStudentId,
-  feeDueIds,
-  parentId
-}) {
-  // 1. Validate session student and parent ownership
-  const sessionStudent = await getSessionStudentService({
-    _id: sessionStudentId,
-    isActive: true
-  });
-  if (!sessionStudent) {
-    throw {
-      statusCode: StatusCodes.NOT_FOUND,
-      message: "Session student not found"
-    };
-  }
-
-  const parent = await getParentService({ _id: parentId });
-  if (!parent) {
-    throw { statusCode: StatusCodes.NOT_FOUND, message: "Parent not found" };
-  }
-
-  const ownsStudent = parent.students?.some((id) =>
-    id.equals(sessionStudent.student)
-  );
-  if (!ownsStudent) {
-    throw {
-      statusCode: StatusCodes.FORBIDDEN,
-      message: "Unauthorized access to student"
-    };
-  }
-
-  // 2. Validate fee dues
-  const { valid, amount } = await validateFeeDuesForPayment({
-    feeDueIds,
-    studentId: sessionStudent.student,
-    adminId: sessionStudent.school
-  });
-  if (!valid || amount <= 0) {
-    throw {
-      statusCode: StatusCodes.BAD_REQUEST,
-      message: "Invalid, already paid, or mismatched fee dues"
-    };
-  }
-  console.info("Fee dues validated.", {
-    parentId,
-    studentId: sessionStudent.student,
-    amount
-  });
-
-  // 3. Create internal payment record
-  const payment = await createPaymentService({
-    adminId: sessionStudent.school,
-    sessionStudentId,
-    feeDueIds,
-    amount,
-    status: "CREATED",
-    gateway: "ZOHO",
-    currency: "INR"
-  });
-  console.info("Internal payment record created.", {
-    paymentId: payment._id,
-    status: payment.status
-  });
-
-  // 4. Get tenant-specific payment gateway credentials
-  const paymentSettings = await getZohoAuthSessionService(payment.adminId);
-  if (!paymentSettings?.paymentSecretKey) {
-    await processFailedPayment({
-      payment,
-      paymentSessionId: null,
-      gatewayResponse: { error: "Gateway not configured" }
-    });
-    console.error("Payment gateway not configured for school.", {
-      schoolId: sessionStudent.school
-    });
-    throw {
-      statusCode: StatusCodes.SERVICE_UNAVAILABLE,
-      message: "Payment gateway is not configured for this school."
-    };
-  }
-
-  let accessToken = paymentSettings.accessToken;
-  if (
-    paymentSettings.accessToken &&
-    new Date() > new Date(paymentSettings.expiresAt)
-  ) {
-    const zohoCreds = await getZohoCredentials(
-      paymentSettings.paymentSecretKey
-    );
-    // 5. Get a valid access token
-    const zohoToken = await getAccessToken({
-      clientId: zohoCreds.clientId,
-      clientSecret: zohoCreds.clientSecret,
-      refreshToken: zohoCreds.refreshToken,
-      cacheKey: sessionStudent.school.toString() // Use schoolId as cache key
-    });
-
-    console.log("Zoho access token refreshed.", {
-      schoolId: sessionStudent.school,
-      accessToken: zohoToken.accessToken,
-      expiresAt: zohoToken.expiresAt,
-      zohoToken
-    });
-    // Update the access token and its expiry in the database
-    await getZohoAuthSessionService(payment.adminId).then(async (session) => {
-      if (session) {
-        session.accessToken = zohoToken.accessToken;
-        session.expiresAt = new Date(
-          Date.now() + (zohoToken.expiresAt - Date.now())
-        );
-        await session.save();
-      }
-    });
-
-    console.info("Zoho access token refreshed and updated in DB.", {
-      schoolId: sessionStudent.school
-    });
-    accessToken = zohoToken.accessToken;
-  }
-  const paymentDescription = `Fee Payment for ${sessionStudentId}`;
-  const zohoResponse = await createZohoPaymentSession({
-    accessToken,
-    amount,
-    currency: payment.currency ?? "INR",
-    description: paymentDescription,
-    accountId: paymentSettings.accountId,
-    internalPaymentId: payment._id.toString() // Pass internal payment ID for metadata
-  });
-
-  const paymentSessionId = zohoResponse?.payments_session?.payments_session_id;
-
-  if (!paymentSessionId) {
-    await processFailedPayment({
-      payment,
-      paymentSessionId: null,
-      gatewayResponse: zohoResponse
-    });
-    console.error("Payment gateway did not return a valid checkout session.", {
-      paymentId: payment._id,
-      zohoResponse
-    });
-    throw {
-      statusCode: StatusCodes.BAD_GATEWAY,
-      message: "Payment gateway did not return a checkout session."
-    };
-  }
-  console.info("Zoho payment session created.", {
-    paymentId: payment._id,
-    paymentSessionId
-  });
-
-  // 7. Update internal records
-  await createPaymentAttemptService({
-    paymentId: payment._id,
-    gateway: "ZOHO",
-    paymentSessionId,
-    status: "PENDING",
-    gatewayResponse: zohoResponse
-  });
-
-  await updatePaymentService(
-    { _id: payment._id },
-    { status: "PENDING", paymentSessionId, gatewayResponse: zohoResponse }
-  );
-
-  // 8. Return data for frontend
-  return {
-    paymentId: payment._id,
-    paymentSessionId,
-    amount
-  };
+export async function initiatePaymentFlow(args) {
+  return initiatePaymentFlowService(args);
 }

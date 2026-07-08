@@ -88,6 +88,30 @@ export async function createZohoPaymentSession({
 }
 
 /**
+ * Creates a webhook subscription with Zoho Payments.
+ * @param {object} args
+ * @param {string} args.accessToken
+ * @param {string} args.accountId
+ * @param {object} args.webhookData - The webhook configuration data (e.g., { url, events }).
+ * @returns {Promise<any>}
+ */
+export async function createZohoWebhook({
+  accessToken,
+  accountId,
+  webhookData
+}) {
+  return zohoRequest({
+    accessToken,
+    method: "post",
+    endpoint: "webhooks",
+    data: webhookData,
+    params: {
+      account_id: accountId
+    }
+  });
+}
+
+/**
  * Fetches payment details from Zoho.
  * @param {object} args
  * @param {string} args.accessToken
