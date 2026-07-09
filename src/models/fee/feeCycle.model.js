@@ -38,7 +38,7 @@ const FeeCycleSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-    collection: "feeCycles"
+    collection: "fee_cycles"
   }
 );
 

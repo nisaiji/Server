@@ -80,7 +80,7 @@ const feeStructureSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-    collection: "feeStructures"
+    collection: "fee_structures"
   }
 );
 

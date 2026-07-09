@@ -429,7 +429,7 @@ export async function setZohoSecretController(req, res) {
       accessToken,
       accountId: credentials.accountId,
       webhookData: {
-        name: "Payment notifications",
+        name: `${config.environment} Payment notifications`,
         url: config.zohoWebhookUrl,
         description:
           "Forwards payment and refund events to our order management system.",
@@ -450,7 +450,7 @@ export async function setZohoSecretController(req, res) {
       accountId: credentials.accountId,
       zohoWebhookUrlId: webhookData.webhook_url.webhook_url_id
     });
-    return res.status(StatusCodes.OK).send(success(200, null));
+    return res.status(StatusCodes.OK).send(success(200));
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
