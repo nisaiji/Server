@@ -27,10 +27,20 @@ const paymentSchema = new mongoose.Schema(
     zohoWebhookPaymentId: { type: String },
     status: {
       type: String,
-      enum: ["CREATED", "PENDING", "SUCCESS", "FAILED", "EXPIRED"],
+      enum: ["CREATED", "PENDING", "SUCCESS", "FAILED", "EXPIRED", "CANCELLED"],
       default: "CREATED"
     },
-    paymentHash: { type: String, index: true, unique: true, sparse: true },
+    paymentHash: {
+      type: String,
+      index: true,
+      unique: true,
+      sparse: true,
+      partialFilterExpression: {
+        status: {
+          $in: ["CREATED", "PENDING", "SUCCESS"]
+        }
+      }
+    },
     paidAt: { type: Date },
     expiresAt: { type: Date },
     gatewayResponse: { type: mongoose.Schema.Types.Mixed }

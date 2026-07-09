@@ -14,7 +14,7 @@ const paymentRouter = express.Router();
 paymentRouter.post("/zoho/webhook", zohoWebhookController);
 paymentRouter.get("/callback", paymentCallbackController);
 
-paymentRouter.put(
+paymentRouter.post(
   "/admin/zoho/secret",
   adminAuthenticate,
   setZohoSecretController
