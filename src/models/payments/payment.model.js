@@ -31,15 +31,7 @@ const paymentSchema = new mongoose.Schema(
       default: "CREATED"
     },
     paymentHash: {
-      type: String,
-      index: true,
-      unique: true,
-      sparse: true,
-      partialFilterExpression: {
-        status: {
-          $in: ["CREATED", "PENDING", "SUCCESS"]
-        }
-      }
+      type: String
     },
     paidAt: { type: Date },
     expiresAt: { type: Date },
@@ -57,4 +49,16 @@ paymentSchema.index({
   paymentHash: 1,
   status: 1
 });
+
+paymentSchema.index(
+  { paymentHash: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      status: {
+        $in: ["CREATED", "PENDING", "SUCCESS"]
+      }
+    }
+  }
+);
 export default mongoose.model("payment", paymentSchema);

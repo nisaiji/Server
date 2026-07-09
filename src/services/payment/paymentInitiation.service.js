@@ -223,7 +223,7 @@ export async function initiatePaymentFlow({
 
   // If an existing payment is found, handle it based on its status.
   // id status is EXPIRED / CANCELLED / FAILED, we can create a new payment session.
-  switch (existingPayment.status) {
+  switch (existingPayment?.status) {
     case "SUCCESS":
       // If the existing payment is already successful, throw an error indicating that the payment is completed.
       throw {
@@ -386,7 +386,7 @@ export async function initiatePaymentFlow({
       {
         status: "PENDING",
         paymentSessionId,
-        expiresAt: zohoResponse.expiresAt,
+        expiresAt: zohoResponse.payments_session.expiry_time,
         gatewayResponse: zohoResponse
       }
     )

@@ -69,7 +69,7 @@ const sessionStudentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    collection: "sessionStudents"
+    collection: "session_students"
   }
 );
 
