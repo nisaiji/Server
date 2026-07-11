@@ -204,17 +204,23 @@ export async function initiatePaymentFlow({
   });
 
   // Check for existing or conflicting payment records concurrently.
-  const [conflictingPayment, existingPayment] = await Promise.all([
+  const [conflictingPayment, LatestExistingPayment] = await Promise.all([
     paymentModel.findOne({
       sessionStudentId,
       status: { $in: ["CREATED", "PENDING", "SUCCESS"] },
       feeDueIds: { $in: feeDueIds }
     }),
-    paymentModel.findOne({
-      paymentHash
-    })
+    paymentModel.find(
+      {
+        paymentHash
+      },
+      {},
+      { limit: 1, sort: { createdAt: -1 } }
+    )
   ]);
 
+  console.log(conflictingPayment, LatestExistingPayment);
+  const existingPayment = LatestExistingPayment[0];
   let useExistingPayment = false;
   const isBothSamePayments =
     existingPayment &&
