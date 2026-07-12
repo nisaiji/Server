@@ -2,6 +2,7 @@ import { error } from "console";
 import { StatusCodes } from "http-status-codes";
 import { sendPushNotification } from "../config/firebase.config.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
+import { error, success } from "../utils/responseWrapper.js";
 import {
   createAttendanceService,
   getAttendanceService,

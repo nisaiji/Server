@@ -41,7 +41,7 @@ export function constructStudentXlsxTemplate() {
     "(Optional)"
   ];
   worksheet.columns = columns.map((el) => ({ header: el, key: el, width: 20 }));
-  worksheet.insertRow(2, row);
+  worksheet.addRow(row);
   return workbook;
 }
 
@@ -84,6 +84,6 @@ export function constructTeacherXlsxTemplate() {
     "(Optional)"
   ];
   worksheet.columns = columns.map((el) => ({ header: el, key: el, width: 20 }));
-  worksheet.insertRow(2, row);
+  worksheet.addRow(row);
   return workbook;
 }
