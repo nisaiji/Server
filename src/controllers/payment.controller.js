@@ -49,13 +49,7 @@ async function assertParentOwnsSessionStudent(parentId, sessionStudent) {
 }
 //checked
 function resolveWebhookStatus(payload) {
-  const status = (
-    payload?.status ??
-    payload?.payment_status ??
-    payload?.data?.status ??
-    payload?.event?.payment?.status ??
-    ""
-  )
+  const status = (payload?.event_object?.payment?.status ?? "FAILED")
     .toString()
     .toUpperCase();
 
@@ -71,17 +65,16 @@ function resolveWebhookStatus(payload) {
 }
 //checked
 function resolveWebhookPaymentId(payload) {
-  return (
-    payload?.payment_id ??
-    payload?.data?.payment_id ??
-    payload?.reference_id ??
-    payload?.event?.payment?.payment_id ??
-    null
-  );
+  return payload?.event_object?.payment?.payments_session_id ?? null;
 }
 //checked
 function resolveWebhookInternalPaymentId(payload) {
-  return payload?.meta_data?.paymentId ?? null;
+  const metadata = Array.isArray(payload?.event_object?.payment?.meta_data)
+    ? payload.event_object.payment.meta_data
+    : [];
+  const paymentIdEntry = metadata.find((item) => item?.key === "paymentId");
+
+  return paymentIdEntry?.value ?? null;
 }
 
 //checked
@@ -285,6 +278,7 @@ export async function getAdminReceiptController(req, res) {
 
 export async function zohoWebhookController(req, res) {
   try {
+    console.log("headers", req.headers);
     const signature =
       req.headers["x-zoho-signature"] ||
       req.headers["x-zoho-webhook-signature"];
