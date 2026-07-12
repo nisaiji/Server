@@ -280,7 +280,6 @@ export async function zohoWebhookController(req, res) {
   try {
     console.log("headers", req.headers);
     const signature = req.headers["x-zoho-webhook-signature"];
-    const rawPayload = JSON.stringify(req.body);
 
     const payload = req.body;
     const paymentSessionId = resolveWebhookPaymentId(payload);

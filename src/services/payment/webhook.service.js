@@ -8,7 +8,6 @@ import crypto from "crypto";
  * @returns {boolean} True if the signature is valid, false otherwise.
  */
 export function verifyZohoWebhookSignature(payload, signature, secret) {
-  console.log({ payload, signature, secret });
   if (!secret) {
     console.warn(
       "Webhook secret is not configured for tenant. Skipping signature verification. This is insecure for production."
