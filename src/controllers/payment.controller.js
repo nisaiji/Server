@@ -318,7 +318,7 @@ export async function zohoWebhookController(req, res) {
 
     // Tenant-aware signature verification
     const schoolId = payment.adminId;
-    const paymentSettings = await getZohoAuthSessionService({ schoolId });
+    const paymentSettings = await getZohoAuthSessionService(schoolId);
     if (!paymentSettings?.paymentSecretKey) {
       console.error("Webhook received for a school with no payment settings.", {
         schoolId,
