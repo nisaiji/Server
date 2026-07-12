@@ -238,7 +238,7 @@ export async function initiatePaymentFlow({
       };
 
     case "PENDING":
-      if (new Date() < new Date(existingPayment.expiresAt)) {
+      if (new Date() < existingPayment.expiresAt) {
         // If the session is still valid, return it.
         console.info("Existing payment session is still valid.", {
           paymentId: existingPayment._id,
@@ -392,7 +392,7 @@ export async function initiatePaymentFlow({
       {
         status: "PENDING",
         paymentSessionId,
-        expiresAt: zohoResponse.payments_session.expiry_time,
+        expiresAt: new Date(zohoResponse.payments_session.expiry_time * 1000),
         gatewayResponse: zohoResponse
       }
     )
