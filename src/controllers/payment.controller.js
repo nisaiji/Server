@@ -279,9 +279,7 @@ export async function getAdminReceiptController(req, res) {
 export async function zohoWebhookController(req, res) {
   try {
     console.log("headers", req.headers);
-    const signature =
-      req.headers["x-zoho-signature"] ||
-      req.headers["x-zoho-webhook-signature"];
+    const signature = req.headers["x-zoho-webhook-signature"];
     const rawPayload = JSON.stringify(req.body);
 
     const payload = req.body;
@@ -333,7 +331,7 @@ export async function zohoWebhookController(req, res) {
     );
     const webhookSecret = credentials?.webhookSecret;
 
-    if (!verifyZohoWebhookSignature(rawPayload, signature, webhookSecret)) {
+    if (!verifyZohoWebhookSignature(req.rawBody, signature, webhookSecret)) {
       console.warn("Invalid webhook signature received.", {
         paymentId: payment._id,
         schoolId
