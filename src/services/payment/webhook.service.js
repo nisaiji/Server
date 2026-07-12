@@ -8,6 +8,7 @@ import crypto from "crypto";
  * @returns {boolean} True if the signature is valid, false otherwise.
  */
 export function verifyZohoWebhookSignature(payload, signature, secret) {
+  console.log({ payload, signature, secret });
   if (!secret) {
     console.warn(
       "Webhook secret is not configured for tenant. Skipping signature verification. This is insecure for production."
@@ -20,13 +21,40 @@ export function verifyZohoWebhookSignature(payload, signature, secret) {
     return false;
   }
 
+  // Parse "t=<timestamp>,v=<hex signature>"
+  const parts = Object.fromEntries(
+    signature.split(",").map((part) => {
+      const [key, value] = part.split("=");
+      return [key?.trim(), value?.trim()];
+    })
+  );
+
+  const timestamp = parts["t"];
+  const providedSig = parts["v"];
+
+  if (!timestamp || !providedSig) {
+    return false;
+  }
+
+  // Replay protection (Zoho's docs don't specify a window, but this is good practice)
+  const timestampMs = Number(timestamp);
+  if (!Number.isFinite(timestampMs)) {
+    return false;
+  }
+  // Per Zoho docs: signed data = "<timestamp>.<raw payload>"
+  const signedContent = `${timestamp}.${payload}`;
+
   const expectedSignature = crypto
     .createHmac("sha256", secret)
-    .update(payload)
+    .update(signedContent)
     .digest("hex");
 
-  return crypto.timingSafeEqual(
-    Uint8Array.from(Buffer.from(signature)),
-    Uint8Array.from(Buffer.from(expectedSignature))
-  );
+  const providedBuf = new Uint8Array(Buffer.from(providedSig, "hex"));
+  const expectedBuf = new Uint8Array(Buffer.from(expectedSignature, "hex"));
+
+  if (providedBuf.length !== expectedBuf.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(providedBuf, expectedBuf);
 }
