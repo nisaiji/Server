@@ -1,8 +1,6 @@
-import { error } from "console";
 import { StatusCodes } from "http-status-codes";
 import { sendPushNotification } from "../config/firebase.config.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
-import { error, success } from "../utils/responseWrapper.js";
 import {
   createAttendanceService,
   getAttendanceService,
@@ -41,7 +39,7 @@ import {
 } from "../services/student.service.js";
 import { getTeacherService } from "../services/teacher.services.js";
 import { getWorkDayService } from "../services/workDay.services.js";
-import { success } from "../utils/responseWrapper.js";
+import { error, success } from "../utils/responseWrapper.js";
 
 export async function attendanceByTeacherController(req, res) {
   try {
