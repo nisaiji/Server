@@ -180,7 +180,7 @@ parentRouter.get(
   getParentPasswordChangeRequestsController
 );
 parentRouter.get(
-  "/dues/:sessionId/:studentId",
+  "/dues/:sessionId/:studentId/:schoolId",
   parentAuthenticate,
   studentFeeDuesParamValidation,
   getStudentFeeDuesController

@@ -5,8 +5,8 @@ import { error, success } from "../utils/responseWrapper.js";
 
 export async function getStudentFeeDuesController(req, res) {
   try {
-    const { sessionId, studentId } = req.params;
-    const adminId = req.adminId;
+    const { sessionId, studentId, schoolId } = req.params;
+    const adminId = req.adminId ?? schoolId;
 
     if (!isValidMongoId(sessionId)) {
       return res
