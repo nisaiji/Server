@@ -10,7 +10,10 @@ import { getAccessToken } from "./oauth.service.js";
 import { getZohoAuthSessionService } from "./zohoAuthSession.service.js";
 import { createZohoPaymentSession } from "./zohoPayments.service.js";
 
-async function validateSessionStudentOwnership({ sessionStudent, parentId }) {
+export async function validateSessionStudentOwnership({
+  sessionStudent,
+  parentId
+}) {
   // Retrieve the parent details.
   const parent = await getParentService({ _id: parentId });
   // If parent is not found, throw an error.

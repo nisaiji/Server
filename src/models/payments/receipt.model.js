@@ -9,7 +9,7 @@ const receiptSchema = new mongoose.Schema(
       required: true,
       index: true
     },
-    studentId: {
+    sessionStudentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "students",
       required: true

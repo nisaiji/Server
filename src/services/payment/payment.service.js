@@ -1,10 +1,15 @@
+import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-import { initiatePaymentFlow as initiatePaymentFlowService } from "./paymentInitiation.service.js";
+import {
+  initiatePaymentFlow as initiatePaymentFlowService,
+  validateSessionStudentOwnership
+} from "./paymentInitiation.service.js";
 import studentFeeDueModel from "../../models/fee/studentFeeDue.model.js";
 import ledgerEntryModel from "../../models/payments/ledgerEntries.model.js";
 import paymentModel from "../../models/payments/payment.model.js";
 import paymentAttemptModel from "../../models/payments/paymentAttempts.model.js";
 import receiptModel from "../../models/payments/receipt.model.js";
+import { getSessionStudentService } from "../sessionStudent.service.js";
 
 export async function createPaymentService(data) {
   return paymentModel.create(data);
@@ -104,7 +109,7 @@ export async function processSuccessfulPayment({
             {
               receiptNo,
               adminId: payment.adminId,
-              studentId: payment.studentId,
+              sessionStudentId: payment.sessionStudentId,
               paymentId: payment._id,
               feeDueIds: payment.feeDueIds,
               amount: payment.amount,
@@ -204,4 +209,59 @@ export async function processFailedPayment({
  */
 export async function initiatePaymentFlow(args) {
   return initiatePaymentFlowService(args);
+}
+
+/**
+ * Cancels a payment if it is in a cancellable state (CREATED or PENDING).
+ * Verifies that the parent initiating the cancellation is authorized.
+ *
+ * @param {object} args
+ * @param {string} args.paymentId - The ID of the payment to cancel.
+ * @param {string} args.parentId - The ID of the parent requesting the cancellation.
+ * @returns {Promise<object>} The updated payment document.
+ * @throws {Error} If the payment is not found, not in a cancellable state, or if the parent is not authorized.
+ */
+export async function cancelPaymentFlow({ paymentId, parentId }) {
+  // 1. Find the payment record.
+  const payment = await paymentModel.findById(paymentId).lean();
+
+  if (!payment) {
+    throw { statusCode: StatusCodes.NOT_FOUND, message: "Payment not found" };
+  }
+
+  // 2. Verify that the parent is authorized to cancel this payment.
+  const sessionStudent = await getSessionStudentService({
+    _id: payment.sessionStudentId
+  });
+  if (!sessionStudent) {
+    throw {
+      statusCode: StatusCodes.NOT_FOUND,
+      message: "Associated student session not found for this payment."
+    };
+  }
+  await validateSessionStudentOwnership({ sessionStudent, parentId });
+
+  // 3. Check if the payment is in a cancellable state.
+  if (payment.status !== "PENDING" && payment.status !== "CREATED") {
+    throw {
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: `Payment cannot be cancelled. Current status: ${payment.status}`
+    };
+  }
+
+  // 4. Atomically update the payment and its attempts to 'CANCELLED'.
+  const [updatedPayment] = await Promise.all([
+    paymentModel.findByIdAndUpdate(
+      paymentId,
+      { status: "CANCELLED" },
+      { new: true }
+    ),
+    paymentAttemptModel.updateMany(
+      { paymentId, status: "PENDING" },
+      { status: "CANCELLED" }
+    )
+  ]);
+
+  console.info("Payment cancelled successfully.", { paymentId });
+  return updatedPayment;
 }

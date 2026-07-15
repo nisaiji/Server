@@ -1,6 +1,7 @@
 import express from "express";
 import { getStudentFeeDuesController } from "../../controllers/feeSetup.controller.js";
 import {
+  cancelPaymentController,
   getPaymentController,
   getPaymentHistoryController,
   getReceiptController,
@@ -42,17 +43,17 @@ import {
   sessionStudentIdParamValidation
 } from "../../middlewares/validation/payment.validation.middleware.js";
 import {
-  parentPhoneValidation,
-  parentEmailValidation,
-  parentPhoneAndOtpValidation,
-  parentPasswordValidation,
-  parentFullnameValidation,
-  parentUpdateValidation,
-  parentPasswordEditValidation,
-  parentPhotoUploadValidation,
-  parentFcmTokenValidation,
   parentEmailTokenValidation,
-  parentPhoneTokenValidation
+  parentEmailValidation,
+  parentFcmTokenValidation,
+  parentFullnameValidation,
+  parentPasswordEditValidation,
+  parentPasswordValidation,
+  parentPhoneAndOtpValidation,
+  parentPhoneTokenValidation,
+  parentPhoneValidation,
+  parentPhotoUploadValidation,
+  parentUpdateValidation
 } from "../../middlewares/validation/v2/parent.validation.middleware.js";
 
 const parentRouter = express.Router();
@@ -189,6 +190,12 @@ parentRouter.post(
   parentAuthenticate,
   initiatePaymentValidation,
   initiatePaymentController
+);
+parentRouter.post(
+  "/payment/:paymentId/cancel",
+  parentAuthenticate,
+  paymentIdParamValidation,
+  cancelPaymentController
 );
 parentRouter.get(
   "/payment/history/:sessionStudentId",

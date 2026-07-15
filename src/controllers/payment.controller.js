@@ -7,6 +7,7 @@ import { config } from "../config/config.js";
 import { getParentService } from "../services/parent.services.js";
 import { getAccessToken } from "../services/payment/oauth.service.js";
 import {
+  cancelPaymentFlow,
   getPaymentService,
   getPaymentsService,
   getReceiptByPaymentIdService,
@@ -148,6 +149,40 @@ export async function getPaymentController(req, res) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send(error(500, err.message));
+  }
+}
+
+/**
+ * Controller to handle the cancellation of a payment.
+ * Expects `paymentId` in params and `parentId` on the request object from auth middleware.
+ */
+export async function cancelPaymentController(req, res) {
+  try {
+    const { paymentId } = req.params;
+    // Assuming parentId is attached to the request by an authentication middleware
+    const { parentId } = req;
+
+    console.info("Payment cancellation request received.", {
+      parentId,
+      paymentId
+    });
+
+    const cancelledPayment = await cancelPaymentFlow({
+      paymentId,
+      parentId
+    });
+
+    return res
+      .status(StatusCodes.OK)
+      .send(success(StatusCodes.OK, { payment: cancelledPayment }));
+  } catch (err) {
+    const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    const message = err.message || "An internal server error occurred.";
+    console.error("Error during payment cancellation.", {
+      error: err.message,
+      statusCode
+    });
+    return res.status(statusCode).send(error(statusCode, message));
   }
 }
 

@@ -12,7 +12,7 @@ const paymentAttemptSchema = new mongoose.Schema(
     checkoutUrl: { type: String },
     status: {
       type: String,
-      enum: ["PENDING", "SUCCESS", "FAILED", "EXPIRED"],
+      enum: ["PENDING", "SUCCESS", "FAILED", "EXPIRED", "CANCELLED"],
       default: "PENDING"
     },
     paymentSessionId: { type: String, index: true, sparse: true },
