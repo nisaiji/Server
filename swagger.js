@@ -1,5 +1,4 @@
 import swaggerJSDoc from "swagger-jsdoc";
-
 import { config } from "./src/config/config.js";
 
 const host = config.host || "localhost";
@@ -34,7 +33,7 @@ const swaggerOptions = {
     },
     security: [{ Authorization: [] }]
   },
-  apis: ["./src/docs/**/*.yaml"]
+  apis: ["./src/routes/**/*.js", "./src/docs/**/*.yaml"]
 };
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions);

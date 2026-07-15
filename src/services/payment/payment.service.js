@@ -129,7 +129,7 @@ export async function processSuccessfulPayment({
             {
               adminId: payment.adminId,
               paymentId: payment._id,
-              studentId: payment.studentId,
+              sessionStudentId: payment.sessionStudentId,
               account: "Bank",
               type: "DEBIT",
               amount: payment.amount,
@@ -139,7 +139,7 @@ export async function processSuccessfulPayment({
             {
               adminId: payment.adminId,
               paymentId: payment._id,
-              studentId: payment.studentId,
+              sessionStudentId: payment.sessionStudentId,
               account: "Fee Income",
               type: "CREDIT",
               amount: payment.amount,
