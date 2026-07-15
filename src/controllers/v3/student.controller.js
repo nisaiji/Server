@@ -2,8 +2,10 @@ import fs from "fs/promises";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import xlsx from "xlsx";
+import { registerStudentsFromExcelHelper } from "../../helpers/student.helper.js";
 import { getStartAndEndTimeService } from "../../services/celender.service.js";
 import { getClassService } from "../../services/class.services.js";
+import { getFeeStructureService } from "../../services/feeSetup.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import {
   getParentService,
@@ -41,8 +43,6 @@ import {
   calculateAttendancePercentageForSessionStudent
 } from "../../services/studentDetailSummary.service.js";
 import { createOrUpdateDuesForFeeStructure } from "../../services/studentFeeDue.service.js";
-import { getFeeStructureService } from "../../services/feeSetup.service.js";
-import { registerStudentsFromExcelHelper } from "../../helpers/student.helper.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
 import { error, success } from "../../utils/responseWrapper.js";
 
