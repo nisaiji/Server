@@ -16,7 +16,11 @@ import {
   processFailedPayment,
   processSuccessfulPayment
 } from "../services/payment/payment.service.js";
-import { verifyZohoWebhookSignature } from "../services/payment/webhook.service.js";
+import {
+  recordWebhookEvent,
+  updateWebhookEventStatus,
+  verifyZohoWebhookSignature
+} from "../services/payment/webhook.service.js";
 import {
   getZohoAuthSessionService,
   updateZohoAuthSessionService
@@ -312,6 +316,7 @@ export async function getAdminReceiptController(req, res) {
 }
 
 export async function zohoWebhookController(req, res) {
+  let webhookEvent;
   try {
     console.log("headers", req.headers);
     const signature = req.headers["x-zoho-webhook-signature"];
@@ -320,6 +325,17 @@ export async function zohoWebhookController(req, res) {
     const paymentSessionId = resolveWebhookPaymentId(payload);
     const internalPaymentId = resolveWebhookInternalPaymentId(payload);
     const webhookStatus = resolveWebhookStatus(payload);
+    const gatewayEventId = payload?.event_id;
+    const eventType = payload?.event_type;
+
+    if (!gatewayEventId || !eventType) {
+      console.error("Webhook payload is missing 'event_id' or 'event_type'.", {
+        payload
+      });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .send(error(400, "Malformed webhook payload."));
+    }
 
     let payment = null;
     if (internalPaymentId) {
@@ -343,9 +359,16 @@ export async function zohoWebhookController(req, res) {
         paymentSessionId,
         payload
       });
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Payment not found for webhook"));
+      await recordWebhookEvent({
+        gateway: "ZOHO",
+        gatewayEventId,
+        eventType,
+        payload,
+        isVerified: false, // Cannot verify without school context
+        adminId: null,
+        paymentId: null
+      });
+      return res.status(StatusCodes.ACCEPTED);
     }
 
     // Tenant-aware signature verification
@@ -365,11 +388,32 @@ export async function zohoWebhookController(req, res) {
     );
     const webhookSecret = credentials?.webhookSecret;
 
-    if (!verifyZohoWebhookSignature(req.rawBody, signature, webhookSecret)) {
+    const isVerified = verifyZohoWebhookSignature(
+      req.rawBody,
+      signature,
+      webhookSecret
+    );
+
+    webhookEvent = await recordWebhookEvent({
+      adminId: payment.adminId,
+      gateway: "ZOHO",
+      gatewayEventId,
+      eventType,
+      payload,
+      isVerified,
+      paymentId: payment._id
+    });
+
+    if (!isVerified) {
       console.warn("Invalid webhook signature received.", {
         paymentId: payment._id,
         schoolId
       });
+      await updateWebhookEventStatus(
+        webhookEvent._id,
+        "FAILED",
+        "Invalid signature"
+      );
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .send(error(401, "Invalid webhook signature"));
@@ -389,12 +433,17 @@ export async function zohoWebhookController(req, res) {
       });
     }
 
+    await updateWebhookEventStatus(webhookEvent._id, "PROCESSED");
+
     return res.status(StatusCodes.OK).send(success(200, { received: true }));
   } catch (err) {
     console.error("Error processing Zoho webhook.", {
       error: err.message,
       stack: err.stack
     });
+    if (webhookEvent?._id) {
+      await updateWebhookEventStatus(webhookEvent._id, "FAILED", err.message);
+    }
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send(error(500, err.message));

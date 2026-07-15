@@ -24,10 +24,7 @@ import {
 import { verifyMsg91Token } from "../services/msg91.service.js";
 import { getSectionsService } from "../services/section.services.js";
 import { getSessionService } from "../services/session.services.js";
-import {
-  createOrUpdateDuesForFeeStructure,
-  getStudentFeeDuesService
-} from "../services/studentFeeDue.service.js";
+import { createOrUpdateDuesForFeeStructure } from "../services/studentFeeDue.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 
 function hasInvalidMongoIds(ids) {
@@ -952,37 +949,6 @@ export async function deleteFeeStructureController(req, res) {
     });
 
     return res.status(StatusCodes.OK).send(success(200));
-  } catch (err) {
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .send(error(500, err.message));
-  }
-}
-
-export async function getStudentFeeDuesController(req, res) {
-  try {
-    const { sessionId, studentId } = req.params;
-    const adminId = req.adminId ?? req.parentId;
-
-    if (!isValidMongoId(sessionId)) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "Invalid session Id"));
-    }
-
-    if (!isValidMongoId(studentId)) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .send(error(400, "Invalid student Id"));
-    }
-
-    const dues = await getStudentFeeDuesService({
-      studentId,
-      sessionId,
-      adminId
-    });
-
-    return res.status(StatusCodes.OK).send(success(200, { dues }));
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

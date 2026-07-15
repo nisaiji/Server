@@ -25,6 +25,9 @@ const paymentSchema = new mongoose.Schema(
     gateway: { type: String, enum: ["ZOHO"], default: "ZOHO" },
     paymentSessionId: { type: String, index: true, sparse: true },
     zohoWebhookPaymentId: { type: String },
+    paymentMethod: {
+      type: String
+    },
     status: {
       type: String,
       enum: ["CREATED", "PENDING", "SUCCESS", "FAILED", "EXPIRED", "CANCELLED"],

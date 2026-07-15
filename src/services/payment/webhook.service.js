@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import webhookEventModel from "../../models/payments/webhookEvent.model.js";
 
 /**
  * Verifies the signature of a Zoho webhook request using a tenant-specific secret.
@@ -56,4 +57,48 @@ export function verifyZohoWebhookSignature(payload, signature, secret) {
   }
 
   return crypto.timingSafeEqual(providedBuf, expectedBuf);
+}
+
+/**
+ * Creates or updates a record for an incoming webhook event.
+ * This function is idempotent based on the gatewayEventId.
+ * @param {object} args
+ * @returns {Promise<object>} The created or updated webhook event document.
+ */
+export async function recordWebhookEvent({
+  adminId,
+  gateway,
+  gatewayEventId,
+  eventType,
+  payload,
+  isVerified,
+  paymentId
+}) {
+  return webhookEventModel.findOneAndUpdate(
+    { gatewayEventId },
+    {
+      $set: {
+        adminId,
+        eventType,
+        gatewayResponse: payload,
+        isVerified,
+        paymentId,
+        gateway,
+        processingStatus: "PENDING" // Reset status on new verified payload
+      },
+      $setOnInsert: { gateway, gatewayEventId }
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+}
+
+export async function updateWebhookEventStatus(
+  webhookEventId,
+  status,
+  errorMessage = null
+) {
+  return webhookEventModel.findByIdAndUpdate(webhookEventId, {
+    processingStatus: status,
+    processingError: errorMessage
+  });
 }

@@ -1,5 +1,4 @@
 import express from "express";
-import { getStudentFeeDuesController } from "../../controllers/feeSetup.controller.js";
 import {
   cancelPaymentController,
   getPaymentController,
@@ -7,6 +6,7 @@ import {
   getReceiptController,
   initiatePaymentController
 } from "../../controllers/payment.controller.js";
+import { getStudentFeeDuesController } from "../../controllers/studentFeeDue.controller.js";
 import {
   addStudentController,
   checkValidStudentController,

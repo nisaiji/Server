@@ -82,14 +82,18 @@ export async function processSuccessfulPayment({
           status: "SUCCESS",
           paymentSessionId,
           paidAt: new Date(),
-          gatewayResponse
+          paymentMethod: gatewayResponse.event_object.payment_method.type
         },
         { session }
       );
 
       await paymentAttemptModel.updateMany(
         { paymentId: payment._id, status: { $in: ["PENDING", "EXPIRED"] } },
-        { status: "SUCCESS", paymentSessionId, gatewayResponse },
+        {
+          status: "SUCCESS",
+          paymentSessionId,
+          gatewayWebhookEventId: gatewayResponse.event_id
+        },
         { session }
       );
 
@@ -193,7 +197,11 @@ export async function processFailedPayment({
 
   await paymentAttemptModel.updateMany(
     { paymentId: payment._id, status: "PENDING" },
-    { status: "FAILED", paymentSessionId, gatewayResponse }
+    {
+      status: "FAILED",
+      paymentSessionId,
+      gatewayWebhookEventId: gatewayResponse.event_id
+    }
   );
 
   return { alreadyProcessed: false };

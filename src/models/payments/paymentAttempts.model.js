@@ -16,7 +16,8 @@ const paymentAttemptSchema = new mongoose.Schema(
       default: "PENDING"
     },
     paymentSessionId: { type: String, index: true, sparse: true },
-    gatewayResponse: { type: mongoose.Schema.Types.Mixed }
+    gatewayResponse: { type: mongoose.Schema.Types.Mixed },
+    gatewayWebhookEventId: { type: String }
   },
   { timestamps: true, versionKey: false, collection: "payment_attempts" }
 );
