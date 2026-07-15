@@ -11,7 +11,9 @@ export async function getFeeCycleService(paramObj) {
 }
 
 export async function updateFeeCycleService(filter, update) {
-  return await feeCycleModel.findOneAndUpdate(filter, update, { new: true });
+  return await feeCycleModel.findOneAndUpdate(filter, update, {
+    returnDocument: "after"
+  });
 }
 
 export async function createFeeHeadService(data) {
@@ -26,7 +28,7 @@ export async function addFeeHeadService(filter, feeHead) {
   return await feeHeadModel.findOneAndUpdate(
     filter,
     { $push: { feeHeads: feeHead } },
-    { new: true }
+    { returnDocument: "after" }
   );
 }
 
@@ -41,19 +43,21 @@ export async function updateFeeHeadService(filter, feeHead) {
         "feeHeads.$.refundable": feeHead.refundable
       }
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 }
 
 export async function updateFeeHeadVerifyStatusService(filter, feeHead) {
-  return await feeHeadModel.findOneAndUpdate(filter, feeHead, { new: true });
+  return await feeHeadModel.findOneAndUpdate(filter, feeHead, {
+    returnDocument: "after"
+  });
 }
 
 export async function deleteFeeHeadService(filter, feeHeadId) {
   return await feeHeadModel.findOneAndUpdate(
     filter,
     { $pull: { feeHeads: { _id: feeHeadId } } },
-    { new: true }
+    { returnDocument: "after" }
   );
 }
 
@@ -163,7 +167,7 @@ export async function getFeeStructureListingService({
 
 export async function updateFeeStructureService(filter, update) {
   return await feeStructureModel.findOneAndUpdate(filter, update, {
-    new: true
+    returnDocument: "after"
   });
 }
 

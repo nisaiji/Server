@@ -87,7 +87,11 @@ export async function recordWebhookEvent({
       },
       $setOnInsert: { gateway, gatewayEventId }
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
+    {
+      upsert: true,
+      returnDocument: "after",
+      setDefaultsOnInsert: true
+    }
   );
 }
 

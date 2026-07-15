@@ -1,15 +1,15 @@
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-import {
-  initiatePaymentFlow as initiatePaymentFlowService,
-  validateSessionStudentOwnership
-} from "./paymentInitiation.service.js";
 import studentFeeDueModel from "../../models/fee/studentFeeDue.model.js";
 import ledgerEntryModel from "../../models/payments/ledgerEntries.model.js";
 import paymentModel from "../../models/payments/payment.model.js";
 import paymentAttemptModel from "../../models/payments/paymentAttempts.model.js";
 import receiptModel from "../../models/payments/receipt.model.js";
 import { getSessionStudentService } from "../sessionStudent.service.js";
+import {
+  initiatePaymentFlow as initiatePaymentFlowService,
+  validateSessionStudentOwnership
+} from "./paymentInitiation.service.js";
 
 export async function createPaymentService(data) {
   return paymentModel.create(data);
@@ -23,8 +23,14 @@ export async function getPaymentsService(filter) {
   return paymentModel.find(filter).sort({ createdAt: -1 }).lean();
 }
 
+export async function getAdminPaymentsService(filter) {
+  return paymentModel.find(filter).sort({ createdAt: -1 }).lean();
+}
+
 export async function updatePaymentService(filter, update) {
-  return paymentModel.findOneAndUpdate(filter, update, { new: true });
+  return paymentModel.findOneAndUpdate(filter, update, {
+    returnDocument: "after"
+  });
 }
 
 export async function createPaymentAttemptService(data) {
@@ -32,7 +38,9 @@ export async function createPaymentAttemptService(data) {
 }
 
 export async function updatePaymentAttemptService(filter, update) {
-  return paymentAttemptModel.findOneAndUpdate(filter, update, { new: true });
+  return paymentAttemptModel.findOneAndUpdate(filter, update, {
+    returnDocument: "after"
+  });
 }
 
 export async function getReceiptByPaymentIdService(paymentId) {
@@ -76,13 +84,28 @@ export async function processSuccessfulPayment({
       console.info("Starting transaction for successful payment.", {
         paymentId: payment._id
       });
+      const paymentMethodType =
+        gatewayResponse?.event_object?.payment_method?.type ??
+        gatewayResponse?.event_object?.payment?.payment_method?.type ??
+        gatewayResponse?.event_object?.payment?.payment_method?.name ??
+        "UNKNOWN";
+
+      if (paymentMethodType === "UNKNOWN") {
+        console.warn(
+          "Unable to resolve payment method type from webhook payload.",
+          {
+            paymentId: payment._id
+          }
+        );
+      }
+
       await paymentModel.findOneAndUpdate(
         { _id: payment._id },
         {
           status: "SUCCESS",
           paymentSessionId,
           paidAt: new Date(),
-          paymentMethod: gatewayResponse.event_object.payment_method.type
+          paymentMethod: paymentMethodType
         },
         { session }
       );
@@ -262,7 +285,7 @@ export async function cancelPaymentFlow({ paymentId, parentId }) {
     paymentModel.findByIdAndUpdate(
       paymentId,
       { status: "CANCELLED" },
-      { new: true }
+      { returnDocument: "after" }
     ),
     paymentAttemptModel.updateMany(
       { paymentId, status: "PENDING" },

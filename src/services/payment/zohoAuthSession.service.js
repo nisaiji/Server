@@ -17,6 +17,6 @@ export async function getZohoAuthSessionService(schoolId) {
 export async function updateZohoAuthSessionService(schoolId, update) {
   return zohoAuthSessionModel.findOneAndUpdate({ schoolId }, update, {
     upsert: true,
-    new: true
+    returnDocument: "after"
   });
 }
