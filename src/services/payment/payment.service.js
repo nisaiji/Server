@@ -88,7 +88,7 @@ export async function processSuccessfulPayment({
       );
 
       await paymentAttemptModel.updateMany(
-        { paymentId: payment._id, status: "PENDING" },
+        { paymentId: payment._id, status: { $in: ["PENDING", "EXPIRED"] } },
         { status: "SUCCESS", paymentSessionId, gatewayResponse },
         { session }
       );
