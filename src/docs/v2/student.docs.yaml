@@ -18,16 +18,16 @@ paths:
             schema:
               type: object
               required:
-                - firstname
-                - lastname
+                - firstName
+                - lastName
                 - gender
                 - parentName
                 - phone
                 - sectionId
               properties:
-                firstname:
+                firstName:
                   type: string
-                lastname:
+                lastName:
                   type: string
                 gender:
                   type: string
@@ -60,7 +60,7 @@ paths:
           name: search
           schema:
             type: string
-          description: Search keyword to match firstname, lastname, parent email or phone.
+          description: Search keyword to match firstName, lastName, parent email or phone.
         - in: query
           name: page
           schema:
@@ -108,9 +108,9 @@ paths:
                           properties:
                             _id:
                               type: string
-                            firstname:
+                            firstName:
                               type: string
-                            lastname:
+                            lastName:
                               type: string
                             gender:
                               type: string
@@ -119,9 +119,9 @@ paths:
                               properties:
                                 _id:
                                   type: string
-                                firstname:
+                                firstName:
                                   type: string
-                                lastname:
+                                lastName:
                                   type: string
                                 email:
                                   type: string
@@ -252,9 +252,9 @@ paths:
             schema:
               type: object
               properties:
-                firstname:
+                firstName:
                   type: string
-                lastname:
+                lastName:
                   type: string
                 gender:
                   type: string

@@ -205,8 +205,8 @@ export async function getLeaveRequestsController(req, res) {
                 createdAt: 1,
                 teacher: {
                   _id: "$teacher._id",
-                  firstname: "$teacher.firstname",
-                  lastname: "$teacher.lastname",
+                  firstName: "$teacher.firstName",
+                  lastName: "$teacher.lastName",
                   phone: "$teacher.phone",
                   section: "$section.name",
                   class: "$class.name",

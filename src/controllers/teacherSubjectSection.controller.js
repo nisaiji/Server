@@ -162,8 +162,8 @@ export async function getAllSubjectsOfTeacherInSectionController(req, res) {
       {
         $project: {
           teacherId: "$teacher._id",
-          teacherFirstName: "$teacher.firstname",
-          teacherLastName: "$teacher.lastname",
+          teacherFirstName: "$teacher.firstName",
+          teacherLastName: "$teacher.lastName",
           teacherEmail: "$teacher.email",
           teacherPhone: "$teacher.phone",
           teacherGender: "$teacher.gender",
@@ -261,8 +261,8 @@ export async function getAllSubjectsTeachersOfSectionController(req, res) {
       {
         $project: {
           teacherId: "$teacher._id",
-          teacherFirstName: "$teacher.firstname",
-          teacherLastName: "$teacher.lastname",
+          teacherFirstName: "$teacher.firstName",
+          teacherLastName: "$teacher.lastName",
           teacherEmail: "$teacher.email",
           teacherPhone: "$teacher.phone",
           teacherGender: "$teacher.gender",
@@ -363,8 +363,8 @@ export async function getAllSubjectsTeachersOfSectionForAdminController(
       {
         $project: {
           teacherId: "$teacher._id",
-          teacherFirstName: "$teacher.firstname",
-          teacherLastName: "$teacher.lastname",
+          teacherFirstName: "$teacher.firstName",
+          teacherLastName: "$teacher.lastName",
           teacherEmail: "$teacher.email",
           teacherPhone: "$teacher.phone",
           teacherGender: "$teacher.gender",

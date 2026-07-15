@@ -4,8 +4,8 @@ import { registerCustomerSupportQueryService } from "../services/customerSupport
 export async function createCustomerSupportQueryController(req, res) {
   try {
     const {
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       schoolName,
       state,
       city,
@@ -16,8 +16,8 @@ export async function createCustomerSupportQueryController(req, res) {
       message
     } = req.body;
     await registerCustomerSupportQueryService({
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       schoolName,
       state,
       city,

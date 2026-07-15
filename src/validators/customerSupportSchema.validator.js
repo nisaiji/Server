@@ -1,10 +1,10 @@
 import Joi from "joi";
 
 const queryValidationSchema = Joi.object({
-  firstname: Joi.string().required().messages({
+  firstName: Joi.string().required().messages({
     "any.required": "First name is required"
   }),
-  lastname: Joi.string().required().messages({
+  lastName: Joi.string().required().messages({
     "any.required": "Last name is required"
   }),
   schoolName: Joi.string().required().messages({

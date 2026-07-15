@@ -312,8 +312,8 @@ export async function getAdminTCRequestsController(req, res) {
           pipeline: [
             {
               $project: {
-                firstname: 1,
-                lastname: 1,
+                firstName: 1,
+                lastName: 1,
                 rollNumber: 1,
                 dob: 1,
                 gender: 1,

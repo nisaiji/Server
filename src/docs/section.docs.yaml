@@ -219,10 +219,10 @@ paths:
                           username:
                             type: string
                             example: "john.doe"
-                          firstname:
+                          firstName:
                             type: string
                             example: "John"
-                          lastname:
+                          lastName:
                             type: string
                             example: "Doe"
                           isLoginAlready:

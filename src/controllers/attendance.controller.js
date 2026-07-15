@@ -2,6 +2,7 @@ import { error } from "console";
 import { StatusCodes } from "http-status-codes";
 import { sendPushNotification } from "../config/firebase.config.js";
 import { attendanceControllerResponse } from "../config/httpResponse.js";
+import { error, success } from "../utils/responseWrapper.js";
 import {
   createAttendanceService,
   getAttendanceService,
@@ -193,7 +194,7 @@ export async function attendanceByTeacherController(req, res) {
         await sendPushNotification(
           studentWithParent[0]?.parent?.["fcmToken"],
           `Attendance`,
-          ` ${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is present today ${getFormattedDateService(new Date())}`,
+          ` ${studentWithParent[0]?.firstName} ${studentWithParent[0]?.lastName} is present today ${getFormattedDateService(new Date())}`,
           "attendance",
           studentWithParent[0]?.parent?._id
         );
@@ -243,7 +244,7 @@ export async function attendanceByTeacherController(req, res) {
         await sendPushNotification(
           studentWithParent[0]?.parent["fcmToken"],
           `Attendance`,
-          `${studentWithParent[0]?.firstname} ${studentWithParent[0]?.lastname} is absent today ${getFormattedDateService(new Date())}`,
+          `${studentWithParent[0]?.firstName} ${studentWithParent[0]?.lastName} is absent today ${getFormattedDateService(new Date())}`,
           "attendance",
           studentWithParent[0]?.parent?._id
         );
@@ -1045,8 +1046,8 @@ export async function getAttendancesController(req, res) {
       },
       {
         $project: {
-          firstname: "$student.firstname",
-          lastname: "$student.lastname",
+          firstName: "$student.firstName",
+          lastName: "$student.lastName",
           gender: "$student.gender",
           sectionName: "$section.name",
           className: "$class.name",

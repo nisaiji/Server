@@ -14,10 +14,10 @@ paths:
           schema:
             type: object
             properties:
-              firstname:
+              firstName:
                 type: string
                 example: "John"
-              lastname:
+              lastName:
                 type: string
                 example: "Doe"
               phone:
@@ -103,10 +103,10 @@ paths:
           schema:
             type: object
             properties:
-              firstname:
+              firstName:
                 type: string
                 example: "Jane"
-              lastname:
+              lastName:
                 type: string
                 example: "Smith"
               phone:
@@ -374,10 +374,10 @@ paths:
                       username:
                         type: string
                         example: "john_doe_123"
-                      firstname:
+                      firstName:
                         type: string
                         example: "John"
-                      lastname:
+                      lastName:
                         type: string
                         example: "Doe"
                       isLoginAlready:
@@ -600,10 +600,10 @@ paths:
                         username:
                           type: string
                           example: "john_doe_123"
-                        firstname:
+                        firstName:
                           type: string
                           example: "John"
-                        lastname:
+                        lastName:
                           type: string
                           example: "Doe"
                         isLoginAlready:
@@ -944,11 +944,11 @@ paths:
             schema:
               type: object
               properties:
-                firstname:
+                firstName:
                   type: string
                   description: "Teacher's first name."
                   example: "John"
-                lastname:
+                lastName:
                   type: string
                   description: "Teacher's last name."
                   example: "Doe"

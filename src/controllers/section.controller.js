@@ -105,7 +105,7 @@ export async function getSectionController(req, res) {
     const _id = req.params.sectionId;
     const [section, teacher] = await Promise.all([
       getSectionService({ _id }),
-      getTeacherService({ section: _id }, { firstname: 1, lastname: 1 })
+      getTeacherService({ section: _id }, { firstName: 1, lastName: 1 })
     ]);
     if (!section) {
       return res

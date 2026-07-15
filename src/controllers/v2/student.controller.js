@@ -59,14 +59,14 @@ export async function searchStudentsController(req, res) {
       const [searchFirstname, searchLastname] = search.split(" ");
       if (searchLastname) {
         filter["$and"] = [
-          { firstname: { $regex: new RegExp(searchFirstname, "i") } },
-          { lastname: { $regex: new RegExp(searchLastname, "i") } },
+          { firstName: { $regex: new RegExp(searchFirstname, "i") } },
+          { lastName: { $regex: new RegExp(searchLastname, "i") } },
           { isActive: true }
         ];
       } else {
         filter["$or"] = [
-          { firstname: { $regex: new RegExp(search, "i") }, isActive: true },
-          { lastname: { $regex: new RegExp(search, "i") }, isActive: true },
+          { firstName: { $regex: new RegExp(search, "i") }, isActive: true },
+          { lastName: { $regex: new RegExp(search, "i") }, isActive: true },
           {
             "parentDetails.email": { $regex: new RegExp(search, "i") },
             isActive: true
@@ -111,7 +111,7 @@ export async function searchStudentsController(req, res) {
       },
 
       {
-        $sort: { firstname: 1 }
+        $sort: { firstName: 1 }
       }
     ];
 
@@ -209,8 +209,8 @@ export async function searchStudentsController(req, res) {
 export async function registerStudentController(req, res) {
   try {
     const {
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       gender,
       parentName,
       phone,
@@ -265,7 +265,7 @@ export async function registerStudentController(req, res) {
     }
 
     let student = await getStudentService({
-      firstname,
+      firstName,
       schoolParent: schoolParent["_id"]
     });
     if (student) {
@@ -274,8 +274,8 @@ export async function registerStudentController(req, res) {
         .send(error(400, "Student already exists"));
     }
     const studentObj = {
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       gender,
       schoolParent: schoolParent["_id"],
       section: sectionId,
@@ -322,11 +322,11 @@ export async function updateStudentBySchoolController(req, res) {
         .send(error(404, "Parent not found"));
     }
 
-    if (req.body["firstname"]) {
-      studentUpdate.firstname = req.body["firstname"];
+    if (req.body["firstName"]) {
+      studentUpdate.firstName = req.body["firstName"];
     }
-    if (req.body["lastname"]) {
-      studentUpdate.lastname = req.body["lastname"];
+    if (req.body["lastName"]) {
+      studentUpdate.lastName = req.body["lastName"];
     }
     if (req.body["gender"]) {
       studentUpdate.gender = req.body["gender"];
@@ -530,11 +530,11 @@ export async function updateStudentByParentController(req, res) {
         .send(error(400, "User is not authorized"));
     }
 
-    if (req.body["firstname"]) {
-      studentUpdate.firstname = req.body["firstname"];
+    if (req.body["firstName"]) {
+      studentUpdate.firstName = req.body["firstName"];
     }
-    if (req.body["lastname"]) {
-      studentUpdate.lastname = req.body["lastname"];
+    if (req.body["lastName"]) {
+      studentUpdate.lastName = req.body["lastName"];
     }
     if (req.body["gender"]) {
       studentUpdate.gender = req.body["gender"];
@@ -679,8 +679,8 @@ export async function getAttendancesController(req, res) {
       },
       {
         $project: {
-          firstname: 1,
-          lastname: 1,
+          firstName: 1,
+          lastName: 1,
           gender: 1,
           sectionName: "$section.name",
           className: "$class.name",
@@ -709,8 +709,8 @@ export async function getStudentsController(req, res) {
       section,
       parent,
       student,
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       gender,
       startTime,
       endTime,
@@ -725,8 +725,8 @@ export async function getStudentsController(req, res) {
       !section &&
       !parent &&
       !student &&
-      !firstname &&
-      !lastname &&
+      !firstName &&
+      !lastName &&
       !gender
     ) {
       return res
@@ -782,13 +782,13 @@ export async function getStudentsController(req, res) {
     if (student) {
       filter._id = convertToMongoId(student);
     }
-    if (firstname) {
-      const regexFirstname = new RegExp(firstname, "i");
-      filter.firstname = { $regex: regexFirstname };
+    if (firstName) {
+      const regexFirstname = new RegExp(firstName, "i");
+      filter.firstName = { $regex: regexFirstname };
     }
-    if (lastname) {
-      const regexLastname = new RegExp(firstname, "i");
-      filter.lastname = { $regex: regexLastname };
+    if (lastName) {
+      const regexLastname = new RegExp(firstName, "i");
+      filter.lastName = { $regex: regexLastname };
     }
     if (gender) {
       filter.gender = gender;
@@ -803,7 +803,7 @@ export async function getStudentsController(req, res) {
         $match: filter
       },
       {
-        $sort: { firstname: 1 }
+        $sort: { firstName: 1 }
       }
     ];
 
@@ -1097,11 +1097,11 @@ export async function updateStudentController(req, res) {
         .send(error(404, "Parent not found"));
     }
 
-    if (req.body["firstname"]) {
-      studentUpdate.firstname = req.body["firstname"];
+    if (req.body["firstName"]) {
+      studentUpdate.firstName = req.body["firstName"];
     }
-    if (req.body["lastname"]) {
-      studentUpdate.lastname = req.body["lastname"];
+    if (req.body["lastName"]) {
+      studentUpdate.lastName = req.body["lastName"];
     }
     if (req.body["gender"]) {
       studentUpdate.gender = req.body["gender"];

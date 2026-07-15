@@ -63,7 +63,7 @@ export async function customGetClassWithSectionTeacherService(paramObj) {
       .populate({
         path: "section",
         select: { name: 1, studentCount: 1, startTime: 1 },
-        populate: { path: "teacher", select: "firstname lastname" }
+        populate: { path: "teacher", select: "firstName lastName" }
       })
       .lean();
     return classInfo;

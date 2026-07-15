@@ -1,10 +1,10 @@
 import Joi from "joi";
 
 const registerStudentSchema = Joi.object({
-  firstname: Joi.string().required().messages({
+  firstName: Joi.string().required().messages({
     "any.required": "First name is required."
   }),
-  lastname: Joi.string().required().messages({
+  lastName: Joi.string().required().messages({
     "any.required": "Last name is required."
   }),
   parentName: Joi.string().required().messages({
@@ -105,11 +105,11 @@ const getStudentsSchema = Joi.object({
     "string.base": "Student must be a string."
   }),
 
-  firstname: Joi.string().optional().messages({
+  firstName: Joi.string().optional().messages({
     "string.base": "First name must be a string."
   }),
 
-  lastname: Joi.string().optional().messages({
+  lastName: Joi.string().optional().messages({
     "string.base": "Last name must be a string."
   }),
 
@@ -151,10 +151,10 @@ const getStudentsSchema = Joi.object({
 });
 
 const updateStudentByTeacherSchema = Joi.object({
-  firstname: Joi.string().required().messages({
+  firstName: Joi.string().required().messages({
     "any.required": "First name is required."
   }),
-  lastname: Joi.string().required().messages({
+  lastName: Joi.string().required().messages({
     "any.required": "Last name is required."
   }),
   parentName: Joi.string().required().messages({
@@ -178,10 +178,10 @@ const updateStudentByTeacherSchema = Joi.object({
 });
 
 const updateStudentByAdminSchema = Joi.object({
-  firstname: Joi.string().required().messages({
+  firstName: Joi.string().required().messages({
     "any.required": "First name is required."
   }),
-  lastname: Joi.string().required().messages({
+  lastName: Joi.string().required().messages({
     "any.required": "Last name is required."
   }),
   parentName: Joi.string().required().messages({
@@ -234,10 +234,10 @@ const updateStudentByParentSchema = Joi.object({
 });
 
 const updateStudentParentByAdminSchema = Joi.object({
-  firstname: Joi.string().required().messages({
+  firstName: Joi.string().required().messages({
     "any.required": "first name is required"
   }),
-  lastname: Joi.string().required().messages({
+  lastName: Joi.string().required().messages({
     "any.required": "last name is required"
   }),
   gender: Joi.string().required().messages({

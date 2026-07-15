@@ -2,10 +2,8 @@ import fs from "fs/promises";
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
 import xlsx from "xlsx";
-import { registerStudentsFromExcelHelper } from "../../helpers/student.helper.js";
 import { getStartAndEndTimeService } from "../../services/celender.service.js";
 import { getClassService } from "../../services/class.services.js";
-import { getFeeStructureService } from "../../services/feeSetup.service.js";
 import { convertToMongoId } from "../../services/mongoose.services.js";
 import {
   getParentService,
@@ -43,6 +41,8 @@ import {
   calculateAttendancePercentageForSessionStudent
 } from "../../services/studentDetailSummary.service.js";
 import { createOrUpdateDuesForFeeStructure } from "../../services/studentFeeDue.service.js";
+import { getFeeStructureService } from "../../services/feeSetup.service.js";
+import { registerStudentsFromExcelHelper } from "../../helpers/student.helper.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
 import { error, success } from "../../utils/responseWrapper.js";
 
@@ -156,7 +156,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
     }
 
     const existingStudent = await getStudentService({
-      firstname: studentData.firstname,
+      firstName: studentData.firstName,
       schoolParent: schoolParent._id
     });
     if (existingStudent) {
@@ -166,8 +166,8 @@ export async function registerStudentAndSessionStudentController(req, res) {
     }
 
     const studentObj = {
-      firstname: studentData.firstname,
-      lastname: studentData.lastname,
+      firstName: studentData.firstName,
+      lastName: studentData.lastName,
       gender: studentData.gender,
       aadharNumber: studentData.aadharNumber,
       guardianName: studentData.guardianName,
@@ -401,8 +401,8 @@ export async function updateStudentBySchoolController(req, res) {
     }
 
     addFieldsIfPresent(studentUpdate, req.body, [
-      "firstname",
-      "lastname",
+      "firstName",
+      "lastName",
       "gender",
       "bloodGroup",
       "dob",
@@ -534,8 +534,8 @@ export async function updateStudentByParentController(req, res) {
     }
 
     addFieldsIfPresent(studentUpdate, req.body, [
-      "firstname",
-      "lastname",
+      "firstName",
+      "lastName",
       "gender",
       "bloodGroup",
       "dob",
@@ -682,8 +682,8 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         id: "$student._id",
         studentId: "$student.studentId",
         rollNumber: "$student.rollNumber",
-        firstname: "$student.firstname",
-        lastname: "$student.lastname",
+        firstName: "$student.firstName",
+        lastName: "$student.lastName",
         aadharNumber: "$student.aadharNumber",
         guardianName: "$student.guardianName",
         dob: "$student.dob",
@@ -987,8 +987,8 @@ export async function getAttendancesController(req, res) {
       },
       {
         $project: {
-          firstname: "$student.firstname",
-          lastname: "$student.lastname",
+          firstName: "$student.firstName",
+          lastName: "$student.lastName",
           gender: "$student.gender",
           sectionName: "$section.name",
           className: "$class.name",
@@ -1143,21 +1143,21 @@ export async function searchStudentsController(req, res) {
 
     if (search) {
       search = search.trim();
-      const [searchFirstname, searchLastname] = search.split(" ");
-      if (searchLastname) {
+      const [searchfirstName, searchlastName] = search.split(" ");
+      if (searchlastName) {
         filter["$and"] = [
-          { "student.firstname": { $regex: new RegExp(searchFirstname, "i") } },
-          { "student.lastname": { $regex: new RegExp(searchLastname, "i") } },
+          { "student.firstName": { $regex: new RegExp(searchfirstName, "i") } },
+          { "student.lastName": { $regex: new RegExp(searchlastName, "i") } },
           { isActive: true }
         ];
       } else {
         filter["$or"] = [
           {
-            "student.firstname": { $regex: new RegExp(search, "i") },
+            "student.firstName": { $regex: new RegExp(search, "i") },
             isActive: true
           },
           {
-            "student.lastname": { $regex: new RegExp(search, "i") },
+            "student.lastName": { $regex: new RegExp(search, "i") },
             isActive: true
           },
           {
@@ -1224,7 +1224,7 @@ export async function searchStudentsController(req, res) {
         $match: filter
       },
       {
-        $sort: { "student.firstname": 1 }
+        $sort: { "student.firstName": 1 }
       },
       {
         $lookup: {
@@ -1298,8 +1298,8 @@ export async function searchStudentsController(req, res) {
           id: "$student._id",
           studentId: "$student.studentId",
           rollNumber: "$student.rollNumber",
-          firstname: "$student.firstname",
-          lastname: "$student.lastname",
+          firstName: "$student.firstName",
+          lastName: "$student.lastName",
           aadharNumber: "$student.aadharNumber",
           dob: "$student.dob",
           gender: "$student.gender",
@@ -1574,8 +1574,8 @@ export async function getSubjectsForStudentSectionController(req, res) {
       {
         $project: {
           teacherId: "$teacher._id",
-          teacherFirstName: "$teacher.firstname",
-          teacherLastName: "$teacher.lastname",
+          teacherfirstName: "$teacher.firstName",
+          teacherlastName: "$teacher.lastName",
           teacherEmail: "$teacher.email",
           teacherPhone: "$teacher.phone",
           teacherGender: "$teacher.gender",

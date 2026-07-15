@@ -53,7 +53,7 @@ export async function teacherAuthenticate(req, res, next) {
           .status(StatusCodes.GONE)
           .send(error(410, "Section not found"));
       }
-      if (section["teacher"].toString() !== decoded?.teacherId) {
+      if (section["teacher"]?.toString() !== decoded?.teacherId) {
         return res
           .status(StatusCodes.GONE)
           .send(error(410, "User has been replaced"));
