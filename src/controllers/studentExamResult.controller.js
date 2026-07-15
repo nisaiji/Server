@@ -256,8 +256,8 @@ export async function getStudentsExamMarksForSubjectController(req, res) {
       {
         $project: {
           id: "$_id",
-          studentFirstName: "$student.firstname",
-          studentLastName: "$student.lastname",
+          studentFirstName: "$student.firstName",
+          studentLastName: "$student.lastName",
           studentId: "$student._id",
           studentGender: "$student.gender",
           studentPhoto: "$student.photo",
@@ -442,8 +442,8 @@ export async function getStudentExamMarksForSubjectController(req, res) {
       {
         $project: {
           id: "$_id",
-          studentFirstName: "$student.firstname",
-          studentLastName: "$student.lastname",
+          studentFirstName: "$student.firstName",
+          studentLastName: "$student.lastName",
           studentId: "$student._id",
           studentGender: "$student.gender",
           studentPhoto: "$student.photo",
@@ -681,8 +681,8 @@ export async function getSectionStudentsExamMarksController(req, res) {
       {
         $project: {
           id: "$_id",
-          studentFirstName: "$student.firstname",
-          studentLastName: "$student.lastname",
+          studentFirstName: "$student.firstName",
+          studentLastName: "$student.lastName",
           studentId: "$student._id",
           studentGender: "$student.gender",
           studentPhoto: "$student.photo",
@@ -898,8 +898,8 @@ export async function getStudentExamMarksController(req, res) {
       {
         $project: {
           id: "$_id",
-          studentFirstName: "$student.firstname",
-          studentLastName: "$student.lastname",
+          studentFirstName: "$student.firstName",
+          studentLastName: "$student.lastName",
           studentId: "$student._id",
           studentGender: "$student.gender",
           studentPhoto: "$student.photo",

@@ -47,16 +47,16 @@ export async function registerStudentsFromExcelHelper(
     let insertedStudentCount = 0;
     for (const student of students) {
       const normalizedStudent = {
-        firstname: student["First Name"],
-        lastname: student["Last Name"],
+        firstName: student["First Name"],
+        lastName: student["Last Name"],
         gender: student["Gender"],
         bloodGroup: student["Blood Group"],
         dob:
           typeof student["DOB (dd-mm-yyyy)"] === "number"
             ? excelDateToStringDateFormat(
-                student["DOB (dd-mm-yyyy)"],
-                "dd-mm-yyyy"
-              )
+              student["DOB (dd-mm-yyyy)"],
+              "dd-mm-yyyy"
+            )
             : student["DOB (dd-mm-yyyy)"],
         address: student["Address"],
         city: student["City"],
@@ -72,8 +72,8 @@ export async function registerStudentsFromExcelHelper(
       };
 
       const {
-        firstname,
-        lastname,
+        firstName,
+        lastName,
         gender,
         bloodGroup,
         dob,
@@ -113,12 +113,12 @@ export async function registerStudentsFromExcelHelper(
       }
 
       let studentInfo = await getStudentService({
-        firstname,
+        firstName,
         schoolParent: schoolParent["_id"]
       });
       const studentObj = {
-        firstname,
-        lastname,
+        firstName,
+        lastName,
         gender,
         bloodGroup,
         dob,

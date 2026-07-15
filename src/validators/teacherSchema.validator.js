@@ -1,10 +1,10 @@
 import Joi from "joi";
 
 const teacherRegisterSchema = Joi.object({
-  firstname: Joi.string().required().messages({
+  firstName: Joi.string().required().messages({
     "any.required": "First name is required."
   }),
-  lastname: Joi.string().required().messages({
+  lastName: Joi.string().required().messages({
     "any.required": "Last name is required."
   }),
   phone: Joi.string()
@@ -67,15 +67,15 @@ const teacherEmailPhoneUpdateSchema = Joi.object({
 });
 
 const teacherUpdateSchema = Joi.object({
-  firstname: Joi.string().min(2).max(15).required().messages({
-    "string.min": "firstname should be atleast 2 chars long",
-    "string.max": "firstname can be atmost 15 chars long.",
-    "any.required": "firstname is required"
+  firstName: Joi.string().min(2).max(15).required().messages({
+    "string.min": "firstName should be atleast 2 chars long",
+    "string.max": "firstName can be atmost 15 chars long.",
+    "any.required": "firstName is required"
   }),
-  lastname: Joi.string().min(2).max(15).required().messages({
-    "string.min": "lastname should be atleast 2 chars long",
-    "string.max": "lastname can be atmost 15 chars long.",
-    "any.required": "lastname is required"
+  lastName: Joi.string().min(2).max(15).required().messages({
+    "string.min": "lastName should be atleast 2 chars long",
+    "string.max": "lastName can be atmost 15 chars long.",
+    "any.required": "lastName is required"
   }),
   phone: Joi.string()
     .pattern(/^[6-9][0-9]{9}$/)

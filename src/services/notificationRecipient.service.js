@@ -185,8 +185,8 @@ async function getTeacherNotificationRecipientsService({
         $project: {
           _id: 0,
           recipientId: "$teacher._id",
-          firstname: "$teacher.firstname",
-          lastname: "$teacher.lastname",
+          firstName: "$teacher.firstName",
+          lastName: "$teacher.lastName",
           fcmToken: "$teacher.fcmToken",
           role: {
             $literal: "teacher"

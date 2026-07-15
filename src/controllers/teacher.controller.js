@@ -34,14 +34,14 @@ import { error, success } from "../utils/responseWrapper.js";
 export async function registerTeacherController(req, res) {
   try {
     const adminId = req.adminId;
-    const { firstname, phone } = req.body;
+    const { firstName, phone } = req.body;
     const teacher = await getTeacherService({ phone, isActive: true });
     if (teacher) {
       return res
         .status(StatusCodes.CONFLICT)
         .send(error(409, "Phone number already registered"));
     }
-    const password = firstname + "@" + phone;
+    const password = firstName + "@" + phone;
     const hashedPassword = await hashPasswordService(password);
     req.body["password"] = hashedPassword;
     req.body["admin"] = adminId;
@@ -200,7 +200,7 @@ export async function loginTeacherController(req, res) {
       success(200, {
         accessToken,
         refreshToken,
-        firstname: teacher ? teacher["firstname"] : "",
+        firstName: teacher ? teacher["firstName"] : "",
         isLoginAlready
       })
     );
@@ -351,8 +351,8 @@ export async function getAllTeacherOfAdminController(req, res) {
           id: "$_id",
           teacherId: "$teacherId",
           username: "$username",
-          firstname: "$firstname",
-          lastname: "$lastname",
+          firstName: "$firstName",
+          lastName: "$lastName",
           isLoginAlready: "$isLoginAlready",
           fcmToken: "$fcmToken",
           deviceId: "$deviceId",
@@ -415,8 +415,8 @@ export async function updateTeacherController(req, res) {
     const teacherId = req.teacherId ? req.teacherId : req.params.teacherId;
     const {
       username,
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       dob,
       bloodGroup,
       email,
@@ -494,11 +494,11 @@ export async function updateTeacherController(req, res) {
       fieldsToBeUpdated.password = hashedPassword;
     }
 
-    if (firstname) {
-      fieldsToBeUpdated.firstname = firstname;
+    if (firstName) {
+      fieldsToBeUpdated.firstName = firstName;
     }
-    if (lastname) {
-      fieldsToBeUpdated.lastname = lastname;
+    if (lastName) {
+      fieldsToBeUpdated.lastName = lastName;
     }
     if (dob) {
       fieldsToBeUpdated.dob = dob;
@@ -725,8 +725,8 @@ export async function getTeacherController(req, res) {
           id: "$_id",
           teacherId: "$teacherId",
           username: "$username",
-          firstname: "$firstname",
-          lastname: "$lastname",
+          firstName: "$firstName",
+          lastName: "$lastName",
           isLoginAlready: "$isLoginAlready",
           fcmToken: "$fcmToken",
           deviceId: "$deviceId",
@@ -865,7 +865,7 @@ export async function registerTeachersFromExcelController(req, res) {
     }
 
     // Expected Excel columns based on teacher model:
-    // firstname (required), lastname, phone (required), email, gender, dob, bloodGroup,
+    // firstName (required), lastName, phone (required), email, gender, dob, bloodGroup,
     // university, degree, address, city, district, state, country, pincode
 
     const workbook = xlsx.readFile(file.path);
@@ -879,8 +879,8 @@ export async function registerTeachersFromExcelController(req, res) {
     for (const teacherData of teachers) {
       try {
         const {
-          firstname,
-          lastname,
+          firstName,
+          lastName,
           phone,
           email,
           gender,
@@ -896,9 +896,9 @@ export async function registerTeachersFromExcelController(req, res) {
           pincode
         } = teacherData;
 
-        if (!firstname || !phone) {
+        if (!firstName || !phone) {
           errors.push(
-            `Row with firstname: ${firstname || "N/A"} - Missing required fields (firstname, phone)`
+            `Row with firstName: ${firstName || "N/A"} - Missing required fields (firstName, phone)`
           );
           continue;
         }
@@ -912,12 +912,12 @@ export async function registerTeachersFromExcelController(req, res) {
           continue;
         }
 
-        const password = firstname + "@" + phone;
+        const password = firstName + "@" + phone;
         const hashedPassword = await hashPasswordService(password);
 
         const teacherObj = {
-          firstname,
-          lastname: lastname || "",
+          firstName,
+          lastName: lastName || "",
           phone,
           email: email || "",
           gender: gender || "",
@@ -939,7 +939,7 @@ export async function registerTeachersFromExcelController(req, res) {
         registeredCount++;
       } catch (err) {
         errors.push(
-          `Error registering teacher ${teacherData.firstname || "Unknown"}: ${err.message}`
+          `Error registering teacher ${teacherData.firstName || "Unknown"}: ${err.message}`
         );
       }
     }

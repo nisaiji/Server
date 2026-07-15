@@ -197,8 +197,8 @@ export async function getChangePasswordRequestsController(req, res) {
         otp: 1,
         teacher: {
           _id: "$teacher._id",
-          firstname: "$teacher.firstname",
-          lastname: "$teacher.lastname",
+          firstName: "$teacher.firstName",
+          lastName: "$teacher.lastName",
           forgetPasswordCount: "$teacher.forgetPasswordCount",
           section: "$section.name",
           class: "$class.name"

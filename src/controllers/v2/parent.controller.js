@@ -586,12 +586,12 @@ export async function checkValidStudentController(req, res) {
     let { studentName } = req.body;
     const parentId = req.parentId;
     studentName = studentName.trim();
-    const [firstname, lastname] = studentName.split(" ");
+    const [firstName, lastName] = studentName.split(" ");
     const pipeline = [
       {
         $match: {
-          firstname: { $regex: new RegExp(`^${firstname}$`, "i") },
-          lastname: { $regex: new RegExp(`^${lastname}$`, "i") },
+          firstName: { $regex: new RegExp(`^${firstName}$`, "i") },
+          lastName: { $regex: new RegExp(`^${lastName}$`, "i") },
           isActive: true
         }
       },
@@ -1028,8 +1028,8 @@ export async function getParentWithStudentsController(req, res) {
             {
               $project: {
                 studentId: "$_id",
-                studentFirstName: "$firstname",
-                studentLastName: "$lastname",
+                studentFirstName: "$firstName",
+                studentLastName: "$lastName",
                 guardianName: "$guardianName",
                 studentGender: "$gender",
                 studentbloodGroup: "$bloodGroup",

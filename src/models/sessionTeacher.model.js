@@ -4,11 +4,11 @@ const sessionTeacherSchema = mongoose.Schema(
     username: {
       type: String
     },
-    firstname: {
+    firstName: {
       type: String,
       required: true
     },
-    lastname: {
+    lastName: {
       type: String,
       required: true
     },

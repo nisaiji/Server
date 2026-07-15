@@ -50,8 +50,8 @@ export function constructTeacherXlsxTemplate() {
   let worksheet = workbook.addWorksheet("Teachers");
 
   let columns = [
-    "firstname",
-    "lastname",
+    "firstName",
+    "lastName",
     "phone",
     "email",
     "gender",

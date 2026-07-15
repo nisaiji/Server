@@ -69,8 +69,8 @@ function compareExams(left, right) {
   return rightCreatedAt - leftCreatedAt;
 }
 
-function getTeacherName(firstname, lastname) {
-  return [firstname, lastname].filter(Boolean).join(" ").trim() || null;
+function getTeacherName(firstName, lastName) {
+  return [firstName, lastName].filter(Boolean).join(" ").trim() || null;
 }
 
 function getLatestResultsBySubject(results = []) {
@@ -344,8 +344,8 @@ export async function buildSubjectSummaryForContext({
         subjectId: { $first: "$subject._id" },
         subjectName: { $first: "$subject.name" },
         subjectCode: { $first: "$subject.code" },
-        teacherFirstName: { $first: "$teacher.firstname" },
-        teacherLastName: { $first: "$teacher.lastname" }
+        teacherFirstName: { $first: "$teacher.firstName" },
+        teacherLastName: { $first: "$teacher.lastName" }
       }
     }
   ]);

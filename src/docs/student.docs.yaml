@@ -18,16 +18,16 @@ paths:
             schema:
               type: object
               required:
-                - firstname
-                - lastname
+                - firstName
+                - lastName
                 - gender
                 - parentName
                 - phone
                 - sectionId
               properties:
-                firstname:
+                firstName:
                   type: string
-                lastname:
+                lastName:
                   type: string
                 gender:
                   type: string
@@ -182,17 +182,17 @@ paths:
           schema:
             type: object
             required:
-              - firstname
-              - lastname
+              - firstName
+              - lastName
               - gender
               - parentName
               - phone
               - sectionId
             properties:
-              firstname:
+              firstName:
                 type: string
                 example: "John"
-              lastname:
+              lastName:
                 type: string
                 example: "Doe"
               gender:
@@ -303,10 +303,10 @@ paths:
               student:
                 type: string
                 example: "student012"
-              firstname:
+              firstName:
                 type: string
                 example: "John"
-              lastname:
+              lastName:
                 type: string
                 example: "Doe"
               gender:
@@ -442,9 +442,9 @@ paths:
             schema:
               type: object
               properties:
-                firstname:
+                firstName:
                   type: string
-                lastname:
+                lastName:
                   type: string
                 gender:
                   type: string
@@ -513,9 +513,9 @@ paths:
               properties:
                 rollNumber:
                   type: string
-                firstname:
+                firstName:
                   type: string
-                lastname:
+                lastName:
                   type: string
                 gender:
                   type: string
@@ -578,8 +578,8 @@ paths:
         - Authorization: []
       tags:
         - "Student"
-      summary: "Search for a student by firstname (Class Teacher)"
-      description: "This API allows a class teacher to search for a student by their firstname."
+      summary: "Search for a student by firstName (Class Teacher)"
+      description: "This API allows a class teacher to search for a student by their firstName."
       produces:
         - "application/json"
       parameters:
@@ -605,8 +605,8 @@ paths:
         - Authorization: []
       tags:
         - "Student"
-      summary: "Search for a student by firstname (Admin)"
-      description: "This API allows an admin to search for a student by their firstname."
+      summary: "Search for a student by firstName (Admin)"
+      description: "This API allows an admin to search for a student by their firstName."
       produces:
         - "application/json"
       parameters:
