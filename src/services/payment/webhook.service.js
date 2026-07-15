@@ -83,7 +83,6 @@ export async function recordWebhookEvent({
         gatewayResponse: payload,
         isVerified,
         paymentId,
-        gateway,
         processingStatus: "PENDING" // Reset status on new verified payload
       },
       $setOnInsert: { gateway, gatewayEventId }
