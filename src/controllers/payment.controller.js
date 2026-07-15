@@ -8,6 +8,7 @@ import { getParentService } from "../services/parent.services.js";
 import { getAccessToken } from "../services/payment/oauth.service.js";
 import {
   cancelPaymentFlow,
+  getAdminPaymentsService,
   getPaymentService,
   getPaymentsService,
   getReceiptByPaymentIdService,
@@ -271,18 +272,19 @@ export async function getAdminPaymentHistoryController(req, res) {
     const { sessionStudentId } = req.params;
     const adminId = req.adminId;
 
-    const sessionStudent = await getSessionStudentService({
-      _id: sessionStudentId,
-      school: adminId
-    });
+    if (sessionStudentId) {
+      const sessionStudent = await getSessionStudentService({
+        _id: sessionStudentId,
+        school: adminId
+      });
 
-    if (!sessionStudent) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .send(error(404, "Session student not found"));
+      if (!sessionStudent) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .send(error(404, "Session student not found"));
+      }
     }
-
-    const payments = await getPaymentsService({ sessionStudentId, adminId });
+    const payments = await getAdminPaymentsService({ ...req.params, adminId });
     return res.status(StatusCodes.OK).send(success(200, { payments }));
   } catch (err) {
     return res
