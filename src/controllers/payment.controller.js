@@ -8,7 +8,7 @@ import { getParentService } from "../services/parent.services.js";
 import { getAccessToken } from "../services/payment/oauth.service.js";
 import {
   cancelPaymentFlow,
-  getAdminPaymentsService,
+  getAdminPaymentsAggregationService,
   getPaymentService,
   getPaymentsService,
   getReceiptByPaymentIdService,
@@ -271,6 +271,9 @@ export async function getAdminPaymentHistoryController(req, res) {
   try {
     const { sessionStudentId } = req.params;
     const adminId = req.adminId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
     if (sessionStudentId) {
       const sessionStudent = await getSessionStudentService({
@@ -284,8 +287,29 @@ export async function getAdminPaymentHistoryController(req, res) {
           .send(error(404, "Session student not found"));
       }
     }
-    const payments = await getAdminPaymentsService({ ...req.params, adminId });
-    return res.status(StatusCodes.OK).send(success(200, { payments }));
+    const data = await getAdminPaymentsAggregationService(
+      adminId,
+      skip,
+      limit,
+      sessionStudentId
+    );
+    return res.status(StatusCodes.OK).send(success(200, data));
+  } catch (err) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
+  }
+}
+
+export async function getAllAdminPaymentHistoryController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const data = await getAdminPaymentsAggregationService(adminId, skip, limit);
+    return res.status(StatusCodes.OK).send(success(200, data));
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getAdminPaymentHistoryController,
+  getAllAdminPaymentHistoryController,
   getAdminReceiptController,
   paymentCallbackController,
   setZohoSecretController,
@@ -34,6 +35,12 @@ paymentRouter.get(
   adminAuthenticate,
   sessionStudentIdParamValidation,
   getAdminPaymentHistoryController
+);
+
+paymentRouter.get(
+  "/admin/history",
+  adminAuthenticate,
+  getAllAdminPaymentHistoryController
 );
 
 paymentRouter.get(

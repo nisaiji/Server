@@ -27,6 +27,111 @@ export async function getAdminPaymentsService(filter) {
   return paymentModel.find(filter).sort({ createdAt: -1 }).lean();
 }
 
+export async function getAdminPaymentsAggregationService(
+  adminId,
+  skip,
+  limit,
+  sessionStudentId = null
+) {
+  const filter = {
+    adminId: new mongoose.Types.ObjectId(adminId),
+    status: { $in: ["SUCCESS", "FAILED", "CANCELLED", "EXPIRED"] }
+  };
+  if (sessionStudentId) {
+    filter.sessionStudentId = new mongoose.Types.ObjectId(sessionStudentId);
+  }
+
+  /** @type {any[]} */
+  const pipeline = [
+    { $match: filter },
+    { $sort: { createdAt: -1 } },
+    { $skip: skip },
+    { $limit: limit },
+    {
+      $lookup: {
+        from: "session_students",
+        localField: "sessionStudentId",
+        foreignField: "_id",
+        pipeline: [{ $project: { student: 1, classId: 1, section: 1 } }],
+        as: "sessionStudent"
+      }
+    },
+    { $unwind: { path: "$sessionStudent", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "students",
+        localField: "sessionStudent.student",
+        foreignField: "_id",
+        pipeline: [{ $project: { firstName: 1, lastName: 1, parent: 1 } }],
+        as: "student"
+      }
+    },
+    { $unwind: { path: "$student", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "parents",
+        localField: "student.parent",
+        foreignField: "_id",
+        pipeline: [{ $project: { phone: 1 } }],
+        as: "parent"
+      }
+    },
+    { $unwind: { path: "$parent", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "classes",
+        localField: "sessionStudent.classId",
+        foreignField: "_id",
+        pipeline: [{ $project: { name: 1 } }],
+        as: "classInfo"
+      }
+    },
+    { $unwind: { path: "$classInfo", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "sections",
+        localField: "sessionStudent.section",
+        foreignField: "_id",
+        pipeline: [{ $project: { name: 1 } }],
+        as: "sectionInfo"
+      }
+    },
+    { $unwind: { path: "$sectionInfo", preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        studentName: {
+          $concat: [
+            { $ifNull: ["$student.firstName", ""] },
+            " ",
+            { $ifNull: ["$student.lastName", ""] }
+          ]
+        },
+        classSection: {
+          $concat: [
+            { $ifNull: ["$classInfo.name", ""] },
+            " ",
+            { $ifNull: ["$sectionInfo.name", ""] }
+          ]
+        },
+        phone: { $ifNull: ["$parent.phone", ""] },
+        paymentRef: { $ifNull: ["$paymentSessionId", { $toString: "$_id" }] },
+        amount: 1,
+        currency: 1,
+        paymentMode: { $ifNull: ["$paymentMethod", "Unknown"] },
+        dateTime: "$createdAt",
+        status: 1
+      }
+    }
+  ];
+
+  const payments = await paymentModel.aggregate(pipeline);
+  const totalCount = await paymentModel.countDocuments(
+    /** @type {any} */ (filter)
+  );
+
+  return { payments, totalCount };
+}
+
 export async function updatePaymentService(filter, update) {
   return paymentModel.findOneAndUpdate(filter, update, {
     returnDocument: "after"
