@@ -15,7 +15,9 @@ import {
   getReceiptByReceiptNoService,
   initiatePaymentFlow,
   processFailedPayment,
-  processSuccessfulPayment
+  processSuccessfulPayment,
+  getCollectedFeesAndTrendService,
+  getOutstandingFeesService
 } from "../services/payment/payment.service.js";
 import {
   recordWebhookEvent,
@@ -172,14 +174,12 @@ export async function cancelPaymentController(req, res) {
       paymentId
     });
 
-    const cancelledPayment = await cancelPaymentFlow({
+    await cancelPaymentFlow({
       paymentId,
       parentId
     });
 
-    return res
-      .status(StatusCodes.OK)
-      .send(success(StatusCodes.OK, { payment: cancelledPayment }));
+    return res.status(StatusCodes.ACCEPTED).send(success(StatusCodes.ACCEPTED));
   } catch (err) {
     const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
     const message = err.message || "An internal server error occurred.";
@@ -498,7 +498,7 @@ export async function paymentCallbackController(req, res) {
         paymentId: payment._id,
         status: payment.status,
         amount: payment.amount,
-        paidAt: payment.paidAt
+        statusUpdatedAt: payment.statusUpdatedAt
       })
     );
   } catch (err) {
@@ -552,6 +552,40 @@ export async function setZohoSecretController(req, res) {
       zohoWebhookUrlId: webhookData.webhook_url.webhook_url_id
     });
     return res.status(StatusCodes.OK).send(success(200));
+  } catch (err) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
+  }
+}
+
+export async function getFeeSummaryController(req, res) {
+  try {
+    const adminId = req.adminId;
+
+    const currentData = new Date();
+    const month = req.query.month
+      ? parseInt(req.query.month)
+      : currentData.getMonth() + 1;
+    const year = req.query.year
+      ? parseInt(req.query.year)
+      : currentData.getFullYear();
+
+    const { totalCollected, trend } = await getCollectedFeesAndTrendService(
+      adminId,
+      month,
+      year
+    );
+    const outstandingFees = await getOutstandingFeesService(adminId);
+
+    const data = {
+      totalCollectedFees: totalCollected,
+      outstandingFees: outstandingFees,
+      totalAdvance: 0,
+      feeCollectionTrend: trend
+    };
+
+    return res.status(StatusCodes.OK).send(success(200, data));
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

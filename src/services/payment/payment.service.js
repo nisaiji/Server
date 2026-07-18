@@ -35,7 +35,7 @@ export async function getAdminPaymentsAggregationService(
 ) {
   const filter = {
     adminId: new mongoose.Types.ObjectId(adminId),
-    status: { $in: ["SUCCESS", "FAILED", "CANCELLED", "EXPIRED"] }
+    status: { $in: ["SUCCESS", "FAILED"] }
   };
   if (sessionStudentId) {
     filter.sessionStudentId = new mongoose.Types.ObjectId(sessionStudentId);
@@ -99,6 +99,9 @@ export async function getAdminPaymentsAggregationService(
     { $unwind: { path: "$sectionInfo", preserveNullAndEmptyArrays: true } },
     {
       $project: {
+        studentSessionId: "$sessionStudent._id",
+        classId: "$classInfo._id",
+        sectionId: "$sectionInfo._id",
         studentName: {
           $concat: [
             { $ifNull: ["$student.firstName", ""] },
@@ -106,19 +109,14 @@ export async function getAdminPaymentsAggregationService(
             { $ifNull: ["$student.lastName", ""] }
           ]
         },
-        classSection: {
-          $concat: [
-            { $ifNull: ["$classInfo.name", ""] },
-            " ",
-            { $ifNull: ["$sectionInfo.name", ""] }
-          ]
-        },
+        class: "$classInfo.name",
+        section: "$sectionInfo.name",
         phone: { $ifNull: ["$parent.phone", ""] },
         paymentRef: { $ifNull: ["$paymentSessionId", { $toString: "$_id" }] },
         amount: 1,
         currency: 1,
         paymentMode: { $ifNull: ["$paymentMethod", "Unknown"] },
-        dateTime: "$createdAt",
+        dateTime: "$statusUpdatedAt",
         status: 1
       }
     }
@@ -209,7 +207,7 @@ export async function processSuccessfulPayment({
         {
           status: "SUCCESS",
           paymentSessionId,
-          paidAt: new Date(),
+          statusUpdatedAt: new Date(),
           paymentMethod: paymentMethodType
         },
         { session }
@@ -319,7 +317,8 @@ export async function processFailedPayment({
     {
       status: "FAILED",
       paymentSessionId,
-      gatewayResponse
+      gatewayResponse,
+      statusUpdatedAt: new Date()
     }
   );
 
@@ -400,4 +399,71 @@ export async function cancelPaymentFlow({ paymentId, parentId }) {
 
   console.info("Payment cancelled successfully.", { paymentId });
   return updatedPayment;
+}
+
+/**
+ * Get total collected fees and daily trend for a specific month
+ */
+export async function getCollectedFeesAndTrendService(adminId, month, year) {
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+  const filter = {
+    adminId: new mongoose.Types.ObjectId(adminId),
+    status: { $in: ["SUCCESS", "PAID"] },
+    createdAt: { $gte: startDate, $lte: endDate }
+  };
+
+  /** @type {any[]} */
+  const pipeline = [
+    { $match: filter },
+    {
+      $group: {
+        _id: { $dayOfMonth: "$createdAt" },
+        totalAmount: { $sum: "$amount" }
+      }
+    },
+    { $sort: { _id: 1 } }
+  ];
+
+  const results = await paymentModel.aggregate(pipeline);
+
+  let totalCollected = 0;
+  const trend = [];
+
+  const daysInMonth = endDate.getDate();
+  for (let i = 1; i <= daysInMonth; i++) {
+    trend.push({ day: i, amount: 0 });
+  }
+
+  results.forEach((item) => {
+    totalCollected += item.totalAmount;
+    trend[item._id - 1].amount = item.totalAmount;
+  });
+
+  return { totalCollected, trend };
+}
+
+/**
+ * Get total outstanding fees across all students
+ */
+export async function getOutstandingFeesService(adminId) {
+  const filter = {
+    adminId: new mongoose.Types.ObjectId(adminId),
+    status: { $in: ["PENDING", "OVERDUE"] }
+  };
+
+  /** @type {any[]} */
+  const pipeline = [
+    { $match: filter },
+    {
+      $group: {
+        _id: null,
+        totalOutstanding: { $sum: "$totalAmount" }
+      }
+    }
+  ];
+
+  const result = await studentFeeDueModel.aggregate(pipeline);
+  return result.length > 0 ? result[0].totalOutstanding : 0;
 }

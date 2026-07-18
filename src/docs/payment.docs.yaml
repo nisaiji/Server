@@ -344,7 +344,7 @@
                       example: "SUCCESS"
                     amount:
                       type: number
-                    paidAt:
+                    statusUpdatedAt:
                       type: string
                       format: date-time
       '400':

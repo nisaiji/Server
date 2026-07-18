@@ -191,7 +191,7 @@ parentRouter.post(
   initiatePaymentValidation,
   initiatePaymentController
 );
-parentRouter.post(
+parentRouter.patch(
   "/payment/:paymentId/cancel",
   parentAuthenticate,
   paymentIdParamValidation,

@@ -5,12 +5,15 @@ import {
   getAdminReceiptController,
   paymentCallbackController,
   setZohoSecretController,
-  zohoWebhookController
+  zohoWebhookController,
+  getFeeSummaryController
 } from "../controllers/payment.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
 import { sessionStudentIdParamValidation } from "../middlewares/validation/payment.validation.middleware.js";
 
 const paymentRouter = express.Router();
+
+paymentRouter.get("/fee-summary", adminAuthenticate, getFeeSummaryController);
 
 paymentRouter.post(
   "/zoho/webhook",

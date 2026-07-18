@@ -36,7 +36,7 @@ const paymentSchema = new mongoose.Schema(
     paymentHash: {
       type: String
     },
-    paidAt: { type: Date },
+    statusUpdatedAt: { type: Date },
     expiresAt: { type: Date },
     gatewayResponse: { type: mongoose.Schema.Types.Mixed }
   },
