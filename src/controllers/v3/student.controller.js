@@ -24,7 +24,8 @@ import {
   getSessionStudentService,
   getSessionStudentsPipelineService,
   registerSessionStudentService,
-  updateSessionStudentService
+  updateSessionStudentService,
+  getSessionStudentCountService
 } from "../../services/sessionStudent.service.js";
 import {
   getStudentService,
@@ -45,6 +46,7 @@ import { getFeeStructureService } from "../../services/feeSetup.service.js";
 import { registerStudentsFromExcelHelper } from "../../helpers/student.helper.js";
 import { getTeacherSubjectSectionPipelineService } from "../../services/teacherSubjectSection.service.js";
 import { error, success } from "../../utils/responseWrapper.js";
+import { get } from "node_modules/axios/index.cjs";
 
 const addFieldsIfPresent = (target, source, fields) => {
   fields.forEach((field) => {
@@ -134,7 +136,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
         ? parentObj
         : await registerParentService({
             phone: studentData.phone,
-            status: "unVerified"
+            status: "UNVERIFIED"
           });
 
       schoolParent = await registerSchoolParentService({
@@ -1403,7 +1405,7 @@ export async function searchStudentsController(req, res) {
     );
 
     const students = await getSessionStudentsPipelineService(pipeline);
-    const totalStudents = students.length;
+    const totalStudents = await getSessionStudentsCountService(filter);
     const totalPages = Math.ceil(totalStudents / limitNum);
 
     await Promise.all(

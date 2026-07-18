@@ -144,7 +144,7 @@ export async function parentPhoneVerifyByOtpController(req, res) {
       phoneVerified: parent["status"] !== "unVerified",
       emailVerified: parent["status"] === "verified",
       passwordUpdated: parent["password"] ? true : false,
-      personalInfoUpdated: parent["fullname"] ? true : false
+      personalInfoUpdated: parent["fullName"] ? true : false
     });
 
     res
@@ -381,7 +381,7 @@ export async function parentEmailVerifyByOtpController(req, res) {
       phoneVerified: parent["status"] !== "unVerified",
       emailVerified: parent["status"] === "verified",
       passwordUpdated: parent["password"] ? true : false,
-      personalInfoUpdated: parent["fullname"] ? true : false
+      personalInfoUpdated: parent["fullName"] ? true : false
     });
 
     res
@@ -494,7 +494,7 @@ export async function updateParentController(req, res) {
       fieldsToBeUpdated["username"] = req.body["username"];
     }
     if (req.body["fullname"]) {
-      fieldsToBeUpdated["fullname"] = req.body["fullname"];
+      fieldsToBeUpdated["fullName"] = req.body["fullname"];
     }
     if (req.body["gender"]) {
       fieldsToBeUpdated["gender"] = req.body["gender"];
@@ -569,7 +569,7 @@ export async function getParentStatusController(req, res) {
     parentStatus["phoneVerified"] = parent["status"] !== "unVerified";
     parentStatus["emailVerified"] = parent["status"] === "verified";
     parentStatus["passwordUpdated"] = parent["password"] ? true : false;
-    parentStatus["personalInfoUpdated"] = parent["fullname"] ? true : false;
+    parentStatus["personalInfoUpdated"] = parent["fullName"] ? true : false;
     parentStatus["studentAdded"] =
       parent["students"]?.length > 0 ? true : false;
 
@@ -819,7 +819,7 @@ export async function getParentController(req, res) {
         $group: {
           _id: "$_id",
           username: { $first: "$username" },
-          fullname: { $first: "$fullname" },
+          fullname: { $first: "$fullName" },
           phone: { $first: "$phone" },
           gender: { $first: "$gender" },
           address: { $first: "$address" },
@@ -842,7 +842,7 @@ export async function getParentController(req, res) {
             $cond: [{ $ne: ["$username", null] }, "$username", "$$REMOVE"]
           },
           fullname: {
-            $cond: [{ $ne: ["$fullname", null] }, "$fullname", "$$REMOVE"]
+            $cond: [{ $ne: ["$fullName", null] }, "$fullName", "$$REMOVE"]
           },
           phone: { $cond: [{ $ne: ["$phone", null] }, "$phone", "$$REMOVE"] },
           gender: {
@@ -1063,7 +1063,7 @@ export async function getParentWithStudentsController(req, res) {
       },
       {
         $project: {
-          parentFullName: "$fullname",
+          parentFullName: "$fullName",
           parentDob: "$dob",
           parentGender: "$gender",
           parentAddress: "$address",
@@ -1295,7 +1295,7 @@ export async function verifyPhoneController(req, res) {
       phoneVerified: parent["status"] !== "unVerified",
       emailVerified: parent["status"] === "verified",
       passwordUpdated: parent["password"] ? true : false,
-      personalInfoUpdated: parent["fullname"] ? true : false
+      personalInfoUpdated: parent["fullName"] ? true : false
     });
     res
       .status(StatusCodes.OK)
@@ -1328,7 +1328,7 @@ export async function verifyEmailController(req, res) {
       phoneVerified: parent["status"] !== "unVerified",
       emailVerified: parent["status"] === "verified",
       passwordUpdated: parent["password"] ? true : false,
-      personalInfoUpdated: parent["fullname"] ? true : false
+      personalInfoUpdated: parent["fullName"] ? true : false
     });
     res
       .status(StatusCodes.OK)
