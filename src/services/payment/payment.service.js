@@ -1,15 +1,21 @@
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-import studentFeeDueModel from "../../models/fee/studentFeeDue.model.js";
-import ledgerEntryModel from "../../models/payments/ledgerEntries.model.js";
-import paymentModel from "../../models/payments/payment.model.js";
-import paymentAttemptModel from "../../models/payments/paymentAttempts.model.js";
-import receiptModel from "../../models/payments/receipt.model.js";
-import { getSessionStudentService } from "../sessionStudent.service.js";
 import {
   initiatePaymentFlow as initiatePaymentFlowService,
   validateSessionStudentOwnership
 } from "./paymentInitiation.service.js";
+import adminModel from "../../models/admin.model.js";
+import feeCycleModel from "../../models/fee/feeCycle.model.js";
+import feeHeadModel from "../../models/fee/feeHead.model.js";
+import studentFeeDueModel from "../../models/fee/studentFeeDue.model.js";
+import parentModel from "../../models/parent.model.js";
+import ledgerEntryModel from "../../models/payments/ledgerEntries.model.js";
+import paymentModel from "../../models/payments/payment.model.js";
+import paymentAttemptModel from "../../models/payments/paymentAttempts.model.js";
+import receiptModel from "../../models/payments/receipt.model.js";
+import sessionStudentModel from "../../models/sessionStudent.model.js";
+import studentModel from "../../models/student.model.js";
+import { getSessionStudentService } from "../sessionStudent.service.js";
 
 export async function createPaymentService(data) {
   return paymentModel.create(data);
@@ -148,6 +154,75 @@ export async function updatePaymentAttemptService(filter, update) {
 
 export async function getReceiptByPaymentIdService(paymentId) {
   return receiptModel.findOne({ paymentId }).lean();
+}
+
+export async function getDetailedReceiptByPaymentIdService(paymentId) {
+  const [receipt, payment] = await Promise.all([
+    receiptModel.findOne({ paymentId }).lean(),
+    paymentModel.findById(paymentId).lean()
+  ]);
+
+  if (!receipt) return null;
+
+  const adminId = receipt.adminId;
+  const sessionStudentId = payment?.sessionStudentId;
+  const feeDueIds = receipt.feeDueIds || [];
+
+  const [school, sessionStudent, feeDues] = await Promise.all([
+    adminModel.findById(adminId).select("schoolName").lean(),
+    sessionStudentModel
+      .findById(sessionStudentId)
+      .select("student session")
+      .lean(),
+    studentFeeDueModel.find({ _id: { $in: feeDueIds } }).lean()
+  ]);
+
+  const studentId = sessionStudent?.student;
+  const feeCycleId = feeDues[0].feeCycleId;
+
+  const [student, feeCycle, feeHead] = await Promise.all([
+    studentModel
+      .findById(studentId)
+      .select({ firstName: 1, lastName: 1, parent: 1 })
+      .lean(),
+    feeCycleModel.findOne({ _id: feeCycleId }).select("frequency").lean(),
+    feeHeadModel
+      .findOne({ adminId: receipt.adminId, sessionId: sessionStudent.session })
+      .lean()
+  ]);
+
+  const parentId = student?.parent;
+  const parent = parentId
+    ? await parentModel.findById(parentId).select("phone contactNo").lean()
+    : {};
+  const feeHeadMap = new Map(
+    feeHead.feeHeads.map((fh) => [fh._id.toString(), fh.name])
+  );
+
+  const feeBreakdownAndAmount = feeDues.map((due) => ({
+    totalAmount: due.totalAmount,
+    breakdown: (due.feeBreakup || []).map((b) => ({
+      feeHeadId: b.feeHeadId?.toString() || "",
+      feeHeadName: b.feeHeadId
+        ? feeHeadMap.get(b.feeHeadId.toString()) || "Unknown"
+        : "Unknown",
+      amount: b.amount
+    }))
+  }));
+
+  return {
+    schoolName: school?.schoolName,
+    studentName:
+      `${student?.firstName || ""} ${student?.lastName || ""}`.trim(),
+    studentId: studentId?.toString(),
+    parentPhoneNo: parent?.phone,
+    receiptNo: receipt.receiptNo,
+    transactionId: payment?.paymentSessionId,
+    paymentPeriod: feeCycle.frequency,
+    paymentDateTime: payment?.statusUpdatedAt,
+    paymentMode: payment?.paymentMethod,
+    feeBreakdownAndAmount: feeBreakdownAndAmount
+  };
 }
 
 export async function getReceiptByReceiptNoService(receiptNo, adminId) {

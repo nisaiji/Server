@@ -11,7 +11,7 @@ import {
   getAdminPaymentsAggregationService,
   getPaymentService,
   getPaymentsService,
-  getReceiptByPaymentIdService,
+  getDetailedReceiptByPaymentIdService,
   getReceiptByReceiptNoService,
   initiatePaymentFlow,
   processFailedPayment,
@@ -163,6 +163,7 @@ export async function getPaymentController(req, res) {
  * Controller to handle the cancellation of a payment.
  * Expects `paymentId` in params and `parentId` on the request object from auth middleware.
  */
+// checked
 export async function cancelPaymentController(req, res) {
   try {
     const { paymentId } = req.params;
@@ -252,14 +253,17 @@ export async function getReceiptController(req, res) {
         .send(error(ownership.statusCode, ownership.message));
     }
 
-    const receipt = await getReceiptByPaymentIdService(paymentId);
-    if (!receipt) {
+    const detailedReceipt =
+      await getDetailedReceiptByPaymentIdService(paymentId);
+    if (!detailedReceipt) {
       return res
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Receipt not found"));
     }
 
-    return res.status(StatusCodes.OK).send(success(200, { receipt, payment }));
+    return res
+      .status(StatusCodes.OK)
+      .send(success(200, { receipt: detailedReceipt }));
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -267,6 +271,7 @@ export async function getReceiptController(req, res) {
   }
 }
 
+//checked
 export async function getAdminPaymentHistoryController(req, res) {
   try {
     const { sessionStudentId } = req.params;
@@ -301,6 +306,7 @@ export async function getAdminPaymentHistoryController(req, res) {
   }
 }
 
+//checked
 export async function getAllAdminPaymentHistoryController(req, res) {
   try {
     const adminId = req.adminId;
@@ -341,6 +347,7 @@ export async function getAdminReceiptController(req, res) {
   }
 }
 
+// checked
 export async function zohoWebhookController(req, res) {
   let webhookEvent;
   try {
