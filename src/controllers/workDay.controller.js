@@ -17,6 +17,7 @@ import {
   deleteWorkDayService
 } from "../services/workDay.services.js";
 import { error, success } from "../utils/responseWrapper.js";
+
 export async function registerWorkDayController(req, res) {
   try {
     const { title, description, sessionId } = req.body;

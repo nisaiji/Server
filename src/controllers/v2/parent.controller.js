@@ -927,7 +927,7 @@ export async function getParentWithStudentsController(req, res) {
           pipeline: [
             {
               $lookup: {
-                from: "sessionstudents",
+                from: "session_students",
                 localField: "_id",
                 foreignField: "student",
                 as: "sessionStudents",
