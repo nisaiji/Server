@@ -156,11 +156,8 @@ export async function getReceiptByPaymentIdService(paymentId) {
   return receiptModel.findOne({ paymentId }).lean();
 }
 
-export async function getDetailedReceiptByPaymentIdService(paymentId) {
-  const [receipt, payment] = await Promise.all([
-    receiptModel.findOne({ paymentId }).lean(),
-    paymentModel.findById(paymentId).lean()
-  ]);
+export async function getDetailedReceiptByPaymentIdService(payment) {
+  const receipt = await receiptModel.findOne({ paymentId: payment._id }).lean();
 
   if (!receipt) return null;
 
@@ -169,10 +166,10 @@ export async function getDetailedReceiptByPaymentIdService(paymentId) {
   const feeDueIds = receipt.feeDueIds || [];
 
   const [school, sessionStudent, feeDues] = await Promise.all([
-    adminModel.findById(adminId).select("schoolName").lean(),
+    adminModel.findById(adminId).select({ schoolName: 1 }).lean(),
     sessionStudentModel
       .findById(sessionStudentId)
-      .select("student session")
+      .select({ student: 1, session: 1 })
       .lean(),
     studentFeeDueModel.find({ _id: { $in: feeDueIds } }).lean()
   ]);
@@ -185,7 +182,7 @@ export async function getDetailedReceiptByPaymentIdService(paymentId) {
       .findById(studentId)
       .select({ firstName: 1, lastName: 1, parent: 1 })
       .lean(),
-    feeCycleModel.findOne({ _id: feeCycleId }).select("frequency").lean(),
+    feeCycleModel.findOne({ _id: feeCycleId }).select({ frequency: 1 }).lean(),
     feeHeadModel
       .findOne({ adminId: receipt.adminId, sessionId: sessionStudent.session })
       .lean()
@@ -193,7 +190,10 @@ export async function getDetailedReceiptByPaymentIdService(paymentId) {
 
   const parentId = student?.parent;
   const parent = parentId
-    ? await parentModel.findById(parentId).select("phone contactNo").lean()
+    ? await parentModel
+        .findById(parentId)
+        .select({ phone: 1, contactNo: 1 })
+        .lean()
     : {};
   const feeHeadMap = new Map(
     feeHead.feeHeads.map((fh) => [fh._id.toString(), fh.name])

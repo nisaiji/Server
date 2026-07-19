@@ -253,8 +253,7 @@ export async function getReceiptController(req, res) {
         .send(error(ownership.statusCode, ownership.message));
     }
 
-    const detailedReceipt =
-      await getDetailedReceiptByPaymentIdService(paymentId);
+    const detailedReceipt = await getDetailedReceiptByPaymentIdService(payment);
     if (!detailedReceipt) {
       return res
         .status(StatusCodes.NOT_FOUND)
