@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { STUDENT_GENDER, STUDENT_BLOOD_GROUP } from "../enums/student.enums.js";
 import { generateCustomId } from "../helpers/idGenerator.helper.js";
 
-const studentSchema = mongoose.Schema(
+const studentSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,

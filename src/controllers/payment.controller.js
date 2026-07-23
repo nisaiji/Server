@@ -225,6 +225,7 @@ export async function getPaymentHistoryController(req, res) {
   }
 }
 
+//checked
 export async function getReceiptController(req, res) {
   try {
     const { paymentId } = req.params;

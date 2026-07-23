@@ -5,7 +5,6 @@ import {
   validateSessionStudentOwnership
 } from "./paymentInitiation.service.js";
 import adminModel from "../../models/admin.model.js";
-import feeCycleModel from "../../models/fee/feeCycle.model.js";
 import feeHeadModel from "../../models/fee/feeHead.model.js";
 import studentFeeDueModel from "../../models/fee/studentFeeDue.model.js";
 import parentModel from "../../models/parent.model.js";
@@ -170,19 +169,18 @@ export async function getDetailedReceiptByPaymentIdService(payment) {
     sessionStudentModel
       .findById(sessionStudentId)
       .select({ student: 1, session: 1 })
+      .populate(["section", "classId", "session"])
       .lean(),
     studentFeeDueModel.find({ _id: { $in: feeDueIds } }).lean()
   ]);
 
   const studentId = sessionStudent?.student;
-  const feeCycleId = feeDues[0].feeCycleId;
 
-  const [student, feeCycle, feeHead] = await Promise.all([
+  const [student, feeHead] = await Promise.all([
     studentModel
       .findById(studentId)
       .select({ firstName: 1, lastName: 1, parent: 1 })
       .lean(),
-    feeCycleModel.findOne({ _id: feeCycleId }).select({ frequency: 1 }).lean(),
     feeHeadModel
       .findOne({ adminId: receipt.adminId, sessionId: sessionStudent.session })
       .lean()
@@ -200,6 +198,7 @@ export async function getDetailedReceiptByPaymentIdService(payment) {
   );
 
   const feeBreakdownAndAmount = feeDues.map((due) => ({
+    dueDate: due.dueDate,
     totalAmount: due.totalAmount,
     breakdown: (due.feeBreakup || []).map((b) => ({
       feeHeadId: b.feeHeadId?.toString() || "",
@@ -211,17 +210,30 @@ export async function getDetailedReceiptByPaymentIdService(payment) {
   }));
 
   return {
-    schoolName: school?.schoolName,
-    studentName:
-      `${student?.firstName || ""} ${student?.lastName || ""}`.trim(),
-    studentId: studentId?.toString(),
-    parentPhoneNo: parent?.phone,
-    receiptNo: receipt.receiptNo,
-    transactionId: payment?.paymentSessionId,
-    paymentPeriod: feeCycle.frequency,
-    paymentDateTime: payment?.statusUpdatedAt,
-    paymentMode: payment?.paymentMethod,
-    feeBreakdownAndAmount: feeBreakdownAndAmount
+    feeBreakdownAndAmount: feeBreakdownAndAmount,
+    transactionDetails: {
+      paymentId: payment._id?.toString(),
+      paymentDate: payment.statusUpdatedAt,
+      transactionId: payment?.paymentSessionId,
+      paymentMode: payment?.paymentMethod,
+      paymentDateTime: payment?.statusUpdatedAt
+    },
+    institution: {
+      schoolName: school?.schoolName,
+      studentName:
+        `${student?.firstName || ""} ${student?.lastName || ""}`.trim(),
+      studentId: studentId?.toString(),
+      parentPhoneNo: parent?.phone,
+      receiptNo: receipt.receiptNo
+    },
+    classDetails: {
+      classId: sessionStudent.classId._id,
+      className: sessionStudent.classId?.name,
+      sectionName: sessionStudent.section?.name,
+      sessionId: sessionStudent.session._id,
+      sessionStartYear: sessionStudent.session.academicStartYear,
+      sessionEndYear: sessionStudent.session.academicEndYear
+    }
   };
 }
 
