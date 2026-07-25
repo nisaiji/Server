@@ -163,7 +163,7 @@ export async function getPaymentController(req, res) {
  * Controller to handle the cancellation of a payment.
  * Expects `paymentId` in params and `parentId` on the request object from auth middleware.
  */
-// checked
+//checked
 export async function cancelPaymentController(req, res) {
   try {
     const { paymentId } = req.params;
@@ -347,7 +347,7 @@ export async function getAdminReceiptController(req, res) {
   }
 }
 
-// checked
+//checked
 export async function zohoWebhookController(req, res) {
   let webhookEvent;
   try {

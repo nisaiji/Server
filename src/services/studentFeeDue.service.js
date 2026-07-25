@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { getFeeCycleService, getFeeHeadService } from "./feeSetup.service.js";
 import studentFeeDueModel from "../models/fee/studentFeeDue.model.js";
+import paymentModel from "../models/payments/payment.model.js";
 import sessionStudentModel from "../models/sessionStudent.model.js";
 import { getSessionService } from "../services/session.services.js";
 function monthsForFrequency(freq) {
@@ -289,20 +290,55 @@ export async function getStudentFeeDuesService({
     (feeHeadGroup?.feeHeads || []).map((fh) => [String(fh._id), fh])
   );
 
-  return dues.map((due) => ({
-    ...due,
-    feeBreakup: due.feeBreakup.map((item) => {
-      const feeHead = feeHeadMap.get(String(item.feeHeadId));
-      return {
-        feeHeadId: item.feeHeadId,
-        amount: item.amount,
-        ...(feeHead && {
-          name: feeHead.name,
-          label: feeHead.label,
-          type: feeHead.type,
-          refundable: feeHead.refundable
-        })
-      };
-    })
-  }));
+  const paidDues = dues.filter((d) => d.status === "PAID");
+  const dueToPaymentMap = new Map();
+
+  if (paidDues.length > 0) {
+    const paidDueIds = paidDues.map((d) => d._id);
+    const payments = await paymentModel
+      .find({ feeDueIds: { $in: paidDueIds }, status: "SUCCESS" })
+      .lean();
+    for (const paidDueId of paidDueIds) {
+      const payment = payments.find((p) =>
+        p.feeDueIds.some((id) => id.equals(paidDueId))
+      );
+      if (payment) {
+        dueToPaymentMap.set(String(paidDueId), {
+          id: payment._id,
+          mode: payment.paymentMethod,
+          transactionId: payment.paymentSessionId,
+          paidAt: payment.statusUpdatedAt
+        });
+      }
+    }
+  }
+
+  // if status is PAID then provide the id, mode, transaction id, paid AT
+  return dues.map((due) => {
+    const dueObj = {
+      ...due,
+      feeBreakup: due.feeBreakup.map((item) => {
+        const feeHead = feeHeadMap.get(String(item.feeHeadId));
+        return {
+          feeHeadId: item.feeHeadId,
+          amount: item.amount,
+          ...(feeHead && {
+            name: feeHead.name,
+            label: feeHead.label,
+            type: feeHead.type,
+            refundable: feeHead.refundable
+          })
+        };
+      })
+    };
+
+    if (due.status === "PAID") {
+      const paymentDetails = dueToPaymentMap.get(String(due._id));
+      if (paymentDetails) {
+        dueObj["paymentDetails"] = paymentDetails;
+      }
+    }
+
+    return dueObj;
+  });
 }
