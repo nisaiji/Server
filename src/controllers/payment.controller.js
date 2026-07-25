@@ -588,7 +588,6 @@ export async function getFeeSummaryController(req, res) {
     const data = {
       totalCollectedFees: totalCollected,
       outstandingFees: outstandingFees,
-      totalAdvance: 0,
       feeCollectionTrend: trend
     };
 
