@@ -23,6 +23,7 @@ import {
 } from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
 import {
+  getSessionStudentCountService,
   getSessionStudentService,
   getSessionStudentsPipelineService,
   registerSessionStudentService,
@@ -134,7 +135,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
         ? parentObj
         : await registerParentService({
             phone: studentData.phone,
-            status: "unVerified"
+            status: "UNVERIFIED"
           });
 
       schoolParent = await registerSchoolParentService({
@@ -455,7 +456,7 @@ export async function updateStudentBySchoolController(req, res) {
       }
 
       if (phone !== schoolParent.phone) {
-        parent = await registerParentService({ phone, status: "unVerified" });
+        parent = await registerParentService({ phone, status: "UNVERIFIED" });
         schoolParent = await registerSchoolParentService({
           phone,
           school: adminId,
@@ -1403,7 +1404,7 @@ export async function searchStudentsController(req, res) {
     );
 
     const students = await getSessionStudentsPipelineService(pipeline);
-    const totalStudents = students.length;
+    const totalStudents = await getSessionStudentCountService(filter);
     const totalPages = Math.ceil(totalStudents / limitNum);
 
     await Promise.all(

@@ -489,7 +489,7 @@ export async function updateParentController(req, res) {
   try {
     const parentId = req.parentId;
 
-    const fieldsToBeUpdated = {};
+    const fieldsToBeUpdated = { personalInfoUpdated: true };
     if (req.body["username"]) {
       fieldsToBeUpdated["username"] = req.body["username"];
     }
