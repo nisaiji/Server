@@ -51,7 +51,7 @@ export async function adminSendOtpToPhoneController(req, res) {
       entityType: "admin",
       expiredAt: new Date().getTime() + 1000 * 60 * 5
     });
-    await registerAdminService({ phone, status: "unVerified" });
+    await registerAdminService({ phone, status: "UNVERIFIED" });
     res.status(StatusCodes.OK).send(success(200, "OTP send successfully"));
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error(500, err));
@@ -144,14 +144,14 @@ export async function adminPhoneVerifyByOtpController(req, res) {
         .send(error(404, `You entered wrong OTP`));
     }
 
-    if (admin["status"] === "unVerified") {
+    if (admin["status"] === "UNVERIFIED") {
       await updateAdminService(
         { _id: admin["_id"] },
         { status: "phoneVerified" }
       );
     }
 
-    await updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" });
+    await updateOtpService({ _id: storedOtp["_id"] }, { status: "VERIFIED" });
 
     admin = await getAdminService({ _id: admin["_id"] });
     const token = getAccessTokenService({
@@ -159,8 +159,8 @@ export async function adminPhoneVerifyByOtpController(req, res) {
       role: "admin",
       status: admin["status"],
       isActive: admin["isActive"],
-      phoneVerified: admin["status"] !== "unVerified",
-      emailVerified: admin["status"] === "verified",
+      phoneVerified: admin["status"] !== "UNVERIFIED",
+      emailVerified: admin["status"] === "VERIFIED",
       passwordUpdated: admin["password"] ? true : false
     });
 
@@ -369,7 +369,7 @@ export async function adminSendOtpToEmailController(req, res) {
         .send(error(404, "Admin not found"));
     }
 
-    if (admin["status"] === "verified") {
+    if (admin["status"] === "VERIFIED") {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(error(400, "User email has already been verified"));
@@ -495,8 +495,8 @@ export async function adminGetStatusController(req, res) {
     }
 
     const status = {
-      phoneVerified: admin["status"] !== "unVerified",
-      emailVerified: admin["status"] === "verified",
+      phoneVerified: admin["status"] !== "UNVERIFIED",
+      emailVerified: admin["status"] === "VERIFIED",
       passwordUpdated: !!admin["password"],
       affiliationExists: !!admin["affiliationNo"],
       status: admin["status"],
@@ -518,8 +518,8 @@ export async function adminLoginController(req, res) {
 
     const admin = await getAdminService({
       $or: [
-        { email: user, status: "verified" },
-        { phone: user, status: "verified" }
+        { email: user, status: "VERIFIED" },
+        { phone: user, status: "VERIFIED" }
       ]
     });
     if (!admin) {
@@ -599,7 +599,7 @@ export async function adminPhoneVerifyController(req, res) {
     }
 
     if (!admin) {
-      await registerAdminService({ phone, status: "phoneVerified" });
+      await registerAdminService({ phone, status: "PHONEVERIFIED" });
     }
 
     admin = await getAdminService({ phone });
@@ -608,8 +608,8 @@ export async function adminPhoneVerifyController(req, res) {
       role: "admin",
       status: admin["status"],
       isActive: admin["isActive"],
-      phoneVerified: admin["status"] !== "unVerified",
-      emailVerified: admin["status"] === "verified",
+      phoneVerified: admin["status"] !== "UNVERIFIED",
+      emailVerified: admin["status"] === "VERIFIED",
       passwordUpdated: admin["password"] ? true : false,
       isSessionCreated: false
     });
@@ -647,7 +647,7 @@ export async function adminEmailVerifyController(req, res) {
 
     await updateAdminService(
       { _id: admin["_id"] },
-      { email, status: "verified" }
+      { email, status: "VERIFIED" }
     );
 
     admin = await getAdminService({ _id: admin["_id"] });
@@ -743,7 +743,7 @@ export async function adminChangePasswordHandlerByPhoneController(req, res) {
 
     await updateAdminService(
       { _id: admin["_id"] },
-      { resetPasswordToken: resetToken, resetPasswordStatus: "phoneVerified" }
+      { resetPasswordToken: resetToken, resetPasswordStatus: "PHONEVERIFIED" }
     );
     return res
       .status(StatusCodes.OK)
@@ -764,7 +764,7 @@ export async function adminChangePasswordRequestByEmailController(req, res) {
       email,
       resetPasswordToken,
       isActive: true,
-      resetPasswordStatus: "phoneVerified"
+      resetPasswordStatus: "PHONEVERIFIED"
     });
     if (!admin) {
       return res
