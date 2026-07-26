@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const sectionAttendanceSchema = mongoose.Schema(
+const sectionAttendanceSchema = new mongoose.Schema(
   {
     date: {
       type: Number,
@@ -29,7 +29,9 @@ const sectionAttendanceSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "section_attendances"
   }
 );
 

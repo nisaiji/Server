@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const teacherSectionSessionSchema = mongoose.Schema(
+const teacherSectionSessionSchema = new mongoose.Schema(
   {
     teacher: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,7 +28,9 @@ const teacherSectionSessionSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "teacher_section_sessions"
   }
 );
 

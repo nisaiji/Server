@@ -128,7 +128,7 @@ const examSchema = new mongoose.Schema(
       default: true
     }
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false, collection: "exams" }
 );
 
 const examModel = mongoose.model("exam", examSchema);

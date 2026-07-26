@@ -26,7 +26,9 @@ const parentPasswordChangeRequestSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "parent_password_change_requests"
   }
 );
 

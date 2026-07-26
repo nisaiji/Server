@@ -22,9 +22,7 @@ const classSchema = new mongoose.Schema(
       required: true
     }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true, versionKey: false, collection: "classes" }
 );
 
 const classModel = mongoose.model("class", classSchema);

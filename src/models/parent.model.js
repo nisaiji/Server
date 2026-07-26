@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { VERIFICATION_STATUS } from "../enums/authentication.enums.js";
 import { PARENT_GENDER } from "../enums/parent.enums.js";
 
-const parentSchema = mongoose.Schema(
+const parentSchema = new mongoose.Schema(
   {
     username: {
       type: String
@@ -76,7 +76,9 @@ const parentSchema = mongoose.Schema(
     ]
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "parents"
   }
 );
 // parentSchema.index({ phone: 1, isActive: 1 }, { unique: true });

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { LEAVE_REQUEST_STATUS } from "../enums/leave.enums.js";
 
-const teacherLeaveRequestSchema = mongoose.Schema(
+const teacherLeaveRequestSchema = new mongoose.Schema(
   {
     reason: {
       type: String,
@@ -56,7 +56,9 @@ const teacherLeaveRequestSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "teacher_leave_requests"
   }
 );
 

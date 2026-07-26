@@ -85,7 +85,9 @@ const studentSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "students"
   }
 );
 

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { SESSION_STATUS } from "../enums/session.enums.js";
 
-const sessionSchema = mongoose.Schema(
+const sessionSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -38,7 +38,9 @@ const sessionSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "sessions"
   }
 );
 

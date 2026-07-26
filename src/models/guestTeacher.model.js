@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const guestTeacherSchema = mongoose.Schema(
+const guestTeacherSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -50,9 +50,7 @@ const guestTeacherSchema = mongoose.Schema(
       required: true
     }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true, versionKey: false, collection: "guest_ teachers" }
 );
 
 const guestTeacherModel = mongoose.model("guestTeacher", guestTeacherSchema);

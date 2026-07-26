@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const sessionTeacherSchema = mongoose.Schema(
+const sessionTeacherSchema = new mongoose.Schema(
   {
     username: {
       type: String
@@ -104,7 +104,9 @@ const sessionTeacherSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "session_teachers"
   }
 );
 

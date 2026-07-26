@@ -72,7 +72,11 @@ const examResultSchema = new mongoose.Schema(
       type: Date
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+    collection: "student_exam_results"
+  }
 );
 
 // Unique per exam-student-subject

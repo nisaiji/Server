@@ -24,7 +24,11 @@ const subjectSchema = new mongoose.Schema(
       default: true
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+    collection: "subjects"
+  }
 );
 
 const subjectModel = mongoose.model("Subject", subjectSchema);

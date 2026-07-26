@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { PARENT_GENDER, PARENT_STATUS } from "../enums/parent.enums.js";
 
-const schoolParentSchema = mongoose.Schema(
+const schoolParentSchema = new mongoose.Schema(
   {
     username: {
       type: String
@@ -72,7 +72,9 @@ const schoolParentSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "school_parents"
   }
 );
 

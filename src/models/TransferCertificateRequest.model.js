@@ -167,7 +167,9 @@ const transferCertificateRequestSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "transfer_certificate_requests"
   }
 );
 

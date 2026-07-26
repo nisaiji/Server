@@ -40,7 +40,9 @@ const customerSupportQuerySchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "customer_support_queries"
   }
 );
 

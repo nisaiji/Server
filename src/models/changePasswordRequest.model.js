@@ -6,7 +6,7 @@ import {
   PASSWORD_CHANGE_STATUS
 } from "../enums/password.enums.js";
 
-const changePasswordRequestSchema = mongoose.Schema(
+const changePasswordRequestSchema = new mongoose.Schema(
   {
     reason: {
       type: String,
@@ -57,7 +57,9 @@ const changePasswordRequestSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "change_password_requests"
   }
 );
 

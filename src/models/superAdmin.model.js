@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const superAdminSchema = mongoose.Schema(
+const superAdminSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -18,7 +18,9 @@ const superAdminSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "super_admins"
   }
 );
 

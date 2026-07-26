@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { STUDENT_GENDER, STUDENT_BLOOD_GROUP } from "../enums/student.enums.js";
 import { generateCustomId } from "../helpers/idGenerator.helper.js";
-const teacherSchema = mongoose.Schema(
+const teacherSchema = new mongoose.Schema(
   {
     username: {
       type: String
@@ -101,7 +101,9 @@ const teacherSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "teachers"
   }
 );
 

@@ -122,9 +122,7 @@ const adminSchema = new mongoose.Schema(
       ref: "merchantPaymentConfig"
     }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true, versionKey: false, collection: "admins" }
 );
 
 const adminModel = mongoose.model("admin", adminSchema);

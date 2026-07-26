@@ -22,7 +22,11 @@ const announcementReadStatusSchema = new mongoose.Schema(
       default: Date.now
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+    collection: "announcement_reads_statuses"
+  }
 );
 
 announcementReadStatusSchema.index(

@@ -50,9 +50,7 @@ const announcementSchema = new mongoose.Schema(
       ref: "admin"
     }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true, versionKey: false, collection: "announcements" }
 );
 
 const announcementModel = mongoose.model("announcement", announcementSchema);

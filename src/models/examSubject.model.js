@@ -24,7 +24,7 @@ const examSubjectSchema = new mongoose.Schema(
       default: true
     }
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false, collection: "exam_subjects" }
 );
 
 const examSubjectModel = mongoose.model("examSubject", examSubjectSchema);

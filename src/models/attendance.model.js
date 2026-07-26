@@ -44,9 +44,7 @@ const attendanceSchema = new mongoose.Schema(
       ref: "admin"
     }
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true, versionKey: false, collection: "attendances" }
 );
 
 const attendanceModel = mongoose.model("attendance", attendanceSchema);

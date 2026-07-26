@@ -37,7 +37,11 @@ const teacherSubjectSectionSchema = new mongoose.Schema(
       required: true
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+    collection: "teacher_subject_sections"
+  }
 );
 
 const teacherSubjectSectionModel = mongoose.model(

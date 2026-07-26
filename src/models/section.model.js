@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const sectionSchema = mongoose.Schema(
+const sectionSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -36,7 +36,9 @@ const sectionSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "sections"
   }
 );
 

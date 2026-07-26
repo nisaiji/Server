@@ -6,7 +6,7 @@ import {
   OTP_STATUS
 } from "../enums/otp.enums.js";
 
-const otpSchema = mongoose.Schema(
+const otpSchema = new mongoose.Schema(
   {
     // value: either phone number or email id
     identifier: {
@@ -44,7 +44,9 @@ const otpSchema = mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: "otps"
   }
 );
 
