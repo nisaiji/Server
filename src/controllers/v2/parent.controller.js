@@ -46,7 +46,7 @@ export async function parentSendOtpToPhoneController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "User is not registered"));
     }
-    // if(['phoneVerified', 'verified'].includes(parent['status'])) {
+    // if(['PHONE_VERIFIED', 'verified'].includes(parent['status'])) {
     //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
     // }
 
@@ -84,7 +84,7 @@ export async function parentPhoneVerifyByOtpController(req, res) {
         .send(error(404, "User is not registered"));
     }
 
-    // if(['phoneVerified', 'verified'].includes(parent['status'])) {
+    // if(['PHONE_VERIFIED', 'verified'].includes(parent['status'])) {
     //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
     // }
 
@@ -132,8 +132,8 @@ export async function parentPhoneVerifyByOtpController(req, res) {
     }
 
     await Promise.all([
-      updateParentService({ _id: parent["_id"] }, { status: "phoneVerified" }),
-      updateOtpService({ _id: storedOtp["_id"] }, { status: "verified" })
+      updateParentService({ _id: parent["_id"] }, { status: "PHONE_VERIFIED" }),
+      updateOtpService({ _id: storedOtp["_id"] }, { status: "VERIFIED" })
     ]);
 
     parent = await getParentService({ _id: parent["_id"] });
@@ -141,8 +141,8 @@ export async function parentPhoneVerifyByOtpController(req, res) {
       parentId: parent["_id"],
       status: parent["status"],
       isLoginAlready: parent["isLoginAlready"],
-      phoneVerified: parent["status"] !== "unVerified",
-      emailVerified: parent["status"] === "verified",
+      phoneVerified: parent["status"] !== "UNVERIFIED",
+      emailVerified: parent["status"] === "VERIFIED",
       passwordUpdated: parent["password"] ? true : false,
       personalInfoUpdated: parent["fullname"] ? true : false
     });
@@ -166,7 +166,7 @@ export async function parentPhoneUpdateSendOtpToPhoneController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Phone number already used"));
     }
-    // if(['phoneVerified', 'verified'].includes(parent['status'])) {
+    // if(['PHONE_VERIFIED', 'verified'].includes(parent['status'])) {
     //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
     // }
 
@@ -205,7 +205,7 @@ export async function parentPhoneUpdateVerifyByOtpController(req, res) {
         .send(error(404, "User is not found"));
     }
 
-    // if(['phoneVerified', 'verified'].includes(parent['status'])) {
+    // if(['PHONE_VERIFIED', 'verified'].includes(parent['status'])) {
     //   return res.status(StatusCodes.CONFLICT).send(error(409, "Your Phone number already verified"))
     // }
 
@@ -378,8 +378,8 @@ export async function parentEmailVerifyByOtpController(req, res) {
       parentId: parent["_id"],
       status: parent["status"],
       isLoginAlready: parent["isLoginAlready"],
-      phoneVerified: parent["status"] !== "unVerified",
-      emailVerified: parent["status"] === "verified",
+      phoneVerified: parent["status"] !== "UNVERIFIED",
+      emailVerified: parent["status"] === "VERIFIED",
       passwordUpdated: parent["password"] ? true : false,
       personalInfoUpdated: parent["fullname"] ? true : false
     });
@@ -419,7 +419,7 @@ export async function loginParentController(req, res) {
         .send(error(404, "User verification is pending"));
     }
 
-    // if(parent['status']==='phoneVerified') {
+    // if(parent['status']==='PHONE_VERIFIED') {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User email Verification is pending"));
     // }
 
@@ -1284,7 +1284,7 @@ export async function verifyPhoneController(req, res) {
     if (parent["status"] === "unVerified") {
       await updateParentService(
         { _id: parent["_id"] },
-        { status: "phoneVerified" }
+        { status: "PHONE_VERIFIED" }
       );
     }
     parent = await getParentService({ _id: parent["_id"] });
@@ -1292,7 +1292,7 @@ export async function verifyPhoneController(req, res) {
       parentId: parent["_id"],
       status: parent["status"],
       isLoginAlready: parent["isLoginAlready"],
-      phoneVerified: parent["status"] !== "unVerified",
+      PHONE_VERIFIED: parent["status"] !== "unVerified",
       emailVerified: parent["status"] === "verified",
       passwordUpdated: parent["password"] ? true : false,
       personalInfoUpdated: parent["fullname"] ? true : false
@@ -1325,8 +1325,8 @@ export async function verifyEmailController(req, res) {
       parentId: parent["_id"],
       status: parent["status"],
       isLoginAlready: parent["isLoginAlready"],
-      phoneVerified: parent["status"] !== "unVerified",
-      emailVerified: parent["status"] === "verified",
+      phoneVerified: parent["status"] !== "UNVERIFIED",
+      emailVerified: parent["status"] === "VERIFIED",
       passwordUpdated: parent["password"] ? true : false,
       personalInfoUpdated: parent["fullname"] ? true : false
     });

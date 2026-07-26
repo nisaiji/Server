@@ -147,7 +147,7 @@ export async function adminPhoneVerifyByOtpController(req, res) {
     if (admin["status"] === "UNVERIFIED") {
       await updateAdminService(
         { _id: admin["_id"] },
-        { status: "phoneVerified" }
+        { status: "PHONE_VERIFIED" }
       );
     }
 
@@ -159,7 +159,7 @@ export async function adminPhoneVerifyByOtpController(req, res) {
       role: "admin",
       status: admin["status"],
       isActive: admin["isActive"],
-      phoneVerified: admin["status"] !== "UNVERIFIED",
+      PHONE_VERIFIED: admin["status"] !== "UNVERIFIED",
       emailVerified: admin["status"] === "VERIFIED",
       passwordUpdated: admin["password"] ? true : false
     });
@@ -599,7 +599,7 @@ export async function adminPhoneVerifyController(req, res) {
     }
 
     if (!admin) {
-      await registerAdminService({ phone, status: "PHONEVERIFIED" });
+      await registerAdminService({ phone, status: "PHONE_VERIFIED" });
     }
 
     admin = await getAdminService({ phone });
@@ -608,7 +608,7 @@ export async function adminPhoneVerifyController(req, res) {
       role: "admin",
       status: admin["status"],
       isActive: admin["isActive"],
-      phoneVerified: admin["status"] !== "UNVERIFIED",
+      PHONE_VERIFIED: admin["status"] !== "UNVERIFIED",
       emailVerified: admin["status"] === "VERIFIED",
       passwordUpdated: admin["password"] ? true : false,
       isSessionCreated: false
@@ -743,7 +743,7 @@ export async function adminChangePasswordHandlerByPhoneController(req, res) {
 
     await updateAdminService(
       { _id: admin["_id"] },
-      { resetPasswordToken: resetToken, resetPasswordStatus: "PHONEVERIFIED" }
+      { resetPasswordToken: resetToken, resetPasswordStatus: "PHONE_VERIFIED" }
     );
     return res
       .status(StatusCodes.OK)
@@ -764,7 +764,7 @@ export async function adminChangePasswordRequestByEmailController(req, res) {
       email,
       resetPasswordToken,
       isActive: true,
-      resetPasswordStatus: "PHONEVERIFIED"
+      resetPasswordStatus: "PHONE_VERIFIED"
     });
     if (!admin) {
       return res
@@ -793,7 +793,7 @@ export async function adminChangePasswordHandlerByEmailController(req, res) {
       email,
       isActive: true,
       resetPasswordToken,
-      resetPasswordStatus: "phoneVerified"
+      resetPasswordStatus: "PHONE_VERIFIED"
     });
     if (!admin) {
       return res

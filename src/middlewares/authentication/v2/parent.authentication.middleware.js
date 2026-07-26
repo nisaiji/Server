@@ -34,7 +34,7 @@ export async function parentAuthenticate(req, res, next) {
         .send(error(404, "User verification is pending"));
     }
 
-    // if(parent['status']==='phoneVerified') {
+    // if(parent['status']==='PHONE_VERIFIED') {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(404, "User email Verification is pending"));
     // }
 
