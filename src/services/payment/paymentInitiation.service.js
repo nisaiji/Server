@@ -404,6 +404,7 @@ export async function initiatePaymentFlow({
   return {
     paymentId: payment._id,
     paymentSessionId,
-    amount
+    amount,
+    accountId: paymentSettings.accountId
   };
 }
