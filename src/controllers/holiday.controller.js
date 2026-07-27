@@ -112,7 +112,7 @@ export async function registerHolidaysController(req, res) {
     const session = await getSessionService({
       _id: sessionId,
       school: adminId,
-      status: "active"
+      status: "ACTIVE"
     });
     if (!session) {
       return res

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { STUDENT_GENDER, STUDENT_BLOOD_GROUP } from "../enums/student.enums.js";
+import { GENDER, STUDENT_BLOOD_GROUP } from "../enums/student.enums.js";
 import { generateCustomId } from "../helpers/idGenerator.helper.js";
 const teacherSchema = new mongoose.Schema(
   {
@@ -45,7 +45,7 @@ const teacherSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: Object.values(STUDENT_GENDER)
+      enum: Object.values(GENDER)
     },
     university: {
       type: String
