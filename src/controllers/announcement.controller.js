@@ -40,7 +40,7 @@ export async function createAnnouncementByAdminController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session not found"));
     }
-    if (session["status"] === "completed") {
+    if (session["status"] === "COMPLETED") {
       return res
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session Completed"));
@@ -57,13 +57,13 @@ export async function createAnnouncementByAdminController(req, res) {
       startsAt,
       expiresAt,
       createdBy: adminId,
-      createdByRole: "admin",
+      createdByRole: "ADMIN",
       session: sessionId,
       school: adminId
     });
 
     const pushTitle = `Post by ${admin.schoolName}`;
-    if (targetAudience.includes("teacher")) {
+    if (targetAudience.includes("TEACHER")) {
       const teachers = await getTeachersByAdminIdService(adminId);
       for (const teacher of teachers) {
         await sendPushNotification(
@@ -76,7 +76,7 @@ export async function createAnnouncementByAdminController(req, res) {
       }
     }
 
-    if (targetAudience.includes("parent")) {
+    if (targetAudience.includes("PARENT")) {
       const parents = await getParentsByAdminIdService(adminId);
       for (const parent of parents) {
         await sendPushNotification(
