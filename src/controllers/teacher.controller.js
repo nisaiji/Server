@@ -112,7 +112,7 @@ export async function loginTeacherController(req, res) {
 
     const session = await getSessionService({
       school: admin["_id"],
-      status: "active"
+      status: "ACTIVE"
     });
     if (!session) {
       return res
