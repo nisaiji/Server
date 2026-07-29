@@ -208,11 +208,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
             { $inc: { studentCount: 1 } },
             transactionSession
           );
-          await updateParentService(
-            { _id: parentObj._id },
-            { $push: { students: student._id } },
-            transactionSession
-          );
+
           if (feeStructureDetails?.isVerified) {
             await createOrUpdateDuesForFeeStructure(
               feeStructureDetails,

@@ -73,7 +73,11 @@ const parentSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "student"
       }
-    ]
+    ],
+    personalInfoUpdated: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true,
