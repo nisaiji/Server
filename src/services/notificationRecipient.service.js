@@ -114,7 +114,7 @@ export async function getSectionParentNotificationRecipientsService({
         $project: {
           _id: 0,
           recipientId: "$parent._id",
-          fullname: "$parent.fullname",
+          fullname: "$parent.fullName",
           fcmToken: "$parent.fcmToken",
           role: {
             $literal: "parent"

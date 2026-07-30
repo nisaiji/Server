@@ -697,7 +697,7 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         studentUpdatedAt: "$student.updatedAt",
 
         parentId: "$schoolParent._id",
-        parentFullName: "$schoolParent.fullname",
+        parentFullName: "$schoolParent.fullName",
         parentUsername: "$schoolParent.username",
         parentGender: "$schoolParent.gender",
         parentAge: "$schoolParent.age",
@@ -1314,7 +1314,7 @@ export async function searchStudentsController(req, res) {
 
           // schoolParent
           parentId: "$schoolParent._id",
-          parentFullName: "$schoolParent.fullname",
+          parentFullName: "$schoolParent.fullName",
           parentUsername: "$schoolParent.username",
           parentGender: "$schoolParent.gender",
           parentAge: "$schoolParent.age",
