@@ -114,7 +114,7 @@ export async function createAnnouncementByTeacherController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session not found"));
     }
-    if (session["status"] === "completed") {
+    if (session["status"] === "COMPLETED") {
       return res
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session Completed"));
@@ -127,12 +127,12 @@ export async function createAnnouncementByTeacherController(req, res) {
     await createAnnouncementService({
       title,
       description,
-      targetAudience: ["parent"],
+      targetAudience: ["PARENT"],
       startsAt,
       expiresAt,
       createdBy: teacherId,
       session: sessionId,
-      createdByRole: "teacher",
+      createdByRole: "TEACHER",
       section: sectionId,
       school: adminId
     });
@@ -155,7 +155,7 @@ export async function getAnnouncementsByAdminController(req, res) {
       limit = 10,
       sortBy = "createdAt",
       order = "desc",
-      createdBy = "admin",
+      createdBy = "ADMIN",
       section,
       session
     } = req.query;
@@ -166,15 +166,15 @@ export async function getAnnouncementsByAdminController(req, res) {
       isActive: true
     };
 
-    if (createdBy === "admin") {
+    if (createdBy === "ADMIN") {
       filter.createdBy = convertToMongoId(adminId);
-      filter.createdByRole = "admin";
-    } else if (createdBy === "teacher") {
-      filter.createdByRole = "teacher";
-    } else if (createdBy === "all") {
+      filter.createdByRole = "ADMIN";
+    } else if (createdBy === "TEACHER") {
+      filter.createdByRole = "TEACHER";
+    } else if (createdBy === "ALL") {
       filter.$or = [
-        { createdBy: convertToMongoId(adminId), createdByRole: "admin" },
-        { createdByRole: "teacher" }
+        { createdBy: convertToMongoId(adminId), createdByRole: "ADMIN" },
+        { createdByRole: "TEACHER" }
       ];
     }
 
@@ -237,7 +237,7 @@ export async function getAnnouncementsByAdminController(req, res) {
         $addFields: {
           createdByDetails: {
             $cond: [
-              { $eq: ["$createdByRole", "teacher"] },
+              { $eq: ["$createdByRole", "TEACHER"] },
               { $arrayElemAt: ["$createdByTeacher", 0] },
               { $arrayElemAt: ["$createdByAdmin", 0] }
             ]
@@ -276,13 +276,13 @@ export async function getAnnouncementsByTeacherController(req, res) {
       limit = 10,
       sortBy = "createdAt",
       order = "desc",
-      createdBy = "teacher",
+      createdBy = "TEACHER",
       sessionId
     } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sortOrder = order === "asc" ? 1 : -1;
 
-    if (!["admin", "teacher", "all"].includes(createdBy)) {
+    if (!["ADMIN", "TEACHER", "ALL"].includes(createdBy)) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(error(400, "Invalid Request"));
@@ -293,21 +293,21 @@ export async function getAnnouncementsByTeacherController(req, res) {
       session: convertToMongoId(sessionId)
     };
 
-    if (createdBy === "admin") {
+    if (createdBy === "ADMIN") {
       filter.createdBy = convertToMongoId(adminId);
-      filter.createdByRole = "admin";
-      filter.targetAudience = { $in: ["teacher"] };
-    } else if (createdBy === "teacher") {
+      filter.createdByRole = "ADMIN";
+      filter.targetAudience = { $in: ["TEACHER"] };
+    } else if (createdBy === "TEACHER") {
       filter.createdBy = convertToMongoId(teacherId);
-      filter.createdByRole = "teacher";
-    } else if (createdBy === "all") {
+      filter.createdByRole = "TEACHER";
+    } else if (createdBy === "ALL") {
       filter.$or = [
         {
           createdBy: convertToMongoId(adminId),
-          createdByRole: "admin",
-          targetAudience: { $in: ["teacher"] }
+          createdByRole: "ADMIN",
+          targetAudience: { $in: ["TEACHER"] }
         },
-        { createdBy: convertToMongoId(teacherId), createdByRole: "teacher" }
+        { createdBy: convertToMongoId(teacherId), createdByRole: "TEACHER" }
       ];
     }
 
@@ -362,7 +362,7 @@ export async function getAnnouncementsByTeacherController(req, res) {
         $addFields: {
           createdByDetails: {
             $cond: [
-              { $eq: ["$createdByRole", "teacher"] },
+              { $eq: ["$createdByRole", "TEACHER"] },
               { $arrayElemAt: ["$createdByTeacher", 0] },
               { $arrayElemAt: ["$createdByAdmin", 0] }
             ]
@@ -396,7 +396,7 @@ export async function getAnnouncementsByParentController(req, res) {
       sessionStudentId,
       page = 1,
       limit = 10,
-      createdBy = "admin"
+      createdBy = "ADMIN"
     } = req.query;
     const sessionStudent = await getSessionStudentService({
       _id: sessionStudentId,
@@ -408,7 +408,7 @@ export async function getAnnouncementsByParentController(req, res) {
         .send(error(404, "Student not found"));
     }
 
-    if (!["admin", "teacher", "all"].includes(createdBy)) {
+    if (!["ADMIN", "TEACHER", "ALL"].includes(createdBy)) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(error(400, "Invalid Request"));
@@ -428,25 +428,25 @@ export async function getAnnouncementsByParentController(req, res) {
       //  ],
     };
 
-    if (createdBy === "admin") {
+    if (createdBy === "ADMIN") {
       filter.createdBy = convertToMongoId(adminId);
-      filter.createdByRole = "admin";
-      filter.targetAudience = { $in: ["parent"] };
-    } else if (createdBy === "teacher") {
+      filter.createdByRole = "ADMIN";
+      filter.targetAudience = { $in: ["PARENT"] };
+    } else if (createdBy === "TEACHER") {
       filter.section = convertToMongoId(sectionId);
-      filter.createdByRole = "teacher";
-      filter.targetAudience = { $in: ["parent"] };
-    } else if (createdBy === "all") {
+      filter.createdByRole = "TEACHER";
+      filter.targetAudience = { $in: ["PARENT"] };
+    } else if (createdBy === "ALL") {
       filter.$or = [
         {
           createdBy: convertToMongoId(adminId),
-          createdByRole: "admin",
-          targetAudience: { $in: ["parent"] }
+          createdByRole: "ADMIN",
+          targetAudience: { $in: ["PARENT"] }
         },
         {
           section: convertToMongoId(sectionId),
-          createdByRole: "teacher",
-          targetAudience: { $in: ["parent"] }
+          createdByRole: "TEACHER",
+          targetAudience: { $in: ["PARENT"] }
         }
       ];
     }
@@ -502,7 +502,7 @@ export async function getAnnouncementsByParentController(req, res) {
         $addFields: {
           createdByDetails: {
             $cond: [
-              { $eq: ["$createdByRole", "teacher"] },
+              { $eq: ["$createdByRole", "TEACHER"] },
               { $arrayElemAt: ["$createdByTeacher", 0] },
               { $arrayElemAt: ["$createdByAdmin", 0] }
             ]
@@ -546,7 +546,7 @@ export async function updateAnnouncementByAdminController(req, res) {
     const filter = {
       _id: convertToMongoId(announcementId),
       createdBy: convertToMongoId(adminId),
-      createdByRole: "admin"
+      createdByRole: "ADMIN"
     };
     const announcement = await getAnnouncementService(filter);
     if (!announcement) {
@@ -563,7 +563,7 @@ export async function updateAnnouncementByAdminController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session not found"));
     }
-    if (session["status"] === "completed") {
+    if (session["status"] === "COMPLETED") {
       return res
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session Completed"));
@@ -612,7 +612,7 @@ export async function updateAnnouncementByTeacherController(req, res) {
         .send(error(404, "Session not found"));
     }
 
-    if (session["status"] === "completed") {
+    if (session["status"] === "COMPLETED") {
       return res
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session Completed"));
@@ -628,7 +628,7 @@ export async function updateAnnouncementByTeacherController(req, res) {
     const filter = {
       _id: convertToMongoId(announcementId),
       createdBy: convertToMongoId(teacherId),
-      createdByRole: "teacher"
+      createdByRole: "TEACHER"
     };
 
     const result = await updateAnnouncementService(filter, fieldToBeUpdated);
@@ -657,7 +657,7 @@ export async function deleteAnnouncementByAdminController(req, res) {
     const filter = {
       _id: convertToMongoId(announcementId),
       createdBy: convertToMongoId(adminId),
-      createdByRole: "admin"
+      createdByRole: "ADMIN"
     };
 
     const announcement = await getAnnouncementService(filter);
@@ -677,7 +677,7 @@ export async function deleteAnnouncementByAdminController(req, res) {
         .send(error(404, "Session not found"));
     }
 
-    if (session["status"] === "completed") {
+    if (session["status"] === "COMPLETED") {
       return res
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session Completed"));
@@ -703,7 +703,7 @@ export async function deleteAnnouncementByTeacherController(req, res) {
     const filter = {
       _id: convertToMongoId(announcementId),
       createdBy: convertToMongoId(teacherId),
-      createdByRole: "teacher"
+      createdByRole: "TEACHER"
     };
 
     const announcement = await getAnnouncementService(filter);
@@ -723,7 +723,7 @@ export async function deleteAnnouncementByTeacherController(req, res) {
         .send(error(404, "Session not found"));
     }
 
-    if (session["status"] === "completed") {
+    if (session["status"] === "COMPLETED") {
       return res
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session Completed"));
@@ -744,7 +744,7 @@ export async function deleteAnnouncementByTeacherController(req, res) {
 export async function getUnReadAnnouncementsCountForParentController(req, res) {
   try {
     const parentId = req.parentId;
-    const { studentId, createdBy = "admin" } = req.query;
+    const { studentId, createdBy = "ADMIN" } = req.query;
     const student = await getSessionStudentService({
       _id: studentId,
       isActive: true
@@ -755,7 +755,7 @@ export async function getUnReadAnnouncementsCountForParentController(req, res) {
         .send(error(404, "Student not found"));
     }
 
-    if (!["admin", "teacher", "all"].includes(createdBy)) {
+    if (!["ADMIN", "TEACHER", "ALL"].includes(createdBy)) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(error(400, "Invalid Request"));
@@ -768,25 +768,25 @@ export async function getUnReadAnnouncementsCountForParentController(req, res) {
       isActive: true
     };
 
-    if (createdBy === "admin") {
+    if (createdBy === "ADMIN") {
       filter.createdBy = convertToMongoId(adminId);
-      filter.createdByRole = "admin";
-      filter.targetAudience = { $in: ["parent"] };
-    } else if (createdBy === "teacher") {
+      filter.createdByRole = "ADMIN";
+      filter.targetAudience = { $in: ["PARENT"] };
+    } else if (createdBy === "TEACHER") {
       filter.section = convertToMongoId(sectionId);
-      filter.createdByRole = "teacher";
-      filter.targetAudience = { $in: ["parent"] };
-    } else if (createdBy === "all") {
+      filter.createdByRole = "TEACHER";
+      filter.targetAudience = { $in: ["PARENT"] };
+    } else if (createdBy === "ALL") {
       filter.$or = [
         {
           createdBy: convertToMongoId(adminId),
-          createdByRole: "admin",
-          targetAudience: { $in: ["parent"] }
+          createdByRole: "ADMIN",
+          targetAudience: { $in: ["PARENT"] }
         },
         {
           section: convertToMongoId(sectionId),
-          createdByRole: "teacher",
-          targetAudience: { $in: ["parent"] }
+          createdByRole: "TEACHER",
+          targetAudience: { $in: ["PARENT"] }
         }
       ];
     }
@@ -803,7 +803,7 @@ export async function getUnReadAnnouncementsCountForParentController(req, res) {
     const readAnnouncements = await getAnnouncementsReadStatusService(
       {
         user: convertToMongoId(parentId),
-        userRole: "parent",
+        userRole: "PARENT",
         announcement: { $in: announcementIds }
       },
       { announcement: 1 }
@@ -833,9 +833,9 @@ export async function getUnReadAnnouncementsCountForTeacherController(
     const teacherId = req.teacherId;
     const sectionId = req.sectionId;
 
-    const { createdBy = "teacher" } = req.query;
+    const { createdBy = "TEACHER" } = req.query;
 
-    if (!["admin", "teacher", "all"].includes(createdBy)) {
+    if (!["ADMIN", "TEACHER", "ALL"].includes(createdBy)) {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(error(400, "Invalid Request"));
@@ -845,21 +845,21 @@ export async function getUnReadAnnouncementsCountForTeacherController(
       school: convertToMongoId(adminId)
     };
 
-    if (createdBy === "admin") {
+    if (createdBy === "ADMIN") {
       filter.createdBy = convertToMongoId(adminId);
-      filter.createdByRole = "admin";
-      filter.targetAudience = { $in: ["teacher"] };
-    } else if (createdBy === "teacher") {
+      filter.createdByRole = "ADMIN";
+      filter.targetAudience = { $in: ["TEACHER"] };
+    } else if (createdBy === "TEACHER") {
       filter.createdBy = convertToMongoId(teacherId);
-      filter.createdByRole = "teacher";
-    } else if (createdBy === "all") {
+      filter.createdByRole = "TEACHER";
+    } else if (createdBy === "ALL") {
       filter.$or = [
         {
           createdBy: convertToMongoId(adminId),
-          createdByRole: "admin",
-          targetAudience: { $in: ["teacher"] }
+          createdByRole: "ADMIN",
+          targetAudience: { $in: ["TEACHER"] }
         },
-        { createdBy: convertToMongoId(teacherId), createdByRole: "teacher" }
+        { createdBy: convertToMongoId(teacherId), createdByRole: "TEACHER" }
       ];
     }
 
@@ -874,7 +874,7 @@ export async function getUnReadAnnouncementsCountForTeacherController(
     const readAnnouncements = await getAnnouncementsReadStatusService(
       {
         user: convertToMongoId(teacherId),
-        userRole: "teacher",
+        userRole: "TEACHER",
         announcement: { $in: announcementIds }
       },
       { announcement: 1 }
