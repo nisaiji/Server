@@ -96,7 +96,7 @@ export async function registerStudentsFromExcelHelper(
 
     if (!schoolParent) {
       if (!parent) {
-        parent = await registerParentService({ phone, status: "unVerified" });
+        parent = await registerParentService({ phone, status: "UNVERIFIED" });
       }
       const parentObj = {
         fullname: parentName,

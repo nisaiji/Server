@@ -548,7 +548,7 @@ export async function adminLoginController(req, res) {
 
     const session = await getSessionService({
       school: admin["_id"],
-      status: "active"
+      status: "ACTIVE"
     });
     const accessToken = getAccessTokenService({
       role: "admin",

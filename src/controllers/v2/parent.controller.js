@@ -413,7 +413,7 @@ export async function loginParentController(req, res) {
         );
     }
 
-    if (parent["status"] === "unVerified") {
+    if (parent["status"] === "UNVERIFIED") {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(error(404, "User verification is pending"));
@@ -566,8 +566,8 @@ export async function getParentStatusController(req, res) {
 
     parentStatus["status"] = parent["status"];
     parentStatus["isLoginAlready"] = parent["isLoginAlready"];
-    parentStatus["phoneVerified"] = parent["status"] !== "unVerified";
-    parentStatus["emailVerified"] = parent["status"] === "verified";
+    parentStatus["phoneVerified"] = parent["status"] !== "UNVERIFIED";
+    parentStatus["emailVerified"] = parent["status"] === "VERIFIED";
     parentStatus["passwordUpdated"] = parent["password"] ? true : false;
     parentStatus["personalInfoUpdated"] = parent["fullName"] ? true : false;
     parentStatus["studentAdded"] =
@@ -738,7 +738,7 @@ export async function getParentController(req, res) {
       },
       {
         $lookup: {
-          from: "sessionstudents",
+          from: "session_students",
           localField: "students._id",
           foreignField: "student",
           as: "students.sessionstudents"
@@ -1077,7 +1077,8 @@ export async function getParentWithStudentsController(req, res) {
           parentEmail: "$email",
           parentPhone: "$phone",
           parentIsLoginAlready: "$isLoginAlready",
-          students: 1
+          students: 1,
+          mainParentPersonalInfoUpdated: "$personalInfoUpdated"
         }
       }
     ];
@@ -1281,7 +1282,7 @@ export async function verifyPhoneController(req, res) {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
     // }
 
-    if (parent["status"] === "unVerified") {
+    if (parent["status"] === "UNVERIFIED") {
       await updateParentService(
         { _id: parent["_id"] },
         { status: "PHONE_VERIFIED" }
@@ -1292,8 +1293,8 @@ export async function verifyPhoneController(req, res) {
       parentId: parent["_id"],
       status: parent["status"],
       isLoginAlready: parent["isLoginAlready"],
-      PHONE_VERIFIED: parent["status"] !== "unVerified",
-      emailVerified: parent["status"] === "verified",
+      PHONE_VERIFIED: parent["status"] !== "UNVERIFIED",
+      emailVerified: parent["status"] === "VERIFIED",
       passwordUpdated: parent["password"] ? true : false,
       personalInfoUpdated: parent["fullName"] ? true : false
     });

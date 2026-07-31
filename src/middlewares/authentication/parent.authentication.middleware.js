@@ -28,7 +28,7 @@ export async function parentAuthenticate(req, res, next) {
         );
     }
 
-    if (parent["status"] === "unVerified") {
+    if (parent["status"] === "UNVERIFIED") {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(error(404, "User verification is pending"));

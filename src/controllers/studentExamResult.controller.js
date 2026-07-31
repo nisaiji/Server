@@ -196,7 +196,7 @@ export async function getStudentsExamMarksForSubjectController(req, res) {
       },
       {
         $lookup: {
-          from: "studentexamresults",
+          from: "student_exam_results",
           localField: "_id",
           foreignField: "sessionStudent",
           as: "studentExamResult",
@@ -382,7 +382,7 @@ export async function getStudentExamMarksForSubjectController(req, res) {
       },
       {
         $lookup: {
-          from: "studentexamresults",
+          from: "student_exam_results",
           localField: "_id",
           foreignField: "sessionStudent",
           as: "studentExamResult",
@@ -562,7 +562,7 @@ export async function getSectionStudentsExamMarksController(req, res) {
             },
             {
               $lookup: {
-                from: "teachersubjectsections",
+                from: "teacher_subject_sections",
                 let: {
                   subjectId: "$subjects.subject",
                   sectionId: "$$sectionId"
@@ -622,7 +622,7 @@ export async function getSectionStudentsExamMarksController(req, res) {
       },
       {
         $lookup: {
-          from: "studentexamresults",
+          from: "student_exam_results",
           localField: "_id",
           foreignField: "sessionStudent",
           as: "studentExamResult",
@@ -839,7 +839,7 @@ export async function getStudentExamMarksController(req, res) {
       },
       {
         $lookup: {
-          from: "studentexamresults",
+          from: "student_exam_results",
           localField: "_id",
           foreignField: "sessionStudent",
           as: "studentExamResult",
@@ -967,7 +967,7 @@ export async function createOrUpdateBulkStudentExamResultController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Session not found"));
     }
-    if (session["status"] === "completed") {
+    if (session["status"] === "COMPLETED") {
       return res
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "can't save exam results for completed session"));

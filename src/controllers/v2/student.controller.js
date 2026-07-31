@@ -248,7 +248,7 @@ export async function registerStudentController(req, res) {
 
     if (!schoolParent) {
       if (!parent) {
-        parent = await registerParentService({ phone, status: "unVerified" });
+        parent = await registerParentService({ phone, status: "UNVERIFIED" });
       }
       schoolParent = await registerSchoolParentService({
         fullname: parentName,
@@ -389,7 +389,7 @@ export async function updateStudentBySchoolController(req, res) {
           .send(error(409, "Phone number already registered"));
       }
       if (phone !== schoolParent["phone"]) {
-        parent = await registerParentService({ phone, status: "unVerified" });
+        parent = await registerParentService({ phone, status: "UNVERIFIED" });
         schoolParent = await registerSchoolParentService({
           phone,
           school: adminId,
