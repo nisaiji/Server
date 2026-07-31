@@ -24,6 +24,13 @@ export const COMPONENT_EXAM_TYPE = {
   PRACTICAL: "PRACTICAL",
   GRADE: "GRADE"
 };
+``;
+export const EXAM_RESULT_STATUS = {
+  PASS: "PASS",
+  FAIL: "FAIL",
+  ABSENT: "ABSENT",
+  PENDING: "PENDING"
+};
 
 export const EXAM_STATUS = {
   SCHEDULED: "SCHEDULED",

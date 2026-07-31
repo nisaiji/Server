@@ -1,4 +1,9 @@
 import mongoose from "mongoose";
+import {
+  GRADING_TYPE,
+  COMPONENT_EXAM_TYPE,
+  EXAM_RESULT_STATUS
+} from "../enums/exam.enums.js";
 
 const examResultSchema = new mongoose.Schema(
   {
@@ -22,11 +27,11 @@ const examResultSchema = new mongoose.Schema(
       {
         gradingType: {
           type: String,
-          enum: ["marks", "grades"]
+          enum: Object.values(GRADING_TYPE)
         },
         examType: {
           type: String,
-          enum: ["theory", "practical", "grade"]
+          enum: Object.values(COMPONENT_EXAM_TYPE)
         },
         marksObtained: {
           type: Number
@@ -39,8 +44,8 @@ const examResultSchema = new mongoose.Schema(
         },
         status: {
           type: String,
-          enum: ["pass", "fail", "absent", "pending"],
-          default: "pending"
+          enum: Object.values(EXAM_RESULT_STATUS),
+          default: EXAM_RESULT_STATUS.PENDING
         },
         isAbsent: {
           type: Boolean,

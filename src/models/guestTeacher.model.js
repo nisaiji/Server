@@ -50,7 +50,7 @@ const guestTeacherSchema = new mongoose.Schema(
       required: true
     }
   },
-  { timestamps: true, versionKey: false, collection: "guest_ teachers" }
+  { timestamps: true, versionKey: false, collection: "guest_teachers" }
 );
 
 const guestTeacherModel = mongoose.model("guestTeacher", guestTeacherSchema);

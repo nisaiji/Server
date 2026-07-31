@@ -109,7 +109,7 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
       },
       {
         $lookup: {
-          from: "sessionstudents",
+          from: "session_students",
           localField: "sessionStudent",
           foreignField: "_id",
           as: "sessionStudentDetails"

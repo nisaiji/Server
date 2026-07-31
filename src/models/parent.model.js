@@ -65,6 +65,10 @@ const parentSchema = new mongoose.Schema(
       type: String,
       lowercase: true
     },
+    personalInfoUpdated: {
+      type: Boolean,
+      default: false
+    },
     password: {
       type: String
     },
@@ -73,11 +77,7 @@ const parentSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "student"
       }
-    ],
-    personalInfoUpdated: {
-      type: Boolean,
-      default: false
-    }
+    ]
   },
   {
     timestamps: true,

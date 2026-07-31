@@ -150,7 +150,7 @@ export async function getExamsForSectionController(req, res) {
       },
       {
         $lookup: {
-          from: "teachersubjectsections",
+          from: "teacher_subject_sections",
           let: {
             subjectId: "$subjects.subject",
             sectionId: "$section"

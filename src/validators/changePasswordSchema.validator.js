@@ -1,8 +1,12 @@
 import Joi from "joi";
+import {
+  PASSWORD_CHANGE_REASON,
+  PASSWORD_CHANGE_SENDER_MODEL
+} from "../enums/password.enums.js";
 
 const registerChangePasswordRequestSchema = Joi.object({
   reason: Joi.string()
-    .valid("forgetPassword", "changeDevice", "technical", "other")
+    .valid(...Object.values(PASSWORD_CHANGE_REASON))
     .required()
     .messages({
       "any.required": "reason is required",
@@ -19,7 +23,7 @@ const registerChangePasswordRequestSchema = Joi.object({
         "string.length": "Phone number must be exactly 10 characters long."
       }),
     model: Joi.string()
-      .valid("parent", "teacher", "admin")
+      .valid(...Object.values(PASSWORD_CHANGE_SENDER_MODEL))
       .required()
       .messages({
         "any.required": "Model is required.",
@@ -38,7 +42,10 @@ const getChangePasswordRequestsForAdminSchema = Joi.object({
     "string.base": "Model must be a string."
   }),
   reason: Joi.string()
-    .valid("forgetPassword", "changeDevice")
+    .valid(
+      PASSWORD_CHANGE_REASON.FORGET_PASSWORD,
+      PASSWORD_CHANGE_REASON.CHANGE_DEVICE
+    )
     .required()
     .messages({
       "any.required": "Reason is required",

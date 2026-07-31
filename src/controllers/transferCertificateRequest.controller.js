@@ -437,7 +437,7 @@ export async function getAdminTCRequestsController(req, res) {
       },
       {
         $lookup: {
-          from: "sessionstudents",
+          from: "session_students",
           localField: "sessionStudent",
           foreignField: "_id",
           as: "sessionStudentInfo",

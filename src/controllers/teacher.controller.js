@@ -231,7 +231,7 @@ export async function getAllTeacherOfAdminController(req, res) {
       },
       {
         $lookup: {
-          from: "teachersectionsessions",
+          from: "teacher_section_sessions",
           let: { teacherId: "$_id" },
           pipeline: [
             {
@@ -284,7 +284,7 @@ export async function getAllTeacherOfAdminController(req, res) {
       },
       {
         $lookup: {
-          from: "teachersubjectsections",
+          from: "teacher_subject_sections",
           localField: "_id",
           foreignField: "teacher",
           as: "sectionSubjects",
@@ -658,7 +658,7 @@ export async function getTeacherController(req, res) {
       },
       {
         $lookup: {
-          from: "teachersubjectsections",
+          from: "teacher_subject_sections",
           localField: "_id",
           foreignField: "teacher",
           as: "sectionSubjects",

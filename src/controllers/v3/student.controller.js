@@ -23,7 +23,6 @@ import {
 } from "../../services/section.services.js";
 import { getSessionService } from "../../services/session.services.js";
 import {
-  getSessionStudentCountService,
   getSessionStudentService,
   getSessionStudentsPipelineService,
   registerSessionStudentService,
@@ -738,6 +737,7 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         mainParentStudents: "$parent.students",
         mainParentCreatedAt: "$parent.createdAt",
         mainParentUpdatedAt: "$parent.updatedAt",
+        mainParentPersonalInfoUpdated: "$parent.personalInfoUpdated",
 
         sessionId: "$session._id",
         sessionName: "$session.name",
@@ -1025,7 +1025,7 @@ export async function getStudentWithAllSessionStudentsController(req, res) {
       },
       {
         $lookup: {
-          from: "sessionstudents",
+          from: "session_students",
           localField: "_id",
           foreignField: "student",
           as: "sessionStudents",
@@ -1356,6 +1356,7 @@ export async function searchStudentsController(req, res) {
           mainParentStudents: "$parent.students",
           mainParentCreatedAt: "$parent.createdAt",
           mainParentUpdatedAt: "$parent.updatedAt",
+          mainParentPersonalInfoUpdated: "$parent.personalInfoUpdated",
 
           // session
           sessionId: "$session._id",
@@ -1390,17 +1391,16 @@ export async function searchStudentsController(req, res) {
       }
     ];
 
-    pipeline.push(
-      {
-        $skip: skipNum
-      },
-      {
-        $limit: limitNum
+    pipeline.push({
+      $facet: {
+        students: [{ $skip: skipNum }, { $limit: limitNum }],
+        total: [{ $count: "count" }]
       }
-    );
+    });
 
-    const students = await getSessionStudentsPipelineService(pipeline);
-    const totalStudents = await getSessionStudentCountService(filter);
+    const [result] = await getSessionStudentsPipelineService(pipeline);
+    const students = result.students;
+    const totalStudents = result.total[0]?.count ?? 0;
     const totalPages = Math.ceil(totalStudents / limitNum);
 
     await Promise.all(

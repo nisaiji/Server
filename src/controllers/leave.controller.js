@@ -37,7 +37,7 @@ export async function registerLeaveRequestController(req, res) {
       {
         $match: {
           "sender.id": convertToMongoId(senderId),
-          status: { $in: ["pending", "accept"] },
+          status: { $in: ["PENDING", "ACCEPT"] },
           startTime: { $lte: endTime },
           endTime: { $gte: startTime }
         }
@@ -53,7 +53,7 @@ export async function registerLeaveRequestController(req, res) {
         new Date(leaveRequests[0].endTime)
       );
       const leaveStatus =
-        leaveRequests[0].status === "accept" ? "issued" : "applied";
+        leaveRequests[0].status === "ACCEPT" ? "ISSUED" : "APPLIED";
       return res
         .status(StatusCodes.CONFLICT)
         .send(
@@ -69,11 +69,11 @@ export async function registerLeaveRequestController(req, res) {
       description,
       sender: {
         id: senderId,
-        model: "teacher"
+        model: "TEACHER"
       },
       receiver: {
         id: receiverId,
-        model: "admin"
+        model: "ADMIN"
       },
       startTime,
       endTime
@@ -105,7 +105,7 @@ export async function getLeaveRequestsController(req, res) {
     const skipNum = (pageNum - 1) * limitNum;
 
     const filter = {
-      receiver: { id: convertToMongoId(req.adminId), model: "admin" }
+      receiver: { id: convertToMongoId(req.adminId), model: "ADMIN" }
     };
 
     if (senderId) {
@@ -133,7 +133,7 @@ export async function getLeaveRequestsController(req, res) {
           teachers: [
             {
               $match: {
-                "sender.model": "teacher"
+                "sender.model": "TEACHER"
               }
             },
             {
@@ -182,7 +182,7 @@ export async function getLeaveRequestsController(req, res) {
             },
             {
               $lookup: {
-                from: "guestteachers",
+                from: "guest_teachers",
                 localField: "_id",
                 foreignField: "leaveRequest",
                 as: "guestTeacher"
@@ -236,7 +236,7 @@ export async function getLeaveRequestsController(req, res) {
           students: [
             {
               $match: {
-                "sender.model": "student"
+                "sender.model": "STUDENT"
               }
             },
             {
@@ -284,7 +284,7 @@ export async function updateTeacherLeavRequestByAdminController(req, res) {
     const adminId = req.adminId;
     const leaveRequest = await getLeaveRequestService({
       _id: leaveRequestId,
-      status: "pending"
+      status: "PENDING"
     });
     if (!leaveRequest) {
       return res
@@ -300,7 +300,7 @@ export async function updateTeacherLeavRequestByAdminController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Section not found"));
     }
-    if (status === "accept") {
+    if (status === "ACCEPT") {
       const hashedPassword = await hashPasswordService(password);
       const [existingTeacher, existingGuestTeacher] = await Promise.all([
         getTeacherService({ username, isActive: true }),
@@ -332,12 +332,12 @@ export async function updateTeacherLeavRequestByAdminController(req, res) {
     await updateLeaveRequestService({ _id: leaveRequestId }, { status });
     await sendPushNotification(
       teacher["fcmToken"],
-      `Your Leave Request is ${status === "accept" ? "Accepted" : "Rejected"}`,
+      `Your Leave Request is ${status === "ACCEPT" ? "Accepted" : "Rejected"}`,
       "leaveRequest",
       teacher["_id"]
     );
     const successMessage =
-      status === "accept"
+      status === "ACCEPT"
         ? "Leave Request Accepted Successfully"
         : "Leave Request Rejected Successfully";
     return res.status(StatusCodes.OK).send(success(200, successMessage));
@@ -364,7 +364,7 @@ export async function updateTeacherLeavRequestController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "Leave Request not found"));
     }
-    if (leaveRequest["status"] !== "pending") {
+    if (leaveRequest["status"] !== "PENDING") {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(
@@ -378,7 +378,7 @@ export async function updateTeacherLeavRequestController(req, res) {
       {
         $match: {
           "sender.id": convertToMongoId(teacherId),
-          status: "pending",
+          status: "PENDING",
           startTime: { $lte: endTime },
           endTime: { $gte: startTime },
           _id: { $ne: convertToMongoId(leaveRequestId) }
