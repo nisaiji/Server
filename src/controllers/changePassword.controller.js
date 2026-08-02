@@ -91,13 +91,8 @@ export async function registerChangePasswordRequestController(req, res) {
 export async function getChangePasswordRequestsController(req, res) {
   try {
     const { model, status, page = 1, limit = 10 } = req.query;
-    const [receiverModel, receiverId] = getReceiver(req);
+    const [receiverModel, receiverId] = ["admin", req.adminId];
 
-    if (!receiverModel || !receiverId) {
-      return res
-        .status(StatusCodes.UNAUTHORIZED)
-        .send(error(401, "User details required!"));
-    }
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skipNum = (pageNum - 1) * limitNum;

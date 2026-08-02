@@ -716,7 +716,7 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         parentUpdatedAt: "$schoolParent.updatedAt",
 
         mainParentId: "$parent._id",
-        mainParentFullName: "$parent.fullName",
+        mainParentFullName: "$schoolParent.fullName",
         mainParentUsername: "$parent.username",
         mainParentGender: "$parent.gender",
         mainParentDob: "$parent.dob",

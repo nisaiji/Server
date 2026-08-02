@@ -569,7 +569,9 @@ export async function getParentStatusController(req, res) {
     parentStatus["phoneVerified"] = parent["status"] !== "UNVERIFIED";
     parentStatus["emailVerified"] = parent["status"] === "VERIFIED";
     parentStatus["passwordUpdated"] = parent["password"] ? true : false;
-    parentStatus["personalInfoUpdated"] = parent["fullName"] ? true : false;
+    parentStatus["personalInfoUpdated"] = parent["personalInfoUpdated"]
+      ? true
+      : false;
     parentStatus["studentAdded"] =
       parent["students"]?.length > 0 ? true : false;
 
