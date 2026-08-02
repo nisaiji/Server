@@ -114,7 +114,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
         .send(error(404, "Session not found"));
     }
 
-    if (session.status === "completed") {
+    if (session.status === "COMPLETED") {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .send(error(400, "Session is already completed"));
@@ -138,7 +138,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
           });
 
       schoolParent = await registerSchoolParentService({
-        fullname: studentData.parentName,
+        fullName: studentData.parentName,
         phone: studentData.phone,
         school: adminId,
         parent: parentObj._id,
