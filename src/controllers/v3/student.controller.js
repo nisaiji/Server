@@ -580,7 +580,7 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
     },
     {
       $lookup: {
-        from: "schoolparents",
+        from: "school_parents",
         localField: "student.schoolParent",
         foreignField: "_id",
         as: "schoolParent"
