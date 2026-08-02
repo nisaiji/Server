@@ -659,7 +659,7 @@ export async function addStudentController(req, res) {
         },
         {
           $lookup: {
-            from: "schoolparents",
+            from: "school_parents",
             localField: "schoolParent",
             foreignField: "_id",
             as: "schoolParent"

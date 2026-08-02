@@ -131,7 +131,7 @@ export async function getStudentLeaveRequestForTeacherController(req, res) {
       },
       {
         $lookup: {
-          from: "schoolparents",
+          from: "school_parents",
           localField: "studentDetails.schoolParent",
           foreignField: "_id",
           as: "schoolParent"

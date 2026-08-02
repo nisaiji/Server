@@ -35,21 +35,21 @@ export async function registerChangePasswordRequestController(req, res) {
         .send(error(404, "User not found"));
     }
 
-    if (senderModel === "teacher" && !sender.section) {
+    if (senderModel === "TEACHER" && !sender.section) {
       return res
         .status(StatusCodes.UNAUTHORIZED)
         .send(error(409, "User in not authorized for forget password"));
     }
     const request = await getChangePasswordRequestService({
       "sender.id": sender["_id"],
-      status: { $in: ["pending", "accept"] }
+      status: { $in: ["PENDING", "ACCEPT"] }
     });
-    if (request && request.status === "accept") {
+    if (request && request.status === "ACCEPT") {
       return res
         .status(StatusCodes.CONFLICT)
         .send(error(409, "Request approved, please change the password"));
     }
-    if (request && request.status === "pending") {
+    if (request && request.status === "PENDING") {
       return res
         .status(StatusCodes.CONFLICT)
         .send(
@@ -59,7 +59,7 @@ export async function registerChangePasswordRequestController(req, res) {
           )
         );
     }
-    const receiver = await getUser("admin", {
+    const receiver = await getUser("ADMIN", {
       _id: sender["admin"],
       isActive: true
     });
@@ -73,9 +73,9 @@ export async function registerChangePasswordRequestController(req, res) {
       reason,
       description,
       sender: { id: sender["_id"], model: senderModel },
-      receiver: { id: receiver["_id"], model: "admin" },
+      receiver: { id: receiver["_id"], model: "ADMIN" },
       expiredAt: Date.now() + 24 * 60 * 60 * 1000,
-      status: "pending"
+      status: "PENDING"
     };
     await registerChangePasswordRequestService(requestObj);
     return res

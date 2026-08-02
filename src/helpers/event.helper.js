@@ -5,13 +5,13 @@ import { getTeacherService } from "../services/teacher.services.js";
 
 export async function getUser(modelType, paramObj) {
   switch (modelType) {
-    case "superAdmin":
+    case "SUPERADMIN":
       return await getSuperAdminService(paramObj);
-    case "admin":
+    case "ADMIN":
       return await getAdminService(paramObj);
-    case "teacher":
+    case "TEACHER":
       return await getTeacherService(paramObj);
-    case "parent":
+    case "PARENT":
       return await getParentService(paramObj);
     default:
       return null;
@@ -20,14 +20,14 @@ export async function getUser(modelType, paramObj) {
 
 export function getReceiver(reqObj) {
   switch (reqObj.role) {
-    case "superAdmin":
-      return ["superAdmin", reqObj.superAdminId];
-    case "admin":
-      return ["admin", reqObj.adminId];
-    case "teacher":
-      return ["tacher", reqObj.teacherId];
-    case "parent":
-      return ["parent", reqObj.parentId];
+    case "SUPERADMIN":
+      return ["SUPERADMIN", reqObj.superAdminId];
+    case "ADMIN":
+      return ["ADMIN", reqObj.adminId];
+    case "TEACHER":
+      return ["TEACHER", reqObj.teacherId];
+    case "PARENT":
+      return ["PARENT", reqObj.parentId];
     default:
       return [null, null];
   }
