@@ -91,7 +91,7 @@ export async function registerChangePasswordRequestController(req, res) {
 export async function getChangePasswordRequestsController(req, res) {
   try {
     const { model, status, page = 1, limit = 10 } = req.query;
-    const [receiverModel, receiverId] = ["admin", req.adminId];
+    const [receiverModel, receiverId] = ["ADMIN", req.adminId];
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
