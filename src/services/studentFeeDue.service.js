@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { getFeeCycleService, getFeeHeadService } from "./feeSetup.service.js";
 import studentFeeDueModel from "../models/fee/studentFeeDue.model.js";
 import paymentModel from "../models/payments/payment.model.js";
+import sessionModel from "../models/session.model.js";
 import sessionStudentModel from "../models/sessionStudent.model.js";
 import { getSessionService } from "../services/session.services.js";
 function monthsForFrequency(freq) {
@@ -341,4 +342,316 @@ export async function getStudentFeeDuesService({
 
     return dueObj;
   });
+}
+
+export async function getSchoolCollectionsService({
+  adminId,
+  sessionId,
+  classId,
+  sectionId,
+  search,
+  page = 1,
+  limit = 10
+}) {
+  let targetSessionId = sessionId;
+  if (!targetSessionId) {
+    const currentSession = await sessionModel
+      .findOne({ school: adminId, isCurrent: true })
+      .lean();
+    if (currentSession) {
+      targetSessionId = currentSession._id;
+    } else {
+      const latestSession = await sessionModel
+        .findOne({ school: adminId })
+        .sort({ startDate: -1 })
+        .lean();
+      if (latestSession) {
+        targetSessionId = latestSession._id;
+      }
+    }
+  }
+
+  if (!targetSessionId) {
+    throw new Error("No active academic session found for this school.");
+  }
+
+  const adminObjId = new mongoose.Types.ObjectId(adminId);
+  const sessionObjId = new mongoose.Types.ObjectId(targetSessionId);
+
+  const matchStage = {
+    school: adminObjId,
+    session: sessionObjId,
+    isActive: true
+  };
+
+  if (classId && mongoose.Types.ObjectId.isValid(classId)) {
+    matchStage.classId = new mongoose.Types.ObjectId(classId);
+  }
+
+  if (sectionId && mongoose.Types.ObjectId.isValid(sectionId)) {
+    matchStage.section = new mongoose.Types.ObjectId(sectionId);
+  }
+
+  // 1. Overview stats: aggregate over all matching session students
+  const overviewPipeline = [
+    { $match: matchStage },
+    {
+      $lookup: {
+        from: "student_fee_dues",
+        let: { studentId: "$student", sessionId: "$session" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$studentId", "$$studentId"] },
+                  { $eq: ["$sessionId", "$$sessionId"] }
+                ]
+              }
+            }
+          }
+        ],
+        as: "dues"
+      }
+    },
+    { $unwind: "$dues" },
+    {
+      $group: {
+        _id: null,
+        totalPayable: { $sum: "$dues.totalAmount" },
+        collectedAmount: {
+          $sum: {
+            $cond: [{ $eq: ["$dues.status", "PAID"] }, "$dues.totalAmount", 0]
+          }
+        },
+        outstandingDues: {
+          $sum: {
+            $cond: [
+              { $in: ["$dues.status", ["PENDING", "OVERDUE"]] },
+              "$dues.totalAmount",
+              0
+            ]
+          }
+        }
+      }
+    }
+  ];
+
+  const overviewResult = await sessionStudentModel.aggregate(overviewPipeline);
+  const overview = overviewResult[0] || {
+    totalPayable: 0,
+    collectedAmount: 0,
+    outstandingDues: 0
+  };
+
+  // 2. Student List with Search and Pagination
+  const studentListPipeline = [
+    { $match: matchStage },
+    {
+      $lookup: {
+        from: "students",
+        localField: "student",
+        foreignField: "_id",
+        as: "studentDoc"
+      }
+    },
+    { $unwind: "$studentDoc" }
+  ];
+
+  if (search) {
+    const searchRegex = new RegExp(search, "i");
+    studentListPipeline.push({
+      $match: {
+        $or: [
+          { "studentDoc.firstName": searchRegex },
+          { "studentDoc.lastName": searchRegex },
+          {
+            $expr: {
+              $regexMatch: {
+                input: {
+                  $concat: [
+                    "$studentDoc.firstName",
+                    " ",
+                    "$studentDoc.lastName"
+                  ]
+                },
+                regex: search,
+                options: "i"
+              }
+            }
+          }
+        ]
+      }
+    });
+  }
+
+  // Count matches
+  const countPipeline = [...studentListPipeline, { $count: "total" }];
+  const countResult = await sessionStudentModel.aggregate(countPipeline);
+  const total = countResult[0]?.total || 0;
+
+  // Add the remaining projection & pagination stages
+  studentListPipeline.push(
+    {
+      $lookup: {
+        from: "classes",
+        localField: "classId",
+        foreignField: "_id",
+        as: "classDoc"
+      }
+    },
+    { $unwind: { path: "$classDoc", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "sections",
+        localField: "section",
+        foreignField: "_id",
+        as: "sectionDoc"
+      }
+    },
+    { $unwind: { path: "$sectionDoc", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "student_fee_dues",
+        let: { studentId: "$student", sessionId: "$session" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$studentId", "$$studentId"] },
+                  { $eq: ["$sessionId", "$$sessionId"] }
+                ]
+              }
+            }
+          }
+        ],
+        as: "dues"
+      }
+    },
+    {
+      $addFields: {
+        totalPayable: { $sum: "$dues.totalAmount" },
+        collected: {
+          $sum: {
+            $map: {
+              input: "$dues",
+              as: "d",
+              in: {
+                $cond: [{ $eq: ["$$d.status", "PAID"] }, "$$d.totalAmount", 0]
+              }
+            }
+          }
+        },
+        outstanding: {
+          $sum: {
+            $map: {
+              input: "$dues",
+              as: "d",
+              in: {
+                $cond: [
+                  { $in: ["$$d.status", ["PENDING", "OVERDUE"]] },
+                  "$$d.totalAmount",
+                  0
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      $lookup: {
+        from: "payments",
+        let: { sessionStudentId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$sessionStudentId", "$$sessionStudentId"] }
+            }
+          },
+          { $sort: { updatedAt: -1 } },
+          { $limit: 1 }
+        ],
+        as: "latestPayment"
+      }
+    },
+    { $unwind: { path: "$latestPayment", preserveNullAndEmptyArrays: true } },
+    {
+      $project: {
+        _id: 0,
+        sessionStudentId: "$_id",
+        studentName: {
+          $concat: ["$studentDoc.firstName", " ", "$studentDoc.lastName"]
+        },
+        class: "$classDoc.name",
+        classId: "$classDoc._id",
+        section: "$sectionDoc.name",
+        sectionId: "$sectionDoc._id",
+        totalPayable: 1,
+        collected: 1,
+        outstanding: 1,
+        latestActivityStatus: {
+          $cond: {
+            if: { $not: ["$latestPayment"] },
+            then: "N/A",
+            else: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: ["$latestPayment.status", "SUCCESS"] },
+                    then: "Succeeded"
+                  },
+                  {
+                    case: { $eq: ["$latestPayment.status", "FAILED"] },
+                    then: "Failed"
+                  },
+                  {
+                    case: { $eq: ["$latestPayment.status", "PENDING"] },
+                    then: "Pending"
+                  },
+                  {
+                    case: { $eq: ["$latestPayment.status", "CREATED"] },
+                    then: "Created"
+                  },
+                  {
+                    case: { $eq: ["$latestPayment.status", "CANCELLED"] },
+                    then: "Cancelled"
+                  },
+                  {
+                    case: { $eq: ["$latestPayment.status", "EXPIRED"] },
+                    then: "Expired"
+                  }
+                ],
+                default: "$latestPayment.status"
+              }
+            }
+          }
+        },
+        lastActivityDate: {
+          $cond: {
+            if: { $not: ["$latestPayment"] },
+            then: null,
+            else: "$latestPayment.updatedAt"
+          }
+        }
+      }
+    },
+    { $sort: { studentName: 1 } },
+    { $skip: (page - 1) * limit },
+    { $limit: limit }
+  );
+
+  const students = await sessionStudentModel.aggregate(studentListPipeline);
+
+  return {
+    overview,
+    students,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
 }

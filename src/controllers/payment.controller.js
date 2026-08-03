@@ -30,6 +30,7 @@ import {
 } from "../services/payment/zohoAuthSession.service.js";
 import { createZohoWebhook } from "../services/payment/zohoPayments.service.js";
 import { getSessionStudentService } from "../services/sessionStudent.service.js";
+import { getSchoolCollectionsService } from "../services/studentFeeDue.service.js";
 import { error, success } from "../utils/responseWrapper.js";
 //checked
 async function assertParentOwnsSessionStudent(parentId, sessionStudent) {
@@ -592,6 +593,31 @@ export async function getFeeSummaryController(req, res) {
     };
 
     return res.status(StatusCodes.OK).send(success(200, data));
+  } catch (err) {
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(error(500, err.message));
+  }
+}
+
+export async function getSchoolCollectionsController(req, res) {
+  try {
+    const adminId = req.adminId;
+    const { sessionId, classId, sectionId, search } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const collectionsData = await getSchoolCollectionsService({
+      adminId,
+      sessionId,
+      classId,
+      sectionId,
+      search,
+      page,
+      limit
+    });
+
+    return res.status(StatusCodes.OK).send(success(200, collectionsData));
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
