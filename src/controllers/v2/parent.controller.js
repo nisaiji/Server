@@ -493,8 +493,8 @@ export async function updateParentController(req, res) {
     if (req.body["username"]) {
       fieldsToBeUpdated["username"] = req.body["username"];
     }
-    if (req.body["fullName"]) {
-      fieldsToBeUpdated["fullName"] = req.body["fullName"];
+    if (req.body["fullname"]) {
+      fieldsToBeUpdated["fullName"] = req.body["fullname"];
     }
     if (req.body["gender"]) {
       fieldsToBeUpdated["gender"] = req.body["gender"];

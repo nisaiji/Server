@@ -133,6 +133,7 @@ export async function registerStudentAndSessionStudentController(req, res) {
       parentObj = parentObj
         ? parentObj
         : await registerParentService({
+            fullName: studentData.parentName,
             phone: studentData.phone,
             status: "UNVERIFIED"
           });
@@ -716,7 +717,7 @@ function buildSessionStudentDetailPipeline(filter, startTime, endTime) {
         parentUpdatedAt: "$schoolParent.updatedAt",
 
         mainParentId: "$parent._id",
-        mainParentFullName: "$schoolParent.fullName",
+        mainParentFullName: "$parent.fullName",
         mainParentUsername: "$parent.username",
         mainParentGender: "$parent.gender",
         mainParentDob: "$parent.dob",

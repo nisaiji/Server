@@ -616,7 +616,7 @@ export async function getTeacherController(req, res) {
           foreignField: "school",
           as: "session",
           pipeline: [
-            { $match: { status: "active" } },
+            { $match: { status: "ACTIVE" } },
             { $sort: { createdAt: -1 } },
             { $limit: 1 }
           ]

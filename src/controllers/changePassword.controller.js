@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import otpGenerator from "otp-generator";
-import { getReceiver, getUser } from "../helpers/event.helper.js";
+import { getUser } from "../helpers/event.helper.js";
 import {
   getChangePasswordRequestCountService,
   getChangePasswordRequestService,
@@ -224,7 +224,7 @@ export async function getChangePasswordRequestsController(req, res) {
 export async function updateChangePasswordRequestByAdminController(req, res) {
   try {
     const { eventId, status } = req.body;
-    const [receiverModel, receiverId] = getReceiver(req);
+    const [receiverModel, receiverId] = ["ADMIN", req.adminId];
     const event = await getChangePasswordRequestService({ _id: eventId });
 
     if (!event) {
@@ -240,7 +240,7 @@ export async function updateChangePasswordRequestByAdminController(req, res) {
     }
 
     const fieldsToBeUpdated = {};
-    if (status === "accept") {
+    if (status === "ACCEPT") {
       fieldsToBeUpdated.otp = otpGenerator.generate(5, {
         lowerCaseAlphabets: false,
         upperCaseAlphabets: false,
@@ -275,9 +275,9 @@ export async function verifyTeacherForgetPasswordController(req, res) {
     }
 
     const request = await getChangePasswordRequestService({
-      "sender.model": "teacher",
+      "sender.model": "TEACHER",
       "sender.id": teacher["_id"],
-      status: "accept"
+      status: "ACCEPT"
     });
     if (!request) {
       return res
@@ -291,7 +291,7 @@ export async function verifyTeacherForgetPasswordController(req, res) {
     }
 
     if (
-      request["reason"] !== "changeDevice" &&
+      request["reason"] !== "CHANGE_DEVICE" &&
       deviceId !== teacher["deviceId"]
     ) {
       return res
@@ -299,7 +299,7 @@ export async function verifyTeacherForgetPasswordController(req, res) {
         .send(error(400, "Access denied due to device mismatch"));
     }
 
-    if (request["reason"] === "changeDevice") {
+    if (request["reason"] === "CHANGE_DEVICE") {
       await updateTeacherService({ _id: teacher["_id"] }, { deviceId });
     }
 
@@ -336,8 +336,8 @@ export async function changePasswordByVerifiedTeacherController(req, res) {
       }
     );
     await updateChangePasswordRequestService(
-      { "sender.id": convertToMongoId(id), status: "accept" },
-      { status: "complete" }
+      { "sender.id": convertToMongoId(id), status: "ACCEPT" },
+      { status: "COMPLETED" }
     );
     return res
       .status(StatusCodes.OK)

@@ -91,13 +91,13 @@ const updateTeacherLeaveSchema = Joi.object({
     "string.base": "Leave Request ID must be a string.",
     "any.required": "Leave Request ID is required."
   }),
-  status: Joi.string().valid("accept", "reject").required().messages({
+  status: Joi.string().valid("ACCEPT", "REJECT").required().messages({
     "string.base": "Status must be a string",
-    "any.only": "Status must be either 'accept', or 'reject'",
+    "any.only": "Status must be either 'ACCEPT', or 'REJECT'",
     "any.required": "Status is a mandatory field"
   }),
   username: Joi.when("status", {
-    is: "accept",
+    is: "ACCEPT",
     then: Joi.string().required().messages({
       "string.base": "Username must be a string",
       "any.required": "Username is required"
@@ -107,7 +107,7 @@ const updateTeacherLeaveSchema = Joi.object({
     })
   }),
   password: Joi.when("status", {
-    is: "accept",
+    is: "ACCEPT",
     then: Joi.string().required().messages({
       "string.base": "Password must be a string",
       "any.required": "Password is required"
@@ -117,7 +117,7 @@ const updateTeacherLeaveSchema = Joi.object({
     })
   }),
   tagline: Joi.when("status", {
-    is: "accept",
+    is: "ACCEPT",
     then: Joi.string().required().messages({
       "string.base": "Tagline must be a string",
       "any.required": "Tagline is required"
