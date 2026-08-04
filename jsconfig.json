@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "target": "ES2022",
     "checkJs": true,
     "allowJs": true,
     "strict": false,
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "baseUrl": ".",
     "paths": {
-      "@src/*": ["src/*"]
+      "@src/*": ["src/*"],
+      "http-status-codes": ["node_modules/http-status-codes/build/cjs/index.d.ts"]
     }
   },
   "include": ["src/**/*", "index.js", "swagger.js"],
