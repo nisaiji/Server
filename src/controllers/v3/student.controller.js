@@ -1293,8 +1293,8 @@ export async function searchStudentsController(req, res) {
       },
       {
         $addFields: {
-          id: "$student._id",
-          studentId: "$student.studentId",
+          studentId: "$student._id",
+          studentUniqueId: "$student.studentId",
           rollNumber: "$student.rollNumber",
           firstName: "$student.firstName",
           lastName: "$student.lastName",
