@@ -584,6 +584,7 @@ export async function getSchoolCollectionsService({
         studentName: {
           $concat: ["$studentDoc.firstName", " ", "$studentDoc.lastName"]
         },
+        studentId: "$studentDoc._id",
         class: "$classDoc.name",
         classId: "$classDoc._id",
         section: "$sectionDoc.name",

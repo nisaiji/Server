@@ -14,7 +14,7 @@ export function verifyZohoWebhookSignature(payload, signature, secret) {
       "Webhook secret is not configured for tenant. Skipping signature verification. This is insecure for production."
     );
     // In a strict production environment, you should return false here.
-    return true;
+    return false;
   }
 
   if (!signature) {
