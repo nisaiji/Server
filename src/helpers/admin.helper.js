@@ -9,6 +9,7 @@ export function constructStudentXlsxTemplate() {
     "Last Name",
     "Gender",
     "Guardian Name",
+    "Second Guardian Name",
     "Phone",
     "Blood Group",
     "DOB (dd-mm-yyyy)",
@@ -20,7 +21,8 @@ export function constructStudentXlsxTemplate() {
     "Pincode",
     "Email",
     "Qualification",
-    "Occupation"
+    "Occupation",
+    "Aadhar Number"
   ];
   let row = [
     "(Required)",
@@ -47,7 +49,7 @@ export function constructStudentXlsxTemplate() {
 
 export function constructTeacherXlsxTemplate() {
   let workbook = new exceljs.Workbook();
-  let worksheet = workbook.addWorksheet("Teachers");
+  let worksheet = workbook.addWorksheet("Worksheet");
 
   let columns = [
     "firstName",
