@@ -19,8 +19,7 @@ const studentSchema = new mongoose.Schema(
       type: String
     },
     aadharNumber: {
-      type: Number,
-      required: true
+      type: Number
     },
     aadharVerified: {
       type: Boolean,

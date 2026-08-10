@@ -68,7 +68,9 @@ export async function registerStudentsFromExcelHelper(
         phone: student["Phone"],
         email: student["Email"],
         occupation: student["Occupation"],
-        qualification: student["Qualification"]
+        qualification: student["Qualification"],
+        aadharNumber: student["Aadhar Number"],
+        guardianName2: student["Second Guardian Name"]
       };
 
       const {
@@ -87,7 +89,9 @@ export async function registerStudentsFromExcelHelper(
         phone,
         email,
         qualification,
-        occupation
+        occupation,
+        aadharNumber,
+        guardianName2
       } = normalizedStudent;
 
       // Handle parent creation/retrieval
@@ -130,7 +134,9 @@ export async function registerStudentsFromExcelHelper(
         district,
         state,
         country,
-        pincode
+        pincode,
+        aadharNumber,
+        guardianName: guardianName2
       };
 
       if (!studentInfo) {

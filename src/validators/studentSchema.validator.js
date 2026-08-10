@@ -58,6 +58,9 @@ const registerStudentFromExcelSchema = Joi.object({
   "Guardian Name": Joi.string().required().messages({
     "any.required": "Guardian name is required"
   }),
+  "Second Guardian Name": Joi.string().required().messages({
+    "any.required": "Second Guardian name is required"
+  }),
   Phone: Joi.number()
     .integer()
     .min(6000000000)
@@ -71,7 +74,8 @@ const registerStudentFromExcelSchema = Joi.object({
     }),
   Email: Joi.string().optional(),
   Qualification: Joi.string().optional(),
-  Occupation: Joi.string().optional()
+  Occupation: Joi.string().optional(),
+  "Aadhar Number": Joi.string().optional()
 });
 
 const deleteStudentSchema = Joi.object({
