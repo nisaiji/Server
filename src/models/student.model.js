@@ -19,7 +19,9 @@ const studentSchema = new mongoose.Schema(
       type: String
     },
     aadharNumber: {
-      type: Number
+      type: Number,
+      unique: true,
+      sparse: true
     },
     aadharVerified: {
       type: Boolean,
