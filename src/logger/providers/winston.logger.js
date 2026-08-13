@@ -3,7 +3,7 @@ import { formatLog } from "../format.js";
 import { LogLevel } from "../levels.js";
 
 const winstonLogger = winston.createLogger({
-  level: LogLevel.INFO,
+  level: process.env.LOG_LEVEL || LogLevel.INFO,
   format: winston.format.json(),
   transports: [
     new winston.transports.Console(),

@@ -1,8 +1,12 @@
+import { getRequestId } from "../utils/asyncContext.js";
+
 export function formatLog({ level, message, context = {}, error = null }) {
+  const requestId = getRequestId();
   const log = {
     level,
     message,
     timestamp: new Date().toISOString(),
+    ...(requestId && { requestId }),
     ...context
   };
 

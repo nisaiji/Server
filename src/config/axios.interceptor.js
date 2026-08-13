@@ -1,11 +1,11 @@
 import axios from "axios";
+import logger from "../logger/index.js";
 
 export function setupAxiosInterceptors() {
   axios.interceptors.request.use((request) => {
-    console.info("Axios request", {
+    logger.debug("Axios request", {
       method: request.method,
       url: request.url,
-      headers: request.headers,
       data: request.data
     });
     return request;
@@ -13,18 +13,22 @@ export function setupAxiosInterceptors() {
 
   axios.interceptors.response.use(
     (response) => {
-      console.info("Axios response", {
+      logger.debug("Axios response", {
         status: response.status,
-        data: response.data
+        url: response.config?.url
       });
       return response;
     },
     (error) => {
-      console.error("Axios error", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message
-      });
+      logger.error(
+        "Axios request error",
+        {
+          status: error.response?.status,
+          url: error.config?.url,
+          data: error.response?.data
+        },
+        error
+      );
       return Promise.reject(error);
     }
   );
