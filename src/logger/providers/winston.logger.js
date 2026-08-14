@@ -1,18 +1,39 @@
+import { CloudWatchLogsClient } from "@aws-sdk/client-cloudwatch-logs";
 import winston from "winston";
+import WinstonCloudWatch from "winston-cloudwatch";
+import { config } from "../../config/config.js";
 import { formatLog } from "../format.js";
 import { LogLevel } from "../levels.js";
+
+/** @type {import('winston').transport[]} */
+const transports = [
+  new winston.transports.Console(),
+  new winston.transports.File({
+    filename: "logs/error.log",
+    level: LogLevel.ERROR
+  }),
+  new winston.transports.File({ filename: "logs/app.log" })
+];
+
+if (config.cloudWatchEnabled && config.cloudWatchLogGroupName) {
+  const cloudWatchClient = new CloudWatchLogsClient({
+    region: config.awsRegion
+  });
+
+  transports.push(
+    new WinstonCloudWatch({
+      cloudWatchLogs: /** @type {any} */ (cloudWatchClient),
+      logGroupName: config.cloudWatchLogGroupName,
+      logStreamName: config.cloudWatchLogStreamName,
+      jsonMessage: true
+    })
+  );
+}
 
 const winstonLogger = winston.createLogger({
   level: process.env.LOG_LEVEL || LogLevel.INFO,
   format: winston.format.json(),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({
-      filename: "logs/error.log",
-      level: LogLevel.ERROR
-    }),
-    new winston.transports.File({ filename: "logs/app.log" })
-  ]
+  transports
 });
 
 class WinstonLogger {

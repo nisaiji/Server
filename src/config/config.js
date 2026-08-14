@@ -41,7 +41,13 @@ const _config = {
   isSandbox: process.env.ZOHO_IS_SANDBOX === "true",
   bypassToken: process.env.BYPASS_TOKEN,
 
-  awsRegion: process.env.AWS_REGION || "ap-south-1"
+  awsRegion: process.env.AWS_REGION || "ap-south-1",
+
+  cloudWatchEnabled: process.env.CLOUDWATCH_ENABLED === "true",
+  cloudWatchLogGroupName: process.env.CLOUDWATCH_LOG_GROUP_NAME,
+  cloudWatchLogStreamName:
+    process.env.CLOUDWATCH_LOG_STREAM_NAME ||
+    `server-${process.env.NODE_ENV || "dev"}`
 };
 
 export const config = Object.freeze(_config);

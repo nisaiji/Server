@@ -27,12 +27,34 @@ app.use(express.json({
 app.use(express.static('public'));
 app.use(cookieParser());
 app.use(
-  morgan("combined", {
-    stream: {
-      write: (message) => logger.http(message.trim())
+  morgan(
+    (tokens, req, res) => {
+      return JSON.stringify({
+        method: tokens.method(req, res),
+        url: tokens.url(req, res),
+        status: Number(tokens.status(req, res)),
+        responseTimeMs: Number(tokens["response-time"](req, res)),
+        contentLength: tokens.res(req, res, "content-length") || "0"
+      });
+    },
+    {
+      stream: {
+        write: (message) => {
+          try {
+            const httpDetails = JSON.parse(message);
+            logger.http(
+              `HTTP ${httpDetails.method} ${httpDetails.url}`,
+              httpDetails
+            );
+          } catch {
+            logger.http(message.trim());
+          }
+        }
+      }
     }
-  })
+  )
 );
+
 app.use(
   cors({
     origin: "*"
