@@ -47,7 +47,10 @@ const _config = {
   cloudWatchLogGroupName: process.env.CLOUDWATCH_LOG_GROUP_NAME,
   cloudWatchLogStreamName:
     process.env.CLOUDWATCH_LOG_STREAM_NAME ||
-    `server-${process.env.NODE_ENV || "dev"}`
+    `server-${process.env.NODE_ENV || "dev"}`,
+  cloudWatchAccessKeyId: process.env.AWS_CLOUDWATCH_ACCESS_KEY,
+  cloudWatchSecretAccessKey: process.env.AWS_CLOUDWATCH_SECRET_ACCESS_KEY,
+  cloudWatchAwsRegion: process.env.CLOUDWATCH_AWS_REGION
 };
 
 export const config = Object.freeze(_config);

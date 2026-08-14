@@ -1,4 +1,4 @@
-import { CloudWatchLogsClient } from "@aws-sdk/client-cloudwatch-logs";
+import { CloudWatchLogs } from "@aws-sdk/client-cloudwatch-logs";
 import winston from "winston";
 import WinstonCloudWatch from "winston-cloudwatch";
 import { config } from "../../config/config.js";
@@ -16,18 +16,31 @@ const transports = [
 ];
 
 if (config.cloudWatchEnabled && config.cloudWatchLogGroupName) {
-  const cloudWatchClient = new CloudWatchLogsClient({
-    region: config.awsRegion
-  });
+  /** @type {Record<string, any>} */
+  const cwOptions = {
+    logGroupName: config.cloudWatchLogGroupName,
+    logStreamName: config.cloudWatchLogStreamName,
+    jsonMessage: true
+  };
 
-  transports.push(
-    new WinstonCloudWatch({
-      cloudWatchLogs: /** @type {any} */ (cloudWatchClient),
-      logGroupName: config.cloudWatchLogGroupName,
-      logStreamName: config.cloudWatchLogStreamName,
-      jsonMessage: true
-    })
-  );
+  const region = config.cloudWatchAwsRegion || config.awsRegion;
+
+  if (config.cloudWatchAccessKeyId && config.cloudWatchSecretAccessKey) {
+    cwOptions.cloudWatchLogs = new CloudWatchLogs({
+      region,
+      credentials: {
+        accessKeyId: config.cloudWatchAccessKeyId,
+        secretAccessKey: config.cloudWatchSecretAccessKey
+      }
+    });
+  } else {
+    console.warn(
+      "[CloudWatch Logger Warning] Dedicated CloudWatch credentials (CLOUDWATCH_AWS_ACCESS_KEY_ID / CLOUDWATCH_AWS_SECRET_ACCESS_KEY) were not found in environment. Falling back to default AWS credentials."
+    );
+    cwOptions.awsRegion = region;
+  }
+
+  transports.push(new WinstonCloudWatch(cwOptions));
 }
 
 const winstonLogger = winston.createLogger({
