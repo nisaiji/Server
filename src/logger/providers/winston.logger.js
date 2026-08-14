@@ -1,6 +1,7 @@
 import { CloudWatchLogs } from "@aws-sdk/client-cloudwatch-logs";
 import winston from "winston";
 import WinstonCloudWatch from "winston-cloudwatch";
+import DailyRotateFile from "winston-daily-rotate-file";
 import { config } from "../../config/config.js";
 import { formatLog } from "../format.js";
 import { LogLevel } from "../levels.js";
@@ -8,16 +9,24 @@ import { LogLevel } from "../levels.js";
 /** @type {import('winston').transport[]} */
 const transports = [
   new winston.transports.Console(),
-  new winston.transports.File({
-    filename: "logs/error.log",
+  new DailyRotateFile({
+    filename: "logs/error-%DATE%.log",
+    datePattern: "YYYY-MM-DD",
+    maxFiles: "14d",
     level: LogLevel.ERROR
   }),
-  new winston.transports.File({ filename: "logs/app.log" })
+  new DailyRotateFile({
+    filename: "logs/app-%DATE%.log",
+    datePattern: "YYYY-MM-DD",
+    maxFiles: "14d",
+    level: process.env.LOG_LEVEL || LogLevel.DEBUG
+  })
 ];
 
 if (config.cloudWatchEnabled && config.cloudWatchLogGroupName) {
   /** @type {Record<string, any>} */
   const cwOptions = {
+    level: process.env.LOG_LEVEL || LogLevel.DEBUG,
     logGroupName: config.cloudWatchLogGroupName,
     logStreamName: config.cloudWatchLogStreamName,
     jsonMessage: true
@@ -44,7 +53,7 @@ if (config.cloudWatchEnabled && config.cloudWatchLogGroupName) {
 }
 
 const winstonLogger = winston.createLogger({
-  level: process.env.LOG_LEVEL || LogLevel.INFO,
+  level: process.env.LOG_LEVEL || LogLevel.DEBUG,
   format: winston.format.json(),
   transports
 });

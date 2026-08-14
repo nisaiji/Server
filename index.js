@@ -26,16 +26,41 @@ app.use(express.json({
  }));
 app.use(express.static('public'));
 app.use(cookieParser());
+const sanitizePayload = (payload) => {
+  if (!payload || typeof payload !== "object") return payload;
+  const clone = Array.isArray(payload) ? [...payload] : { ...payload };
+  const sensitiveKeys = ["password", "token", "accessToken", "refreshToken", "secret", "authorization"];
+  for (const key of Object.keys(clone)) {
+    if (sensitiveKeys.some((k) => key.toLowerCase().includes(k))) {
+      clone[key] = "***REDACTED***";
+    } else if (typeof clone[key] === "object" && clone[key] !== null) {
+      clone[key] = sanitizePayload(clone[key]);
+    }
+  }
+  return clone;
+};
+
 app.use(
   morgan(
     (tokens, req, res) => {
-      return JSON.stringify({
+      const isDebug =
+        (process.env.LOG_LEVEL || "debug").toLowerCase() === "debug";
+
+      const payload = {
         method: tokens.method(req, res),
         url: tokens.url(req, res),
         status: Number(tokens.status(req, res)),
         responseTimeMs: Number(tokens["response-time"](req, res)),
-        contentLength: tokens.res(req, res, "content-length") || "0"
-      });
+        contentLength: tokens.res(req, res, "content-length") || "0",
+        ...(isDebug && req.body && Object.keys(req.body).length > 0 && {
+          requestBody: sanitizePayload(req.body)
+        }),
+        ...(isDebug && res.responseBody && {
+          responseBody: sanitizePayload(res.responseBody)
+        })
+      };
+
+      return JSON.stringify(payload);
     },
     {
       stream: {
@@ -54,6 +79,7 @@ app.use(
     }
   )
 );
+
 
 app.use(
   cors({
