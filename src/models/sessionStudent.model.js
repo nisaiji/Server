@@ -34,14 +34,6 @@ const sessionStudentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "admin"
     },
-    exams: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {}
-    },
-    tests: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {}
-    },
     transferCertificateIssued: {
       type: Boolean,
       default: false
@@ -61,10 +53,6 @@ const sessionStudentSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true
-    },
-    scholarship: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {}
     }
   },
   {

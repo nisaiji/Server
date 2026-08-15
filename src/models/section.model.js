@@ -24,7 +24,7 @@ const sectionSchema = new mongoose.Schema(
     },
     guestTeacher: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "guestTeacher"
+      ref: "guest_teacher"
     },
     session: {
       type: mongoose.Schema.Types.ObjectId,

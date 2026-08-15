@@ -10,17 +10,13 @@ const attendanceSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    parentAttendance: {
-      type: String,
-      default: ""
-    },
     teacherAttendance: {
       type: String,
       default: ""
     },
     sessionStudent: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "sessionStudent",
+      ref: "session_student",
       required: true
     },
     student: {

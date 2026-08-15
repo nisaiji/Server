@@ -36,7 +36,7 @@ const guestTeacherSchema = new mongoose.Schema(
     },
     leaveRequest: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "leaveRequest",
+      ref: "leave_request",
       required: true
     },
     section: {

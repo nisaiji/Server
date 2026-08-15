@@ -16,7 +16,7 @@ const transferCertificateRequestSchema = new mongoose.Schema(
     },
     sessionStudent: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "sessionStudent"
+      ref: "session_student"
     },
 
     // Parent/Guardian Information
@@ -27,7 +27,7 @@ const transferCertificateRequestSchema = new mongoose.Schema(
     },
     schoolParent: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "schoolParent"
+      ref: "school_parent"
     },
 
     // School Information

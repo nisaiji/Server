@@ -95,28 +95,6 @@ const adminSchema = new mongoose.Schema(
       default: ADMIN_RESET_PASSWORD_STATUS.EMPTY
     },
     statusChangeLog: [statusChangeLogSchema],
-
-    website: {
-      type: String
-    },
-    facebook: {
-      type: String
-    },
-    instagram: {
-      type: String
-    },
-    linkedin: {
-      type: String
-    },
-    twitter: {
-      type: String
-    },
-    whatsapp: {
-      type: String
-    },
-    youtube: {
-      type: String
-    },
     merchantPaymentConfig: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "merchantPaymentConfig"

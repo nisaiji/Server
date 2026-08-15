@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { SECTION_ATTENDANCE_STATUS } from "../enums/sectionAttendance.enums.js";
 
 const sectionAttendanceSchema = new mongoose.Schema(
   {
@@ -24,7 +25,7 @@ const sectionAttendanceSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["completed", "pending"],
+      enum: Object.values(SECTION_ATTENDANCE_STATUS),
       required: true
     }
   },
