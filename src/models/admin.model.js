@@ -94,11 +94,7 @@ const adminSchema = new mongoose.Schema(
       enum: Object.values(ADMIN_RESET_PASSWORD_STATUS),
       default: ADMIN_RESET_PASSWORD_STATUS.EMPTY
     },
-    statusChangeLog: [statusChangeLogSchema],
-    merchantPaymentConfig: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "merchantPaymentConfig"
-    }
+    statusChangeLog: [statusChangeLogSchema]
   },
   { timestamps: true, versionKey: false, collection: "admins" }
 );
