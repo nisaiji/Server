@@ -1,3 +1,4 @@
+import { ANNOUNCEMENT_TARGET_AUDIENCE } from "@src/enums/announcement.enums.js";
 import mongoose from "mongoose";
 
 const announcementReadStatusSchema = new mongoose.Schema(
@@ -9,7 +10,7 @@ const announcementReadStatusSchema = new mongoose.Schema(
     },
     userRole: {
       type: String,
-      enum: ["teacher", "parent"],
+      enum: Object.values(ANNOUNCEMENT_TARGET_AUDIENCE),
       required: true
     },
     announcement: {
