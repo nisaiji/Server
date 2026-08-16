@@ -1,5 +1,5 @@
-import { ANNOUNCEMENT_TARGET_AUDIENCE } from "@src/enums/announcement.enums.js";
 import mongoose from "mongoose";
+import { ANNOUNCEMENT_TARGET_AUDIENCE } from "../enums/announcement.enums.js";
 
 const announcementReadStatusSchema = new mongoose.Schema(
   {
