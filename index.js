@@ -3,14 +3,14 @@ import cors from "cors";
 import express from "express";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
+import { setupAxiosInterceptors } from "./src/config/axios.interceptor.js";
 import { config } from "./src/config/config.js";
 import connectDB from "./src/config/db.config.js";
 import { cronManager } from "./src/crons/index.cron.js";
-import router from "./src/routers/index.router.js";
-import swaggerDocs from "./swagger.js";
-import { setupAxiosInterceptors } from "./src/config/axios.interceptor.js";
 import logger from "./src/logger/index.js";
 import { requestIdMiddleware } from "./src/middlewares/requestId.middleware.js";
+import router from "./src/routers/index.router.js";
+import swaggerDocs from "./swagger.js";
 
 setupAxiosInterceptors();
 // import "./src/config/redis.config.js";
@@ -26,17 +26,38 @@ app.use(express.json({
  }));
 app.use(express.static('public'));
 app.use(cookieParser());
-const sanitizePayload = (payload) => {
+const sanitizePayload = (payload, seen = new WeakSet()) => {
   if (!payload || typeof payload !== "object") return payload;
-  const clone = Array.isArray(payload) ? [...payload] : { ...payload };
-  const sensitiveKeys = ["password", "token", "accessToken", "refreshToken", "secret", "authorization"];
-  for (const key of Object.keys(clone)) {
+  if (seen.has(payload)) return "[Circular]";
+
+  if (payload instanceof Date || payload instanceof RegExp || Buffer.isBuffer(payload)) {
+    return payload;
+  }
+
+  seen.add(payload);
+
+  const clone = Array.isArray(payload) ? [] : {};
+  const sensitiveKeys = [
+    "password",
+    "token",
+    "accessToken",
+    "refreshToken",
+    "secret",
+    "authorization"
+  ];
+
+  for (const key of Object.keys(payload)) {
+    const value = payload[key];
     if (sensitiveKeys.some((k) => key.toLowerCase().includes(k))) {
       clone[key] = "***REDACTED***";
-    } else if (typeof clone[key] === "object" && clone[key] !== null) {
-      clone[key] = sanitizePayload(clone[key]);
+    } else if (typeof value === "object" && value !== null) {
+      clone[key] = sanitizePayload(value, seen);
+    } else {
+      clone[key] = value;
     }
   }
+
+  seen.delete(payload);
   return clone;
 };
 
