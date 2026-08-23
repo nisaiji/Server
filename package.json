@@ -44,6 +44,7 @@
     "mongoose": "^9.7.2",
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
+    "newrelic": "^14.3.8",
     "otp-generator": "^4.0.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.0",
