@@ -9,15 +9,15 @@ import { getAccessToken } from "../services/payment/oauth.service.js";
 import {
   cancelPaymentFlow,
   getAdminPaymentsAggregationService,
+  getCollectedFeesAndTrendService,
+  getDetailedReceiptByPaymentIdService,
+  getOutstandingFeesService,
   getPaymentService,
   getPaymentsService,
-  getDetailedReceiptByPaymentIdService,
   getReceiptByReceiptNoService,
   initiatePaymentFlow,
   processFailedPayment,
-  processSuccessfulPayment,
-  getCollectedFeesAndTrendService,
-  getOutstandingFeesService
+  processSuccessfulPayment
 } from "../services/payment/payment.service.js";
 import {
   recordWebhookEvent,
@@ -29,6 +29,7 @@ import {
   updateZohoAuthSessionService
 } from "../services/payment/zohoAuthSession.service.js";
 import { createZohoWebhook } from "../services/payment/zohoPayments.service.js";
+import { getSessionService } from "../services/session.services.js";
 import { getSessionStudentService } from "../services/sessionStudent.service.js";
 import { getSchoolCollectionsService } from "../services/studentFeeDue.service.js";
 import { error, success } from "../utils/responseWrapper.js";
@@ -570,6 +571,19 @@ export async function setZohoSecretController(req, res) {
 export async function getFeeSummaryController(req, res) {
   try {
     const adminId = req.adminId;
+    const { sessionId } = req.query;
+
+    if (sessionId) {
+      const session = await getSessionService({
+        _id: sessionId,
+        school: adminId
+      });
+      if (!session) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .send(error(404, "Session not found"));
+      }
+    }
 
     const currentData = new Date();
     const month = req.query.month
@@ -582,9 +596,10 @@ export async function getFeeSummaryController(req, res) {
     const { totalCollected, trend } = await getCollectedFeesAndTrendService(
       adminId,
       month,
-      year
+      year,
+      sessionId
     );
-    const outstandingFees = await getOutstandingFeesService(adminId);
+    const outstandingFees = await getOutstandingFeesService(adminId, sessionId);
 
     const data = {
       totalCollectedFees: totalCollected,

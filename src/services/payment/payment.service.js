@@ -1,9 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
-import {
-  initiatePaymentFlow as initiatePaymentFlowService,
-  validateSessionStudentOwnership
-} from "./paymentInitiation.service.js";
 import adminModel from "../../models/admin.model.js";
 import feeHeadModel from "../../models/fee/feeHead.model.js";
 import studentFeeDueModel from "../../models/fee/studentFeeDue.model.js";
@@ -15,6 +11,10 @@ import receiptModel from "../../models/payments/receipt.model.js";
 import sessionStudentModel from "../../models/sessionStudent.model.js";
 import studentModel from "../../models/student.model.js";
 import { getSessionStudentService } from "../sessionStudent.service.js";
+import {
+  initiatePaymentFlow as initiatePaymentFlowService,
+  validateSessionStudentOwnership
+} from "./paymentInitiation.service.js";
 
 export async function createPaymentService(data) {
   return paymentModel.create(data);
@@ -491,7 +491,12 @@ export async function cancelPaymentFlow({ paymentId, parentId }) {
 /**
  * Get total collected fees and daily trend for a specific month
  */
-export async function getCollectedFeesAndTrendService(adminId, month, year) {
+export async function getCollectedFeesAndTrendService(
+  adminId,
+  month,
+  year,
+  sessionId
+) {
   const startDate = new Date(year, month - 1, 1);
   const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
@@ -512,6 +517,22 @@ export async function getCollectedFeesAndTrendService(adminId, month, year) {
     },
     { $sort: { _id: 1 } }
   ];
+
+  if (sessionId) {
+    pipeline.splice(1, 0, {
+      $lookup: {
+        from: sessionStudentModel.collection.name,
+        localField: "sessionStudentId",
+        foreignField: "_id",
+        as: "sessionStudent"
+      }
+    });
+    pipeline.splice(2, 0, {
+      $match: {
+        "sessionStudent.session": new mongoose.Types.ObjectId(sessionId)
+      }
+    });
+  }
 
   const results = await paymentModel.aggregate(pipeline);
 
@@ -534,11 +555,15 @@ export async function getCollectedFeesAndTrendService(adminId, month, year) {
 /**
  * Get total outstanding fees across all students
  */
-export async function getOutstandingFeesService(adminId) {
+export async function getOutstandingFeesService(adminId, sessionId) {
   const filter = {
     adminId: new mongoose.Types.ObjectId(adminId),
     status: { $in: ["PENDING", "OVERDUE"] }
   };
+
+  if (sessionId) {
+    filter.sessionId = new mongoose.Types.ObjectId(sessionId);
+  }
 
   /** @type {any[]} */
   const pipeline = [
