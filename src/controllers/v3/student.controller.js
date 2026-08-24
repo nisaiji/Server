@@ -75,17 +75,12 @@ export async function registerStudentAndSessionStudentController(req, res) {
     const [
       classInfo,
       session,
-      studentWithAadhar,
       parent,
       schoolParentFromDb,
       feeStructureDetails
     ] = await Promise.all([
       getClassService({ _id: section.classId }),
       getSessionService({ _id: section.session }),
-      getStudentService({
-        aadharNumber: studentData.aadharNumber,
-        isActive: true
-      }),
       getParentService({ phone: studentData.phone, isActive: true }),
       getSchoolParentService({
         phone: studentData.phone,
@@ -99,6 +94,14 @@ export async function registerStudentAndSessionStudentController(req, res) {
         isVerified: true
       })
     ]);
+
+    let studentWithAadhar = null;
+    if (studentData.aadharNumber) {
+      studentWithAadhar = await getStudentService({
+        aadharNumber: studentData.aadharNumber,
+        isActive: true
+      });
+    }
 
     console.log(feeStructureDetails);
 

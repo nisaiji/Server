@@ -20,8 +20,6 @@ const studentSchema = new mongoose.Schema(
     },
     aadharNumber: {
       type: Number,
-      unique: true,
-      sparse: true
     },
     aadharVerified: {
       type: Boolean,

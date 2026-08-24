@@ -65,7 +65,7 @@ const updateChangePasswordRequestByAdminSchema = Joi.object({
     "any.required": "Request Id is required.",
     "string.base": "Request Id must be a string."
   }),
-  status: Joi.string().valid("accept", "reject").required().messages({
+  status: Joi.string().valid("ACCEPT", "REJECT").required().messages({
     "any.required": "Status is required",
     "string.base": "Status must be a string",
     "string.valid": "Invalid status"

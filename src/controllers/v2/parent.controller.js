@@ -317,7 +317,7 @@ export async function parentEmailVerifyByOtpController(req, res) {
         .status(StatusCodes.NOT_FOUND)
         .send(error(404, "User is not registered"));
     }
-    if (["verified"].includes(parent["status"])) {
+    if (["VERIFIED"].includes(parent["status"])) {
       return res
         .status(StatusCodes.CONFLICT)
         .send(error(409, "Your Email has already verified"));
@@ -1322,8 +1322,8 @@ export async function verifyEmailController(req, res) {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
     // }
 
-    (updateParentService({ _id: parent["_id"] }, { email, status: "verified" }),
-      (parent = await getParentService({ _id: parent["_id"] })));
+    await updateParentService({ _id: parent["_id"] }, { email, status: "VERIFIED" });
+    parent = await getParentService({ _id: parent["_id"] });
     const jwtToken = getAccessTokenService({
       parentId: parent["_id"],
       status: parent["status"],
@@ -1335,7 +1335,7 @@ export async function verifyEmailController(req, res) {
     });
     res
       .status(StatusCodes.OK)
-      .send(success(200, { message: "OTP verified successfully", jwtToken }));
+      .send(success(200, { message: "Email verified successfully", jwtToken }));
   } catch (err) {
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
