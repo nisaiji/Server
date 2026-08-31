@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import mongoose from "mongoose";
+import { TRANSFER_REQUEST_TYPE } from "../enums/transfer.enums.js";
 import { getClassService } from "../services/class.services.js";
 import {
   convertToMongoId,
@@ -117,7 +118,7 @@ export async function applyTransferCertificateController(req, res) {
       session: session._id,
       class: classInfo._id,
       section: section._id,
-      requestType: "transfer",
+      requestType: TRANSFER_REQUEST_TYPE.TRANSFER,
       reason,
       reasonDescription,
       lastAttendanceDate: new Date(lastAttendanceDate),

@@ -98,7 +98,7 @@ export async function registerLeaveRequestController(req, res) {
 
 export async function getLeaveRequestsController(req, res) {
   try {
-    const { senderId, model, status, page = 1, limit = 10 } = req.query;
+    const { sessionId, senderId, model, status, page = 1, limit = 10 } = req.query;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -152,11 +152,37 @@ export async function getLeaveRequestsController(req, res) {
             },
             {
               $lookup: {
+                from: "teacher_section_sessions",
+                let: { teacherId: "$teacher._id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$teacher", "$$teacherId"] },
+                          { $eq: ["$session", convertToMongoId(sessionId)] }
+                        ]
+                      }
+                    }
+                  },
+                  { $project: { section: 1, classInfo: 1 } }
+                ],
+                as: "teacherSectionSession"
+              }
+            },
+            {
+              $unwind: {
+                path: "$teacherSectionSession",
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
                 from: "sections",
-                localField: "teacher.section",
+                localField: "teacherSectionSession.section",
                 foreignField: "_id",
                 as: "section",
-                pipeline: [{ $project: { name: 1, classId: 1 } }]
+                pipeline: [{ $project: { name: 1 } }]
               }
             },
             {
@@ -168,7 +194,7 @@ export async function getLeaveRequestsController(req, res) {
             {
               $lookup: {
                 from: "classes",
-                localField: "section.classId",
+                localField: "teacherSectionSession.classInfo",
                 foreignField: "_id",
                 as: "class",
                 pipeline: [{ $project: { name: 1 } }]
