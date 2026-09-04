@@ -1322,7 +1322,10 @@ export async function verifyEmailController(req, res) {
     //   return res.status(StatusCodes.BAD_REQUEST).send(error(400, response?.message || "Token can't verified"));
     // }
 
-    await updateParentService({ _id: parent["_id"] }, { email, status: "VERIFIED" });
+    await updateParentService(
+      { _id: parent["_id"] },
+      { email, status: "VERIFIED" }
+    );
     parent = await getParentService({ _id: parent["_id"] });
     const jwtToken = getAccessTokenService({
       parentId: parent["_id"],

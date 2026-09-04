@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import mongoose from "mongoose";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 import { setupAxiosInterceptors } from "./src/config/axios.interceptor.js";
@@ -11,12 +12,14 @@ import logger from "./src/logger/index.js";
 import { requestIdMiddleware } from "./src/middlewares/requestId.middleware.js";
 import router from "./src/routers/index.router.js";
 import swaggerDocs from "./swagger.js";
+import helmet from "helmet";
 
 setupAxiosInterceptors();
 // import "./src/config/redis.config.js";
-const PORT = config.port || 4000;
+const PORT = Number(config.port) || 4000;
 
 const app = express();
+app.use(helmet);
 app.use(requestIdMiddleware);
 app.use(express.json({ 
   limit: "5mb",
@@ -119,7 +122,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+
+app.get("/health", (req, res) => {
+  const dbConnected = mongoose.connection.readyState === 1;
+  res.json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date(),
+    dbConnected,
+  });
+});
+
+app.listen(PORT, "127.0.0.1" ,() => {
   logger.info(`Server is running at ${PORT}`, { port: PORT });
   connectDB();
   cronManager();

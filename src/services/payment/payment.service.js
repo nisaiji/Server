@@ -545,8 +545,11 @@ export async function getCollectedFeesAndTrendService(
   }
 
   results.forEach((item) => {
-    totalCollected += item.totalAmount;
-    trend[item._id - 1].amount = item.totalAmount;
+    totalCollected += item.totalAmount || 0;
+    const dayTrend = trend[item._id - 1];
+    if (dayTrend) {
+      dayTrend.amount = item.totalAmount || 0;
+    }
   });
 
   return { totalCollected, trend };

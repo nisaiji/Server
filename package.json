@@ -32,6 +32,7 @@
     "exceljs": "^3.4.0",
     "express": "^5.2.1",
     "firebase-admin": "^14.0.0",
+    "helmet": "^8.3.0",
     "http-status-codes": "^2.3.0",
     "ioredis": "^5.11.1",
     "jest": "^29.7.0",

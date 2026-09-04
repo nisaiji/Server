@@ -98,7 +98,14 @@ export async function registerLeaveRequestController(req, res) {
 
 export async function getLeaveRequestsController(req, res) {
   try {
-    const { sessionId, senderId, model, status, page = 1, limit = 10 } = req.query;
+    const {
+      sessionId,
+      senderId,
+      model,
+      status,
+      page = 1,
+      limit = 10
+    } = req.query;
 
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
