@@ -12,7 +12,7 @@
     "lint": "eslint src --max-warnings 0",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.{js,json}\"",
-    "prepare": "husky"
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') import('child_process').then(cp => cp.execSync('husky')).catch(() => {})\""
   },
   "_moduleAliases": {
     "@src": "src"

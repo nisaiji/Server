@@ -60,7 +60,7 @@ jobs:
                   echo "${{ secrets.PRODUCTION }}" > bin/.env.prod
 
                   echo "Installing production dependencies..."
-                  npm ci --only=production
+                  npm ci --omit=dev --ignore-scripts
 
                   echo "Reloading application with PM2..."
                   NODE_ENV=prod pm2 startOrReload ecosystem.config.js --env production || NODE_ENV=prod pm2 start index.js --name "shiksha-api"
