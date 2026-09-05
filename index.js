@@ -24,25 +24,26 @@ const app = express();
 //     crossOriginResourcePolicy: { policy: "cross-origin" }
 //   })(req, res, next);
 // });
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, Postman) or any requesting origin
-      callback(null, true);
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Requested-With",
-      "Accept",
-      "Origin",
-      "x-request-id"
-    ],
-    optionsSuccessStatus: 200
-  })
-);
+app.use(cors({ origin: "*" }));
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       // Allow requests with no origin (like mobile apps, curl, Postman) or any requesting origin
+//       callback(null, true);
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+//     allowedHeaders: [
+//       "Content-Type",
+//       "Authorization",
+//       "X-Requested-With",
+//       "Accept",
+//       "Origin",
+//       "x-request-id"
+//     ],
+//     optionsSuccessStatus: 200
+//   })
+// );
 app.use(requestIdMiddleware);
 app.use(express.json({ 
   limit: "5mb",
