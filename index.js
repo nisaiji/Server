@@ -12,18 +12,18 @@ import logger from "./src/logger/index.js";
 import { requestIdMiddleware } from "./src/middlewares/requestId.middleware.js";
 import router from "./src/routers/index.router.js";
 import swaggerDocs from "./swagger.js";
-import helmet from "helmet";
+//import helmet from "helmet";
 
 setupAxiosInterceptors();
 // import "./src/config/redis.config.js";
 const PORT = Number(config.port) || 4000;
 
 const app = express();
-app.use((req, res, next) => {
-  helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }
-  })(req, res, next);
-});
+// app.use((req, res, next) => {
+//   helmet({
+//     crossOriginResourcePolicy: { policy: "cross-origin" }
+//   })(req, res, next);
+// });
 app.use(
   cors({
     origin: (origin, callback) => {
