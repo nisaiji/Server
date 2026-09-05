@@ -50,9 +50,9 @@ jobs:
                     echo "Initializing git repository..."
                     git clone https://github.com/${{ github.repository }}.git .
                   else
-                    echo "Pulling latest code from main branch..."
-                    git fetch origin main
-                    git reset --hard origin/main
+                    echo "Pulling latest code from production branch..."
+                    git fetch origin production
+                    git reset --hard origin/production
                   fi
 
                   echo "Creating production .env file..."
@@ -60,14 +60,13 @@ jobs:
                   echo "${{ secrets.PRODUCTION }}" > bin/.env.prod
 
                   echo "Installing production dependencies..."
-                  cd src
                   npm ci --only=production
 
                   echo "Reloading application with PM2..."
-                  pm2 startOrReload ecosystem.config.js || pm2 start index.js --name "shiksha-api" --update-env
+                  NODE_ENV=prod pm2 startOrReload ecosystem.config.js --env production || NODE_ENV=prod pm2 start index.js --name "shiksha-api"
                   pm2 save
 
                   echo "Verifying health endpoint..."
                   sleep 2
-                  curl -f http://localhost:3000/health || exit 1
+                  curl -f http://localhost:4000/health || exit 1
                   echo "✅ Deployment successful!"
