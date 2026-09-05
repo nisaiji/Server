@@ -56,7 +56,7 @@ jobs:
                   fi
 
                   echo "Creating production .env file..."
-                  mkdir bin
+                  mkdir -p bin
                   echo "${{ secrets.PRODUCTION }}" > bin/.env.prod
 
                   echo "Installing production dependencies..."

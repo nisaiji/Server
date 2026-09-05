@@ -54,7 +54,7 @@ jobs:
                   echo "Updating repository..." 
                   git reset --hard origin/dev
 
-                  mkdir bin
+                  mkdir -p bin
                   echo "${{ secrets.DEV }}" > bin/.env.dev
 
                   echo "Installing dependencies..." 
