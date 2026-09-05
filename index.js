@@ -156,4 +156,3 @@ app.listen(PORT,() => {
   connectDB();
   cronManager();
 });
-
