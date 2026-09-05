@@ -10,11 +10,19 @@ import {
   getSchoolCollectionsController
 } from "../controllers/payment.controller.js";
 import { adminAuthenticate } from "../middlewares/authentication/admin.authentication.middleware.js";
-import { sessionStudentIdParamValidation } from "../middlewares/validation/payment.validation.middleware.js";
+import {
+  feeSummaryQueryValidation,
+  sessionStudentIdParamValidation
+} from "../middlewares/validation/payment.validation.middleware.js";
 
 const paymentRouter = express.Router();
 
-paymentRouter.get("/fee-summary", adminAuthenticate, getFeeSummaryController);
+paymentRouter.get(
+  "/fee-summary",
+  adminAuthenticate,
+  feeSummaryQueryValidation,
+  getFeeSummaryController
+);
 
 paymentRouter.get(
   "/admin/collections",

@@ -571,37 +571,33 @@ export async function setZohoSecretController(req, res) {
 export async function getFeeSummaryController(req, res) {
   try {
     const adminId = req.adminId;
-    const { sessionId } = req.query;
+    const { sessionId, month, year } = req.query;
 
-    if (sessionId) {
-      const session = await getSessionService({
-        _id: sessionId,
-        school: adminId
-      });
-      if (!session) {
-        return res
-          .status(StatusCodes.NOT_FOUND)
-          .send(error(404, "Session not found"));
-      }
+    const session = await getSessionService({
+      _id: sessionId,
+      school: adminId
+    });
+    if (!session) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .send(error(404, "Session not found"));
     }
 
-    const currentData = new Date();
-    const month = req.query.month
-      ? parseInt(req.query.month)
-      : currentData.getMonth() + 1;
-    const year = req.query.year
-      ? parseInt(req.query.year)
-      : currentData.getFullYear();
+    const selectedMonth = parseInt(month, 10);
+    const selectedYear = parseInt(year, 10);
 
     const { totalCollected, trend } = await getCollectedFeesAndTrendService(
       adminId,
-      month,
-      year,
+      selectedMonth,
+      selectedYear,
       sessionId
     );
     const outstandingFees = await getOutstandingFeesService(adminId, sessionId);
 
     const data = {
+      sessionId,
+      month: selectedMonth,
+      year: selectedYear,
       totalCollectedFees: totalCollected,
       outstandingFees: outstandingFees,
       feeCollectionTrend: trend

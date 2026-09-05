@@ -507,8 +507,27 @@ export async function getCollectedFeesAndTrendService(
   };
 
   /** @type {any[]} */
-  const pipeline = [
-    { $match: filter },
+  const pipeline = [{ $match: filter }];
+
+  if (sessionId) {
+    pipeline.push(
+      {
+        $lookup: {
+          from: sessionStudentModel.collection.name,
+          localField: "sessionStudentId",
+          foreignField: "_id",
+          as: "sessionStudent"
+        }
+      },
+      {
+        $match: {
+          "sessionStudent.session": new mongoose.Types.ObjectId(sessionId)
+        }
+      }
+    );
+  }
+
+  pipeline.push(
     {
       $group: {
         _id: { $dayOfMonth: "$createdAt" },
@@ -516,23 +535,7 @@ export async function getCollectedFeesAndTrendService(
       }
     },
     { $sort: { _id: 1 } }
-  ];
-
-  if (sessionId) {
-    pipeline.splice(1, 0, {
-      $lookup: {
-        from: sessionStudentModel.collection.name,
-        localField: "sessionStudentId",
-        foreignField: "_id",
-        as: "sessionStudent"
-      }
-    });
-    pipeline.splice(2, 0, {
-      $match: {
-        "sessionStudent.session": new mongoose.Types.ObjectId(sessionId)
-      }
-    });
-  }
+  );
 
   const results = await paymentModel.aggregate(pipeline);
 
