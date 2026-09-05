@@ -1,0 +1,73 @@
+
+name: Node.js CI PROD
+
+on:
+    push:
+        branches: ['production']
+
+permissions:
+    contents: read
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            # Step 1: Checkout the code
+            - uses: actions/checkout@v7
+
+            # Step 2: Setup Node.js environment
+            - name: Use Node.js 24
+              uses: actions/setup-node@v7
+              with:
+                  node-version: '24'
+                  cache: 'npm'
+                  cache-dependency-path: package-lock.json
+            # Step 6: Security scan with Trivy
+            - name: Run Trivy Security Scan
+              uses: aquasecurity/trivy-action@master
+              with:
+                  scan-type: 'fs'          # Scans the filesystem
+                  scan-ref: .         # Path to scan (project root)
+                  format: 'table'          # Human-readable output
+                  ignore-unfixed: true     # Ignore vulnerabilities without fixes
+                  severity: 'HIGH,CRITICAL' # Scan for high-severity vulnerabilities only
+
+            - name: Deploy via SSH
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                host: ${{ secrets.PROD_EC2_HOST }}
+                username: ${{ secrets.PROD_EC2_USERNAME || 'deploy' }}
+                key: ${{ secrets.PROD_EC2_SSH_KEY }}
+                script: |
+                  set -e
+                  APP_DIR="/var/www/shiksha-api"
+
+                  echo "🚀 Navigating to application directory..."
+                  cd $APP_DIR
+
+                  if [ ! -d ".git" ]; then
+                    echo "Initializing git repository..."
+                    git clone https://github.com/${{ github.repository }}.git .
+                  else
+                    echo "Pulling latest code from main branch..."
+                    git fetch origin main
+                    git reset --hard origin/main
+                  fi
+
+                  echo "Creating production .env file..."
+                  mkdir bin
+                  echo "${{ secrets.PRODUCTION }}" > bin/.env.prod
+
+                  echo "Installing production dependencies..."
+                  cd src
+                  npm ci --only=production
+
+                  echo "Reloading application with PM2..."
+                  pm2 startOrReload ecosystem.config.js || pm2 start index.js --name "shiksha-api" --update-env
+                  pm2 save
+
+                  echo "Verifying health endpoint..."
+                  sleep 2
+                  curl -f http://localhost:3000/health || exit 1
+                  echo "✅ Deployment successful!"
