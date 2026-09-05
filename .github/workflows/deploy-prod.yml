@@ -63,7 +63,7 @@ jobs:
                   npm ci --omit=dev --ignore-scripts
 
                   echo "Reloading application with PM2..."
-                  NODE_ENV=prod pm2 startOrReload ecosystem.config.js --env production || NODE_ENV=prod pm2 start index.js --name "shiksha-api"
+                  NODE_ENV=prod pm2 startOrReload ecosystem.config.cjs --env production || NODE_ENV=prod pm2 start index.js --name "shiksha-api"
                   pm2 save
 
                   echo "Verifying health endpoint..."
