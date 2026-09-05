@@ -21,6 +21,7 @@ const PORT = Number(config.port) || 4000;
 const app = express();
 app.use(helmet);
 app.use(requestIdMiddleware);
+app.use(cors({ origin: "*" }));
 app.use(express.json({ 
   limit: "5mb",
   verify: (req, res, buf) => {
@@ -104,12 +105,6 @@ app.use(
   )
 );
 
-
-app.use(
-  cors({
-    origin: "*"
-  })
-);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
