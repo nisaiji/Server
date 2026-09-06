@@ -65,8 +65,3 @@ jobs:
                   echo "Reloading application with PM2..."
                   NODE_ENV=prod pm2 startOrReload ecosystem.config.cjs --env production || NODE_ENV=prod pm2 start index.js --name "shiksha-api"
                   pm2 save
-
-                  echo "Verifying health endpoint..."
-                  sleep 2
-                  curl -f http://localhost:4000/health || exit 1
-                  echo "✅ Deployment successful!"

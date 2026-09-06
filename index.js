@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
 import mongoose from "mongoose";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
@@ -12,7 +13,6 @@ import logger from "./src/logger/index.js";
 import { requestIdMiddleware } from "./src/middlewares/requestId.middleware.js";
 import router from "./src/routers/index.router.js";
 import swaggerDocs from "./swagger.js";
-import helmet from "helmet";
 
 setupAxiosInterceptors();
 // import "./src/config/redis.config.js";
@@ -25,25 +25,6 @@ app.use((req, res, next) => {
   })(req, res, next);
 });
 app.use(cors({ origin: "*" }));
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-//       // Allow requests with no origin (like mobile apps, curl, Postman) or any requesting origin
-//       callback(null, true);
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//     allowedHeaders: [
-//       "Content-Type",
-//       "Authorization",
-//       "X-Requested-With",
-//       "Accept",
-//       "Origin",
-//       "x-request-id"
-//     ],
-//     optionsSuccessStatus: 200
-//   })
-// );
 app.use(requestIdMiddleware);
 app.use(express.json({ 
   limit: "5mb",
